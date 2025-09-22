@@ -1,0 +1,670 @@
+/* ===== GLOBAL FOCUS OVERRIDE - BẮT BUỘC PHẢI Ở TRÊN CÙNG ===== */
+/* ===== SIÊU MẠNH - LOẠI BỎ TẤT CẢ FOCUS EFFECTS ===== */
+.sidebar button {
+  border: none !important;
+}
+
+.sidebar button:hover {
+  outline: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  background: inherit !important;
+}
+
+/* ===== LAYOUT CHÍNH CUA SIDEBAR ===== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  height: 100vh;
+  background: #fff;
+  box-shadow: 7px 0px 16.5px #00000040;
+  transition: width 0.3s;
+  width: 220px;
+  /* Width mặc định khi mở rộng */
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+/* Trạng thái thu gọn của sidebar */
+.sidebar-collapsed {
+  width: 70px;
+}
+
+/* Container bên trong sidebar */
+.sidebar-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: visible;
+}
+
+/* ===== KEYFRAME ANIMATIONS ===== */
+/* Animation cho active box background (fade từ trái sang phải) */
+@keyframes fadeInFromLeft {
+  0% {
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+}
+
+@keyframes fadeOutToLeft {
+  0% {
+    opacity: 1;
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+}
+
+/* ===== ACTIVE INDICATORS ===== */
+/* Thanh xanh bên trái (4px width) */
+.sidebar-highlight {
+  background: #057746;
+  border-radius: 0 4px 4px 0;
+  width: 4px;
+  height: 48px;
+  position: absolute;
+  left: 0;
+  z-index: 1;
+  transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center;
+}
+
+
+.sidebar-active-box {
+  background: rgba(211, 255, 236, 0.6);
+  border-radius: 0 8px 8px 0;
+  width: 100%;
+  height: 48px;
+  position: absolute;
+  left: 0;
+  z-index: 0;
+  transition: top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInFromLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: left center;
+}
+
+.sidebar-active-box.fade-out {
+  animation: fadeOutToLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+
+/* ===== FOOTER STYLES ===== */
+.sidebar-footer {
+  position: absolute;
+  bottom: 32px;
+  left: 40%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 16px;
+  display: flex;
+  gap: 2px;
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 0.3s;
+}
+
+/* Footer khi sidebar collapsed */
+.sidebar-footer-collapsed {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sidebar-footer-icon {
+  margin-top: 6.4px;
+  width: 14px;
+  height: 14px;
+  aspect-ratio: 1/1;
+}
+
+.sidebar-footer-text {
+  width: 85px;
+  height: 16px;
+  font-family: 'Space Grotesk', Helvetica, Arial, sans-serif;
+  font-size: 11px;
+  color: #00000073;
+  line-height: 29px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sidebar-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 1;
+  pointer-events: auto;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.sidebar-collapsed .sidebar-header {
+  padding: 15px 0 10px 0;
+}
+
+.sidebar-title {
+  text-shadow: 0px 2px 8px rgba(11, 148, 89, 0.3);
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 700;
+  font-style: italic;
+  color: #057746;
+  font-size: 17px;
+  line-height: 22px;
+  text-align: center;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 8px;
+  letter-spacing: 0.5px;
+}
+
+.sidebar-collapsed .sidebar-title {
+  opacity: 0;
+  display: none;
+}
+
+.sidebar-logo {
+  width: 80px;
+  display: block;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 4px 8px rgba(5, 119, 70, 0.15));
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sidebar-logo:hover {
+  transform: scale(1.05) rotate(1deg);
+  filter: drop-shadow(0 6px 12px rgba(5, 119, 70, 0.25));
+}
+
+.sidebar-menu-icon {
+  font-size: 24px;
+  color: #057746;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+}
+
+.sidebar-menu-item {
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 12px 20px;
+  z-index: 4;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  height: 48px;
+  margin: 2px 0;
+  position: relative;
+  transition: background-color 0.3s;
+}
+
+.sidebar-menu-item-collapsed {
+  justify-content: center !important;
+  padding: 12px !important;
+}
+
+.sidebar-menu-item-collapsed .sidebar-menu-icon {
+  margin-right: 0 !important;
+}
+
+.sidebar-menu-label {
+  font-family: 'Space Grotesk', Helvetica, Arial, sans-serif;
+  font-size: 22px;
+  color: #057746;
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.sidebar-menu-icon {
+  transition: all 0.3s ease;
+}
+
+.sidebar-toggle {
+  position: absolute !important;
+  top: 320px;
+  right: -14px;
+  transform: none;
+  background: #fff !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  z-index: 1000 !important;
+  transition: all 0.3s ease !important;
+}
+
+.sidebar-toggle:hover .sidebar-toggle-icon {
+  transform: scale(1.2) translateY(-1px);
+  filter: drop-shadow(0 2px 6px rgba(5, 119, 70, 0.4));
+  color: #057746 !important;
+}
+
+.sidebar-toggle:hover .sidebar-toggle-icon-open {
+  transform: rotate(180deg) scale(1.2) translateY(-1px);
+  filter: drop-shadow(0 2px 6px rgba(5, 119, 70, 0.4));
+}
+
+.sidebar-toggle-open {
+  right: -15px;
+  top: 320px;
+}
+
+/* Đảm bảo nút toggle luôn hiển thị đầy đủ */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -40px;
+  width: 40px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+}
+
+.sidebar-toggle-icon {
+  transition: all 0.3s ease;
+  color: #057746 !important;
+  width: 19px;
+  /* Đồng bộ với tablet làm chuẩn */
+  height: 19px;
+  font-size: 19px;
+  position: relative;
+  top: 0;
+  left: 0;
+}
+
+.sidebar-toggle-icon-open {
+  transform: rotate(180deg);
+  transition: all 0.3s ease;
+}
+
+.sidebar-menu-item {
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  cursor: pointer;
+  padding: 12px 20px !important;
+  z-index: 4;
+  width: 100% !important;
+  height: 48px !important;
+  margin: 2px 0 !important;
+  position: relative;
+  transition: background-color 0.3s !important;
+  color: #057746 !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  user-select: none !important;
+}
+
+.sidebar-menu-item:hover {
+  background: rgba(5, 119, 70, 0.1) !important;
+  color: #057746 !important;
+  transform: translateY(-2px);
+}
+
+.sidebar-menu-item:hover .sidebar-menu-label {
+  text-shadow: 0 2px 8px rgba(5, 119, 70, 0.3),
+    0 1px 3px rgba(5, 119, 70, 0.4);
+  transform: translateY(-1px);
+  font-weight: 600;
+}
+
+.sidebar-menu-item:hover .sidebar-menu-icon {
+  transform: scale(1.1) translateY(-1px);
+  filter: drop-shadow(0 2px 4px rgba(5, 119, 70, 0.3));
+}
+
+/* ===== RESPONSIVE <=480px (Mobile nhỏ) ===== */
+@media (max-width: 480px) {
+
+  .sidebar {
+    width: 160px;
+    /* Width khi sidebar expanded ở 480px */
+  }
+
+  .sidebar-collapsed {
+    width: 60px !important;
+    /* Width khi sidebar collapsed ở 480px */
+  }
+
+  .sidebar .sidebar-logo {
+    width: 40px !important;
+  }
+
+  .sidebar-toggle {
+    width: 28px !important;
+    height: 28px !important;
+    right: -12px !important;
+    top: 256px !important;
+    transform: none !important;
+  }
+
+  .sidebar-toggle-open {
+    right: -14px !important;
+    top: 256px !important;
+  }
+
+  .sidebar-toggle-icon {
+    width: 16px !important;
+    /* Nhỏ nhất cho mobile rất nhỏ */
+    height: 16px !important;
+    font-size: 16px !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+}
+
+
+/* ===== RESPONSIVE 481px-768px (Mobile lớn / Tablet nhỏ) ===== */
+@media (max-width: 768px) {
+
+  .sidebar {
+    width: 55px;
+  }
+
+  /* Khi expanded trên mobile, width sẽ nhỏ hơn desktop */
+  .sidebar:not(.sidebar-collapsed) {
+    width: 137px !important;
+  }
+
+  .sidebar-collapsed {
+    width: 55px !important;
+  }
+
+  /* Force collapsed state styles on mobile khi collapsed */
+  .sidebar-collapsed .sidebar-header {
+    background: rgba(255, 255, 255, 0.98);
+  }
+
+  .sidebar-collapsed .sidebar-logo {
+    width: 32px !important;
+    filter: drop-shadow(0 2px 4px rgba(5, 119, 70, 0.2));
+  }
+
+  .sidebar-collapsed .sidebar-title {
+    display: none !important;
+  }
+
+  .sidebar-collapsed .sidebar-menu-label {
+    display: none !important;
+  }
+
+  .sidebar-collapsed .sidebar-menu-item {
+    justify-content: center !important;
+    padding: 8px !important;
+    height: 40px !important;
+  }
+
+  .sidebar-collapsed .sidebar-menu-icon {
+    margin-right: 0 !important;
+    font-size: 18px !important;
+  }
+
+  .sidebar-collapsed .sidebar-footer-text {
+    display: none !important;
+  }
+
+  /* Footer responsive for mobile */
+  .sidebar-footer {
+    bottom: 20px !important;
+    left: 50% !important;
+    width: 80px !important;
+    height: 14px !important;
+  }
+
+  .sidebar-footer-icon {
+    width: 10px !important;
+    height: 10px !important;
+    margin-top: 6.4px !important;
+  }
+
+  .sidebar-footer-text {
+    width: 70px !important;
+    height: 14px !important;
+    font-size: 9px !important;
+    line-height: 24px !important;
+  }
+
+  /* Khi sidebar expanded trên mobile */
+  .sidebar:not(.sidebar-collapsed) .sidebar-footer {
+    left: 45% !important;
+    width: 120px !important;
+  }
+
+  .sidebar:not(.sidebar-collapsed) .sidebar-footer-text {
+    width: 100px !important;
+    font-size: 10px !important;
+  }
+
+  .sidebar-toggle {
+    right: -10px !important;
+    top: 246px !important;
+    width: 26px !important;
+    height: 26px !important;
+    transform: none !important;
+  }
+
+  .sidebar-toggle-open {
+    right: -12px !important;
+    top: 246px !important;
+  }
+
+  .sidebar-toggle-icon {
+    width: 18px !important;
+    /* Giảm kích thước cho mobile */
+    height: 18px !important;
+    font-size: 18px !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+
+  /* Khi expanded trên mobile */
+  .sidebar:not(.sidebar-collapsed) .sidebar-menu-item {
+    padding: 8px 14px !important;
+    height: 40px !important;
+  }
+
+  .sidebar:not(.sidebar-collapsed) .sidebar-menu-icon {
+    font-size: 18px !important;
+    margin-right: 10px !important;
+  }
+
+  .sidebar:not(.sidebar-collapsed) .sidebar-menu-label {
+    font-size: 13px !important;
+  }
+
+  .sidebar:not(.sidebar-collapsed) .sidebar-header {
+    padding: 16px 0 12px 0 !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0) 100%);
+  }
+
+  .sidebar:not(.sidebar-collapsed) .sidebar-logo {
+    width: 48px !important;
+    filter: drop-shadow(0 3px 6px rgba(5, 119, 70, 0.2));
+  }
+
+  .sidebar:not(.sidebar-collapsed) .sidebar-title {
+    font-size: 15px !important;
+    margin-top: 6px !important;
+    letter-spacing: 0.3px !important;
+    text-shadow: 0px 1px 4px rgba(11, 148, 89, 0.25) !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .sidebar .sidebar-highlight {
+    width: 3px !important;
+    left: 0 !important;
+    height: 40px !important;
+  }
+
+  .sidebar-collapsed .sidebar-highlight {
+    width: 3px !important;
+    left: 0 !important;
+    height: 40px !important;
+  }
+
+  .sidebar .sidebar-active-box {
+    width: 100% !important;
+    left: 0 !important;
+    height: 40px !important;
+  }
+
+  .sidebar-collapsed .sidebar-active-box {
+    width: 100% !important;
+    left: 0 !important;
+    height: 40px !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .sidebar {
+    width: 70px;
+  }
+
+  .sidebar-collapsed {
+    width: 70px;
+  }
+}
+
+
+/* ===== RESPONSIVE 769px-1024px (Tablet) ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  .sidebar-footer {
+    bottom: 24px !important;
+    left: 45% !important;
+    width: 90px !important;
+    height: 15px !important;
+  }
+
+  .sidebar-footer-icon {
+    width: 13px !important;
+    height: 13px !important;
+    margin-top: 6.4px !important;
+  }
+
+  .sidebar-footer-text {
+    width: 75px !important;
+    height: 15px !important;
+    font-size: 10px !important;
+    line-height: 26px !important;
+  }
+
+  /* Khi sidebar expanded trên tablet */
+  .sidebar:not(.sidebar-collapsed) .sidebar-footer {
+    left: 42% !important;
+    width: 110px !important;
+  }
+
+  .sidebar:not(.sidebar-collapsed) .sidebar-footer-text {
+    width: 90px !important;
+    font-size: 11px !important;
+  }
+
+  .sidebar-toggle {
+    right: -14px !important;
+    top: 320px !important;
+    width: 30px !important;
+    height: 30px !important;
+    transform: none !important;
+  }
+
+  .sidebar-toggle-open {
+    right: -15px !important;
+    top: 320px !important;
+  }
+
+  .sidebar-toggle-icon {
+    width: 19px !important;
+    /* Kích thước trung bình cho tablet */
+    height: 19px !important;
+    font-size: 19px !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+  }
+}
+
+@media (max-width: 1024px) and (min-width: 769px) {
+
+  .sidebar {
+    width: 200px;
+  }
+
+  .sidebar-collapsed {
+    width: 70px;
+  }
+}
+
+/* ===== RESPONSIVE >=1025px (Desktop) ===== */
+@media (min-width: 1025px) {
+
+  .sidebar-footer {
+    bottom: 32px !important;
+    left: 40% !important;
+    width: 100px !important;
+    height: 16px !important;
+  }
+
+  .sidebar-footer-icon {
+    width: 14px !important;
+    height: 14px !important;
+    margin-top: 6.4px !important;
+  }
+
+  .sidebar-footer-text {
+    width: 85px !important;
+    height: 16px !important;
+    font-size: 11px !important;
+    line-height: 29px !important;
+  }
+
+  /* Khi sidebar expanded trên desktop */
+  .sidebar:not(.sidebar-collapsed) .sidebar-footer {
+    left: 40% !important;
+    width: 100px !important;
+  }
+
+  .sidebar:not(.sidebar-collapsed) .sidebar-footer-text {
+    width: 85px !important;
+    font-size: 11px !important;
+  }
+}
