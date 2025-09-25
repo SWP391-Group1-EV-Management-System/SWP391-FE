@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
 import {
   BsChevronLeft,
   BsClock,
@@ -37,11 +38,22 @@ const menuItems = [
 ];
 
 const Menu = ({ collapsed, onToggleCollapse }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   // State quản lý menu item hiện tại được chọn
   const [activeMenuItem, setActiveMenuItem] = useState("home");
 
   // State quản lý animation khi chuyển đổi active item
   const [isAnimating, setIsAnimating] = useState(false);
+
+  /**
+   * Effect đồng bộ activeMenuItem với URL hiện tại
+   */
+  useEffect(() => {
+    const path = location.pathname.substring(1) || "home";
+    setActiveMenuItem(path);
+  }, [location.pathname]);
 
   /**
    * Effect xử lý responsive behavior
@@ -73,9 +85,11 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
     // Bắt đầu animation
     setIsAnimating(true);
 
-    // Timing tối ưu cho cả thanh active và box (300ms)
+    // Navigate đến route tương ứng
+    navigate(`/${id}`);
+
+    // Timing tối ưu cho animation (300ms)
     setTimeout(() => {
-      setActiveMenuItem(id);
       setIsAnimating(false);
     }, 300);
   };
