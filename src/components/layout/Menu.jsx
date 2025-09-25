@@ -7,6 +7,7 @@
  * - Responsive design cho mobile/tablet/desktop
  * - Hover effects và focus management
  * - Bootstrap integration
+ * - React Router integration
  */
 
 import React, { useState, useEffect } from "react";
@@ -26,20 +27,26 @@ import { Button } from "react-bootstrap";
 import Logo from "../../assets/images/logo.png";
 import "../../assets/styles/Menu.css";
 
-// Danh sách các menu items với id, label và icon
+// Danh sách các menu items với id, label, icon và path
 const menuItems = [
-  { id: "home", label: "Trang chủ", icon: BsHouse },
-  { id: "map", label: "Bản đồ trạm", icon: BsMap },
-  { id: "energy", label: "Phiên sạc", icon: BsLightning },
-  { id: "history", label: "Lịch sử", icon: BsClock },
-  { id: "payment", label: "Thanh toán", icon: BsCreditCard },
-  { id: "favorite", label: "Gói dịch vụ", icon: BsBookmarkStar },
-  { id: "setting", label: "Cài đặt", icon: BsGear },
+  { id: "home", label: "Trang chủ", icon: BsHouse, path: "/home" },
+  { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "/map" },
+  { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/energy" },
+  { id: "history", label: "Lịch sử", icon: BsClock, path: "/history" },
+  { id: "payment", label: "Thanh toán", icon: BsCreditCard, path: "/payment" },
+  { id: "favorite", label: "Gói dịch vụ", icon: BsBookmarkStar, path: "/favorite" },
+  { id: "setting", label: "Cài đặt", icon: BsGear, path: "/setting" },
 ];
 
 const Menu = ({ collapsed, onToggleCollapse }) => {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Tìm active menu item dựa trên current path
+  const getActiveMenuIdFromPath = () => {
+    const currentItem = menuItems.find(item => item.path === location.pathname);
+    return currentItem ? currentItem.id : "home";
+  };
 
   // State quản lý menu item hiện tại được chọn
   const [activeMenuItem, setActiveMenuItem] = useState("home");
@@ -75,18 +82,29 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
   }, [onToggleCollapse]);
 
   /**
-   * Xử lý click vào menu item
-   * @param {string} id - ID của menu item được click
+   * Cập nhật active menu khi route thay đổi
    */
-  const handleMenuItemClick = (id) => {
+  useEffect(() => {
+    const newActiveId = getActiveMenuIdFromPath();
+    if (newActiveId !== activeMenuItem) {
+      setActiveMenuItem(newActiveId);
+    }
+  }, [location.pathname]);
+
+  /**
+   * Xử lý click vào menu item với React Router
+   * @param {string} id - ID của menu item được click
+   * @param {string} path - Path để navigate
+   */
+  const handleMenuItemClick = (id, path) => {
     // Không làm gì nếu đã active
     if (id === activeMenuItem) return;
 
     // Bắt đầu animation
     setIsAnimating(true);
 
-    // Navigate đến route tương ứng
-    navigate(`/${id}`);
+    // Navigate đến route mới
+    navigate(path);
 
     // Timing tối ưu cho animation (300ms)
     setTimeout(() => {
@@ -184,7 +202,7 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
                   ? " sidebar-menu-item-collapsed justify-content-center"
                   : " justify-content-start"
               }`}
-              onClick={() => handleMenuItemClick(item.id)}
+              onClick={() => handleMenuItemClick(item.id, item.path)}
               aria-current={activeMenuItem === item.id ? "page" : undefined}
               tabIndex="-1"
               // Ngăn chặn focus effects bằng nhiều layers

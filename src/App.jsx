@@ -9,6 +9,7 @@ import PaymentPage from "./page/PaymentPage.jsx";
 import FavoritePage from "./page/FavoritePage.jsx";
 import SettingPage from "./page/SettingPage.jsx";
 import NotFoundPage from "./page/NotFoundPage.jsx";
+import ShowCharging from "./components/layout/ShowCharging.jsx";
 
 function App() {
   return (
@@ -18,7 +19,7 @@ function App() {
           <Route index element={<HomePage />} />
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
-          <Route path="energy" element={<EnergyPage />} />
+          <Route path="energy" element={<ShowCharging />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="payment" element={<PaymentPage />} />
           <Route path="favorite" element={<FavoritePage />} />
