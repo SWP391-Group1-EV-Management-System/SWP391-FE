@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Card, Badge } from "react-bootstrap";
 import "../../assets/styles/ShowCharging.css";
+import { PiChargingStationBold } from "react-icons/pi";
 
 const ShowCharging = () => {
   const [sessionData, setSessionData] = useState({
@@ -59,18 +60,25 @@ const ShowCharging = () => {
         {/* Header Section */}
         <div className="charging-session-header">
           <Row className="align-items-center">
+            {/* Logo */}
             <Col xs="auto">
               <div className="header-icon">
-                <i className="fas fa-charging-station"></i>
+                <PiChargingStationBold />
               </div>
             </Col>
+            
+            {/* Tên trạm và địa chỉ */}
             <Col>
-              <h1 className="header-title">{sessionData.stationName}</h1>
-              <p className="header-address">
-                <i className="fas fa-map-marker-alt me-2"></i>
-                {sessionData.address}
-              </p>
+              <div className="header-info">
+                <h1 className="header-title">{sessionData.stationName}</h1>
+                <p className="header-address">
+                  <i className="fas fa-map-marker-alt me-2"></i>
+                  {sessionData.address}
+                </p>
+              </div>
             </Col>
+            
+            {/* Trạng thái */}
             <Col xs="auto">
               <Badge 
                 className="status-badge" 
