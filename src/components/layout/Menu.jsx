@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
 import {
   BsChevronLeft,
   BsClock,
@@ -20,28 +21,41 @@ import {
   BsLightning,
   BsMap,
   BsBookmarkStar,
+  BsList,
+  BsX
 } from "react-icons/bs";
 import { Button } from "react-bootstrap";
 import Logo from "../../assets/images/logo.png";
 import "../../assets/styles/Menu.css";
 
-// Danh sách các menu items với id, label và icon
+// Danh sách các menu items với path
 const menuItems = [
-  { id: "home", label: "Trang chủ", icon: BsHouse },
-  { id: "map", label: "Bản đồ trạm", icon: BsMap },
-  { id: "energy", label: "Phiên sạc", icon: BsLightning },
-  { id: "history", label: "Lịch sử", icon: BsClock },
-  { id: "payment", label: "Thanh toán", icon: BsCreditCard },
-  { id: "favorite", label: "Gói dịch vụ", icon: BsBookmarkStar },
-  { id: "setting", label: "Cài đặt", icon: BsGear },
+  { id: "home", label: "Trang chủ", icon: BsHouse, path: "/home" },
+  { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "/map" },
+  { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/energy" },
+  { id: "history", label: "Lịch sử", icon: BsClock, path: "/history" },
+  { id: "payment", label: "Thanh toán", icon: BsCreditCard, path: "/payment" },
+  { id: "favorite", label: "Gói dịch vụ", icon: BsBookmarkStar, path: "/favorite" },
+  { id: "setting", label: "Cài đặt", icon: BsGear, path: "/setting" },
 ];
 
-const Menu = ({ collapsed, onToggleCollapse, onPageChange, currentPage = "home" }) => {
-  // State quản lý menu item hiện tại được chọn
-  const [activeMenuItem, setActiveMenuItem] = useState(currentPage);
+const Menu = ({ collapsed, onToggleCollapse }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Tìm active menu item dựa trên current path
+  const getActiveMenuId = () => {
+    const currentItem = menuItems.find(item => item.path === location.pathname);
+    return currentItem ? currentItem.id : "home";
+  };
 
-  // State quản lý animation khi chuyển đổi active item
+  const [activeMenuItem, setActiveMenuItem] = useState(getActiveMenuId());
   const [isAnimating, setIsAnimating] = useState(false);
+
+  // Cập nhật active menu khi route thay đổi
+  useEffect(() => {
+    setActiveMenuItem(getActiveMenuId());
+  }, [location.pathname]);
 
   /**
    * Effect xử lý responsive behavior
@@ -65,61 +79,26 @@ const Menu = ({ collapsed, onToggleCollapse, onPageChange, currentPage = "home" 
   /**
    * Xử lý click vào menu item
    * @param {string} id - ID của menu item được click
+   * @param {string} path - Path để navigate
    */
-  const handleMenuItemClick = (id) => {
+  const handleMenuItemClick = (id, path) => {
     // Không làm gì nếu đã active
     if (id === activeMenuItem) return;
 
     // Bắt đầu animation
     setIsAnimating(true);
 
-    // Timing tối ưu cho cả thanh active và box (300ms)
+    // Navigate to new route
+    navigate(path);
+
+    // Timing tối ưu cho animation
     setTimeout(() => {
       setActiveMenuItem(id);
       setIsAnimating(false);
-      
-      // Gọi callback để thay đổi trang trong App.jsx
-      if (onPageChange) {
-        onPageChange(id);
-      }
     }, 300);
   };
 
-  /**
-   * Tìm index của menu item hiện tại trong mảng
-   * @returns {number} Index của active menu item, -1 nếu không tìm thấy
-   */
-  const getActiveIndex = () =>
-    menuItems.findIndex((item) => item.id === activeMenuItem);
-
-  /**
-   * Tính toán vị trí top cho active indicator
-   * @returns {number} Giá trị top tính bằng pixel
-   */
-  const getHighlightTop = () => {
-    const index = getActiveIndex();
-    if (index === -1) return 0;
-
-    const isMobile = window.innerWidth < 768;
-
-    if (isMobile) {
-      // Mobile: chiều cao menu item 40px + margin 4px = 44px, bắt đầu từ 12px
-      return index * 44 + 12;
-    } else {
-      // Desktop: chiều cao menu item 48px + margin 4px = 52px, bắt đầu từ 12px
-      return index * 52 + 12;
-    }
-  };
-
-  // Sync activeMenuItem với currentPage từ props
-  React.useEffect(() => {
-    if (currentPage !== activeMenuItem) {
-      setActiveMenuItem(currentPage);
-    }
-  }, [currentPage]);
-
   return (
-    /* Container chính của sidebar với navigation role */
     <nav
       className={`sidebar${collapsed ? " sidebar-collapsed" : ""}`}
       role="navigation"
@@ -153,21 +132,21 @@ const Menu = ({ collapsed, onToggleCollapse, onPageChange, currentPage = "home" 
           }}
         >
           {/* Active indicator - thanh xanh 4px bên trái */}
-          {getActiveIndex() !== -1 && (
+          {getActiveMenuId() !== -1 && (
             <div
               className={`sidebar-highlight${isAnimating ? " fade-out" : ""}`}
               style={{
-                top: `${getHighlightTop()}px`,
+                top: `${getActiveMenuId()}px`,
               }}
             />
           )}
 
           {/* Active box - nền fade animation từ trái sang phải */}
-          {getActiveIndex() !== -1 && (
+          {getActiveMenuId() !== -1 && (
             <div
               className={`sidebar-active-box${isAnimating ? " fade-out" : ""}`}
               style={{
-                top: `${getHighlightTop()}px`,
+                top: `${getActiveMenuId()}px`,
               }}
             />
           )}
@@ -182,7 +161,7 @@ const Menu = ({ collapsed, onToggleCollapse, onPageChange, currentPage = "home" 
                   ? " sidebar-menu-item-collapsed justify-content-center"
                   : " justify-content-start"
               }`}
-              onClick={() => handleMenuItemClick(item.id)}
+              onClick={() => handleMenuItemClick(item.id, item.path)}
               aria-current={activeMenuItem === item.id ? "page" : undefined}
               tabIndex="-1"
               // Ngăn chặn focus effects bằng nhiều layers
