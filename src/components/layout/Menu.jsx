@@ -34,7 +34,12 @@ const menuItems = [
   { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/energy" },
   { id: "history", label: "Lịch sử", icon: BsClock, path: "/history" },
   { id: "payment", label: "Thanh toán", icon: BsCreditCard, path: "/payment" },
-  { id: "favorite", label: "Gói dịch vụ", icon: BsBookmarkStar, path: "/favorite" },
+  {
+    id: "favorite",
+    label: "Gói dịch vụ",
+    icon: BsBookmarkStar,
+    path: "/favorite",
+  },
   { id: "setting", label: "Cài đặt", icon: BsGear, path: "/setting" },
 ];
 
@@ -44,7 +49,9 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
 
   // Tìm active menu item dựa trên current path
   const getActiveMenuIdFromPath = () => {
-    const currentItem = menuItems.find(item => item.path === location.pathname);
+    const currentItem = menuItems.find(
+      (item) => item.path === location.pathname
+    );
     return currentItem ? currentItem.id : "home";
   };
 

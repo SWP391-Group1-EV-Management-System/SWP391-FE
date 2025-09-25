@@ -27,7 +27,8 @@
   /* Width mặc định khi mở rộng */
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow-y: auto; /* Cho phép sidebar scroll nếu cần */
+  overflow-x: hidden;
 }
 
 /* Trạng thái thu gọn của sidebar */

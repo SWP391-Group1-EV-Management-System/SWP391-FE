@@ -1,8 +1,12 @@
-body {
+/* 404 Page specific styles - không override body global */
+.page_404 {
   padding: 40px 0;
   background: #fff;
   font-family: "Arvo", serif;
-  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow-y: auto; /* Cho phép scroll */
 }
 
 .page_404 img {

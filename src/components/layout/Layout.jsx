@@ -8,7 +8,7 @@ function Layout() {
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
 
   return (
-    <>
+    <div className="app-layout">
       <MyNavbar collapsed={isMenuCollapsed} />
       <Menu collapsed={isMenuCollapsed} onToggleCollapse={setIsMenuCollapsed} />
       <main
@@ -17,13 +17,18 @@ function Layout() {
           marginLeft: isMenuCollapsed ? "80px" : "250px",
           padding: "20px",
           transition: "margin-left 0.3s ease",
-          minHeight: "100vh",
+          minHeight: "calc(100vh - 60px)",
           backgroundColor: "#f5f5f5",
+          overflowY: "auto",
+          position: "relative",
+          zIndex: 1,
         }}
       >
-        <Outlet />
+        <div className="content-wrapper">
+          <Outlet />
+        </div>
       </main>
-    </>
+    </div>
   );
 }
 
