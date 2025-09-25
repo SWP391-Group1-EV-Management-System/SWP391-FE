@@ -8,13 +8,13 @@ function HomePage() {
           <div className="col-12">
             <h1>Trang chủ</h1>
             <p>Chào mừng bạn đến với hệ thống quản lý sạc xe điện Eco-Z</p>
-            
+
             <div className="card mb-4">
               <div className="card-body">
                 <h5 className="card-title">Thông tin tổng quan</h5>
                 <p className="card-text">
-                  Đây là trang chủ của hệ thống quản lý trạm sạc xe điện. 
-                  Bạn có thể điều hướng đến các chức năng khác thông qua menu bên trái.
+                  Đây là trang chủ của hệ thống quản lý trạm sạc xe điện. Bạn có
+                  thể điều hướng đến các chức năng khác thông qua menu bên trái.
                 </p>
               </div>
             </div>
@@ -33,7 +33,9 @@ function HomePage() {
                 <div className="card">
                   <div className="card-body">
                     <h5 className="card-title">Lịch sử sạc</h5>
-                    <p className="card-text">Xem lại các phiên sạc đã thực hiện</p>
+                    <p className="card-text">
+                      Xem lại các phiên sạc đã thực hiện
+                    </p>
                   </div>
                 </div>
               </div>
@@ -50,11 +52,23 @@ function HomePage() {
             {/* Thêm content dài để test scroll */}
             <div className="mt-4">
               <h3>Về Eco-Z</h3>
-              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
-              <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-              <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
-              <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-              
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+                eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </p>
+              <p>
+                Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                laboris nisi ut aliquip ex ea commodo consequat.
+              </p>
+              <p>
+                Duis aute irure dolor in reprehenderit in voluptate velit esse
+                cillum dolore eu fugiat nulla pariatur.
+              </p>
+              <p>
+                Excepteur sint occaecat cupidatat non proident, sunt in culpa
+                qui officia deserunt mollit anim id est laborum.
+              </p>
+
               <h3>Tính năng nổi bật</h3>
               <ul>
                 <li>Tìm kiếm trạm sạc thông minh</li>
@@ -69,14 +83,25 @@ function HomePage() {
               <p>2. Tìm trạm sạc gần nhất</p>
               <p>3. Đặt trước hoặc sạc trực tiếp</p>
               <p>4. Thanh toán và theo dõi</p>
-              
-              <div style={{ height: '500px', backgroundColor: '#e9ecef', borderRadius: '8px', padding: '20px', marginTop: '20px' }}>
+
+              <div
+                style={{
+                  height: "500px",
+                  backgroundColor: "#e9ecef",
+                  borderRadius: "8px",
+                  padding: "20px",
+                  marginTop: "20px",
+                }}
+              >
                 <h4>Khu vực test scroll</h4>
-                <p>Đây là khu vực để test scroll. Nếu bạn thấy phần này thì scroll đã hoạt động tốt!</p>
-                <div style={{ marginTop: '200px' }}>
+                <p>
+                  Đây là khu vực để test scroll. Nếu bạn thấy phần này thì
+                  scroll đã hoạt động tốt!
+                </p>
+                <div style={{ marginTop: "200px" }}>
                   <p>Nội dung ở giữa...</p>
                 </div>
-                <div style={{ marginTop: '200px' }}>
+                <div style={{ marginTop: "200px" }}>
                   <p>Cuối khu vực test scroll.</p>
                 </div>
               </div>

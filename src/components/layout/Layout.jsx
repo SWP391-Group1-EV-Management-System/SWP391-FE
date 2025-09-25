@@ -18,7 +18,6 @@ function Layout() {
           padding: "20px",
           transition: "margin-left 0.3s ease",
           minHeight: "calc(100vh - 60px)",
-          backgroundColor: "#f5f5f5",
           overflowY: "auto",
           position: "relative",
           zIndex: 1,
