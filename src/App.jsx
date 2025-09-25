@@ -75,7 +75,6 @@ function App() {
             <Route path="/payment" element={<PaymentPage />} />
             <Route path="/favorite" element={<FavoritePage />} />
             <Route path="/setting" element={<SettingPage />} />
-            {/* Fallback route */}
             <Route path="*" element={<Navigate to="/home" replace />} />
           </Routes>
         </div>
