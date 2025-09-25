@@ -7,6 +7,7 @@
  * - Responsive design cho mobile/tablet/desktop
  * - Hover effects và focus management
  * - Bootstrap integration
+ * - React Router integration
  */
 
 import React, { useState, useEffect } from "react";
@@ -21,14 +22,12 @@ import {
   BsLightning,
   BsMap,
   BsBookmarkStar,
-  BsList,
-  BsX
 } from "react-icons/bs";
 import { Button } from "react-bootstrap";
 import Logo from "../../assets/images/logo.png";
 import "../../assets/styles/Menu.css";
 
-// Danh sách các menu items với path
+// Danh sách các menu items với id, label, icon và path
 const menuItems = [
   { id: "home", label: "Trang chủ", icon: BsHouse, path: "/home" },
   { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "/map" },
@@ -42,20 +41,18 @@ const menuItems = [
 const Menu = ({ collapsed, onToggleCollapse }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Tìm active menu item dựa trên current path
-  const getActiveMenuId = () => {
+  const getActiveMenuIdFromPath = () => {
     const currentItem = menuItems.find(item => item.path === location.pathname);
     return currentItem ? currentItem.id : "home";
   };
 
-  const [activeMenuItem, setActiveMenuItem] = useState(getActiveMenuId());
-  const [isAnimating, setIsAnimating] = useState(false);
+  // State quản lý menu item hiện tại được chọn
+  const [activeMenuItem, setActiveMenuItem] = useState(getActiveMenuIdFromPath());
 
-  // Cập nhật active menu khi route thay đổi
-  useEffect(() => {
-    setActiveMenuItem(getActiveMenuId());
-  }, [location.pathname]);
+  // State quản lý animation khi chuyển đổi active item
+  const [isAnimating, setIsAnimating] = useState(false);
 
   /**
    * Effect xử lý responsive behavior
@@ -77,7 +74,17 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
   }, [onToggleCollapse]);
 
   /**
-   * Xử lý click vào menu item
+   * Cập nhật active menu khi route thay đổi
+   */
+  useEffect(() => {
+    const newActiveId = getActiveMenuIdFromPath();
+    if (newActiveId !== activeMenuItem) {
+      setActiveMenuItem(newActiveId);
+    }
+  }, [location.pathname]);
+
+  /**
+   * Xử lý click vào menu item với React Router
    * @param {string} id - ID của menu item được click
    * @param {string} path - Path để navigate
    */
@@ -88,17 +95,44 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
     // Bắt đầu animation
     setIsAnimating(true);
 
-    // Navigate to new route
+    // Navigate đến route mới
     navigate(path);
 
-    // Timing tối ưu cho animation
+    // Timing tối ưu cho cả thanh active và box (300ms)
     setTimeout(() => {
       setActiveMenuItem(id);
       setIsAnimating(false);
     }, 300);
   };
 
+  /**
+   * Tìm index của menu item hiện tại trong mảng
+   * @returns {number} Index của active menu item, -1 nếu không tìm thấy
+   */
+  const getActiveIndex = () =>
+    menuItems.findIndex((item) => item.id === activeMenuItem);
+
+  /**
+   * Tính toán vị trí top cho active indicator
+   * @returns {number} Giá trị top tính bằng pixel
+   */
+  const getHighlightTop = () => {
+    const index = getActiveIndex();
+    if (index === -1) return 0;
+
+    const isMobile = window.innerWidth < 768;
+
+    if (isMobile) {
+      // Mobile: chiều cao menu item 40px + margin 4px = 44px, bắt đầu từ 12px
+      return index * 44 + 12;
+    } else {
+      // Desktop: chiều cao menu item 48px + margin 4px = 52px, bắt đầu từ 12px
+      return index * 52 + 12;
+    }
+  };
+
   return (
+    /* Container chính của sidebar với navigation role */
     <nav
       className={`sidebar${collapsed ? " sidebar-collapsed" : ""}`}
       role="navigation"
@@ -132,21 +166,21 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
           }}
         >
           {/* Active indicator - thanh xanh 4px bên trái */}
-          {getActiveMenuId() !== -1 && (
+          {getActiveIndex() !== -1 && (
             <div
               className={`sidebar-highlight${isAnimating ? " fade-out" : ""}`}
               style={{
-                top: `${getActiveMenuId()}px`,
+                top: `${getHighlightTop()}px`,
               }}
             />
           )}
 
           {/* Active box - nền fade animation từ trái sang phải */}
-          {getActiveMenuId() !== -1 && (
+          {getActiveIndex() !== -1 && (
             <div
               className={`sidebar-active-box${isAnimating ? " fade-out" : ""}`}
               style={{
-                top: `${getActiveMenuId()}px`,
+                top: `${getHighlightTop()}px`,
               }}
             />
           )}
