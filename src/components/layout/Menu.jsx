@@ -49,10 +49,18 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
   };
 
   // State quản lý menu item hiện tại được chọn
-  const [activeMenuItem, setActiveMenuItem] = useState(getActiveMenuIdFromPath());
+  const [activeMenuItem, setActiveMenuItem] = useState("home");
 
   // State quản lý animation khi chuyển đổi active item
   const [isAnimating, setIsAnimating] = useState(false);
+
+  /**
+   * Effect đồng bộ activeMenuItem với URL hiện tại
+   */
+  useEffect(() => {
+    const path = location.pathname.substring(1) || "home";
+    setActiveMenuItem(path);
+  }, [location.pathname]);
 
   /**
    * Effect xử lý responsive behavior
@@ -98,9 +106,8 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
     // Navigate đến route mới
     navigate(path);
 
-    // Timing tối ưu cho cả thanh active và box (300ms)
+    // Timing tối ưu cho animation (300ms)
     setTimeout(() => {
-      setActiveMenuItem(id);
       setIsAnimating(false);
     }, 300);
   };
