@@ -36,9 +36,9 @@ const menuItems = [
   { id: "setting", label: "Cài đặt", icon: BsGear },
 ];
 
-const Menu = ({ collapsed, onToggleCollapse }) => {
+const Menu = ({ collapsed, onToggleCollapse, onPageChange, currentPage = "home" }) => {
   // State quản lý menu item hiện tại được chọn
-  const [activeMenuItem, setActiveMenuItem] = useState("home");
+  const [activeMenuItem, setActiveMenuItem] = useState(currentPage);
 
   // State quản lý animation khi chuyển đổi active item
   const [isAnimating, setIsAnimating] = useState(false);
@@ -77,6 +77,11 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
     setTimeout(() => {
       setActiveMenuItem(id);
       setIsAnimating(false);
+      
+      // Gọi callback để thay đổi trang trong App.jsx
+      if (onPageChange) {
+        onPageChange(id);
+      }
     }, 300);
   };
 
@@ -105,6 +110,13 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
       return index * 52 + 12;
     }
   };
+
+  // Sync activeMenuItem với currentPage từ props
+  React.useEffect(() => {
+    if (currentPage !== activeMenuItem) {
+      setActiveMenuItem(currentPage);
+    }
+  }, [currentPage]);
 
   return (
     /* Container chính của sidebar với navigation role */
