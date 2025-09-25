@@ -13,13 +13,6 @@ function Layout() {
       <Menu collapsed={isMenuCollapsed} onToggleCollapse={setIsMenuCollapsed} />
       <main
         className={`main-content ${isMenuCollapsed ? "menu-collapsed" : ""}`}
-        style={{
-          marginLeft: isMenuCollapsed ? "80px" : "250px",
-          padding: "20px",
-          transition: "margin-left 0.3s ease",
-          minHeight: "100vh",
-          backgroundColor: "#f5f5f5",
-        }}
       >
         <Outlet />
       </main>

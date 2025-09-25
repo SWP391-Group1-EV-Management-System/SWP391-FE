@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route } from "react-router";
 import Layout from "./components/layout/Layout.jsx";
 import HomePage from "./page/HomePage.jsx";
 import MapPage from "./page/MapPage.jsx";
-import EnergyPage from "./page/EnergyPage.jsx";
 import HistoryPage from "./page/HistoryPage.jsx";
 import PaymentPage from "./page/PaymentPage.jsx";
 import FavoritePage from "./page/FavoritePage.jsx";

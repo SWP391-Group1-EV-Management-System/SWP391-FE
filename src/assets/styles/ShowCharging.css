@@ -48,11 +48,12 @@
    LAYOUT STYLES
    ======================================== */
 .charging-session-container {
-  min-height: 100vh;
   background: var(--white);
   padding: var(--spacing-lg) 0;
   font-family: var(--font-family);
   color: var(--black);
+  overflow-y: auto;
+  height: auto;
 }
 
 /* ========================================
