@@ -9,6 +9,7 @@ import FavoritePage from "./page/FavoritePage.jsx";
 import SettingPage from "./page/SettingPage.jsx";
 import NotFoundPage from "./page/NotFoundPage.jsx";
 import ShowCharging from "./components/layout/ShowCharging.jsx";
+import Login from "./page/Login.jsx";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <Route path="favorite" element={<FavoritePage />} />
           <Route path="setting" element={<SettingPage />} />
         </Route>
+        <Route path="login" element={<Login />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
