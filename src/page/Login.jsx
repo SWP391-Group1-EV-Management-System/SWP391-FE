@@ -3,12 +3,18 @@ import "../assets/styles/Login.css";
 import { CgMail } from "react-icons/cg";
 import { TbLockPassword } from "react-icons/tb";
 import { IoIosArrowForward } from "react-icons/io";
-import { MdOutlineCopyright } from "react-icons/md";
+import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 
 function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <>
-      <div>
+      <div className="login-page">
         <div className="login-container">
           <div className="login-inner">
             <h2>Đăng nhập</h2>
@@ -18,18 +24,45 @@ function Login() {
                   <CgMail size={28} />
                   Gmail
                 </label>
-                <input type="text" id="username" name="username" required />
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  required
+                  placeholder="email@example.com"
+                />
               </div>
-              <div>
+              <div className="password-field">
                 <label htmlFor="password">
                   <TbLockPassword size={24} />
                   Mật khẩu
                 </label>
-                <input type="password" id="password" name="password" required />
+                <div className="password-input-container">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    required
+                    placeholder="Nhập mật khẩu"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={togglePasswordVisibility}
+                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showPassword ? (
+                      <IoEyeOffOutline size={20} />
+                    ) : (
+                      <IoEyeOutline size={20} />
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="form-options">
                 <label className="checkbox-label">
                   <input type="checkbox" id="remember-password" />
+                  <span className="checkmark"></span>
                   <span>Nhớ mật khẩu</span>
                 </label>
                 <a href="#" className="forgot-password-link">
@@ -65,7 +98,6 @@ function Login() {
               </div>
             </form>
             <div className="copyright">
-              {/* <MdOutlineCopyright size={10} /> */}
               <span> © 2025 Group1SE1818. All rights reserved.</span>
             </div>
             <div className="footer"></div>

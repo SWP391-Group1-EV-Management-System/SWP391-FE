@@ -10,6 +10,7 @@ import SettingPage from "./page/SettingPage.jsx";
 import NotFoundPage from "./page/NotFoundPage.jsx";
 import ShowCharging from "./components/layout/ShowCharging.jsx";
 import Login from "./page/Login.jsx";
+import Register from "./page/Register.jsx";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="setting" element={<SettingPage />} />
         </Route>
         <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
