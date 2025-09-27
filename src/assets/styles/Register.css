@@ -1,4 +1,4 @@
-.login-page {
+.register-page {
   min-height: 100vh;
   background-image: url("../images/Frame 16.png");
   background-size: cover;
@@ -6,24 +6,24 @@
   background-attachment: fixed;
 }
 
-.login-container {
+.register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
 }
 
-.login-inner {
+.register-inner {
   background: rgba(255, 255, 255, 0.54);
-  padding: 20px 40px 0 40px;
+  padding: 40px;
   border-radius: 25px;
   box-shadow: 0 4px 12px #98b691;
   width: 100%;
-  max-width: 440px;
+  max-width: 450px;
   backdrop-filter: blur(10px);
 }
 
-.login-inner h2 {
+.register-inner h2 {
   margin-bottom: 20px;
   color: #333;
   text-align: center;
@@ -33,7 +33,7 @@
   text-shadow: 2px 2px 11px rgba(11, 148, 89, 0.4);
 }
 
-.login-inner label {
+.register-inner label {
   display: flex;
   align-items: center;
   gap: 2px;
@@ -42,7 +42,7 @@
   font-size: 20px;
 }
 
-.login-inner input {
+.register-inner input {
   width: 100%;
   padding: 10px;
   margin-bottom: 20px;
@@ -96,12 +96,12 @@
 }
 
 /* Form options styling */
-.form-options {
+.form-options-register {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   margin-bottom: 25px;
-  margin-top: -10px;
+  margin-top: -5px;
 }
 
 /* Custom Checkbox Styling */
@@ -112,11 +112,12 @@
   gap: 8px !important;
   font-size: 16px !important;
   font-weight: 400;
-  color: #0b9459 !important;
+  color: rgba(0, 0, 0, 0.53) !important;
   cursor: pointer;
   user-select: none;
   flex-shrink: 0;
   white-space: nowrap;
+  margin-top: 5px;
 }
 
 .checkbox-label input[type="checkbox"] {
@@ -125,6 +126,15 @@
   cursor: pointer;
   height: 0;
   width: 0;
+}
+
+.checkbox-label a {
+  color: #0b9459;
+  text-decoration: none;
+}
+
+.checkbox-label a:hover {
+  text-decoration: underline;
 }
 
 .checkmark {
@@ -165,25 +175,8 @@
   display: block;
 }
 
-.form-options span:not(.checkmark) {
-  color: rgba(0, 0, 0, 0.58);
-}
-
-.forgot-password-link {
-  color: #0b9459;
-  text-decoration: none;
-  font-size: 16px;
-  font-weight: 400;
-  transition: all 0.3s ease;
-}
-
-.forgot-password-link:hover {
-  color: #097a4a;
-  text-decoration: underline;
-}
-
-/* Submit button */
-.login-inner button[type="submit"] {
+/* Register button */
+.register-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -193,32 +186,45 @@
   color: white;
   border: none;
   border-radius: 14px;
-  font-size: 18px;
-  font-weight: 600;
+  font-size: 20px;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
   margin-top: 5px;
+  gap: 8px;
 }
 
-.login-inner button[type="submit"]:hover {
+.register-button:hover {
   background-color: #097a4a;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(11, 148, 89, 0.3);
 }
 
-.login-inner button[type="submit"]:active {
+.register-button:active {
   transform: translateY(0);
 }
 
-.register-prompt {
+.login-prompt {
   display: flex;
   justify-content: center;
   text-align: center;
   margin-top: 20px;
-  font-size: 14px;
-  color: rgba(0, 0, 0, 0.58);
+  font-size: 16px;
+  color: #555;
   gap: 30px;
   align-items: center;
+}
+
+.login-link {
+  color: #0b9459;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 20px;
+  text-decoration: none;
+}
+
+.login-link:hover {
+  text-decoration: underline;
 }
 
 .copyright {
@@ -228,5 +234,49 @@
   text-align: center;
   margin-top: 20px;
   font-size: 10px;
-  color: rgba(105, 104, 104, 0.3);
+  color: #777;
+}
+
+/* System Status Footer */
+.system-status {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(11, 148, 89, 0.2);
+}
+
+.status-indicator {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #0b9459;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.status-text {
+  font-size: 14px;
+  color: #0b9459;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
