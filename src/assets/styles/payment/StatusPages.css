@@ -1,0 +1,273 @@
+.status-container {
+  min-height: 100vh;
+  background-color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  margin-top: 80px;
+}
+
+.status-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 3rem 2rem;
+  max-width: 28rem;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.5s ease-out;
+}
+
+.success-page {
+  max-width: 32rem;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.status-icon {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2.5rem;
+}
+
+.status-icon.success {
+  background-color: #ecfdf5;
+  color: #059669;
+}
+
+.status-icon.pending {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.status-icon.processing {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.status-icon svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.status-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 0.5rem 0;
+}
+
+.status-description {
+  color: #6b7280;
+  font-size: 1rem;
+  margin: 0 0 2rem 0;
+}
+
+.status-details {
+  background-color: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.status-details.pending {
+  background-color: #fffbeb;
+  border: 1px solid #fed7aa;
+}
+
+.success-details {
+  text-align: left;
+}
+
+.success-section {
+  background-color: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.success-section:last-child {
+  margin-bottom: 0;
+}
+
+.success-section h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.total-section {
+  background-color: #ecfdf5;
+  border: 2px solid #d1fae5;
+}
+
+.status-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #059669;
+  margin: 0;
+}
+
+.status-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.status-detail-row:last-child {
+  border-bottom: none;
+}
+
+.status-detail-label {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.status-detail-value {
+  color: #111827;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.total-row .status-detail-label,
+.total-row .status-detail-value {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.total-amount {
+  color: #059669 !important;
+}
+
+.email-notification {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: #eff6ff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #dbeafe;
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.email-icon {
+  font-size: 1.5rem;
+}
+
+.success-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.status-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: none;
+  font-size: 0.875rem;
+}
+
+.status-btn.primary {
+  background-color: #059669;
+  color: white;
+}
+
+.status-btn.primary:hover {
+  background-color: #047857;
+}
+
+.status-btn.secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.status-btn.secondary:hover {
+  background-color: #e5e7eb;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.processing-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+  .status-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .success-actions {
+    flex-direction: column;
+  }
+  
+  .status-icon {
+    width: 4rem;
+    height: 4rem;
+    font-size: 2rem;
+  }
+  
+  .status-icon svg {
+    width: 2rem;
+    height: 2rem;
+  }
+  
+  .status-title {
+    font-size: 1.5rem;
+  }
+}
