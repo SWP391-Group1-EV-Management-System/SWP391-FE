@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import '../assets/styles/PaymentPage.css';
+import { CiDollar } from "react-icons/ci";
+import './../assets/styles/PaymentPage.css';
 
 const PaymentPage = () => {
   const [paymentMethod, setPaymentMethod] = useState('');
@@ -8,6 +9,10 @@ const PaymentPage = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState('pending'); // pending, processing, success
   const [cashPaymentPending, setCashPaymentPending] = useState(false);
+  const [peakHourSurcharge, setPeakHourSurcharge] = useState(0);
+  const [sendInvoiceEmail, setSendInvoiceEmail] = useState(false);
+  const [customerEmail, setCustomerEmail] = useState('customer@example.com');
+  
   const [newCard, setNewCard] = useState({
     cardNumber: '',
     expiryDate: '',
@@ -17,7 +22,7 @@ const PaymentPage = () => {
 
   const reservationData = {
     station: 'EcoCharge Station #42',
-    district: 'District 1',
+    district: 'District 1', 
     address: '123 Green Street, Ho Chi Minh City',
     chargingType: 'Fast Charging (50kW DC)',
     date: 'May 15, 2023',
@@ -25,8 +30,7 @@ const PaymentPage = () => {
     vehicle: 'Tesla Model 3 (ABC-1234)',
     chargingCost: 180000,
     serviceFee: 25000,
-    tax: 20500,
-    total: 225500
+    tax: 20500
   };
 
   const savedCards = [
@@ -34,13 +38,31 @@ const PaymentPage = () => {
     { id: 2, number: '**** **** **** 5678', type: 'Techcombank', expiry: '03/26' },
   ];
 
+  // Calculate peak hour surcharge (6-9 AM and 5-8 PM)
+  useEffect(() => {
+    const currentHour = new Date().getHours();
+    if ((currentHour >= 6 && currentHour <= 9) || (currentHour >= 17 && currentHour <= 20)) {
+      setPeakHourSurcharge(reservationData.chargingCost * 0.15); // 15% surcharge
+    } else {
+      setPeakHourSurcharge(0);
+    }
+  }, []);
+
+  // Calculate total cost
+  const calculateTotal = () => {
+    return reservationData.chargingCost + 
+           reservationData.serviceFee + 
+           reservationData.tax + 
+           peakHourSurcharge;
+  };
+
   // Simulate staff confirmation for cash payment
   useEffect(() => {
     if (cashPaymentPending) {
       const timer = setTimeout(() => {
         setPaymentStatus('success');
         setCashPaymentPending(false);
-      }, 5000); // 5 seconds simulation
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [cashPaymentPending]);
@@ -60,7 +82,6 @@ const PaymentPage = () => {
   };
 
   const handleSaveCard = () => {
-    // Here you would typically save the card to backend
     setShowAddCard(false);
     setNewCard({ cardNumber: '', expiryDate: '', cvv: '', cardHolder: '' });
   };
@@ -77,9 +98,12 @@ const PaymentPage = () => {
     setShowConfirmModal(false);
     setPaymentStatus('processing');
     
-    // Simulate payment processing
     setTimeout(() => {
       setPaymentStatus('success');
+      // Simulate sending invoice email
+      if (sendInvoiceEmail) {
+        console.log(`Sending invoice to ${customerEmail}`);
+      }
     }, 3000);
   };
 
@@ -93,36 +117,63 @@ const PaymentPage = () => {
   if (paymentStatus === 'success') {
     return (
       <div className="status-container">
-        <div className="status-card">
+        <div className="status-card success-page">
           <div className="status-icon success">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
             </svg>
           </div>
-          <h2 className="status-title">Thanh toán thành công!</h2>
-          <p className="status-description">Giao dịch của bạn đã được xử lý thành công</p>
           
-          <div className="status-details success">
-            <div className="status-detail-row">
-              <span className="status-detail-label">Trạm sạc:</span>
-              <span className="status-detail-value">{reservationData.station}</span>
+          <h2 className="status-title">Thanh toán thành công!</h2>
+          <p className="status-description">Cảm ơn bạn đã sử dụng dịch vụ EcoCharge</p>
+          
+          <div className="success-details">
+            <div className="success-section">
+              <h4>Thông tin giao dịch</h4>
+              <div className="status-detail-row">
+                <span className="status-detail-label">Mã giao dịch:</span>
+                <span className="status-detail-value">#EC{Date.now().toString().slice(-6)}</span>
+              </div>
+              <div className="status-detail-row">
+                <span className="status-detail-label">Trạm sạc:</span>
+                <span className="status-detail-value">{reservationData.station}</span>
+              </div>
+              <div className="status-detail-row">
+                <span className="status-detail-label">Thời gian:</span>
+                <span className="status-detail-value">{new Date().toLocaleString('vi-VN')}</span>
+              </div>
+              <div className="status-detail-row">
+                <span className="status-detail-label">Phương thức:</span>
+                <span className="status-detail-value">{paymentMethod === 'cash' ? 'Tiền mặt' : 'Thẻ ngân hàng'}</span>
+              </div>
             </div>
-            <div className="status-detail-row">
-              <span className="status-detail-label">Tổng tiền:</span>
-              <span className="status-detail-value success">{formatCurrency(reservationData.total)}</span>
-            </div>
-            <div className="status-detail-row">
-              <span className="status-detail-label">Phương thức:</span>
-              <span className="status-detail-value">{paymentMethod === 'cash' ? 'Tiền mặt' : 'Thẻ ngân hàng'}</span>
+
+            <div className="success-section total-section">
+              <div className="status-detail-row total-row">
+                <span className="status-detail-label">Tổng thanh toán:</span>
+                <span className="status-detail-value total-amount">{formatCurrency(calculateTotal())}</span>
+              </div>
             </div>
           </div>
 
-          <button 
-            onClick={() => window.location.reload()}
-            className="status-btn"
-          >
-            Hoàn tất
-          </button>
+          {sendInvoiceEmail && (
+            <div className="email-notification">
+              <div className="email-icon">📧</div>
+              <p>Hóa đơn điện tử đã được gửi đến: <strong>{customerEmail}</strong></p>
+            </div>
+          )}
+
+          <div className="success-actions">
+            <button className="status-btn secondary">
+              Tải hóa đơn PDF
+            </button>
+            <button 
+              onClick={() => window.location.reload()}
+              className="status-btn primary"
+            >
+              Hoàn tất
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -142,7 +193,7 @@ const PaymentPage = () => {
           
           <div className="status-details pending">
             <p className="status-detail-label" style={{textAlign: 'center', marginBottom: '0.5rem'}}>Số tiền cần thanh toán:</p>
-            <p className="status-amount">{formatCurrency(reservationData.total)}</p>
+            <p className="status-amount">{formatCurrency(calculateTotal())}</p>
           </div>
 
           <div className="loading-container">
@@ -162,7 +213,7 @@ const PaymentPage = () => {
             <div className="processing-spinner"></div>
           </div>
           <h2 className="status-title">Đang xử lý thanh toán</h2>
-          <p className="status-description">Vui lòng đợi trong giây lát...</p>
+          <p className="status-description">Đang kết nối với ngân hàng...</p>
         </div>
       </div>
     );
@@ -170,12 +221,11 @@ const PaymentPage = () => {
 
   return (
     <div className="payment-container">
-      {/* Header */}
       <header className="payment-header">
         <div className="header-content">
           <div className="logo-section">
             <div className="logo-icon">
-              <span>E</span>
+            <CiDollar />
             </div>
             <h1 className="logo-text">EcoCharge Payment</h1>
           </div>
@@ -184,18 +234,15 @@ const PaymentPage = () => {
 
       <main className="main-content">
         <div className="payment-grid">
-          {/* Left - Reservation Details */}
           <div>
             <div className="payment-card">
               <h2 className="card-title">Chi tiết đặt chỗ</h2>
               
-              {/* Station Info */}
               <div className="station-info">
                 <h3 className="station-name">{reservationData.station}</h3>
                 <p className="station-address">{reservationData.district} • {reservationData.address}</p>
               </div>
 
-              {/* Charging Details */}
               <div className="details-grid">
                 <div className="detail-item">
                   <div className="detail-header">
@@ -230,7 +277,6 @@ const PaymentPage = () => {
                 </div>
               </div>
 
-              {/* Cost Breakdown */}
               <div className="cost-section">
                 <h3 className="cost-title">Chi phí</h3>
                 <div className="cost-list">
@@ -246,10 +292,18 @@ const PaymentPage = () => {
                     <span className="cost-label">Thuế</span>
                     <span className="cost-value">{formatCurrency(reservationData.tax)}</span>
                   </div>
+                  
+                  {peakHourSurcharge > 0 && (
+                    <div className="cost-item surcharge">
+                      <span className="cost-label">Phí phụ thu (Giờ cao điểm)</span>
+                      <span className="cost-value">{formatCurrency(peakHourSurcharge)}</span>
+                    </div>
+                  )}
+
                   <div className="cost-total">
                     <div className="cost-item">
                       <span className="cost-label">Tổng cộng</span>
-                      <span className="cost-value">{formatCurrency(reservationData.total)}</span>
+                      <span className="cost-value">{formatCurrency(calculateTotal())}</span>
                     </div>
                   </div>
                 </div>
@@ -257,12 +311,10 @@ const PaymentPage = () => {
             </div>
           </div>
 
-          {/* Right - Payment Method */}
           <div>
             <div className="payment-card">
               <h3 className="card-title">Chọn phương thức thanh toán</h3>
               
-              {/* Payment Methods */}
               <div className="payment-methods">
                 <button
                   onClick={() => handlePaymentMethodSelect('cash')}
@@ -287,7 +339,26 @@ const PaymentPage = () => {
                 </button>
               </div>
 
-              {/* Card Selection */}
+              <div className="email-invoice-section">
+                <label className="email-invoice-label">
+                  <input
+                    type="checkbox"
+                    checked={sendInvoiceEmail}
+                    onChange={(e) => setSendInvoiceEmail(e.target.checked)}
+                  />
+                  <span>Gửi hóa đơn qua email</span>
+                </label>
+                {sendInvoiceEmail && (
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="Nhập email của bạn"
+                    className="email-input"
+                  />
+                )}
+              </div>
+
               {paymentMethod === 'card' && (
                 <div className="card-selection">
                   <h4 className="card-selection-title">Chọn thẻ</h4>
@@ -314,7 +385,6 @@ const PaymentPage = () => {
                 </div>
               )}
 
-              {/* Add Card Form */}
               {showAddCard && (
                 <div className="add-card-form">
                   <h4 className="add-card-title">Thêm thẻ mới</h4>
@@ -356,7 +426,6 @@ const PaymentPage = () => {
                 </div>
               )}
 
-              {/* Confirm Payment Button */}
               <button
                 onClick={handleConfirmPayment}
                 disabled={!paymentMethod || (paymentMethod === 'card' && !selectedCard)}
@@ -366,36 +435,54 @@ const PaymentPage = () => {
                     : 'enabled'
                 }`}
               >
-                Xác nhận thanh toán {formatCurrency(reservationData.total)}
+                Xác nhận thanh toán {formatCurrency(calculateTotal())}
               </button>
             </div>
           </div>
         </div>
       </main>
 
-      {/* Payment Confirmation Modal */}
       {showConfirmModal && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-content enhanced-modal">
             <div className="modal-header">
               <div className="modal-icon">
                 <span>💳</span>
               </div>
               <h3 className="modal-title">Xác nhận thanh toán</h3>
-              <p className="modal-description">Bạn có chắc chắn muốn thanh toán?</p>
+              <p className="modal-description">Vui lòng kiểm tra thông tin trước khi thanh toán</p>
             </div>
 
-            <div className="modal-details">
-              <div className="modal-detail-row">
-                <span className="modal-detail-label">Số tiền:</span>
-                <span className="modal-detail-value">{formatCurrency(reservationData.total)}</span>
+            <div className="modal-details-enhanced">
+              <div className="modal-section">
+                <h4>Thông tin thanh toán</h4>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">Trạm sạc:</span>
+                  <span className="modal-detail-value">{reservationData.station}</span>
+                </div>
+                <div className="modal-detail-row">
+                  <span className="modal-detail-label">Thẻ:</span>
+                  <span className="modal-detail-value">
+                    {savedCards.find(card => card.id === selectedCard)?.number}
+                  </span>
+                </div>
               </div>
-              <div className="modal-detail-row">
-                <span className="modal-detail-label">Thẻ:</span>
-                <span className="modal-detail-value">
-                  {savedCards.find(card => card.id === selectedCard)?.number}
-                </span>
+
+              <div className="modal-section total-section">
+                <div className="modal-detail-row total-row">
+                  <span className="modal-detail-label">Tổng thanh toán:</span>
+                  <span className="modal-detail-value total-amount">{formatCurrency(calculateTotal())}</span>
+                </div>
               </div>
+
+              {sendInvoiceEmail && (
+                <div className="modal-section email-section">
+                  <div className="modal-detail-row">
+                    <span className="modal-detail-label">Gửi hóa đơn đen:</span>
+                    <span className="modal-detail-value">{customerEmail}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="modal-actions">
@@ -409,7 +496,7 @@ const PaymentPage = () => {
                 onClick={handleCardPayment}
                 className="modal-btn confirm"
               >
-                Thanh toán
+                Xác nhận thanh toán
               </button>
             </div>
           </div>
