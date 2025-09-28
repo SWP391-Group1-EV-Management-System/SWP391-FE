@@ -1,0 +1,85 @@
+.card-selection {
+  margin-bottom: 2rem;
+}
+
+.card-selection-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #f9fafb;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  width: 100%;
+  text-align: left;
+}
+
+.card-item:hover {
+  border-color: #d1d5db;
+  background-color: #f3f4f6;
+}
+
+.card-item.selected {
+  border-color: #10b981;
+  background-color: #ecfdf5;
+}
+
+.card-info h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.25rem 0;
+}
+
+.card-info p {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.card-icon {
+  font-size: 1.5rem;
+  color: #6b7280;
+}
+
+.add-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: transparent;
+  border: 2px dashed #d1d5db;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  color: #6b7280;
+  font-weight: 500;
+  width: 100%;
+}
+
+.add-card-btn:hover {
+  border-color: #10b981;
+  color: #10b981;
+  background-color: #f0fdf4;
+}
+
+@media (max-width: 640px) {
+  .card-item {
+    padding: 0.75rem;
+  }
+}
