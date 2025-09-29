@@ -1,114 +1,177 @@
 import { useState, useEffect } from 'react';
 
 export const usePayment = (reservationData) => {
-  const [paymentMethod, setPaymentMethod] = useState('');
-  const [selectedCard, setSelectedCard] = useState('');
-  const [showAddCard, setShowAddCard] = useState(false);
+  console.log('usePayment called with:', reservationData);
+  
+  const [selectedMethod, setSelectedMethod] = useState('');
+  const [selectedCard, setSelectedCard] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState('pending');
+  const [paymentStatus, setPaymentStatus] = useState('');
   const [cashPaymentPending, setCashPaymentPending] = useState(false);
-  const [peakHourSurcharge, setPeakHourSurcharge] = useState(0);
-  const [sendInvoiceEmail, setSendInvoiceEmail] = useState(false);
-  const [customerEmail, setCustomerEmail] = useState('customer@example.com');
-  const [newCard, setNewCard] = useState({
-    cardNumber: '',
-    expiryDate: '',
-    cvv: '',
-    cardHolder: ''
-  });
+  const [selectedServicePackage, setSelectedServicePackage] = useState(null);
 
-  // Calculate peak hour surcharge
+  // Reset states when reservationData changes
   useEffect(() => {
-    const currentHour = new Date().getHours();
-    if ((currentHour >= 6 && currentHour <= 9) || (currentHour >= 17 && currentHour <= 20)) {
-      setPeakHourSurcharge(reservationData.chargingCost * 0.15);
-    } else {
-      setPeakHourSurcharge(0);
+    if (reservationData) {
+      console.log('usePayment: reservationData loaded, resetting states');
+      setSelectedMethod('');
+      setSelectedCard(null);
+      setShowConfirmModal(false);
+      setPaymentStatus('');
+      setCashPaymentPending(false);
+      setSelectedServicePackage(null);
     }
-  }, [reservationData.chargingCost]);
+  }, [reservationData]);
 
-  // Simulate staff confirmation for cash payment
-  useEffect(() => {
-    if (cashPaymentPending) {
-      const timer = setTimeout(() => {
-        setPaymentStatus('success');
-        setCashPaymentPending(false);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [cashPaymentPending]);
-
-  // Calculate total cost
+  // Safe calculation functions
   const calculateTotal = () => {
-    return reservationData.chargingCost + 
-           reservationData.serviceFee + 
-           reservationData.tax + 
-           peakHourSurcharge;
+    if (!reservationData) {
+      console.log('calculateTotal: no reservationData');
+      return 0;
+    }
+    
+    const chargingCost = reservationData.chargingCost || 0;
+    const serviceFee = reservationData.serviceFee || 0;
+    const tax = reservationData.tax || 0;
+    const peakHourSurcharge = calculatePeakHourSurcharge();
+    
+    const total = chargingCost + serviceFee + tax + peakHourSurcharge;
+    console.log('calculateTotal:', { chargingCost, serviceFee, tax, peakHourSurcharge, total });
+    
+    return total;
   };
 
-  const handlePaymentMethodSelect = (method) => {
-    setPaymentMethod(method);
-    setSelectedCard('');
-    setShowAddCard(false);
+  const calculatePeakHourSurcharge = () => {
+    if (!reservationData?.startTime) {
+      console.log('calculatePeakHourSurcharge: no startTime');
+      return 0;
+    }
+    
+    const startHour = new Date(reservationData.startTime).getHours();
+    const isPeakHour = (startHour >= 7 && startHour <= 9) || (startHour >= 17 && startHour <= 19);
+    
+    console.log('calculatePeakHourSurcharge:', { startHour, isPeakHour });
+    
+    if (isPeakHour && reservationData.chargingCost) {
+      const surcharge = Math.round(reservationData.chargingCost * 0.15);
+      console.log('Peak hour surcharge:', surcharge);
+      return surcharge;
+    }
+    
+    return 0;
   };
 
-  const handleCardSelect = (cardId) => {
-    setSelectedCard(cardId);
+  // Event handlers
+  const handleMethodSelect = (method) => {
+    console.log('handleMethodSelect called with:', method);
+    setSelectedMethod(method);
   };
 
-  const handleAddCard = () => {
-    setShowAddCard(true);
+  const handleCardSelect = (card) => {
+    console.log('handleCardSelect called with:', card);
+    setSelectedCard(card);
   };
 
-  const handleSaveCard = () => {
-    setShowAddCard(false);
-    setNewCard({ cardNumber: '', expiryDate: '', cvv: '', cardHolder: '' });
-  };
+  const handlePayClick = (servicePackage = null) => {
+    console.log('handlePayClick called', { 
+      selectedMethod, 
+      servicePackage 
+    });
+    
+    if (!selectedMethod) {
+      alert('Vui lòng chọn phương thức thanh toán');
+      return;
+    }
 
-  const handleConfirmPayment = () => {
-    if (paymentMethod === 'cash') {
+    // Store service package for later use
+    if (servicePackage) {
+      setSelectedServicePackage(servicePackage);
+    }
+
+    if (selectedMethod === 'cash') {
+      console.log('Setting cash payment pending');
       setCashPaymentPending(true);
-    } else if (paymentMethod === 'card' && selectedCard) {
+    } else {
+      console.log('Showing confirm modal');
       setShowConfirmModal(true);
     }
   };
 
-  const handleCardPayment = () => {
+  const handleConfirmPayment = async () => {
+    console.log('handleConfirmPayment called');
     setShowConfirmModal(false);
     setPaymentStatus('processing');
     
-    setTimeout(() => {
-      setPaymentStatus('success');
-      if (sendInvoiceEmail) {
-        console.log(`Sending invoice to ${customerEmail}`);
-      }
-    }, 3000);
+    try {
+      // TODO: Integrate with actual payment service
+      // const paymentResult = await createPayment(
+      //   reservationData.session_id,
+      //   selectedMethod,
+      //   calculateFinalAmount(),
+      //   selectedServicePackage
+      // );
+      
+      // Simulate payment processing
+      setTimeout(() => {
+        console.log('Payment processing completed');
+        setPaymentStatus('success');
+        
+        // TODO: Update service package usage if applied
+        if (selectedServicePackage) {
+          console.log('Updating service package usage:', selectedServicePackage);
+          // updateServicePackageUsage(selectedServicePackage, reservationData.kwh);
+        }
+      }, 2000);
+    } catch (error) {
+      console.error('Payment failed:', error);
+      setPaymentStatus('failed');
+    }
   };
 
-  return {
-    // States
-    paymentMethod,
+  const handleCloseModal = () => {
+    console.log('handleCloseModal called');
+    setShowConfirmModal(false);
+  };
+
+  const calculateFinalAmount = () => {
+    let amount = calculateTotal();
+    
+    if (selectedServicePackage && reservationData) {
+      // Apply free kWh
+      if (selectedServicePackage.remainingKwh > 0) {
+        const freeKwh = Math.min(selectedServicePackage.remainingKwh, reservationData.kwh);
+        const freeAmount = freeKwh * reservationData.chargingFeePerKwh;
+        amount = Math.max(0, amount - freeAmount);
+      }
+      
+      // Apply percentage discount
+      if (selectedServicePackage.discountPercent > 0) {
+        amount = amount * (100 - selectedServicePackage.discountPercent) / 100;
+      }
+    }
+    
+    return Math.round(amount);
+  };
+
+  const result = {
+    selectedMethod,
     selectedCard,
-    showAddCard,
     showConfirmModal,
     paymentStatus,
     cashPaymentPending,
-    peakHourSurcharge,
-    sendInvoiceEmail,
-    customerEmail,
-    newCard,
-    // Setters
-    setSendInvoiceEmail,
-    setCustomerEmail,
-    setNewCard,
-    setShowConfirmModal,
-    // Handlers
-    handlePaymentMethodSelect,
+    selectedServicePackage,
+    calculateTotal,
+    calculateFinalAmount,
+    peakHourSurcharge: calculatePeakHourSurcharge(),
+    handleMethodSelect,
     handleCardSelect,
-    handleAddCard,
-    handleSaveCard,
+    handlePayClick,
     handleConfirmPayment,
-    handleCardPayment,
-    calculateTotal
+    handleCloseModal,
+    // Additional states for debugging
+    isReady: !!reservationData
   };
+
+  console.log('usePayment returning:', result);
+  return result;
 };
