@@ -10,7 +10,12 @@ const BatteryProgress = ({ batteryLevel, statusConfig }) => {
     <div className="progress-container">
       <h3 className="progress-title">Trạng thái pin</h3>
       <div className="progress-circle-container">
-        <svg width="200" height="200" className="progress-circle-svg">
+        <svg 
+          width="100%" 
+          height="100%" 
+          viewBox="0 0 200 200" 
+          className="progress-circle-svg"
+        >
           <circle
             cx="100"
             cy="100"
