@@ -38,6 +38,32 @@
         "phone_number": "0901122334",
         "created_at": "2025-09-26T09:15:00",
         "status": false
+      },
+      {
+        "user_id": "USR0004",
+        "first_name": "Le",
+        "last_name": "Minh D",
+        "birth_date": "1995-03-08",
+        "gender": true,
+        "role": "driver",
+        "email": "mind@example.com",
+        "password": "$2a$10$hashed_password_example",
+        "phone_number": "0923456789",
+        "created_at": "2025-09-25T08:00:00",
+        "status": true
+      },
+      {
+        "user_id": "USR0005",
+        "first_name": "Vo",
+        "last_name": "Thi E",
+        "birth_date": "1992-12-25",
+        "gender": false,
+        "role": "driver",
+        "email": "thie@example.com",
+        "password": "$2a$10$hashed_password_example",
+        "phone_number": "0934567890",
+        "created_at": "2025-09-24T16:30:00",
+        "status": true
       }
     ],
   
@@ -62,6 +88,20 @@
         "brand": "Tesla",
         "model": "Model 3",
         "charging_type_id": 5
+      },
+      {
+        "license_plate": "29D-11111",
+        "user_id": "USR0004",
+        "brand": "BMW",
+        "model": "iX3",
+        "charging_type_id": 4
+      },
+      {
+        "license_plate": "77E-22222",
+        "user_id": "USR0005",
+        "brand": "VinFast",
+        "model": "VF9",
+        "charging_type_id": 4
       }
     ],
   
@@ -102,7 +142,7 @@
         "created_at": "2025-09-28T11:00:00",
         "paid_at": null,
         "payment_method": null,
-        "price": 150000.00,
+        "price": 43750,
         "session_id": "CS001"
       },
       {
@@ -113,7 +153,7 @@
         "created_at": "2025-09-27T14:30:00",
         "paid_at": "2025-09-27T15:00:00",
         "payment_method": "VNPAY",
-        "price": 80000.50,
+        "price": 100000,
         "session_id": "CS002"
       },
       {
@@ -124,10 +164,88 @@
         "created_at": "2025-09-26T09:15:00",
         "paid_at": "2025-09-26T09:45:00",
         "payment_method": "MOMO",
-        "price": 120000,
+        "price": 180000,
         "session_id": "CS003"
+      },
+      {
+        "payment_id": "PAY0004",
+        "user_id": "USR0001",
+        "charging_session_id": "CS004",
+        "is_paid": true,
+        "created_at": "2025-09-25T16:20:00",
+        "paid_at": "2025-09-25T16:22:00",
+        "payment_method": "Thẻ tín dụng",
+        "price": 87500,
+        "session_id": "CS004"
+      },
+      {
+        "payment_id": "PAY0005",
+        "user_id": "USR0004",
+        "charging_session_id": "CS005",
+        "is_paid": true,
+        "created_at": "2025-09-24T12:45:00",
+        "paid_at": "2025-09-24T12:47:00",
+        "payment_method": "ZaloPay",
+        "price": 210000,
+        "session_id": "CS005"
+      },
+      {
+        "payment_id": "PAY0006",
+        "user_id": "USR0005",
+        "charging_session_id": "CS006",
+        "is_paid": false,
+        "created_at": "2025-09-23T08:30:00",
+        "paid_at": null,
+        "payment_method": null,
+        "price": 156000,
+        "session_id": "CS006"
+      },
+      {
+        "payment_id": "PAY0007",
+        "user_id": "USR0002",
+        "charging_session_id": "CS007",
+        "is_paid": true,
+        "created_at": "2025-09-22T19:15:00",
+        "paid_at": "2025-09-22T19:17:00",
+        "payment_method": "VNPAY",
+        "price": 67500,
+        "session_id": "CS007"
+      },
+      {
+        "payment_id": "PAY0008",
+        "user_id": "USR0003",
+        "charging_session_id": "CS008",
+        "is_paid": true,
+        "created_at": "2025-09-21T14:00:00",
+        "paid_at": "2025-09-21T14:02:00",
+        "payment_method": "MOMO",
+        "price": 0,
+        "session_id": "CS008"
+      },
+      {
+        "payment_id": "PAY0009",
+        "user_id": "USR0001",
+        "charging_session_id": "CS009",
+        "is_paid": true,
+        "created_at": "2025-09-20T11:30:00",
+        "paid_at": "2025-09-20T11:32:00",
+        "payment_method": "Thẻ tín dụng",
+        "price": 125000,
+        "session_id": "CS009"
+      },
+      {
+        "payment_id": "PAY0010",
+        "user_id": "USR0004",
+        "charging_session_id": "CS010",
+        "is_paid": true,
+        "created_at": "2025-09-19T15:45:00",
+        "paid_at": "2025-09-19T15:47:00",
+        "payment_method": "ZaloPay",
+        "price": 195000,
+        "session_id": "CS010"
       }
     ],
+    
     "charging_station": [
         {
           "id_charging_station": "ST001",
@@ -135,7 +253,7 @@
           "address": "123 Lê Lợi, Quận 1, TP.HCM",
           "is_active": true,
           "established_time": "2023-05-20T08:00:00",
-          "number_of_posts": 2,
+          "number_of_posts": 4,
           "id_user_manager": "USR0002"
         },
         {
@@ -146,6 +264,33 @@
           "established_time": "2024-03-12T09:00:00",
           "number_of_posts": 3,
           "id_user_manager": "USR0003"
+        },
+        {
+          "id_charging_station": "ST003",
+          "name_charging_station": "VinFast Station Thủ Đức",
+          "address": "78 Võ Văn Ngân, Thủ Đức, TP.HCM",
+          "is_active": true,
+          "established_time": "2024-01-15T10:00:00",
+          "number_of_posts": 6,
+          "id_user_manager": "USR0002"
+        },
+        {
+          "id_charging_station": "ST004",
+          "name_charging_station": "Shell Station Quận 7",
+          "address": "456 Nguyễn Thị Thập, Quận 7, TP.HCM",
+          "is_active": true,
+          "established_time": "2023-12-01T07:30:00",
+          "number_of_posts": 4,
+          "id_user_manager": "USR0002"
+        },
+        {
+          "id_charging_station": "ST005",
+          "name_charging_station": "EVN Station Bình Thạnh",
+          "address": "321 Điện Biên Phủ, Bình Thạnh, TP.HCM",
+          "is_active": true,
+          "established_time": "2024-02-20T08:15:00",
+          "number_of_posts": 5,
+          "id_user_manager": "USR0002"
         }
       ],
     
@@ -170,8 +315,58 @@
           "maxPower": 100.0,
           "charging_fee_per_kwh": 6000,
           "id_charging_station": "ST002"
+        },
+        {
+          "idChargingPost": "POST004",
+          "is_active": true,
+          "maxPower": 150.0,
+          "charging_fee_per_kwh": 7000,
+          "id_charging_station": "ST001"
+        },
+        {
+          "idChargingPost": "POST005",
+          "is_active": true,
+          "maxPower": 75.0,
+          "charging_fee_per_kwh": 5500,
+          "id_charging_station": "ST001"
+        },
+        {
+          "idChargingPost": "POST006",
+          "is_active": true,
+          "maxPower": 22.0,
+          "charging_fee_per_kwh": 4000,
+          "id_charging_station": "ST002"
+        },
+        {
+          "idChargingPost": "POST007",
+          "is_active": true,
+          "maxPower": 50.0,
+          "charging_fee_per_kwh": 5000,
+          "id_charging_station": "ST002"
+        },
+        {
+          "idChargingPost": "POST008",
+          "is_active": true,
+          "maxPower": 120.0,
+          "charging_fee_per_kwh": 6500,
+          "id_charging_station": "ST003"
+        },
+        {
+          "idChargingPost": "POST009",
+          "is_active": true,
+          "maxPower": 50.0,
+          "charging_fee_per_kwh": 4500,
+          "id_charging_station": "ST004"
+        },
+        {
+          "idChargingPost": "POST010",
+          "is_active": true,
+          "maxPower": 75.0,
+          "charging_fee_per_kwh": 5200,
+          "id_charging_station": "ST005"
         }
       ],
+      
       "charging_session": [
         {
           "charging_session_id": "CS001",
@@ -211,8 +406,123 @@
           "end_time": "2025-09-26T10:00:00",
           "kwh": 30.0,
           "total_amount": 180000
+        },
+        {
+          "charging_session_id": "CS004",
+          "booking_id": null,
+          "charging_post_id": "POST004",
+          "station_id": "ST001",
+          "user_id": "USR0001",
+          "user_manage": "USR0002",
+          "is_done": true,
+          "start_time": "2025-09-25T16:20:00",
+          "end_time": "2025-09-25T17:45:00",
+          "kwh": 25.0,
+          "total_amount": 87500
+        },
+        {
+          "charging_session_id": "CS005",
+          "booking_id": null,
+          "charging_post_id": "POST008",
+          "station_id": "ST003",
+          "user_id": "USR0004",
+          "user_manage": "USR0002",
+          "is_done": true,
+          "start_time": "2025-09-24T12:45:00",
+          "end_time": "2025-09-24T14:15:00",
+          "kwh": 35.0,
+          "total_amount": 227500
+        },
+        {
+          "charging_session_id": "CS006",
+          "booking_id": null,
+          "charging_post_id": "POST005",
+          "station_id": "ST001",
+          "user_id": "USR0005",
+          "user_manage": "USR0002",
+          "is_done": false,
+          "start_time": "2025-09-23T08:30:00",
+          "end_time": "2025-09-23T08:33:00",
+          "kwh": 0.8,
+          "total_amount": 4400
+        },
+        {
+          "charging_session_id": "CS007",
+          "booking_id": null,
+          "charging_post_id": "POST006",
+          "station_id": "ST002",
+          "user_id": "USR0002",
+          "user_manage": "USR0003",
+          "is_done": true,
+          "start_time": "2025-09-22T19:15:00",
+          "end_time": "2025-09-22T20:00:00",
+          "kwh": 15.0,
+          "total_amount": 60000
+        },
+        {
+          "charging_session_id": "CS008",
+          "booking_id": null,
+          "charging_post_id": "POST009",
+          "station_id": "ST004",
+          "user_id": "USR0003",
+          "user_manage": "USR0002",
+          "is_done": false,
+          "start_time": "2025-09-21T14:00:00",
+          "end_time": "2025-09-21T14:03:00",
+          "kwh": 0.0,
+          "total_amount": 0
+        },
+        {
+          "charging_session_id": "CS009",
+          "booking_id": null,
+          "charging_post_id": "POST007",
+          "station_id": "ST002",
+          "user_id": "USR0001",
+          "user_manage": "USR0003",
+          "is_done": true,
+          "start_time": "2025-09-20T11:30:00",
+          "end_time": "2025-09-20T12:45:00",
+          "kwh": 25.0,
+          "total_amount": 125000
+        },
+        {
+          "charging_session_id": "CS010",
+          "booking_id": null,
+          "charging_post_id": "POST010",
+          "station_id": "ST005",
+          "user_id": "USR0004",
+          "user_manage": "USR0002",
+          "is_done": true,
+          "start_time": "2025-09-19T15:45:00",
+          "end_time": "2025-09-19T17:20:00",
+          "kwh": 38.0,
+          "total_amount": 197600
+        },
+        {
+          "charging_session_id": "CS011",
+          "booking_id": null,
+          "charging_post_id": "POST002",
+          "station_id": "ST001",
+          "user_id": "USR0005",
+          "user_manage": "USR0002",
+          "is_done": true,
+          "start_time": "2025-09-18T13:20:00",
+          "end_time": "2025-09-18T14:50:00",
+          "kwh": 28.5,
+          "total_amount": 142500
+        },
+        {
+          "charging_session_id": "CS012",
+          "booking_id": null,
+          "charging_post_id": "POST008",
+          "station_id": "ST003",
+          "user_id": "USR0001",
+          "user_manage": "USR0002",
+          "is_done": true,
+          "start_time": "2025-09-17T09:00:00",
+          "end_time": "2025-09-17T10:40:00",
+          "kwh": 42.0,
+          "total_amount": 273000
         }
       ]
-
   }
-  
