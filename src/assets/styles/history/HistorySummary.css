@@ -1,0 +1,83 @@
+/* HistorySummary.css - Summary cards styles */
+
+/* Summary Cards */
+.history-page .summary-container {
+  margin-bottom: 2rem;
+}
+
+.history-page .summary-container .card {
+  background: var(--bg-white);
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px var(--shadow-light);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.history-page .summary-container .card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px var(--shadow-medium);
+  border-color: var(--border-medium);
+}
+
+.history-page .summary-container .card-body {
+  padding: 2rem 1.5rem;
+  background: var(--bg-white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.history-page .summary-container .card-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--primary-green);
+  margin: 1rem 0 0.5rem 0;
+  line-height: 1.2;
+}
+
+.history-page .summary-container .card-text {
+  font-size: 1.35rem;
+  margin: 0;
+  color: var(--text-green);
+  font-weight: 500;
+}
+
+.history-page .summary-container .summary-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .history-page .summary-container .card-body {
+    padding: 1.5rem 1rem;
+  }
+  
+  .history-page .summary-container .card-title {
+    font-size: 2.5rem;
+  }
+  
+  .history-page .summary-container .card-text {
+    font-size: 1.1rem;
+  }
+  
+  .history-page .summary-container .summary-icon {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .history-page .summary-container .card-title {
+    font-size: 2rem;
+  }
+  
+  .history-page .summary-container .card-text {
+    font-size: 1rem;
+  }
+  
+  .history-page .summary-container .summary-icon {
+    font-size: 2rem;
+  }
+}
