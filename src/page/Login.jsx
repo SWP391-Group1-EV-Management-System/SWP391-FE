@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import "../assets/styles/Login.css";
 import { CgMail } from "react-icons/cg";
 import { TbLockPassword } from "react-icons/tb";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
+import { IoClose } from "react-icons/io5";
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleBackToWelcome = () => {
+    navigate("/");
   };
 
   return (
@@ -17,6 +24,13 @@ function Login() {
       <div className="login-page">
         <div className="login-container">
           <div className="login-inner">
+            <button
+              className="back-to-welcome-btn"
+              onClick={handleBackToWelcome}
+              aria-label="Quay lại trang chính"
+            >
+              <IoClose size={24} />
+            </button>
             <h2>Đăng nhập</h2>
             <form>
               <div>
