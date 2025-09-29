@@ -1,5 +1,6 @@
 .clock-container {
   background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-radius: 1rem;
   padding: 2rem;
@@ -40,6 +41,7 @@
 @media (max-width: 768px) {
   .clock-container {
     padding: 1.5rem;
+    margin-bottom: 1rem; /* Thêm margin bottom */
   }
   
   .clock-time {
@@ -48,15 +50,23 @@
 }
 
 @media (max-width: 576px) {
+  .clock-container {
+    padding: 1rem; /* Giảm padding */
+    margin-bottom: 1rem; /* Đảm bảo có khoảng cách */
+  }
+  
   .clock-time {
     font-size: 2rem;
+    margin-bottom: 0.5rem; /* Thêm margin */
   }
   
   .clock-label {
     font-size: 0.875rem;
+    margin-bottom: 0.75rem; /* Thêm margin */
   }
   
   .clock-date {
-    font-size: 0.875rem;
+    font-size: 0.75rem; /* Giảm thêm font size */
+    line-height: 1.2; /* Thêm line height */
   }
 }

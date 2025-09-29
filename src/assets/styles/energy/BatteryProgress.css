@@ -1,5 +1,6 @@
 .progress-container {
   background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
   border-radius: 1rem;
   padding: 2rem;
@@ -21,10 +22,15 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
 }
 
 .progress-circle-svg {
   transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
 }
 
 .progress-circle {
@@ -54,21 +60,61 @@
   font-weight: 500;
 }
 
-@media (max-width: 640px) {
+/* Media queries theo thứ tự từ lớn đến nhỏ */
+@media (max-width: 768px) {
   .progress-container {
     padding: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .progress-circle-container {
+    width: 160px;
+    height: 160px;
   }
   
   .progress-circle-svg {
-    width: 150px;
-    height: 150px;
+    width: 160px;
+    height: 160px;
+  }
+  
+  .progress-title {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
   }
   
   .battery-percentage {
     font-size: 2.5rem;
   }
+}
+
+@media (max-width: 576px) {
+  .progress-container {
+    padding: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .progress-circle-container {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .progress-circle-svg {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .battery-percentage {
+    font-size: 2rem;
+  }
+  
+  .battery-label {
+    font-size: 0.75rem;
+  }
   
   .progress-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
   }
 }

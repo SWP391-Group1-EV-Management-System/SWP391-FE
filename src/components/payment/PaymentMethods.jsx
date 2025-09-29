@@ -7,10 +7,6 @@ import '../../assets/styles/payment/PaymentMethods.css';
 const PaymentMethods = ({
   paymentMethod,
   handlePaymentMethodSelect,
-  sendInvoiceEmail,
-  setSendInvoiceEmail,
-  customerEmail,
-  setCustomerEmail,
   savedCards,
   selectedCard,
   handleCardSelect,
@@ -20,7 +16,8 @@ const PaymentMethods = ({
   setNewCard,
   handleSaveCard,
   handleConfirmPayment,
-  calculateTotal
+  calculateTotal,
+  userServicePackage // Thêm prop gói dịch vụ
 }) => {
   return (
     <div className="payment-card">
@@ -50,24 +47,36 @@ const PaymentMethods = ({
         </button>
       </div>
 
-      <div className="email-invoice-section">
-        <label className="email-invoice-label">
-          <input
-            type="checkbox"
-            checked={sendInvoiceEmail}
-            onChange={(e) => setSendInvoiceEmail(e.target.checked)}
-          />
-          <span>Gửi hóa đơn qua email</span>
-        </label>
-        {sendInvoiceEmail && (
-          <input
-            type="email"
-            value={customerEmail}
-            onChange={(e) => setCustomerEmail(e.target.value)}
-            placeholder="Nhập email của bạn"
-            className="email-input"
-          />
-        )}
+      {/* Thay thế phần email bằng gói dịch vụ */}
+      <div className="service-package-section">
+        <h4 className="service-package-title">Gói dịch vụ hiện tại</h4>
+        <div className="service-package-info">
+          {userServicePackage ? (
+            <>
+              <div className="package-detail">
+                <span className="package-label">Tên gói:</span>
+                <span className="package-value">{userServicePackage.name}</span>
+              </div>
+              <div className="package-detail">
+                <span className="package-label">ID gói:</span>
+                <span className="package-value">#{userServicePackage.id}</span>
+              </div>
+              <div className="package-detail">
+                <span className="package-label">Giảm giá:</span>
+                <span className="package-value discount">{userServicePackage.discount}%</span>
+              </div>
+              <div className="package-detail">
+                <span className="package-label">Lượt sử dụng còn lại:</span>
+                <span className="package-value">{userServicePackage.remainingUsage}/{userServicePackage.totalUsage}</span>
+              </div>
+            </>
+          ) : (
+            <div className="no-package-info">
+              <span className="no-package-text">📦 Chưa đăng ký gói dịch vụ</span>
+              <p className="no-package-note">Bạn có thể thanh toán theo giá lẻ</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {paymentMethod === 'card' && (
