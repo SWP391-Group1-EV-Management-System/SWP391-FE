@@ -1,22 +1,215 @@
+/* ============================================
+   PAYMENT METHODS COMPONENT STYLES
+   ============================================ */
+
+/* --------------------------------------------
+   Main Container
+   -------------------------------------------- */
+.payment-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+  font-size: 1.5rem; /* Tăng từ 1.5rem */
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+/* --------------------------------------------
+   Service Package Section
+   -------------------------------------------- */
+.service-package-section {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+}
+
+.service-package-title {
+  font-size: 1.125rem; /* Tăng từ 0.5rem */
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.service-package-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* Package Options */
+.package-option {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-bottom: 8px;
+}
+
+.package-option:hover {
+  border-color: #d1d5db;
+  background-color: #f9fafb;
+}
+
+.package-option.selected {
+  border-color: #10b981;
+  background-color: #ecfdf5;
+}
+
+.package-option label.package-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem; /* Tăng từ 0.5rem */
+}
+
+.package-option input[type="radio"] {
+  margin-top: 0.25rem;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: #10b981;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.package-content {
+  flex: 1;
+}
+
+.package-name {
+  font-size: 1rem; /* Tăng từ 0.5rem */
+  font-weight: 600;
+  color: #10b981;
+  margin-bottom: 4px;
+}
+
+.package-description {
+  font-size: 0.875rem; /* Giảm từ 1.375rem */
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.package-detail {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem; /* Giảm từ 1.375rem */
+}
+
+.package-detail:last-child {
+  border-bottom: none;
+}
+
+.package-label {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.package-value {
+  font-weight: 600;
+  color: #059669;
+  background: #e5e7eb;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem; /* Giảm từ 1.375rem */
+}
+
+.package-value.discount {
+  background: #dcfce7;
+  color: #166534;
+}
+
+/* No Package State */
+.no-package-info {
+  text-align: center;
+  padding: 16px;
+  color: #6b7280;
+}
+
+.no-package-text {
+  font-size: 1rem; /* Tăng từ 0.5rem */
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+  display: block;
+  font-weight: 500;
+}
+
+.no-package-note {
+  font-size: 0.875rem; /* Giảm từ 1.375rem */
+  color: #9ca3af;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Loading State */
+.loading-packages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 2rem;
+  color: #6b7280;
+  font-size: 0.875rem; /* Giảm từ 1.375rem */
+}
+
+.loading-spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #10b981;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------
+   Payment Methods Section
+   -------------------------------------------- */
 .payment-methods {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
+}
+
+.payment-methods-title {
+  font-size: 1.125rem; /* Tăng từ 0.625rem */
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
 }
 
 .payment-method-btn {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.5rem;
+  gap: 16px;
+  padding: 16px;
   background-color: #f9fafb;
   border: 2px solid #e5e7eb;
-  border-radius: 0.75rem;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   width: 100%;
   text-align: left;
+  margin-bottom: 12px;
 }
 
 .payment-method-btn:hover {
@@ -30,69 +223,197 @@
 }
 
 .payment-method-icon {
-  font-size: 2rem;
+  font-size: 2rem; /* Giữ nguyên 2rem */
   min-width: 3rem;
   text-align: center;
+  width: 40px;
 }
 
 .payment-method-info h4 {
-  font-size: 1.125rem;
+  font-size: 1rem; /* Tăng từ 0.5rem */
   font-weight: 600;
   color: #111827;
   margin: 0 0 0.25rem 0;
 }
 
 .payment-method-info p {
-  font-size: 0.875rem;
+  font-size: 0.875rem; /* Giảm từ 1.375rem */
   color: #6b7280;
   margin: 0;
 }
 
-.email-invoice-section {
-  background-color: #f9fafb;
-  padding: 1.5rem;
-  border-radius: 0.75rem;
-  border: 1px solid #e5e7eb;
-  margin-bottom: 2rem;
+/* --------------------------------------------
+   Card Selection Section
+   -------------------------------------------- */
+.card-selection {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
 }
 
-.email-invoice-label {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+.card-selection-title {
+  font-size: 1rem; /* Tăng từ 0.5rem */
+  font-weight: 600;
   color: #374151;
+  margin-bottom: 12px;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
   cursor: pointer;
-}
-
-.email-invoice-label input[type="checkbox"] {
-  width: 1rem;
-  height: 1rem;
-  accent-color: #10b981;
-}
-
-.email-input {
+  transition: all 0.2s ease-in-out;
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  margin-top: 1rem;
-  transition: border-color 0.2s ease-in-out;
+  text-align: left;
+  margin-bottom: 8px;
 }
 
-.email-input:focus {
-  outline: none;
+.card-item:hover {
+  border-color: #d1d5db;
+  background-color: #f9fafb;
+}
+
+.card-item.selected {
   border-color: #10b981;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  background-color: #ecfdf5;
 }
 
+.card-info h5 {
+  font-size: 0.875rem; /* Giảm từ 1.375rem */
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 0.25rem 0;
+}
+
+.card-info p {
+  font-size: 0.75rem; /* Tăng từ 0.625rem */
+  color: #6b7280;
+  margin: 0;
+}
+
+.card-icon {
+  font-size: 1.5rem;
+  color: #6b7280;
+}
+
+.card-item.selected .card-icon {
+  color: #10b981;
+}
+
+/* --------------------------------------------
+   Payment Summary Section
+   -------------------------------------------- */
+.payment-summary {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.summary-title {
+  font-size: 1rem; /* Tăng từ 0.5rem */
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  font-size: 0.875rem; /* Giảm từ 1.375rem */
+  color: #4b5563;
+  border-bottom: 1px solid #d1fae5;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+}
+
+.summary-item.total {
+  font-size: 1rem; /* Tăng từ 0.5rem */
+  font-weight: 700;
+  color: #111827;
+  padding-top: 12px;
+  border-top: 2px solid #10b981;
+  margin-top: 8px;
+}
+
+/* Discount Styles */
+.summary-discount {
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.discount-title {
+  font-size: 1rem; /* Tăng từ 0.5rem */
+  font-weight: 600;
+  color: #059669;
+  margin-bottom: 8px;
+}
+
+.summary-item.discount {
+  color: #059669;
+  font-weight: 500;
+  padding: 0.25rem 0;
+  font-size: 0.875rem; /* Giảm từ 1.375rem */
+}
+
+.summary-item.discount span:last-child {
+  color: #15803d;
+  font-weight: 600;
+}
+
+.summary-total .discounted {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+  color: #10b981;
+  font-weight: 700;
+}
+
+.original-price {
+  font-size: 0.75rem; /* Tăng từ 0.625rem */
+  color: #9ca3af;
+  text-decoration: line-through;
+  font-weight: 400;
+  display: block;
+  margin-top: 4px;
+}
+
+/* --------------------------------------------
+   Confirm Button
+   -------------------------------------------- */
 .confirm-btn {
   width: 100%;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  font-size: 1.125rem;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 1rem; /* Tăng từ 0.5rem */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -116,100 +437,125 @@
   cursor: not-allowed;
 }
 
-@media (max-width: 640px) {
-  .payment-method-btn {
-    padding: 1rem;
+/* --------------------------------------------
+   Error Section
+   -------------------------------------------- */
+.error-section {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+}
+
+.error-section h3 {
+  color: #dc2626;
+  font-size: 1rem; /* Tăng từ 0.5rem */
+  margin-bottom: 8px;
+}
+
+.error-section p {
+  color: #7f1d1d;
+  font-size: 0.875rem; /* Tăng từ 0.5rem */
+  margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+/* Tablet */
+@media (max-width: 768px) {
+  .payment-card {
+    padding: 1.5rem;
   }
   
+  .card-title {
+    font-size: 1.375rem;
+  }
+  
+  .payment-methods-title {
+    font-size: 1rem;
+  }
+  
+  .payment-method-info h4 {
+    font-size: 0.875rem;
+  }
+  
+  .confirm-btn {
+    font-size: 0.875rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .payment-card {
+    padding: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+  }
+
+  .payment-method-btn {
+    padding: 12px;
+  }
+
   .payment-method-icon {
     font-size: 1.5rem;
     min-width: 2rem;
   }
+
+  .service-package-section {
+    padding: 1rem;
+  }
+
+  .package-option {
+    padding: 0.75rem;
+  }
+
+  .summary-item {
+    font-size: 0.8rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .summary-item.total {
+    font-size: 0.875rem;
+  }
+
+  .package-detail {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .package-value {
+    align-self: flex-end;
+  }
+
+  .payment-method-info h4 {
+    font-size: 0.8rem;
+  }
+
+  .payment-method-info p {
+    font-size: 0.75rem;
+  }
+
+  .confirm-btn {
+    font-size: 0.875rem;
+  }
 }
 
-.service-package-section {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin: 1.5rem 0;
-}
-
-.service-package-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 1rem;
-}
-
-.service-package-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.package-detail {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.package-detail:last-child {
-  border-bottom: none;
-}
-
-.package-label {
-  font-weight: 500;
-  color: #6b7280;
-}
-
-.package-value {
-  font-weight: 600;
-  color: #1f2937;
-  background: #e5e7eb;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-}
-
-.package-value.discount {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.no-package-info {
-  text-align: center;
-  padding: 1rem;
-}
-
-.no-package-text {
-  font-size: 1rem;
-  color: #6b7280;
-  margin-bottom: 0.5rem;
-  display: block;
-  font-weight: 500;
-}
-
-.no-package-note {
-  font-size: 0.875rem;
-  color: #9ca3af;
-  margin: 0;
-  font-style: italic;
-}
-
+/* Small Mobile */
 @media (max-width: 576px) {
   .package-detail {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
   }
-  
-  .service-package-section {
-    padding: 1rem;
-  }
-  
+
   .package-value {
     align-self: flex-end;
   }

@@ -14,57 +14,51 @@ const SuccessPage = ({
     <div className="status-container">
       <div className="status-card success-page">
         <div className="status-icon success">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-          </svg>
+          ✅
         </div>
         
-        <h2 className="status-title">Thanh toán thành công!</h2>
+        <h1 className="status-title">Thanh toán thành công!</h1>
         <p className="status-description">Cảm ơn bạn đã sử dụng dịch vụ EcoCharge</p>
-        
-        <div className="success-details">
-          <div className="success-section">
-            <h4>Thông tin giao dịch</h4>
-            <div className="status-detail-row">
-              <span className="status-detail-label">Mã giao dịch:</span>
-              <span className="status-detail-value">#EC{Date.now().toString().slice(-6)}</span>
-            </div>
-            <div className="status-detail-row">
-              <span className="status-detail-label">Trạm sạc:</span>
-              <span className="status-detail-value">{reservationData.station}</span>
-            </div>
-            <div className="status-detail-row">
-              <span className="status-detail-label">Thời gian:</span>
-              <span className="status-detail-value">{new Date().toLocaleString('vi-VN')}</span>
-            </div>
-            <div className="status-detail-row">
-              <span className="status-detail-label">Phương thức:</span>
-              <span className="status-detail-value">{paymentMethod === 'cash' ? 'Tiền mặt' : 'Thẻ ngân hàng'}</span>
+
+        <div className="status-details">
+          <div className="success-details">
+            <div className="success-section">
+              <h4>Thông tin giao dịch</h4>
+              <div className="status-detail-row">
+                <span className="status-detail-label">Mã giao dịch:</span>
+                <span className="status-detail-value">#EC{Date.now().toString().slice(-6)}</span>
+              </div>
+              <div className="status-detail-row">
+                <span className="status-detail-label">Trạm sạc:</span>
+                <span className="status-detail-value">{reservationData.station}</span>
+              </div>
+              <div className="status-detail-row">
+                <span className="status-detail-label">Thời gian:</span>
+                <span className="status-detail-value">{new Date().toLocaleString('vi-VN')}</span>
+              </div>
+              <div className="status-detail-row">
+                <span className="status-detail-label">Phương thức:</span>
+                <span className="status-detail-value">{paymentMethod === 'cash' ? 'Tiền mặt' : 'Thẻ ngân hàng'}</span>
+              </div>
+              <div className="status-detail-row total-row">
+                <span className="status-detail-label">Tổng thanh toán:</span>
+                <span className="status-detail-value total-amount">{formatCurrency(calculateTotal())}</span>
+              </div>
             </div>
           </div>
 
-          <div className="success-section total-section">
-            <div className="status-detail-row total-row">
-              <span className="status-detail-label">Tổng thanh toán:</span>
-              <span className="status-detail-value total-amount">{formatCurrency(calculateTotal())}</span>
+          {sendInvoiceEmail && (
+            <div className="email-notification">
+              <span className="email-icon">📧</span>
+              <span>Hóa đơn điện tử đã được gửi đến: <strong>{customerEmail}</strong></span>
             </div>
-          </div>
+          )}
         </div>
-
-        {sendInvoiceEmail && (
-          <div className="email-notification">
-            <div className="email-icon">📧</div>
-            <p>Hóa đơn điện tử đã được gửi đến: <strong>{customerEmail}</strong></p>
-          </div>
-        )}
 
         <div className="success-actions">
-          <button className="status-btn secondary">
-            Tải hóa đơn PDF
-          </button>
           <button 
-            onClick={() => window.location.reload()}
             className="status-btn primary"
+            onClick={() => window.location.reload()}
           >
             Hoàn tất
           </button>
@@ -80,16 +74,15 @@ const PendingPage = ({ calculateTotal }) => {
     <div className="status-container">
       <div className="status-card">
         <div className="status-icon pending">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
+          ⏰
         </div>
-        <h2 className="status-title">Đang chờ xác nhận thanh toán</h2>
-        <p className="status-description">Vui lòng liên hệ nhân viên để xác nhận thanh toán tiền mặt</p>
         
+        <h1 className="status-title">Đang chờ xác nhận thanh toán</h1>
+        <p className="status-description">Vui lòng liên hệ nhân viên để xác nhận thanh toán tiền mặt</p>
+
         <div className="status-details pending">
-          <p className="status-detail-label" style={{textAlign: 'center', marginBottom: '0.5rem'}}>Số tiền cần thanh toán:</p>
-          <p className="status-amount">{formatCurrency(calculateTotal())}</p>
+          <div className="status-amount">{formatCurrency(calculateTotal())}</div>
+          <p>Số tiền cần thanh toán</p>
         </div>
 
         <div className="loading-container">
@@ -109,7 +102,8 @@ const ProcessingPage = () => {
         <div className="status-icon processing">
           <div className="processing-spinner"></div>
         </div>
-        <h2 className="status-title">Đang xử lý thanh toán</h2>
+        
+        <h1 className="status-title">Đang xử lý thanh toán</h1>
         <p className="status-description">Đang kết nối với ngân hàng...</p>
       </div>
     </div>
