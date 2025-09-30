@@ -1,3 +1,5 @@
+import { fetchUserBankCards } from '../services/bankCardService';
+
 export const formatCurrency = (amount) => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
@@ -5,9 +7,38 @@ export const formatCurrency = (amount) => {
   }).format(amount);
 };
 
+// Lấy thẻ ngân hàng từ database thay vì hardcode
+export const getUserBankCards = async (userId = 'USR0001') => {
+  try {
+    return await fetchUserBankCards(userId);
+  } catch (error) {
+    console.error('Error getting user bank cards:', error);
+    // Fallback to mock data if API fails
+    return [
+      { 
+        id: 'CARD001', 
+        number: '**** **** **** 1234', 
+        bank: 'Vietcombank', 
+        type: 'Visa',
+        expiry: '12/25',
+        isDefault: true 
+      },
+      { 
+        id: 'CARD002', 
+        number: '**** **** **** 5678', 
+        bank: 'Techcombank', 
+        type: 'Mastercard',
+        expiry: '08/26',
+        isDefault: false 
+      },
+    ];
+  }
+};
+
+// Deprecated - kept for backward compatibility
 export const savedCards = [
-  { id: 1, number: '**** **** **** 1234', type: 'Vietcombank', expiry: '12/25' },
-  { id: 2, number: '**** **** **** 5678', type: 'Techcombank', expiry: '03/26' },
+  { id: 'CARD001', number: '**** **** **** 1234', type: 'Vietcombank', expiry: '12/25' },
+  { id: 'CARD002', number: '**** **** **** 5678', type: 'Techcombank', expiry: '03/26' },
 ];
 
 // Tính toán tổng tiền từ session data thực

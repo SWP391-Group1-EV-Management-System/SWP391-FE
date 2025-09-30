@@ -7,194 +7,168 @@ import ConfirmModal from '../components/payment/ConfirmModal';
 import StatusPages from '../components/payment/StatusPages';
 import { usePayment } from '../hooks/usePayment';
 import { fetchChargingSessionForPayment } from '../services/paymentService';
-import { savedCards } from '../utils/paymentUtils';
+import { getUserBankCards } from '../utils/paymentUtils';
 import '../assets/styles/payment/PaymentPage.css';
 
 const PaymentPage = () => {
   const { sessionId } = useParams();
   const location = useLocation();
   const [reservationData, setReservationData] = useState(null);
+  const [userBankCards, setUserBankCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
   const sessionIdFromState = location.state?.sessionId;
   const finalSessionId = sessionId || sessionIdFromState || 'CS001';
-
+  const userId = 'USR0001';
   const payment = usePayment(reservationData);
 
-  // Debug logs
-  console.log('PaymentPage Debug:', {
-    sessionId,
-    sessionIdFromState,
-    finalSessionId,
-    reservationData,
-    loading,
-    error,
-    payment
-  });
-
   useEffect(() => {
-    const loadSessionData = async () => {
+    const loadPaymentData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        console.log('Loading session data for ID:', finalSessionId);
-        const sessionData = await fetchChargingSessionForPayment(finalSessionId);
-        console.log('Session data loaded:', sessionData);
+        console.log('Loading payment data...');
+        
+        const [sessionData, bankCards] = await Promise.all([
+          fetchChargingSessionForPayment(finalSessionId),
+          getUserBankCards(userId)
+        ]);
+        
+        console.log('Payment data loaded:', { sessionData, bankCards });
         
         setReservationData(sessionData);
+        setUserBankCards(bankCards);
       } catch (err) {
-        console.error('Error loading session data:', err);
-        setError(err.message || 'Không thể tải thông tin phiên sạc');
+        console.error('Error loading payment data:', err);
+        setError(err.message || 'Không thể tải thông tin thanh toán');
       } finally {
         setLoading(false);
       }
     };
 
-    loadSessionData();
-  }, [finalSessionId]);
+    loadPaymentData();
+  }, [finalSessionId, userId]);
 
-  // Debug: Thêm fallback UI để test
+  // Loading state
   if (loading) {
-    console.log('Rendering loading state');
     return (
-      <div className="payment-container" style={{ minHeight: '100vh', background: '#f8f9fa' }}>
+      <div className="payment-container">
         <PaymentHeader />
-        <div className="main-content d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-          <div className="text-center">
-            <div className="spinner-border text-primary mb-3" role="status">
-              <span className="visually-hidden">Đang tải...</span>
-            </div>
-            <p>Đang tải thông tin thanh toán cho phiên: {finalSessionId}</p>
-          </div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Đang tải thông tin thanh toán...</p>
         </div>
       </div>
     );
   }
 
+  // Error state
   if (error) {
-    console.log('Rendering error state:', error);
     return (
-      <div className="payment-container" style={{ minHeight: '100vh', background: '#f8f9fa' }}>
+      <div className="payment-container">
         <PaymentHeader />
-        <div className="main-content">
-          <div className="alert alert-danger text-center">
-            <h5>Có lỗi xảy ra</h5>
-            <p>{error}</p>
-            <p><small>Session ID: {finalSessionId}</small></p>
-            <button 
-              className="btn btn-primary me-2"
-              onClick={() => window.location.reload()}
-            >
-              Thử lại
-            </button>
-            <button 
-              className="btn btn-secondary"
-              onClick={() => window.history.back()}
-            >
-              Quay lại
-            </button>
+        <div className="error-container">
+          <div className="error-card">
+            <h2 className="error-title">Có lỗi xảy ra</h2>
+            <p className="error-message">{error}</p>
+            <small className="error-detail">Session ID: {finalSessionId}</small>
+            <div className="error-actions">
+              <button className="btn-primary" onClick={() => window.location.reload()}>
+                Thử lại
+              </button>
+              <button className="btn-secondary" onClick={() => window.history.back()}>
+                Quay lại
+              </button>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
+  // No data state
   if (!reservationData) {
-    console.log('No reservationData, showing fallback');
     return (
-      <div className="payment-container" style={{ minHeight: '100vh', background: '#f8f9fa' }}>
+      <div className="payment-container">
         <PaymentHeader />
-        <div className="main-content">
-          <div className="alert alert-warning text-center">
-            <h5>Đang xử lý...</h5>
-            <p>Vui lòng đợi trong giây lát</p>
-            <p><small>Debug: reservationData is null</small></p>
-          </div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Đang xử lý...</p>
         </div>
       </div>
     );
   }
-
-  console.log('Payment status check:', {
-    paymentStatus: payment?.paymentStatus,
-    cashPaymentPending: payment?.cashPaymentPending
-  });
 
   // Render status pages
   if (payment?.paymentStatus === 'success') {
-    console.log('Rendering success page');
     return <StatusPages.Success {...payment} reservationData={reservationData} />;
   }
 
   if (payment?.cashPaymentPending) {
-    console.log('Rendering pending page');
     return <StatusPages.Pending {...payment} />;
   }
 
   if (payment?.paymentStatus === 'processing') {
-    console.log('Rendering processing page');
     return <StatusPages.Processing />;
   }
 
-  console.log('Rendering main payment page');
-
-  // Thêm fallback nếu components không load được
-  try {
-    return (
-      <div className="payment-container" style={{ minHeight: '100vh', background: '#f8f9fa' }}>
-        <PaymentHeader />
-
-        <main className="main-content" style={{ padding: '20px' }}>
-          <div className="payment-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            <div>
-              <h3>Booking Details</h3>
-              <BookingDetails
-                reservationData={reservationData}
-                peakHourSurcharge={payment?.peakHourSurcharge || 0}
-                calculateTotal={payment?.calculateTotal || (() => 0)}
-              />
-            </div>
-
-            <div>
-              <h3>Payment Methods</h3>
-              <PaymentMethods
-                selectedMethod={payment?.selectedMethod}
-                selectedCard={payment?.selectedCard}
-                handleMethodSelect={payment?.handleMethodSelect}
-                handleCardSelect={payment?.handleCardSelect}
-                handlePayClick={payment?.handlePayClick}
-                savedCards={savedCards}
-                sessionData={reservationData}
-              />
-            </div>
+  // Main payment page
+  return (
+    <div className="payment-container">
+      <PaymentHeader />
+      
+      <div className="main-content">
+        <div className="payment-grid">
+          <div className="grid-item">
+            <BookingDetails
+              reservationData={reservationData}
+              peakHourSurcharge={payment?.peakHourSurcharge || 0}
+              calculateTotal={payment?.calculateTotal || (() => 0)}
+            />
           </div>
-        </main>
-
-        {payment?.showConfirmModal && (
-          <ConfirmModal
-            {...payment}
-            reservationData={reservationData}
-            savedCards={savedCards}
-            sessionData={reservationData}
-          />
-        )}
-      </div>
-    );
-  } catch (renderError) {
-    console.error('Render error:', renderError);
-    return (
-      <div className="payment-container" style={{ minHeight: '100vh', background: '#f8f9fa', padding: '20px' }}>
-        <h1>Payment Page</h1>
-        <div className="alert alert-danger">
-          <h5>Render Error</h5>
-          <p>{renderError.message}</p>
-          <pre>{JSON.stringify(reservationData, null, 2)}</pre>
+          
+          <div className="grid-item">
+            <PaymentMethods
+              selectedMethod={payment?.selectedMethod}
+              selectedCard={payment?.selectedCard}
+              handleMethodSelect={payment?.handleMethodSelect}
+              handleCardSelect={payment?.handleCardSelect}
+              handlePayClick={payment?.handlePayClick}
+              savedCards={userBankCards}
+              sessionData={reservationData}
+              userId={userId}
+              // Add these props for synchronization
+              selectedServicePackage={payment?.selectedServicePackage}
+              setSelectedServicePackage={payment?.setSelectedServicePackage}
+              calculateFreeKwhDiscount={payment?.calculateFreeKwhDiscount}
+              calculatePercentDiscount={payment?.calculatePercentDiscount}
+              calculateDiscountedPrice={payment?.calculateDiscountedPrice}
+            />
+          </div>
         </div>
       </div>
-    );
-  }
+
+      {payment?.showConfirmModal && (
+        <ConfirmModal
+          selectedMethod={payment.selectedMethod}
+          selectedCard={payment.selectedCard}
+          selectedServicePackage={payment.selectedServicePackage}
+          calculateFinalAmount={payment.calculateFinalAmount}
+          handleConfirmPayment={payment.handleConfirmPayment}
+          handleCloseModal={payment.handleCloseModal}
+          reservationData={reservationData}
+          savedCards={userBankCards}
+          sessionData={reservationData}
+          // Add calculate functions for PaymentSummary
+          calculateFreeKwhDiscount={payment.calculateFreeKwhDiscount}
+          calculatePercentDiscount={payment.calculatePercentDiscount}
+          calculateDiscountedPrice={payment.calculateDiscountedPrice}
+        />
+      )}
+    </div>
+  );
 };
 
 export default PaymentPage;
