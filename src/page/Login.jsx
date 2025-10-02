@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router"; // Thay react-router-dom bằng react-router
 import "../assets/styles/Login.css";
 import { CgMail } from "react-icons/cg";
-import { TbLockPassword } from "react-icons/tb";
+import { TbLock } from "react-icons/tb"; // Sửa từ TbLockPassword
 import { IoIosArrowForward } from "react-icons/io";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { IoClose } from "react-icons/io5";
@@ -48,7 +48,7 @@ function Login() {
               </div>
               <div className="password-field">
                 <label htmlFor="password">
-                  <TbLockPassword size={24} />
+                  <TbLock size={24} />
                   Mật khẩu
                 </label>
                 <div className="password-input-container">

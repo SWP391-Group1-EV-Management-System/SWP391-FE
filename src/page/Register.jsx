@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import "../assets/styles/Register.css";
 import { CgMail } from "react-icons/cg";
-import { TbLockPassword } from "react-icons/tb";
+import { TbLock } from "react-icons/tb";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { IoClose } from "react-icons/io5";
@@ -53,7 +53,7 @@ function Register() {
               </div>
               <div className="password-field">
                 <label htmlFor="password">
-                  <TbLockPassword size={24} />
+                  <TbLock size={24} />
                   Mật khẩu
                 </label>
                 <div className="password-input-container">
@@ -80,7 +80,7 @@ function Register() {
               </div>
               <div className="password-field">
                 <label htmlFor="confirmPassword">
-                  <TbLockPassword size={24} />
+                  <TbLock size={24} />
                   Xác nhận mật khẩu
                 </label>
                 <div className="password-input-container">
