@@ -8,7 +8,7 @@ const PaymentHeader = () => {
   return (
     <header style={{
       marginTop: '6rem',
-      background: 'linear-gradient(135deg, #10b981, #059669)',
+      background: '',
       padding: '2rem',
       borderRadius: '12px',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
@@ -34,14 +34,14 @@ const PaymentHeader = () => {
           }}>
             <DollarOutlined style={{
               fontSize: '2rem',
-              color: 'white'
+              color: '#155724'
             }} />
           </div>
           
           <Title 
             level={1}
             style={{
-              color: 'white',
+              color: '#155724',
               fontSize: '2.5rem',
               fontWeight: 700,
               margin: 0,
