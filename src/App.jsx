@@ -18,13 +18,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Welcome & Auth Routes */}
-        <Route index element={<WelcomePage />} />
         <Route path="welcome" element={<WelcomePage />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
         
         {/* Protected Main App Routes */}
-        <Route path="/app" element={<Layout />}>
+        <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
@@ -38,6 +37,7 @@ function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
+
   );
 }
 
