@@ -1,23 +1,57 @@
 import React from 'react';
-import { Card, Button } from 'react-bootstrap';
-import '../../assets/styles/history/NoDataMessage.css';
+import { Card, Button, Typography, Space } from 'antd';
+import { ReloadOutlined, FileSearchOutlined } from '@ant-design/icons';
+
+const { Title, Text } = Typography;
 
 const NoDataMessage = ({ onClearFilter }) => {
   return (
-    <div className="no-data-container">
-      <Card>
-        <Card.Body className="text-center">
-          <div className="no-data-icon mb-3">📊</div>
-          <h5>Không có dữ liệu</h5>
-          <p>Không tìm thấy phiên sạc nào phù hợp với bộ lọc hiện tại.</p>
-          <Button 
-            variant="primary" 
-            onClick={onClearFilter}
-            className="mt-2"
+    <div style={{ 
+      margin: '2rem 0',
+      display: 'flex',
+      justifyContent: 'center'
+    }}>
+      <Card
+        style={{
+          background: '#ffffff',
+          borderRadius: '10px',
+          boxShadow: '0 4px 12px rgba(40, 167, 69, 0.08)',
+          border: '1px solid #d4edda',
+          maxWidth: '500px',
+          width: '100%'
+        }}
+      >
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <FileSearchOutlined 
+            style={{ 
+              fontSize: '4rem',
+              color: '#28a745',
+              marginBottom: '1rem'
+            }} 
+          />
+          
+          <Title 
+            level={4} 
+            style={{ 
+              color: '#155724',
+              marginBottom: '1rem',
+              fontSize: '2rem'
+            }}
           >
-            Xóa bộ lọc
-          </Button>
-        </Card.Body>
+            Không có dữ liệu
+          </Title>
+          
+          <Text 
+            style={{ 
+              color: '#28a745',
+              marginBottom: '2rem',
+              fontSize: '1.5rem',
+              display: 'block'
+            }}
+          >
+            Không tìm thấy phiên sạc nào phù hợp với bộ lọc hiện tại.
+          </Text>
+        </Space>
       </Card>
     </div>
   );
