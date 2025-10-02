@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route } from "react-router"; // Thay react-router-dom bằng react-router
 import Layout from "./components/layout/Layout.jsx";
 import HomePage from "./page/HomePage.jsx";
 import MapPage from "./page/MapPage.jsx";
