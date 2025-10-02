@@ -11,11 +11,18 @@ import SettingPage from "./page/SettingPage.jsx";
 import NotFoundPage from "./page/NotFoundPage.jsx";
 import Login from "./page/Login.jsx";
 import Register from "./page/Register.jsx";
+import WelcomePage from "./page/WelcomePage.jsx";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Welcome & Auth Routes */}
+        <Route path="welcome" element={<WelcomePage />} />
+        <Route path="login" element={<Login />} />
+        <Route path="register" element={<Register />} />
+        
+        {/* Protected Main App Routes */}
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="home" element={<HomePage />} />
@@ -26,11 +33,11 @@ function App() {
           <Route path="favorite" element={<FavoritePage />} />
           <Route path="setting" element={<SettingPage />} />
         </Route>
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
+        
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
+
   );
 }
 

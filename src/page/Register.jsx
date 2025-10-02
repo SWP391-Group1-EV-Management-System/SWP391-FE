@@ -1,13 +1,20 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router";
 import "../assets/styles/Register.css";
 import { CgMail } from "react-icons/cg";
 import { TbLockPassword } from "react-icons/tb";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
+import { IoClose } from "react-icons/io5";
 
 function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
+
+  const handleBackToWelcome = () => {
+    navigate("/");
+  };
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -22,6 +29,13 @@ function Register() {
       <div className="register-page">
         <div className="register-container">
           <div className="register-inner">
+            <button
+              className="back-to-welcome-btn"
+              onClick={handleBackToWelcome}
+              aria-label="Quay lại trang chính"
+            >
+              <IoClose size={24} />
+            </button>
             <h2>Đăng ký</h2>
             <form>
               <div>
@@ -97,7 +111,9 @@ function Register() {
                 <label className="checkbox-label">
                   <input type="checkbox" id="agree-terms" required />
                   <span className="checkmark"></span>
-                  <span>Tôi đồng ý với <a href="#">điều khoản sử dụng</a></span>
+                  <span>
+                    Tôi đồng ý với <a href="#">điều khoản sử dụng</a>
+                  </span>
                 </label>
               </div>
               <button type="submit" className="register-button">
@@ -112,15 +128,6 @@ function Register() {
             </form>
             <div className="copyright">
               <span> © 2025 Group1SE1818. All rights reserved.</span>
-            </div>
-            <div className="system-status">
-              <div className="status-indicator">
-                <span className="status-dot"></span>
-                <span className="status-text">
-                  Hệ thống hoạt động bình thường
-                </span>
-                <span className="status-dot"></span>
-              </div>
             </div>
           </div>
         </div>
