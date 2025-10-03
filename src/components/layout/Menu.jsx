@@ -29,19 +29,15 @@ import "../../assets/styles/Menu.css";
 
 // Danh sách các menu items với id, label, icon và path
 const menuItems = [
-  { id: "home", label: "Trang chủ", icon: BsHouse, path: "home" },
-  { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "map" },
-  { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "energy" },
-  { id: "history", label: "Lịch sử", icon: BsClock, path: "history" },
-  { id: "payment", label: "Thanh toán", icon: BsCreditCard, path: "payment" },
-  {
-    id: "favorite",
-    label: "Gói dịch vụ",
-    icon: BsBookmarkStar,
-    path: "favorite",
-  },
-  { id: "setting", label: "Cài đặt", icon: BsGear, path: "setting" },
-];
+
+  { id: "home", label: "Trang chủ", icon: BsHouse, path: "/home" },
+  { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "/map" },
+  { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/energy" },
+  { id: "history", label: "Lịch sử", icon: BsClock, path: "/history" },
+  { id: "payment", label: "Thanh toán", icon: BsCreditCard, path: "/payment" },
+  { id: "servicepackage",label: "Gói dịch vụ",icon: BsBookmarkStar,path: "/servicepackage",},
+  { id: "setting", label: "Cài đặt", icon: BsGear, path: "/setting" },
+
 
 const Menu = ({ collapsed, onToggleCollapse }) => {
   const navigate = useNavigate();
