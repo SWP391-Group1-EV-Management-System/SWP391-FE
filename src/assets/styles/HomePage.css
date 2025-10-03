@@ -1,0 +1,550 @@
+/**
+ * HomePage.css
+ * Stylesheet for HomePage component (Dashboard)
+ * 
+ * Design System:
+ * - Colors: #1f2937 (dark text), #6b7280 (gray text), #667eea (primary), #764ba2 (secondary)
+ * - Spacing: Consistent 3rem between sections
+ * - Cards: White background with 4px gradient top border
+ * - Grid: Auto-fit responsive columns with equal heights
+ * - Effects: Subtle hover animations, smooth transitions
+ */
+
+/* ==================== CONTAINER & LAYOUT ==================== */
+
+/**
+ * Main container for the dashboard
+ * Uses light gray background for visual separation
+ */
+.home-dashboard-container {
+  background: #f8f9fa;
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+/**
+ * Force equal spacing between all row sections
+ * Ensures consistent visual rhythm throughout the page
+ */
+.home-dashboard-container > .container-fluid > .row.g-4 {
+  margin-bottom: 3rem !important;
+}
+
+/* Remove bottom margin from last row to avoid extra whitespace */
+.home-dashboard-container > .container-fluid > .row.g-4:last-of-type {
+  margin-bottom: 0 !important;
+}
+
+/* ==================== HERO HEADER SECTION ==================== */
+
+/**
+ * Hero header - Welcome section with system status
+ * Features gradient top border and clean white background
+ */
+.home-dashboard-container .hero-header {
+  background: white;
+  border-radius: 16px;
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Gradient top border using ::before pseudo-element */
+.home-dashboard-container .hero-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.home-dashboard-container .hero-title {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+.home-dashboard-container .hero-subtitle {
+  font-size: 1.75rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.home-dashboard-container .hero-stats {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.home-dashboard-container .hero-stat-item {
+  background: #f8f9fa;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+}
+
+.home-dashboard-container .hero-stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  display: block;
+}
+
+.home-dashboard-container .hero-stat-label {
+  font-size: 1.3rem;
+  color: #6b7280;
+}
+
+.home-dashboard-container .hero-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.home-dashboard-container .hero-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.75rem;
+}
+
+/* ==================== STATUS BADGE ==================== */
+
+/**
+ * System status badge - Displays system health indicator
+ * Uses green gradient to indicate good status
+ */
+.home-dashboard-container .status-badge-premium {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  color: white;
+  padding: 0.75rem 1.4rem;
+  border-radius: 20px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ==================== INFO CARD GRID SYSTEM ==================== */
+
+/**
+ * Grid container for stat cards and action cards
+ * Uses CSS Grid with auto-fit for responsive layout
+ * All cards in same row automatically have equal heights
+ */
+.home-dashboard-container .info-card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 3rem; /* Increased margin for consistent spacing */
+  grid-auto-rows: 1fr; /* Ensures all cards in the same row have equal height */
+}
+
+/* Info Cards */
+.home-dashboard-container .info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  overflow: auto; /* Enable scroll if content is too long */
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  text-align: center; /* Căn giữa text */
+  min-height: 0; /* Allow shrinking */
+}
+
+.home-dashboard-container .info-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.home-dashboard-container .info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.home-dashboard-container .card-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem auto; /* Căn giữa icon */
+  font-size: 3.5rem;
+}
+
+.home-dashboard-container .card-title {
+  font-size: 1.6rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+
+.home-dashboard-container .card-value {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.home-dashboard-container .card-sub {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 1.4rem;
+  color: #10b981;
+  font-weight: 500;
+}
+
+/* Action Button */
+.home-dashboard-container .action-btn {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* Section Title */
+.home-dashboard-container .section-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem; /* Add top margin for section separation */
+}
+
+/* ==================== DETAIL CARDS ==================== */
+
+/**
+ * Info detail cards - Used for activities, featured stations, achievements
+ * Features:
+ * - Gradient top border
+ * - Scrollable content when overflow
+ * - Equal heights in same row
+ * - Smooth hover effects
+ */
+.home-dashboard-container .info-detail-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Fill parent height */
+}
+
+.home-dashboard-container .info-detail-card .card-body {
+  overflow-y: auto; /* Enable vertical scroll for card body content */
+  flex: 1;
+  min-height: 0;
+  padding-top: 1.25rem; /* Add top padding to avoid touching gradient bar */
+}
+
+/* Override for cards with explicit padding class */
+.home-dashboard-container .info-detail-card .card-body.p-0 {
+  padding-top: 0 !important;
+}
+
+.home-dashboard-container .info-detail-card .card-body.p-4 {
+  padding: 1.5rem !important; /* Consistent padding for all sides */
+}
+
+.home-dashboard-container .info-detail-card .card-header {
+  padding: 1rem 1.25rem; /* Add padding to card headers */
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.home-dashboard-container .info-detail-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.home-dashboard-container .info-detail-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.home-dashboard-container .info-detail-header {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* ==================== ACTIVITIES SECTION ==================== */
+
+/**
+ * Activity list items
+ * Displays recent user activities with icons and timestamps
+ */
+.home-dashboard-container .activity-item {
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.25rem; /* Added horizontal padding */
+  transition: background 0.2s ease;
+}
+
+.home-dashboard-container .activity-item:first-child {
+  padding-top: 1.25rem; /* Extra padding for first item */
+}
+
+.home-dashboard-container .activity-item:last-child {
+  border-bottom: none;
+  padding-bottom: 1.25rem; /* Extra padding for last item */
+}
+
+.home-dashboard-container .activity-item:hover {
+  background: #f8f9fa;
+}
+
+.home-dashboard-container .activity-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+}
+
+.home-dashboard-container .activity-text {
+  font-size: 1.4rem;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.home-dashboard-container .activity-time {
+  font-size: 1.25rem;
+  color: #6b7280;
+}
+
+/* ==================== FEATURED STATIONS ==================== */
+
+/**
+ * Featured charging stations list items
+ * Shows station details including rating, availability, and distance
+ */
+.home-dashboard-container .featured-station-item {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+.home-dashboard-container .featured-station-item:first-child {
+  padding-top: 0; /* No extra padding for first item since card-body has padding */
+}
+
+.home-dashboard-container .featured-station-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0; /* No padding for last item since card-body has padding */
+}
+
+.home-dashboard-container .station-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 1.6rem;
+}
+
+.home-dashboard-container .rating-badge {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  border: none;
+  padding: 0.5rem 1.1rem;
+  font-size: 1.25rem;
+}
+
+.home-dashboard-container .station-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.home-dashboard-container .info-item {
+  font-size: 1.4rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+}
+
+/* ==================== ACHIEVEMENTS ==================== */
+
+/**
+ * Achievement icon with gradient background
+ * Used to display user achievement badges
+ */
+.home-dashboard-container .achievement-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 2rem;
+}
+
+.home-dashboard-container .achievement-title {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 1.6rem;
+}
+
+.home-dashboard-container .achievement-desc {
+  color: #6b7280;
+  font-size: 1.4rem;
+}
+
+.home-dashboard-container .progress-text {
+  color: #667eea;
+  font-weight: 600;
+  font-size: 1.25rem;
+  display: block !important;
+  margin-top: 20px !important;
+  padding-top: 60px !important;
+}
+
+/* Target the parent div of progress text */
+.home-dashboard-container .text-end {
+  margin-top: 25px !important;
+  padding-top: 20px !important;
+}
+
+/* Target ProgressBar component specifically */
+.home-dashboard-container .progress {
+  margin-bottom: 30px !important;
+}
+
+/* Alternative targeting for achievement cards */
+.home-dashboard-container .info-detail-card .progress + div {
+  margin-top: 25px !important;
+  padding-top: 15px !important;
+}
+
+/* Ensure Row columns have equal height - SCOPED TO HOME-DASHBOARD ONLY */
+.home-dashboard-container .row.g-4 {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.home-dashboard-container .row.g-4 > [class*="col-"] {
+  display: flex;
+}
+
+.home-dashboard-container .row.g-4 > [class*="col-"] > .info-detail-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom scrollbar for cards */
+.home-dashboard-container .info-card::-webkit-scrollbar,
+.home-dashboard-container .info-detail-card .card-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.home-dashboard-container .info-card::-webkit-scrollbar-track,
+.home-dashboard-container
+  .info-detail-card
+  .card-body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.home-dashboard-container .info-card::-webkit-scrollbar-thumb,
+.home-dashboard-container
+  .info-detail-card
+  .card-body::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.home-dashboard-container .info-card::-webkit-scrollbar-thumb:hover,
+.home-dashboard-container
+  .info-detail-card
+  .card-body::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+/**
+ * Tablet breakpoint (max-width: 992px)
+ * Adjusts layout for medium-sized screens
+ */
+@media (max-width: 992px) {
+  .home-dashboard-container .hero-title {
+    font-size: 2rem;
+  }
+
+  .home-dashboard-container .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .home-dashboard-container .hero-stats {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .home-dashboard-container .hero-actions {
+    flex-direction: column;
+  }
+
+  .home-dashboard-container .card-value {
+    font-size: 1.75rem;
+  }
+
+  .home-dashboard-container .info-card-container {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+/**
+ * Mobile breakpoint (max-width: 768px)
+ * Single column layout for small screens
+ */
+@media (max-width: 768px) {
+  .home-dashboard-container .hero-header {
+    padding: 1.5rem;
+  }
+
+  .home-dashboard-container .hero-title {
+    font-size: 1.75rem;
+  }
+
+  .home-dashboard-container .hero-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .home-dashboard-container .hero-stat-value {
+    font-size: 1.5rem;
+  }
+
+  .home-dashboard-container .info-card-container {
+    grid-template-columns: 1fr;
+  }
+}

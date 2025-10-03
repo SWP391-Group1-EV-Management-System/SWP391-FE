@@ -16,15 +16,12 @@ const EnergyPage = () => {
     <div className="charging-session-container">
       <Container fluid className="px-4">
         {/* Header Section */}
-        <EnergyHeader 
-          sessionData={sessionData} 
-          statusConfig={statusConfig} 
-        />
+        <EnergyHeader sessionData={sessionData} statusConfig={statusConfig} />
 
         {/* Main Content */}
         <Row className="g-4 mb-4">
           <Col lg={6}>
-            <BatteryProgress 
+            <BatteryProgress
               batteryLevel={sessionData.batteryLevel}
               statusConfig={statusConfig}
             />

@@ -22,10 +22,9 @@ function App() {
         <Route path="welcome" element={<WelcomePage />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
-        
+
         {/* Protected Main App Routes */}
-        <Route path="/app" element={<Layout />}>
-          <Route index element={<HomePage />} />
+        <Route path="/" element={<Layout />}>
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
           <Route path="energy" element={<EnergyPage />} />
@@ -34,7 +33,7 @@ function App() {
           <Route path="favorite" element={<FavoritePage />} />
           <Route path="setting" element={<SettingPage />} />
         </Route>
-        
+
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
