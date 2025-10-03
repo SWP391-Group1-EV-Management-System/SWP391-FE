@@ -1,12 +1,12 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router"; // Thay react-router-dom bằng react-router
+import { BrowserRouter, Routes, Route } from "react-router";
 import Layout from "./components/layout/Layout.jsx";
 import HomePage from "./page/HomePage.jsx";
 import MapPage from "./page/MapPage.jsx";
 import EnergyPage from "./page/EnergyPage.jsx";
 import HistoryPage from "./page/HistoryPage.jsx";
 import PaymentPage from "./page/PaymentPage.jsx";
-import FavoritePage from "./page/FavoritePage.jsx";
+import ServicePackage from "./page/ServicePackage.jsx";
 import SettingPage from "./page/SettingPage.jsx";
 import NotFoundPage from "./page/NotFoundPage.jsx";
 import Login from "./page/Login.jsx";
@@ -30,7 +30,7 @@ function App() {
           <Route path="energy" element={<EnergyPage />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="payment" element={<PaymentPage />} />
-          <Route path="favorite" element={<FavoritePage />} />
+          <Route path="servicepackage" element={<ServicePackage />} />
           <Route path="setting" element={<SettingPage />} />
         </Route>
         
