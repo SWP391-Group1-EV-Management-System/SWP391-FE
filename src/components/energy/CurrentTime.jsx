@@ -1,20 +1,63 @@
 import React from "react";
-import "../../assets/styles/energy/CurrentTime.css";
+import { 
+  Card, 
+  Typography, 
+  Space
+} from "antd";
+import { 
+  ClockCircleOutlined
+} from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 const CurrentTime = ({ currentTime }) => {
   return (
-    <div className="clock-container">
-      <div className="clock-label">Thời gian hiện tại</div>
-      <div className="clock-time">{currentTime.toLocaleTimeString()}</div>
-      <div className="clock-date">
+    <Card
+      style={{
+        borderRadius: '16px',
+        border: '1px solid #e8f4fd',
+        boxShadow: '0 4px 16px rgba(24, 144, 255, 0.08)',
+        textAlign: 'center'
+      }}
+      styles={{
+        body: { padding: '24px' }
+      }}
+    >
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <Space>
+          <ClockCircleOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
+          <Title level={4} style={{ margin: 0, color: '#1a1a1a' }}>
+            Thời gian hiện tại
+          </Title>
+        </Space>
+      </div>
+
+      {/* Time Display */}
+      <div style={{ 
+        fontSize: '36px', 
+        fontWeight: 700, 
+        color: '#1a1a1a',
+        lineHeight: 1,
+        marginBottom: '16px'
+      }}>
+        {currentTime.toLocaleTimeString()}
+      </div>
+
+      {/* Date Display */}
+      <Text style={{ 
+        color: '#6b7280', 
+        fontSize: '14px',
+        fontWeight: 500
+      }}>
         {currentTime.toLocaleDateString('vi-VN', {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
           day: 'numeric'
         })}
-      </div>
-    </div>
+      </Text>
+    </Card>
   );
 };
 
