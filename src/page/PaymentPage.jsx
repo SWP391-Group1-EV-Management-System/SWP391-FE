@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router';
+import { Row, Col, message } from 'antd';
 import PaymentHeader from '../components/payment/PaymentHeader';
 import BookingDetails from '../components/payment/BookingDetails';
 import PaymentMethods from '../components/payment/PaymentMethods';
-import ConfirmModal from '../components/payment/ConfirmModal';
 import StatusPages from '../components/payment/StatusPages';
 import { usePayment } from '../hooks/usePayment';
 import { fetchChargingSessionForPayment } from '../services/paymentService';
@@ -17,7 +17,10 @@ const PaymentPage = () => {
   const [userBankCards, setUserBankCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+  const [selectedMethod, setSelectedMethod] = useState('');
+  const [selectedServicePackage, setSelectedServicePackage] = useState(null); // ✅ Đổi từ 'basic' thành null
+  const [sessionData, setSessionData] = useState(null);
+
   const sessionIdFromState = location.state?.sessionId;
   const finalSessionId = sessionId || sessionIdFromState || 'CS001';
   const userId = 'USR0001';
@@ -50,6 +53,115 @@ const PaymentPage = () => {
 
     loadPaymentData();
   }, [finalSessionId, userId]);
+
+  // Mock data - thay thế bằng API call thực tế
+  useEffect(() => {
+    // Simulate API call
+    const mockSessionData = {
+      station: 'Trạm sạc EVN HCMC',
+      district: 'Quận 1',
+      address: '123 Đường Nguyễn Huệ, Quận 1, TP.HCM',
+      chargingType: 'AC Type 2',
+      date: '15/03/2024',
+      time: '14:30 - 16:00',
+      vehicle: 'VinFast VF8',
+      kwh: 25.5,
+      chargingCost: 200000,
+      serviceFee: 20000,
+      tax: 22000,
+      totalAmount: 242000
+    };
+    setSessionData(mockSessionData);
+  }, []);
+
+  const handleMethodSelect = (method) => {
+    setSelectedMethod(method);
+  };
+
+  const handlePayClick = (paymentData) => {
+    console.log('Payment data:', paymentData);
+    
+    if (paymentData.selectedMethod === 'cash') {
+      message.success({
+        content: '✅ Đã xác nhận thanh toán tiền mặt. Vui lòng đến trạm sạc để hoàn tất giao dịch.',
+        duration: 5,
+        style: { fontSize: '1rem' }
+      });
+    } else if (paymentData.selectedMethod === 'e-wallet') {
+      message.loading({
+        content: '🔄 Đang tạo mã QR thanh toán...',
+        duration: 2,
+        style: { fontSize: '1rem' }
+      });
+      
+      setTimeout(() => {
+        message.success({
+          content: '📱 Mã QR đã được tạo. Vui lòng quét mã để hoàn tất thanh toán.',
+          duration: 5,
+          style: { fontSize: '1rem' }
+        });
+      }, 2000);
+    }
+  };
+
+  // ✅ Sửa logic discount calculations
+  const calculateFreeKwhDiscount = () => {
+    console.log('calculateFreeKwhDiscount - selectedServicePackage:', selectedServicePackage);
+    
+    // ✅ Kiểm tra object thay vì string
+    if (selectedServicePackage?.discountPercent && sessionData) {
+      const freeKwh = Math.min(5, sessionData.kwh);
+      const pricePerKwh = sessionData.chargingCost / sessionData.kwh;
+      const discount = freeKwh * pricePerKwh;
+      
+      console.log('Free kWh discount calculated:', {
+        freeKwh,
+        pricePerKwh,
+        discount,
+        selectedServicePackage
+      });
+      
+      return discount;
+    }
+    return 0;
+  };
+
+  const calculatePercentDiscount = () => {
+    console.log('calculatePercentDiscount - selectedServicePackage:', selectedServicePackage);
+    
+    // ✅ Kiểm tra object và discountPercent
+    if (selectedServicePackage?.discountPercent && sessionData) {
+      const discount = sessionData.totalAmount * (selectedServicePackage.discountPercent / 100);
+      
+      console.log('Percent discount calculated:', {
+        totalAmount: sessionData.totalAmount,
+        discountPercent: selectedServicePackage.discountPercent,
+        discount,
+        selectedServicePackage
+      });
+      
+      return discount;
+    }
+    return 0;
+  };
+
+  const calculateDiscountedPrice = () => {
+    if (!sessionData) return 0;
+    
+    const freeKwhDiscount = calculateFreeKwhDiscount();
+    const percentDiscount = calculatePercentDiscount();
+    const finalPrice = sessionData.totalAmount - freeKwhDiscount - percentDiscount;
+    
+    console.log('Final price calculated:', {
+      originalTotal: sessionData.totalAmount,
+      freeKwhDiscount,
+      percentDiscount,
+      finalPrice,
+      selectedServicePackage
+    });
+    
+    return finalPrice;
+  };
 
   // Loading state
   if (loading) {
@@ -120,53 +232,30 @@ const PaymentPage = () => {
       <PaymentHeader />
       
       <div className="main-content">
-        <div className="payment-grid">
-          <div className="grid-item">
-            <BookingDetails
-              reservationData={reservationData}
-              peakHourSurcharge={payment?.peakHourSurcharge || 0}
-              calculateTotal={payment?.calculateTotal || (() => 0)}
+        <Row gutter={[24, 24]} justify="center">
+          <Col xs={24} lg={12}>
+            <BookingDetails 
+              reservationData={sessionData}
+              calculateTotal={calculateDiscountedPrice}
             />
-          </div>
+          </Col>
           
-          <div className="grid-item">
+          <Col xs={24} lg={12}>
             <PaymentMethods
-              selectedMethod={payment?.selectedMethod}
-              selectedCard={payment?.selectedCard}
-              handleMethodSelect={payment?.handleMethodSelect}
-              handleCardSelect={payment?.handleCardSelect}
-              handlePayClick={payment?.handlePayClick}
-              savedCards={userBankCards}
-              sessionData={reservationData}
-              userId={userId}
-              // Add these props for synchronization
-              selectedServicePackage={payment?.selectedServicePackage}
-              setSelectedServicePackage={payment?.setSelectedServicePackage}
-              calculateFreeKwhDiscount={payment?.calculateFreeKwhDiscount}
-              calculatePercentDiscount={payment?.calculatePercentDiscount}
-              calculateDiscountedPrice={payment?.calculateDiscountedPrice}
+              selectedMethod={selectedMethod}
+              handleMethodSelect={handleMethodSelect}
+              handlePayClick={handlePayClick}
+              sessionData={sessionData}
+              selectedServicePackage={selectedServicePackage}
+              setSelectedServicePackage={setSelectedServicePackage}
+              calculateFreeKwhDiscount={calculateFreeKwhDiscount}
+              calculatePercentDiscount={calculatePercentDiscount}
+              calculateDiscountedPrice={calculateDiscountedPrice}
+              userId={userId} // ✅ Thêm userId prop
             />
-          </div>
-        </div>
+          </Col>
+        </Row>
       </div>
-
-      {payment?.showConfirmModal && (
-        <ConfirmModal
-          selectedMethod={payment.selectedMethod}
-          selectedCard={payment.selectedCard}
-          selectedServicePackage={payment.selectedServicePackage}
-          calculateFinalAmount={payment.calculateFinalAmount}
-          handleConfirmPayment={payment.handleConfirmPayment}
-          handleCloseModal={payment.handleCloseModal}
-          reservationData={reservationData}
-          savedCards={userBankCards}
-          sessionData={reservationData}
-          // Add calculate functions for PaymentSummary
-          calculateFreeKwhDiscount={payment.calculateFreeKwhDiscount}
-          calculatePercentDiscount={payment.calculatePercentDiscount}
-          calculateDiscountedPrice={payment.calculateDiscountedPrice}
-        />
-      )}
     </div>
   );
 };

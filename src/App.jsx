@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route } from "react-router"; // Thay react-router-dom bằng react-router
 import Layout from "./components/layout/Layout.jsx";
 import HomePage from "./page/HomePage.jsx";
 import MapPage from "./page/MapPage.jsx";
@@ -18,13 +18,12 @@ function App() {
     <BrowserRouter>
       <Routes>
         {/* Welcome & Auth Routes */}
-        <Route index element={<WelcomePage />} />
         <Route path="welcome" element={<WelcomePage />} />
         <Route path="login" element={<Login />} />
         <Route path="register" element={<Register />} />
 
         {/* Protected Main App Routes */}
-        <Route path="/" element={<Layout />}>
+        <Route path="/app" element={<Layout />}>
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
           <Route path="energy" element={<EnergyPage />} />
@@ -37,6 +36,7 @@ function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
+
   );
 }
 
