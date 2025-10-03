@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import Layout from "./components/layout/Layout.jsx";
 import HomePage from "./page/HomePage.jsx";
 import MapPage from "./page/MapPage.jsx";
@@ -17,13 +17,19 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Root redirect to app */}
+        <Route path="/" element={<Navigate to="/app/home" replace />} />
+        
         {/* Welcome & Auth Routes */}
-        <Route path="welcome" element={<WelcomePage />} />
-        <Route path="login" element={<Login />} />
-        <Route path="register" element={<Register />} />
+        <Route path="/welcome" element={<WelcomePage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* Protected Main App Routes */}
         <Route path="/app" element={<Layout />}>
+          {/* Default route for /app */}
+          <Route index element={<Navigate to="home" replace />} />
+          
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
           <Route path="energy" element={<EnergyPage />} />
@@ -33,10 +39,10 @@ function App() {
           <Route path="setting" element={<SettingPage />} />
         </Route>
 
+        {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
-
   );
 }
 
