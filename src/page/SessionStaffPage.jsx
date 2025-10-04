@@ -378,86 +378,126 @@ const SessionStaffPage = () => {
       minHeight: '100vh' 
     }}>
       {/* Header Section */}
-      <Row justify="space-between" align="middle" style={{ marginBottom: 24 }}>
+      <Row justify="space-between" align="middle" style={{ marginBottom: 32 }}>
         <Col>
-          <Title level={2} style={{ margin: 0 }}>
+          <Title level={2} style={{ margin: 0, color: '#262626', fontWeight: '600' }}>
             Quản lý phiên sạc & trạm
           </Title>
+          <Typography.Text type="secondary" style={{ fontSize: '16px' }}>
+            Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và thân thiện môi trường
+          </Typography.Text>
         </Col>
         <Col>
           <Button 
             icon={<ReloadOutlined />} 
             onClick={handleRefresh} 
             loading={loading}
+            size="large"
             style={{ 
               backgroundColor: '#43e97b', 
               borderColor: '#43e97b', 
-              color: '#fff' 
+              color: '#fff',
+              borderRadius: '8px',
+              fontWeight: '500'
             }}
           >
-            Làm mới
+            Hệ thống hoạt động tốt
           </Button>
         </Col>
       </Row>
 
-      {/* Statistics Cards với hiệu ứng hover */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+      {/* Statistics Cards với phong cách mới */}
+      <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
         {statsData.map((stat, index) => (
           <Col xs={24} sm={12} md={6} lg={6} xl={6} key={index}>
             <Card 
-              size="small" 
               hoverable
               style={{ 
-                borderRadius: 8,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                borderRadius: '16px',
+                border: '1px solid #e8e8e8',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                 height: '100%',
                 backgroundColor: '#ffffff',
-                border: '2px solid #000', // Đổi border thành màu đen
                 transition: 'all 0.3s ease',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                padding: '8px'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.3)'; // Shadow đen khi hover
-                e.currentTarget.style.transform = 'translateY(-5px)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.12)';
+                e.currentTarget.style.transform = 'translateY(-4px)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
+              bodyStyle={{ padding: '24px' }}
             >
-              <Statistic
-                title={<span style={{ color: '#000', fontWeight: 'normal' }}>{stat.title}</span>}
-                value={stat.value}
-                suffix={stat.suffix}
-                prefix={<span style={{ color: '#000' }}>{stat.icon}</span>}
-                valueStyle={{ 
-                  color: '#43e97b',
-                  fontWeight: 'bold',
-                  fontSize: '20px'
-                }}
-                formatter={stat.formatter === 'currency' ? 
-                  (value) => `${value?.toLocaleString()} VND` : undefined}
-              />
+              <div style={{ textAlign: 'center' }}>
+                {/* Icon */}
+                <div style={{ marginBottom: '16px' }}>
+                  <span style={{ fontSize: '32px', color: '#6c757d' }}>
+                    {stat.icon}
+                  </span>
+                </div>
+                
+                {/* Title */}
+                <Typography.Text 
+                  style={{ 
+                    color: '#8c8c8c', 
+                    fontSize: '14px',
+                    fontWeight: '400',
+                    display: 'block',
+                    marginBottom: '8px'
+                  }}
+                >
+                  {stat.title}
+                </Typography.Text>
+                
+                {/* Value */}
+                <Title 
+                  level={2} 
+                  style={{ 
+                    color: '#262626',
+                    fontWeight: '600',
+                    fontSize: '36px',
+                    margin: '0',
+                    lineHeight: '1'
+                  }}
+                >
+                  {stat.formatter === 'currency' ? 
+                    `${stat.value?.toLocaleString()} VND` : stat.value}
+                </Title>
+              </div>
             </Card>
           </Col>
         ))}
       </Row>
 
-      {/* Main Content - giữ nguyên màu bình thường */}
+      {/* Main Content */}
       <Card 
-        title={<span style={{ color: '#000', fontWeight: 'bold' }}>Danh sách phiên sạc</span>}
+        title={
+          <span style={{ 
+            color: '#262626', 
+            fontWeight: '600',
+            fontSize: '18px'
+          }}>
+            Danh sách phiên sạc
+          </span>
+        }
         style={{ 
-          borderRadius: 8,
+          borderRadius: '16px',
           backgroundColor: '#ffffff',
-          border: '1px solid #d9d9d9'
+          border: '1px solid #e8e8e8',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}
+        bodyStyle={{ padding: '24px' }}
         extra={
           <Space>
             <Badge count={3} color="orange" size="small">
-              <Tag color="orange">Đang sạc</Tag>
+              <Tag color="orange" style={{ borderRadius: '6px' }}>Đang sạc</Tag>
             </Badge>
             <Badge count={11} color="green" size="small">
-              <Tag color="green">Hoàn thành</Tag>
+              <Tag color="green" style={{ borderRadius: '6px' }}>Hoàn thành</Tag>
             </Badge>
           </Space>
         }
@@ -468,14 +508,21 @@ const SessionStaffPage = () => {
             placeholder="Tìm kiếm theo mã phiên sạc hoặc tên người dùng..."
             allowClear
             enterButton={
-              <Button style={{ backgroundColor: '#43e97b', borderColor: '#43e97b' }}>
+              <Button style={{ 
+                backgroundColor: '#43e97b', 
+                borderColor: '#43e97b',
+                borderRadius: '8px'
+              }}>
                 <SearchOutlined />
               </Button>
             }
             size="large"
             onSearch={handleSearch}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ maxWidth: 400 }}
+            style={{ 
+              maxWidth: 400,
+              borderRadius: '8px'
+            }}
           />
         </div>
 
@@ -494,7 +541,10 @@ const SessionStaffPage = () => {
           }}
           scroll={{ x: 1300 }}
           bordered
-          style={{ backgroundColor: '#ffffff' }}
+          style={{ 
+            backgroundColor: '#ffffff',
+            borderRadius: '8px'
+          }}
           rowClassName={(record, index) => 
             index % 2 === 0 ? 'table-row-light' : 'table-row-dark'
           }
