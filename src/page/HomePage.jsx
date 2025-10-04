@@ -121,7 +121,7 @@ function HomePage() {
       trend: "up",
     },
     {
-      label: "Phiên sạc hôm nay", // Today's charging sessions
+      label: "Phiên sạc tháng này", // Today's charging sessions
       value: animatedValues.sessions.toLocaleString(),
       icon: BsSpeedometer2,
       gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", // Pink gradient

@@ -45,8 +45,7 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
 
   // Tìm active menu item dựa trên current path
   const getActiveMenuIdFromPath = () => {
-    const currentPath =
-      location.pathname === "/" ? "home" : location.pathname.substring(1);
+    const currentPath = location.pathname;
     const currentItem = menuItems.find((item) => item.path === currentPath);
     return currentItem ? currentItem.id : "home";
   };
@@ -61,8 +60,8 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
    * Effect đồng bộ activeMenuItem với URL hiện tại
    */
   useEffect(() => {
-    const path = location.pathname.substring(1) || "home";
-    setActiveMenuItem(path);
+    const newActiveId = getActiveMenuIdFromPath();
+    setActiveMenuItem(newActiveId);
   }, [location.pathname]);
 
   /**
@@ -84,15 +83,7 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, [onToggleCollapse]);
 
-  /**
-   * Cập nhật active menu khi route thay đổi
-   */
-  useEffect(() => {
-    const newActiveId = getActiveMenuIdFromPath();
-    if (newActiveId !== activeMenuItem) {
-      setActiveMenuItem(newActiveId);
-    }
-  }, [location.pathname]);
+
 
   /**
    * Xử lý click vào menu item với React Router
