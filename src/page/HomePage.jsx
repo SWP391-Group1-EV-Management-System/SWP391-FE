@@ -333,9 +333,9 @@ function HomePage() {
               </div>
               <h4 className="card-title">{action.title}</h4>
               <div className="card-sub mb-3">{action.description}</div>
-              <Button className="action-btn">
+              <Button className="action-btn d-flex align-items-center justify-content-center gap-2">
                 Truy cập ngay
-                <BsArrowRight className="ms-2" />
+                <BsArrowRight size={18} className="icon-arrow-home" />
               </Button>
             </div>
           ))}
@@ -452,7 +452,7 @@ function HomePage() {
                     variant="primary"
                     style={{ height: "8px" }}
                   />
-                  <div className="text-end mt-2">
+                  <div>
                     <small className="progress-text">
                       {achievement.progress}%
                     </small>
@@ -476,9 +476,12 @@ function HomePage() {
                   Đội ngũ hỗ trợ chuyên nghiệp luôn sẵn sàng giúp đỡ bạn mọi
                   lúc, mọi nơi.
                 </p>
-                <Button variant="primary">
+                <Button
+                  variant="primary"
+                  className="d-flex align-items-center justify-content-center gap-2"
+                >
                   Liên hệ ngay
-                  <BsArrowRight className="ms-2" />
+                  <BsArrowRight size={18} />
                 </Button>
               </Card.Body>
             </Card>

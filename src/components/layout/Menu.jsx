@@ -29,13 +29,22 @@ import "../../assets/styles/Menu.css";
 
 // Danh sách các menu items với id, label, icon và path
 const menuItems = [
-
   { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
   { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "/app/map" },
   { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/app/energy" },
   { id: "history", label: "Lịch sử", icon: BsClock, path: "/app/history" },
-  { id: "payment", label: "Thanh toán", icon: BsCreditCard, path: "/app/payment" },
-  { id: "servicepackage", label: "Gói dịch vụ", icon: BsBookmarkStar, path: "/app/servicepackage"},
+  {
+    id: "payment",
+    label: "Thanh toán",
+    icon: BsCreditCard,
+    path: "/app/payment",
+  },
+  {
+    id: "servicepackage",
+    label: "Gói dịch vụ",
+    icon: BsBookmarkStar,
+    path: "/app/servicepackage",
+  },
   { id: "setting", label: "Cài đặt", icon: BsGear, path: "/app/setting" },
 ];
 
@@ -82,8 +91,6 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
     // Cleanup event listener
     return () => window.removeEventListener("resize", handleResize);
   }, [onToggleCollapse]);
-
-
 
   /**
    * Xử lý click vào menu item với React Router
@@ -152,6 +159,8 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
             }`}
             alt="Eco-Z Logo"
             src={Logo}
+            onClick={() => navigate("/app/home")}
+            style={{ cursor: "pointer" }}
           />
         </header>
 

@@ -4,6 +4,7 @@
  */
 
 import React from "react";
+import { createPortal } from "react-dom";
 import { Button } from "react-bootstrap";
 import { BsXLg, BsLightning, BsGeoAlt, BsClock } from "react-icons/bs";
 
@@ -14,7 +15,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
     alert(`Đã đặt chỗ trụ sạc ${chargerId} tại ${station.name}!`);
   };
 
-  return (
+  const modalContent = (
     <div
       style={{
         position: "fixed",
@@ -26,7 +27,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        zIndex: 10000,
+        zIndex: "var(--z-modal-backdrop)",
       }}
       onClick={onClose}
     >
@@ -40,6 +41,8 @@ const StationModal = ({ isOpen, onClose, station }) => {
           maxHeight: "80vh",
           overflowY: "auto",
           boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
+          zIndex: "var(--z-modal)",
+          position: "relative",
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -163,7 +166,9 @@ const StationModal = ({ isOpen, onClose, station }) => {
                         charger.status === "available" ? "#155724" : "#721c24",
                     }}
                   >
-                    {charger.status === "available" ? "Sẵn sàng" : "Đang sử dụng"}
+                    {charger.status === "available"
+                      ? "Sẵn sàng"
+                      : "Đang sử dụng"}
                   </span>
                 </div>
                 <div
@@ -199,6 +204,9 @@ const StationModal = ({ isOpen, onClose, station }) => {
       </div>
     </div>
   );
+
+  // Render modal bằng createPortal để đặt nó ở root level
+  return createPortal(modalContent, document.body);
 };
 
 export default StationModal;

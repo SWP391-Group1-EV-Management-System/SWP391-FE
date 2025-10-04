@@ -190,10 +190,6 @@ function MapPage() {
               <BsLightning className="stat-icon" />
               <div className="stat-number">194</div>
               <div className="stat-label">Tổng số trụ sạc</div>
-              <div className="stat-growth">
-                <BsCheck2Circle className="stat-growth-icon" />
-                +12%
-              </div>
             </Card>
           </Col>
           <Col lg={4} md={4} sm={12}>
@@ -201,10 +197,6 @@ function MapPage() {
               <BsClock className="stat-icon" />
               <div className="stat-number">976</div>
               <div className="stat-label">Số trụ sạc trống</div>
-              <div className="stat-growth">
-                <BsCheck2Circle className="stat-growth-icon" />
-                +8%
-              </div>
             </Card>
           </Col>
           <Col lg={4} md={4} sm={12}>
@@ -212,10 +204,6 @@ function MapPage() {
               <BsPeople className="stat-icon" />
               <div className="stat-number">6.996</div>
               <div className="stat-label">Số người đã đặt trụ</div>
-              <div className="stat-growth">
-                <BsCheck2Circle className="stat-growth-icon" />
-                +15%
-              </div>
             </Card>
           </Col>
         </Row>

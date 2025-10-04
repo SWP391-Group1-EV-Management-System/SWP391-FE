@@ -104,8 +104,8 @@ const BatteryProgress = ({
     <Card
       style={{
         borderRadius: '16px',
-        border: '1px solid #e8f4fd',
-        boxShadow: '0 4px 16px rgba(24, 144, 255, 0.08)',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 4px 16px rgba(5, 119, 70, 0.08)',
         textAlign: 'center'
       }}
       styles={{

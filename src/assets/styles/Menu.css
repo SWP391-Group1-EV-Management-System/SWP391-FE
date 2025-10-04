@@ -18,7 +18,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 30;
+  z-index: var(--z-sidebar);
   height: 100vh;
   background: #fff;
   box-shadow: 7px 0px 16.5px #00000040;
@@ -264,7 +264,7 @@
   width: 35px !important;
   height: 35px !important;
   padding: 0 !important;
-  z-index: 1000 !important;
+  z-index: var(--z-button) !important;
   transition: all 0.3s ease !important;
   cursor: pointer !important;
 }
@@ -301,7 +301,7 @@
   width: 40px;
   height: 100%;
   pointer-events: none;
-  z-index: 999;
+  z-index: calc(var(--z-sidebar) - 1);
 }
 
 .sidebar-toggle-icon {
