@@ -167,7 +167,7 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
         {/* Nút toggle thu gọn/mở rộng sidebar */}
         <Button
           variant="light"
-          className={`sidebar-toggle d-flex align-items-center justify-content-center${
+          className={`sidebar-toggle d-flex align-items-left justify-content-left${
             collapsed ? "" : " sidebar-toggle-open"
           }`}
           aria-label="Toggle sidebar"

@@ -26,7 +26,6 @@ import {
   BsCreditCard, // Card icon for payments
   BsBookmarkStar, // Bookmark star for favorites/promotions
   BsShield, // Shield icon for security/reliability
-  BsSpeedometer2, // Speedometer for speed/performance
   BsGlobe, // Globe icon for global/network
   BsStarFill, // Filled star for ratings
   BsTrophy, // Trophy for achievements
@@ -123,7 +122,7 @@ function HomePage() {
     {
       label: "Phiên sạc tháng này", // Today's charging sessions
       value: animatedValues.sessions.toLocaleString(),
-      icon: BsSpeedometer2,
+      icon: BsLightning,
       gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", // Pink gradient
       change: "+8%",
       trend: "up",
@@ -137,48 +136,12 @@ function HomePage() {
       trend: "up",
     },
     {
-      label: "Độ tin cậy hệ thống", // System reliability
+      label: "Độ tin cậy", // System reliability
       value: `${animatedValues.reliability}%`,
       icon: BsShield,
       gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)", // Green gradient
       change: "+0.2%",
       trend: "up",
-    },
-  ];
-
-  /**
-   * Quick action buttons data
-   * Provides shortcuts to main features
-   */
-  const quickActions = [
-    {
-      title: "Tìm trạm sạc", // Find charging stations
-      description:
-        "Tìm kiếm trạm sạc gần nhất với công nghệ định vị",
-      icon: BsMap,
-      gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-      path: "/map",
-    },
-    {
-      title: "Lịch sử sạc", // Charging history
-      description: "Xem chi tiết các phiên sạc và thống kê sử dụng",
-      icon: BsClock,
-      gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-      path: "/history",
-    },
-    {
-      title: "Quản lý thanh toán", // Payment management
-      description: "Thêm phương thức thanh toán và xem hóa đơn",
-      icon: BsCreditCard,
-      gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-      path: "/payment",
-    },
-    {
-      title: "Gói dịch vụ", // Service packages
-      description: "Khám phá các gói dịch vụ và ưu đãi đặc biệt",
-      icon: BsBookmarkStar,
-      gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-      path: "/favorite",
     },
   ];
 
@@ -286,7 +249,7 @@ function HomePage() {
             <Col lg={9}>
               <div className="d-flex align-items-center mb-2">
                 <div>
-                  <h1 className="hero-title mb-1">Chào mừng đến với Eco-Z</h1>
+                  <h1 className="hero-title mb-1">Chào mừng [user] đến với Eco-Z</h1>
                   <p className="hero-subtitle mb-0">
                     Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và
                     thân thiện môi trường
@@ -316,27 +279,6 @@ function HomePage() {
                 <BsGraphUp className="me-1" size={12} />
                 {stat.change}
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Quick Actions */}
-        <h3 className="section-title mb-3">
-          <BsSpeedometer2 className="me-2" />
-          Thao tác nhanh
-        </h3>
-        <div className="info-card-container">
-          {quickActions.map((action, index) => (
-            <div key={index} className="info-card text-center">
-              <div className="card-icon">
-                <action.icon size={32} />
-              </div>
-              <h4 className="card-title">{action.title}</h4>
-              <div className="card-sub mb-3">{action.description}</div>
-              <Button className="action-btn d-flex align-items-center justify-content-center gap-2">
-                Truy cập ngay
-                <BsArrowRight size={18} className="icon-arrow-home" />
-              </Button>
             </div>
           ))}
         </div>

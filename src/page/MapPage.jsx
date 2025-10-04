@@ -62,12 +62,19 @@ function MapPage() {
       type: "AC",
       address: "191 Bà Triệu, Hai Bà Trưng, Hà Nội",
       phone: "024 3936 4368",
-      operatingHours: "24/7",
+      email: "support@vincom-charging.vn",
+      openHours: "Mở cửa 24/7",
+      totalBookings: 15,
+      rating: 4.5,
+      reviewCount: 124,
+      fastChargingPrice: "3,200",
+      normalChargingPrice: "2,500",
+      amenities: ["WiFi", "Cafe", "Parking", "Security"],
       chargers: [
-        { id: 101, name: "Trụ A1", status: "available", power: "22 kW", type: "AC", bookedUsers: 0 },
-        { id: 102, name: "Trụ A2", status: "busy", power: "22 kW", type: "AC", bookedUsers: 1 },
-        { id: 103, name: "Trụ A3", status: "available", power: "22 kW", type: "AC", bookedUsers: 0 },
-        { id: 104, name: "Trụ A4", status: "available", power: "22 kW", type: "AC", bookedUsers: 2 }
+        { id: 101, name: "Trụ A1", status: "available", power: "22 kW", type: "AC", bookings: 3 },
+        { id: 102, name: "Trụ A2", status: "busy", power: "22 kW", type: "AC", bookings: 5, estimatedWaitTime: 25 },
+        { id: 103, name: "Trụ A3", status: "available", power: "22 kW", type: "AC", bookings: 2 },
+        { id: 104, name: "Trụ A4", status: "available", power: "22 kW", type: "AC", bookings: 4 }
       ]
     },
     {
@@ -81,12 +88,19 @@ function MapPage() {
       type: "DC Fast",
       address: "458 Minh Khai, Hai Bà Trưng, Hà Nội",
       phone: "024 3577 1010",
-      operatingHours: "6:00 - 22:00",
+      email: "info@timescity-ev.com",
+      openHours: "6:00 - 22:00",
+      totalBookings: 28,
+      rating: 4.2,
+      reviewCount: 89,
+      fastChargingPrice: "3,800",
+      normalChargingPrice: "3,000",
+      amenities: ["WiFi", "Shop", "Parking"],
       chargers: [
-        { id: 201, name: "Trụ B1", status: "busy", power: "50 kW", type: "DC Fast", bookedUsers: 2 },
-        { id: 202, name: "Trụ B2", status: "busy", power: "50 kW", type: "DC Fast", bookedUsers: 1 },
-        { id: 203, name: "Trụ B3", status: "available", power: "50 kW", type: "DC Fast", bookedUsers: 0 },
-        { id: 204, name: "Trụ B4", status: "available", power: "50 kW", type: "DC Fast", bookedUsers: 1 }
+        { id: 201, name: "Trụ B1", status: "busy", power: "50 kW", type: "DC Fast", bookings: 8, estimatedWaitTime: 15 },
+        { id: 202, name: "Trụ B2", status: "busy", power: "50 kW", type: "DC Fast", bookings: 6, estimatedWaitTime: 35 },
+        { id: 203, name: "Trụ B3", status: "available", power: "50 kW", type: "DC Fast", bookings: 4 },
+        { id: 204, name: "Trụ B4", status: "available", power: "50 kW", type: "DC Fast", bookings: 7 }
       ]
     },
     {
@@ -100,11 +114,18 @@ function MapPage() {
       type: "AC",
       address: "72A Nguyễn Trãi, Thanh Xuân, Hà Nội",
       phone: "024 3557 5555",
-      operatingHours: "24/7",
+      email: "charging@royalcity.vn",
+      openHours: "Mở cửa 24/7",
+      totalBookings: 12,
+      rating: 4.7,
+      reviewCount: 56,
+      fastChargingPrice: "3,400",
+      normalChargingPrice: "2,700",
+      amenities: ["WiFi", "Cafe", "Shop", "Parking", "Security"],
       chargers: [
-        { id: 301, name: "Trụ C1", status: "available", power: "22 kW", type: "AC", bookedUsers: 0 },
-        { id: 302, name: "Trụ C2", status: "available", power: "22 kW", type: "AC", bookedUsers: 1 },
-        { id: 303, name: "Trụ C3", status: "available", power: "22 kW", type: "AC", bookedUsers: 0 }
+        { id: 301, name: "Trụ C1", status: "available", power: "22 kW", type: "AC", bookings: 2 },
+        { id: 302, name: "Trụ C2", status: "available", power: "22 kW", type: "AC", bookings: 5 },
+        { id: 303, name: "Trụ C3", status: "available", power: "22 kW", type: "AC", bookings: 1 }
       ]
     },
     {
@@ -118,7 +139,14 @@ function MapPage() {
       type: "AC", 
       address: "222 Trần Duy Hưng, Cầu Giấy, Hà Nội",
       phone: "024 3796 5588",
-      operatingHours: "8:00 - 22:00"
+      email: "support@bigc-charging.vn",
+      openHours: "8:00 - 22:00",
+      totalBookings: 0,
+      rating: 4.0,
+      reviewCount: 23,
+      fastChargingPrice: "3,500",
+      normalChargingPrice: "2,800",
+      amenities: ["WiFi", "Shop", "Parking"]
       // Không có chargers array - sẽ sử dụng fallback UI
     },
     {
@@ -132,7 +160,14 @@ function MapPage() {
       type: "DC Fast",
       address: "54 Liễu Giai, Ba Đình, Hà Nội",
       phone: "024 3333 2222",
-      operatingHours: "24/7"
+      email: "ev@lotte.vn",
+      openHours: "Mở cửa 24/7",
+      totalBookings: 22,
+      rating: 4.8,
+      reviewCount: 167,
+      fastChargingPrice: "4,000",
+      normalChargingPrice: "3,200",
+      amenities: ["WiFi", "Cafe", "Shop", "Parking", "Security"]
       // Không có chargers array - sẽ sử dụng fallback UI
     }
   ]);

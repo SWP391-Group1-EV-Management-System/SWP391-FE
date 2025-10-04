@@ -90,23 +90,6 @@
   color: #6b7280;
 }
 
-.home-dashboard-container .hero-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-.home-dashboard-container .hero-icon {
-  width: 3.5rem;
-  height: 3.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 1.75rem;
-}
-
 /* ==================== STATUS BADGE ==================== */
 
 /**
@@ -198,37 +181,9 @@
   font-weight: 500;
 }
 
-/* Action Button */
-.home-dashboard-container .action-btn {
-  margin-top: 1rem;
-  width: 100%;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 8px !important;
-  line-height: 1 !important;
-}
 
-/* Force alignment for all buttons with flex */
-.home-dashboard-container .btn.d-flex {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1 !important;
-}
 
-.home-dashboard-container .btn.d-flex svg {
-  flex-shrink: 0;
-  vertical-align: baseline !important;
-}
 
-/* Fix alignment for support buttons - don't use full width */
-.home-dashboard-container .text-center .btn.d-flex {
-  width: auto !important;
-  margin: 0 auto !important;
-  padding-left: 2rem !important;
-  padding-right: 2rem !important;
-}
 
 /* Section Title */
 .home-dashboard-container .section-title {
@@ -240,9 +195,7 @@
   margin-top: 0.5rem; /* Add top margin for section separation */
 }
 
-.icon-arrow-home {
-  top: 5px;
-}
+
 /* ==================== DETAIL CARDS ==================== */
 
 /**
@@ -500,9 +453,7 @@
     gap: 1rem;
   }
 
-  .home-dashboard-container .hero-actions {
-    flex-direction: column;
-  }
+
 
   .home-dashboard-container .card-value {
     font-size: 1.75rem;
