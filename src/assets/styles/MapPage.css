@@ -356,3 +356,140 @@
     gap: 0.5rem;
   }
 }
+
+/* ==================== MODAL STYLES ==================== */
+
+.station-modal .modal-content {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.station-modal .modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+  border-bottom: none;
+  padding: 1.5rem 2rem;
+}
+
+.station-modal .modal-header .btn-close {
+  filter: invert(1);
+}
+
+.station-modal .modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.station-modal .modal-body {
+  padding: 2rem;
+}
+
+.station-modal .modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem 2rem;
+}
+
+/* ==================== STATION INFO SECTION ==================== */
+
+.station-info-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.info-item {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.info-item strong {
+  color: #1f2937;
+}
+
+/* ==================== CHARGERS SECTION ==================== */
+
+.chargers-section {
+  margin-top: 1.5rem;
+}
+
+.charger-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.charger-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.charger-header {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.charger-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.charger-details {
+  margin-top: 0.75rem;
+}
+
+.detail-row {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-row strong {
+  color: #1f2937;
+}
+
+.charger-status-dot {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+/* ==================== RESPONSIVE MODAL ==================== */
+
+@media (max-width: 768px) {
+  .station-modal .modal-body {
+    padding: 1.5rem;
+  }
+  
+  .station-modal .modal-header {
+    padding: 1rem 1.5rem;
+  }
+  
+  .station-modal .modal-footer {
+    padding: 1rem 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 1rem;
+  }
+  
+  .charger-card {
+    margin-bottom: 1rem;
+  }
+}

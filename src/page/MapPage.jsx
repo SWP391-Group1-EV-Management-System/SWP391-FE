@@ -14,6 +14,9 @@ import {
   Card,
 } from "react-bootstrap";
 
+// Custom Components
+import StationModal from "../components/station/StationModal.jsx";
+
 // Bootstrap Icons
 import {
   BsLightning,
@@ -43,6 +46,10 @@ function MapPage() {
     availableStations: 34
   });
 
+  // Modal state management
+  const [showModal, setShowModal] = useState(false);
+  const [selectedStation, setSelectedStation] = useState(null);
+
   const [chargingStations, setChargingStations] = useState([
     {
       id: 1,
@@ -53,7 +60,15 @@ function MapPage() {
       availableSlots: 6,
       power: "22 kW",
       type: "AC",
-      address: "191 Bà Triệu, Hai Bà Trưng, Hà Nội"
+      address: "191 Bà Triệu, Hai Bà Trưng, Hà Nội",
+      phone: "024 3936 4368",
+      operatingHours: "24/7",
+      chargers: [
+        { id: 101, name: "Trụ A1", status: "available", power: "22 kW", type: "AC", bookedUsers: 0 },
+        { id: 102, name: "Trụ A2", status: "busy", power: "22 kW", type: "AC", bookedUsers: 1 },
+        { id: 103, name: "Trụ A3", status: "available", power: "22 kW", type: "AC", bookedUsers: 0 },
+        { id: 104, name: "Trụ A4", status: "available", power: "22 kW", type: "AC", bookedUsers: 2 }
+      ]
     },
     {
       id: 2,
@@ -64,7 +79,15 @@ function MapPage() {
       availableSlots: 2,
       power: "50 kW",
       type: "DC Fast",
-      address: "458 Minh Khai, Hai Bà Trưng, Hà Nội"
+      address: "458 Minh Khai, Hai Bà Trưng, Hà Nội",
+      phone: "024 3577 1010",
+      operatingHours: "6:00 - 22:00",
+      chargers: [
+        { id: 201, name: "Trụ B1", status: "busy", power: "50 kW", type: "DC Fast", bookedUsers: 2 },
+        { id: 202, name: "Trụ B2", status: "busy", power: "50 kW", type: "DC Fast", bookedUsers: 1 },
+        { id: 203, name: "Trụ B3", status: "available", power: "50 kW", type: "DC Fast", bookedUsers: 0 },
+        { id: 204, name: "Trụ B4", status: "available", power: "50 kW", type: "DC Fast", bookedUsers: 1 }
+      ]
     },
     {
       id: 3,
@@ -75,7 +98,14 @@ function MapPage() {
       availableSlots: 6,
       power: "22 kW", 
       type: "AC",
-      address: "72A Nguyễn Trãi, Thanh Xuân, Hà Nội"
+      address: "72A Nguyễn Trãi, Thanh Xuân, Hà Nội",
+      phone: "024 3557 5555",
+      operatingHours: "24/7",
+      chargers: [
+        { id: 301, name: "Trụ C1", status: "available", power: "22 kW", type: "AC", bookedUsers: 0 },
+        { id: 302, name: "Trụ C2", status: "available", power: "22 kW", type: "AC", bookedUsers: 1 },
+        { id: 303, name: "Trụ C3", status: "available", power: "22 kW", type: "AC", bookedUsers: 0 }
+      ]
     },
     {
       id: 4,
@@ -86,7 +116,10 @@ function MapPage() {
       availableSlots: 0,
       power: "22 kW",
       type: "AC", 
-      address: "222 Trần Duy Hưng, Cầu Giấy, Hà Nội"
+      address: "222 Trần Duy Hưng, Cầu Giấy, Hà Nội",
+      phone: "024 3796 5588",
+      operatingHours: "8:00 - 22:00"
+      // Không có chargers array - sẽ sử dụng fallback UI
     },
     {
       id: 5,
@@ -97,7 +130,10 @@ function MapPage() {
       availableSlots: 8,
       power: "50 kW",
       type: "DC Fast",
-      address: "54 Liễu Giai, Ba Đình, Hà Nội"
+      address: "54 Liễu Giai, Ba Đình, Hà Nội",
+      phone: "024 3333 2222",
+      operatingHours: "24/7"
+      // Không có chargers array - sẽ sử dụng fallback UI
     }
   ]);
 
@@ -124,6 +160,22 @@ function MapPage() {
    */
   const getStatusClass = (status) => {
     return `station-status ${status}`;
+  };
+
+  /**
+   * Handle station click to show modal
+   */
+  const handleStationClick = (station) => {
+    setSelectedStation(station);
+    setShowModal(true);
+  };
+
+  /**
+   * Handle modal close
+   */
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedStation(null);
   };
 
   // ==================== RENDER COMPONENT ====================
@@ -198,7 +250,12 @@ function MapPage() {
                 
                 <div className="stations-list">
                   {chargingStations.map((station) => (
-                    <div key={station.id} className="station-item">
+                    <div 
+                      key={station.id} 
+                      className="station-item"
+                      onClick={() => handleStationClick(station)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <div className="station-header">
                         <h4 className="station-name">{station.name}</h4>
                         <span className={getStatusClass(station.status)}>
@@ -232,6 +289,13 @@ function MapPage() {
           </Col>
         </Row>
       </Container>
+
+      {/* Station Details Modal */}
+      <StationModal 
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        station={selectedStation}
+      />
     </div>
   );
 }
