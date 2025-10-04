@@ -29,7 +29,6 @@ function App() {
         {/* Protected Main App Routes */}
         <Route path="/app" element={<Layout />}>
           {/* Default route for /app */}
-          <Route index element={<Navigate to="home" replace />} />
           
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
