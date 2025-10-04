@@ -9,13 +9,15 @@ import {
 const EnergyStats = ({ sessionData }) => {
   return (
     <Row gutter={[16, 16]}>
-      {/* Năng lượng đã sạc */}
+      {/* Năng lượng đã sạc - 1/3 width */}
       <Col xs={24} md={8}>
         <Card
           style={{
-            borderRadius: "16px",
-            boxShadow: "0 4px 16px rgba(5, 119, 70, 0.08)",
-            textAlign: "center",
+            borderRadius: '16px',
+            border: '1px solid #e8f4fd',
+            boxShadow: '0 4px 16px rgba(24, 144, 255, 0.08)',
+            textAlign: 'center',
+            height: '100%'
           }}
           styles={{
             body: { padding: "24px" },
@@ -43,14 +45,15 @@ const EnergyStats = ({ sessionData }) => {
         </Card>
       </Col>
 
-      {/* Thời gian đã sạc */}
+      {/* Thời gian đã sạc - 1/3 width */}
       <Col xs={24} md={8}>
         <Card
           style={{
-            borderRadius: "16px",
-            border: "1px solid #e5e7eb",
-            boxShadow: "0 4px 16px rgba(5, 119, 70, 0.08)",
-            textAlign: "center",
+            borderRadius: '16px',
+            border: '1px solid #e8f4fd',
+            boxShadow: '0 4px 16px rgba(24, 144, 255, 0.08)',
+            textAlign: 'center',
+            height: '100%'
           }}
           styles={{
             body: { padding: "24px" },
@@ -73,26 +76,19 @@ const EnergyStats = ({ sessionData }) => {
                 color: "#1a1a1a",
               }}
             />
-            <div
-              style={{
-                fontSize: "14px",
-                color: "#6b7280",
-                fontWeight: 500,
-                marginTop: "8px",
-              }}
-            ></div>
           </Space>
         </Card>
       </Col>
 
-      {/* Chi phí ước tính */}
+      {/* Chi phí ước tính - 1/3 width */}
       <Col xs={24} md={8}>
         <Card
           style={{
-            borderRadius: "16px",
-            border: "1px solid #e5e7eb",
-            boxShadow: "0 4px 16px rgba(5, 119, 70, 0.08)",
-            textAlign: "center",
+            borderRadius: '16px',
+            border: '1px solid #e8f4fd',
+            boxShadow: '0 4px 16px rgba(24, 144, 255, 0.08)',
+            textAlign: 'center',
+            height: '100%'
           }}
           styles={{
             body: { padding: "24px" },
