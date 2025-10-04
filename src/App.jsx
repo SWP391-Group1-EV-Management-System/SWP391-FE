@@ -12,6 +12,7 @@ import NotFoundPage from "./page/NotFoundPage.jsx";
 import Login from "./page/Login.jsx";
 import Register from "./page/Register.jsx";
 import WelcomePage from "./page/WelcomePage.jsx";
+import SessionStaffPage from "./page/SessionStaffPage.jsx";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="payment" element={<PaymentPage />} />
           <Route path="servicepackage" element={<ServicePackage />} />
           <Route path="setting" element={<SettingPage />} />
+          <Route path="sessionstaff" element={<SessionStaffPage />} />
         </Route>
 
         {/* 404 Page */}
