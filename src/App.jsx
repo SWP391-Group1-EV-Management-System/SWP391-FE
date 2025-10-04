@@ -13,6 +13,7 @@ import Login from "./page/Login.jsx";
 import Register from "./page/Register.jsx";
 import WelcomePage from "./page/WelcomePage.jsx";
 import SessionStaffPage from "./page/SessionStaffPage.jsx";
+import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
           <Route path="servicepackage" element={<ServicePackage />} />
           <Route path="setting" element={<SettingPage />} />
           <Route path="sessionstaff" element={<SessionStaffPage />} />
+          <Route path="waitingstaff" element={<WaitingStaffPage />} />
         </Route>
 
         {/* 404 Page */}
