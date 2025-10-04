@@ -154,7 +154,7 @@ function HomePage() {
     {
       title: "Tìm trạm sạc", // Find charging stations
       description:
-        "Tìm kiếm trạm sạc gần nhất với công nghệ định vị thông minh",
+        "Tìm kiếm trạm sạc gần nhất với công nghệ định vị",
       icon: BsMap,
       gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       path: "/map",

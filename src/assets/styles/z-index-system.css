@@ -51,6 +51,9 @@
   --z-fullscreen: 700; /* Fullscreen overlays */
   --z-error: 710; /* Error messages */
   --z-debug: 720; /* Debug tools (dev only) */
+
+  /* ===== LAYER 8: QR SCANNER (800-899) ===== */
+  --z-qr-scanner: 800; /* QR Scanner overlay */
 }
 
 /* ===== UTILITY CLASSES ===== */
@@ -141,6 +144,10 @@
 }
 .z-debug {
   z-index: var(--z-debug);
+}
+
+.z-qr-scanner {
+  z-index: var(--z-qr-scanner);
 }
 
 /* ===== RESPONSIVE Z-INDEX ADJUSTMENTS ===== */
