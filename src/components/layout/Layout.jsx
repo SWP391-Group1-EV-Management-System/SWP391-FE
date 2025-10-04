@@ -48,7 +48,7 @@ function Layout() {
           minHeight: "calc(100vh - 60px)",
           overflowY: "auto",
           position: "relative",
-          zIndex: 1,
+          zIndex: "var(--z-content)",
         }}
       >
         <div className="content-wrapper">

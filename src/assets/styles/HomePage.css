@@ -17,7 +17,6 @@
  * Uses light gray background for visual separation
  */
 .home-dashboard-container {
-  background: #f8f9fa;
   min-height: 100vh;
   padding: 2rem 0;
 }
@@ -44,23 +43,15 @@
 .home-dashboard-container .hero-header {
   background: white;
   border-radius: 16px;
+  border: 1px solid #e5e7eb;
   padding: 2.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(5, 119, 70, 0.08);
   position: relative;
   overflow: hidden;
 }
 
-/* Gradient top border using ::before pseudo-element */
-.home-dashboard-container .hero-header::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-}
+/* Gradient top border removed */
 
 .home-dashboard-container .hero-title {
   font-size: 4rem;
@@ -139,12 +130,12 @@
 
 /**
  * Grid container for stat cards and action cards
- * Uses CSS Grid with auto-fit for responsive layout
+ * Uses CSS Grid with fixed 4 columns for consistent layout
  * All cards in same row automatically have equal heights
  */
 .home-dashboard-container .info-card-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   margin-bottom: 3rem; /* Increased margin for consistent spacing */
   grid-auto-rows: 1fr; /* Ensures all cards in the same row have equal height */
@@ -154,30 +145,23 @@
 .home-dashboard-container .info-card {
   background: white;
   border-radius: 16px;
+  border: 1px solid #e5e7eb;
   padding: 2rem;
   position: relative;
   overflow: auto; /* Enable scroll if content is too long */
   transition: all 0.3s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(5, 119, 70, 0.08);
   display: flex;
   flex-direction: column;
   text-align: center; /* Căn giữa text */
   min-height: 0; /* Allow shrinking */
 }
 
-.home-dashboard-container .info-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-}
+/* Gradient top border removed */
 
 .home-dashboard-container .info-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 20px rgba(5, 119, 70, 0.12);
 }
 
 .home-dashboard-container .card-icon {
@@ -218,6 +202,32 @@
 .home-dashboard-container .action-btn {
   margin-top: 1rem;
   width: 100%;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  line-height: 1 !important;
+}
+
+/* Force alignment for all buttons with flex */
+.home-dashboard-container .btn.d-flex {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+}
+
+.home-dashboard-container .btn.d-flex svg {
+  flex-shrink: 0;
+  vertical-align: baseline !important;
+}
+
+/* Fix alignment for support buttons - don't use full width */
+.home-dashboard-container .text-center .btn.d-flex {
+  width: auto !important;
+  margin: 0 auto !important;
+  padding-left: 2rem !important;
+  padding-right: 2rem !important;
 }
 
 /* Section Title */
@@ -230,6 +240,9 @@
   margin-top: 0.5rem; /* Add top margin for section separation */
 }
 
+.icon-arrow-home {
+  top: 5px;
+}
 /* ==================== DETAIL CARDS ==================== */
 
 /**
@@ -243,7 +256,8 @@
 .home-dashboard-container .info-detail-card {
   background: white;
   border-radius: 16px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 10px rgba(5, 119, 70, 0.08);
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -274,18 +288,10 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
-.home-dashboard-container .info-detail-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-}
+/* Gradient top border removed */
 
 .home-dashboard-container .info-detail-card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 20px rgba(5, 119, 70, 0.12);
 }
 
 .home-dashboard-container .info-detail-header {
@@ -424,26 +430,10 @@
   font-weight: 600;
   font-size: 1.25rem;
   display: block !important;
-  margin-top: 20px !important;
-  padding-top: 60px !important;
-}
-
-/* Target the parent div of progress text */
-.home-dashboard-container .text-end {
-  margin-top: 25px !important;
-  padding-top: 20px !important;
+  text-align: center;
 }
 
 /* Target ProgressBar component specifically */
-.home-dashboard-container .progress {
-  margin-bottom: 30px !important;
-}
-
-/* Alternative targeting for achievement cards */
-.home-dashboard-container .info-detail-card .progress + div {
-  margin-top: 25px !important;
-  padding-top: 15px !important;
-}
 
 /* Ensure Row columns have equal height - SCOPED TO HOME-DASHBOARD ONLY */
 .home-dashboard-container .row.g-4 {
@@ -519,7 +509,8 @@
   }
 
   .home-dashboard-container .info-card-container {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 }
 
@@ -545,6 +536,26 @@
   }
 
   .home-dashboard-container .info-card-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+}
+
+/**
+ * Small mobile breakpoint (max-width: 480px)
+ * Single column layout for very small screens
+ */
+@media (max-width: 480px) {
+  .home-dashboard-container .info-card-container {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .home-dashboard-container .card-value {
+    font-size: 2.5rem;
+  }
+
+  .home-dashboard-container .card-title {
+    font-size: 1.3rem;
   }
 }
