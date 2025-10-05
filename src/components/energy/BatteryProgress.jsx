@@ -1,49 +1,162 @@
 import React from "react";
-import "../../assets/styles/energy/BatteryProgress.css";
+import { 
+  Card, 
+  Progress, 
+  Typography, 
+  Space, 
+  Tag
+} from "antd";
+import { 
+  ThunderboltOutlined,
+  CheckCircleOutlined,
+  PauseCircleOutlined
+} from "@ant-design/icons";
 
-const BatteryProgress = ({ batteryLevel, statusConfig }) => {
-  const radius = 90;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (batteryLevel / 100) * circumference;
+const { Title } = Typography;
+
+const BatteryProgress = ({ 
+  batteryLevel = 75, 
+  isCharging = false,
+  isCompleted = false
+}) => {
+  
+  /**
+   * Custom Battery Icon Component
+   */
+  const BatteryIcon = ({ level, color = '#1890ff' }) => {
+    const batteryWidth = 24;
+    const batteryHeight = 14;
+    const fillWidth = (batteryWidth - 4) * (level / 100);
+    
+    return (
+      <svg
+        width="28"
+        height="18"
+        viewBox="0 0 28 18"
+        style={{ display: 'inline-block', verticalAlign: 'middle' }}
+      >
+        {/* Battery body */}
+        <rect
+          x="1"
+          y="3"
+          width={batteryWidth}
+          height={batteryHeight}
+          rx="2"
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+        />
+        
+        {/* Battery positive terminal */}
+        <rect
+          x={batteryWidth + 1}
+          y="7"
+          width="2"
+          height="6"
+          rx="1"
+          fill={color}
+        />
+        
+        {/* Battery fill */}
+        <rect
+          x="3"
+          y="5"
+          width={fillWidth}
+          height={batteryHeight - 4}
+          rx="1"
+          fill={color}
+          opacity="0.8"
+        />
+      </svg>
+    );
+  };
+
+  /**
+   * Xác định trạng thái pin
+   */
+  const getBatteryStatus = () => {
+    if (isCompleted) {
+      return {
+        label: 'Hoàn thành',
+        icon: <CheckCircleOutlined />,
+        color: '#52c41a'
+      };
+    }
+    
+    if (isCharging) {
+      return {
+        label: 'Đang sạc',
+        icon: <ThunderboltOutlined spin />,
+        color: '#1890ff'
+      };
+    }
+    
+    return {
+      label: 'Dừng sạc',
+        icon: <PauseCircleOutlined />,
+        color: '#8c8c8c'
+    };
+  };
+
+  const batteryStatus = getBatteryStatus();
 
   return (
-    <div className="progress-container">
-      <h3 className="progress-title">Trạng thái pin</h3>
-      <div className="progress-circle-container">
-        <svg 
-          width="100%" 
-          height="100%" 
-          viewBox="0 0 200 200" 
-          className="progress-circle-svg"
+    <Card
+      style={{
+        borderRadius: '16px',
+        border: '1px solid #e5e7eb',
+        boxShadow: '0 4px 16px rgba(5, 119, 70, 0.08)',
+        textAlign: 'center'
+      }}
+      styles={{
+        body: { padding: '24px' }
+      }}
+    >
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <Space>
+          <BatteryIcon level={batteryLevel} color="#1890ff" />
+          <Title level={4} style={{ margin: 0, color: '#1a1a1a' }}>
+            Trạng thái pin
+          </Title>
+        </Space>
+        <Tag 
+          color={batteryStatus.color}
+          style={{ 
+            fontSize: '12px',
+            fontWeight: 600,
+            borderRadius: '8px',
+            padding: '4px 12px'
+          }}
         >
-          <circle
-            cx="100"
-            cy="100"
-            r={radius}
-            stroke="#e5e7eb"
-            strokeWidth="8"
-            fill="transparent"
-          />
-          <circle
-            cx="100"
-            cy="100"
-            r={radius}
-            stroke={statusConfig.color}
-            strokeWidth="8"
-            fill="transparent"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            className="progress-circle"
-            transform="rotate(-90 100 100)"
-          />
-        </svg>
-        <div className="progress-text">
-          <div className="battery-percentage">{batteryLevel}%</div>
-          <div className="battery-label">Mức pin hiện tại</div>
-        </div>
+          <Space size={4}>
+            {batteryStatus.icon}
+            {batteryStatus.label}
+          </Space>
+        </Tag>
       </div>
-    </div>
+
+      {/* Main Progress Circle Only */}
+      <Progress
+        type="circle"
+        percent={batteryLevel}
+        format={(percent) => (
+          <div style={{ 
+            fontSize: '36px', 
+            fontWeight: 700, 
+            color: '#1a1a1a',
+            lineHeight: 1
+          }}>
+            {percent}%
+          </div>
+        )}
+        strokeColor="#1890ff"
+        trailColor="#f0f0f0"
+        strokeWidth={8}
+        size={180}
+        strokeLinecap="round"
+      />
+    </Card>
   );
 };
 

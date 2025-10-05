@@ -1,41 +1,138 @@
 import React from "react";
-import { Card } from "react-bootstrap";
-import "../../assets/styles/energy/PricingInfo.css";
+import { Card, Typography, Space, Row, Col, Divider } from "antd";
+import { DollarOutlined } from "@ant-design/icons";
+
+const { Title, Text } = Typography;
 
 const PricingInfo = ({ sessionData }) => {
+  const pricingItems = [
+    {
+      label: "Giá theo kWh",
+      value: `${sessionData.pricePerKwh}đ`,
+    },
+    {
+      label: "Giá theo phút",
+      value: `${sessionData.pricePerMin}đ`,
+    },
+    {
+      label: "Tổng thời gian",
+      value: sessionData.timeElapsed,
+    },
+    {
+      label: "Tổng năng lượng",
+      value: `${sessionData.energyCharged} kWh`,
+    },
+  ];
+
   return (
-    <Card className="pricing-info-card">
-      <Card.Header>
-        <h5>
-          <i className="fas fa-dollar-sign me-2"></i>
-          Thông tin giá cả
-        </h5>
-      </Card.Header>
-      <Card.Body>
-        <div className="pricing-grid">
-          <div className="pricing-item">
-            <span className="pricing-label">Giá theo kWh</span>
-            <span className="pricing-value">{sessionData.pricePerKwh}đ</span>
-          </div>
-          <div className="pricing-item">
-            <span className="pricing-label">Giá theo phút</span>
-            <span className="pricing-value">{sessionData.pricePerMin}đ</span>
-          </div>
-          <div className="pricing-item">
-            <span className="pricing-label">Tổng thời gian</span>
-            <span className="pricing-value">{sessionData.timeElapsed}</span>
-          </div>
-          <div className="pricing-item">
-            <span className="pricing-label">Tổng năng lượng</span>
-            <span className="pricing-value">{sessionData.energyCharged} kWh</span>
-          </div>
+    <Card
+      style={{
+        borderRadius: "16px",
+        border: "1px solid #e5e7eb",
+        boxShadow: "0 4px 16px rgba(5, 119, 70, 0.08)",
+      }}
+      styles={{
+        body: { padding: "24px" },
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "24px",
+        }}
+      >
+        <Space>
+          <DollarOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
+          <Title level={4} style={{ margin: 0, color: "#1a1a1a" }}>
+            Thông tin giá cả
+          </Title>
+        </Space>
+      </div>
+
+      {/* Pricing Details */}
+      <Space
+        direction="vertical"
+        size="medium"
+        style={{ width: "100%", marginBottom: "24px" }}
+      >
+        {pricingItems.map((item, index) => (
+          <Row
+            key={index}
+            justify="space-between"
+            align="middle"
+            style={{
+              padding: "12px 16px",
+              backgroundColor: "#f8fafc",
+              borderRadius: "8px",
+              border: "1px solid #e2e8f0",
+            }}
+          >
+            <Col>
+              <Text
+                style={{
+                  color: "#6b7280",
+                  fontSize: "14px",
+                  fontWeight: 500,
+                }}
+              >
+                {item.label}
+              </Text>
+            </Col>
+            <Col>
+              <Text
+                style={{
+                  color: "#1f2937",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  fontFamily: "monospace",
+                }}
+              >
+                {item.value}
+              </Text>
+            </Col>
+          </Row>
+        ))}
+      </Space>
+
+      <Divider style={{ margin: "16px 0" }} />
+
+      {/* Cost Summary */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+          padding: "24px",
+          borderRadius: "12px",
+          border: "2px solid #10b981",
+          textAlign: "center",
+        }}
+      >
+        <Text
+          style={{
+            color: "#065f46",
+            fontSize: "14px",
+            fontWeight: 600,
+            display: "block",
+            marginBottom: "8px",
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          }}
+        >
+          Tổng chi phí dự kiến
+        </Text>
+        <div
+          style={{
+            color: "#047857",
+            fontSize: "32px",
+            fontWeight: 800,
+            fontFamily: "monospace",
+          }}
+        >
+          {sessionData.estimatedCost}đ
         </div>
-        
-        <div className="cost-summary">
-          <div className="cost-label">Tổng chi phí dự kiến</div>
-          <div className="cost-amount">{sessionData.estimatedCost}đ</div>
-        </div>
-      </Card.Body>
+      </div>
     </Card>
   );
 };

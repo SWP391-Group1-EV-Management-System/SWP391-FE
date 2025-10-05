@@ -1,0 +1,447 @@
+/**
+ * MapPage.css
+ * Stylesheet for MapPage component
+ * 
+ * Layout: Statistics overview (3 separate cards) + Map + Charging Station List
+ * Design: Modern cards with clean layout (gradient borders removed)
+ */
+
+/* ==================== CONTAINER & LAYOUT ==================== */
+
+.map-page-container {
+  min-height: 100vh;
+  padding: 2rem 0;
+}
+
+/* ==================== STATISTICS SECTION ==================== */
+
+.map-stats-section {
+  margin-bottom: 2rem;
+}
+
+.map-stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(5, 119, 70, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  height: 100%;
+  text-align: center;
+}
+
+.map-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(5, 119, 70, 0.12);
+}
+
+/* Gradient top borders removed */
+
+.stat-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.map-stat-card.stations .stat-icon {
+  color: #667eea;
+}
+
+.map-stat-card.sessions .stat-icon {
+  color: #f5576c;
+}
+
+.map-stat-card.users .stat-icon {
+  color: #4facfe;
+}
+
+.stat-number {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  display: block;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 1.3rem;
+  color: #6b7280;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* ==================== MAIN CONTENT SECTION ==================== */
+
+.map-main-content {
+  margin-top: 2rem;
+}
+
+.map-content-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(5, 119, 70, 0.08);
+  height: 600px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Gradient top border removed */
+
+/* ==================== MAP SECTION ==================== */
+
+.map-container {
+  height: 100%;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  border-radius: 0 0 0 16px;
+}
+
+.map-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #667eea;
+  color: #6b7280;
+  text-align: center;
+}
+
+.map-placeholder-icon {
+  font-size: 4rem;
+  color: #667eea;
+  margin-bottom: 1rem;
+}
+
+.map-placeholder-text {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.map-placeholder-subtext {
+  font-size: 1.4rem;
+  opacity: 0.7;
+}
+
+/* ==================== CHARGING STATIONS LIST ==================== */
+
+.stations-list-container {
+  height: 100%;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.stations-list-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.stations-list-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.stations-count {
+  font-size: 1.4rem;
+  color: #6b7280;
+}
+
+.stations-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 450px;
+  padding: 0 0.5rem;
+}
+
+.station-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 0 0.25rem 1rem 0.25rem;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.station-item:hover {
+  background: #e3f2fd;
+  border-color: #667eea;
+  transform: translateX(4px);
+}
+
+.station-item:last-child {
+  margin-bottom: 0;
+}
+
+.station-header {
+  display: flex;
+  justify-content: between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.station-name {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.station-status {
+  font-size: 1.25rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.station-status.available {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.station-status.busy {
+  background: #fed7d7;
+  color: #9b2c2c;
+}
+
+.station-status.maintenance {
+  background: #fef3cd;
+  color: #92400e;
+}
+
+.station-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  font-size: 1.4rem;
+}
+
+.station-detail {
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+}
+
+.station-detail-icon {
+  margin-right: 0.5rem;
+  font-size: 1.3rem;
+  color: #667eea;
+}
+
+.station-distance {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* ==================== RESPONSIVE DESIGN ==================== */
+
+@media (max-width: 768px) {
+  .map-page-container {
+    padding: 1rem 0;
+  }
+
+  .map-stats-card {
+    padding: 1.5rem;
+  }
+
+  .stat-item {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .map-content-card {
+    height: auto;
+  }
+
+  .map-container,
+  .stations-list-container {
+    height: 400px;
+    padding: 1.5rem;
+  }
+
+  .stations-list {
+    max-height: 320px;
+  }
+
+  .station-details {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-number {
+    font-size: 1.8rem;
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+  }
+
+  .station-item {
+    padding: 1rem;
+  }
+
+  .station-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+}
+
+/* ==================== MODAL STYLES ==================== */
+
+.station-modal .modal-content {
+  border-radius: 16px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(5, 119, 70, 0.15);
+}
+
+.station-modal .modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px 16px 0 0;
+  border-bottom: none;
+  padding: 1.5rem 2rem;
+}
+
+.station-modal .modal-header .btn-close {
+  filter: invert(1);
+}
+
+.station-modal .modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.station-modal .modal-body {
+  padding: 2rem;
+}
+
+.station-modal .modal-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 1rem 2rem;
+}
+
+/* ==================== STATION INFO SECTION ==================== */
+
+.station-info-section {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.info-item {
+  font-size: 0.95rem;
+  color: #4b5563;
+  line-height: 1.5;
+}
+
+.info-item strong {
+  color: #1f2937;
+}
+
+/* ==================== CHARGERS SECTION ==================== */
+
+.chargers-section {
+  margin-top: 1.5rem;
+}
+
+.charger-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.charger-card:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(5, 119, 70, 0.15);
+  transform: translateY(-2px);
+}
+
+.charger-header {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.charger-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.charger-details {
+  margin-top: 0.75rem;
+}
+
+.detail-row {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: #6b7280;
+}
+
+.detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-row strong {
+  color: #1f2937;
+}
+
+.charger-status-dot {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.8);
+}
+
+/* ==================== RESPONSIVE MODAL ==================== */
+
+@media (max-width: 768px) {
+  .station-modal .modal-body {
+    padding: 1.5rem;
+  }
+
+  .station-modal .modal-header {
+    padding: 1rem 1.5rem;
+  }
+
+  .station-modal .modal-footer {
+    padding: 1rem 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .charger-card {
+    margin-bottom: 1rem;
+  }
+}

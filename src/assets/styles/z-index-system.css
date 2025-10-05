@@ -1,0 +1,167 @@
+/*
+ * Z-INDEX SYSTEM
+ * Hệ thống phân cấp z-index có tổ chức để tránh xung đột và dễ quản lý
+ * 
+ * CÁCH SỬ DỤNG:
+ * - Sử dụng CSS variables thay vì hardcode z-index
+ * - Mỗi layer cách nhau 100 để có chỗ thêm element phụ
+ * - Không sử dụng số z-index ngẫu nhiên
+ */
+
+:root {
+  /* ===== LAYER 0: BASE LAYOUT (0-99) ===== */
+  --z-base: 0; /* Nền và layout cơ bản */
+  --z-content: 1; /* Nội dung chính */
+
+  /* ===== LAYER 1: NAVIGATION (100-199) ===== */
+  --z-sidebar: 100; /* Menu sidebar */
+  --z-navbar: 110; /* Navigation bar */
+  --z-breadcrumb: 120; /* Breadcrumb navigation */
+
+  /* ===== LAYER 2: UI ELEMENTS (200-299) ===== */
+  --z-card: 200; /* Card components */
+  --z-button: 210; /* Button overlays */
+  --z-form: 220; /* Form elements */
+  --z-table-header: 230; /* Sticky table headers */
+
+  /* ===== LAYER 3: DROPDOWNS & TOOLTIPS (300-399) ===== */
+  --z-dropdown: 300; /* Dropdown menus */
+  --z-tooltip: 310; /* Tooltips */
+  --z-popover: 320; /* Popovers */
+  --z-autocomplete: 330; /* Autocomplete suggestions */
+
+  /* ===== LAYER 4: OVERLAYS (400-499) ===== */
+  --z-sticky: 400; /* Sticky elements */
+  --z-fixed: 410; /* Fixed positioned elements */
+  --z-overlay: 420; /* General overlays */
+  --z-loading: 430; /* Loading indicators */
+
+  /* ===== LAYER 5: MODALS & DIALOGS (500-599) ===== */
+  --z-modal-backdrop: 500; /* Modal backdrop */
+  --z-modal: 510; /* Modal content */
+  --z-dialog: 520; /* Dialog boxes */
+  --z-alert: 530; /* Alert messages */
+
+  /* ===== LAYER 6: NOTIFICATIONS (600-699) ===== */
+  --z-toast: 600; /* Toast notifications */
+  --z-snackbar: 610; /* Snackbar messages */
+  --z-notification: 620; /* System notifications */
+
+  /* ===== LAYER 7: CRITICAL (700-799) ===== */
+  --z-fullscreen: 700; /* Fullscreen overlays */
+  --z-error: 710; /* Error messages */
+  --z-debug: 720; /* Debug tools (dev only) */
+
+  /* ===== LAYER 8: QR SCANNER (800-899) ===== */
+  --z-qr-scanner: 800; /* QR Scanner overlay */
+}
+
+/* ===== UTILITY CLASSES ===== */
+.z-base {
+  z-index: var(--z-base);
+}
+.z-content {
+  z-index: var(--z-content);
+}
+
+.z-sidebar {
+  z-index: var(--z-sidebar);
+}
+.z-navbar {
+  z-index: var(--z-navbar);
+}
+.z-breadcrumb {
+  z-index: var(--z-breadcrumb);
+}
+
+.z-card {
+  z-index: var(--z-card);
+}
+.z-button {
+  z-index: var(--z-button);
+}
+.z-form {
+  z-index: var(--z-form);
+}
+.z-table-header {
+  z-index: var(--z-table-header);
+}
+
+.z-dropdown {
+  z-index: var(--z-dropdown);
+}
+.z-tooltip {
+  z-index: var(--z-tooltip);
+}
+.z-popover {
+  z-index: var(--z-popover);
+}
+.z-autocomplete {
+  z-index: var(--z-autocomplete);
+}
+
+.z-sticky {
+  z-index: var(--z-sticky);
+}
+.z-fixed {
+  z-index: var(--z-fixed);
+}
+.z-overlay {
+  z-index: var(--z-overlay);
+}
+.z-loading {
+  z-index: var(--z-loading);
+}
+
+.z-modal-backdrop {
+  z-index: var(--z-modal-backdrop);
+}
+.z-modal {
+  z-index: var(--z-modal);
+}
+.z-dialog {
+  z-index: var(--z-dialog);
+}
+.z-alert {
+  z-index: var(--z-alert);
+}
+
+.z-toast {
+  z-index: var(--z-toast);
+}
+.z-snackbar {
+  z-index: var(--z-snackbar);
+}
+.z-notification {
+  z-index: var(--z-notification);
+}
+
+.z-fullscreen {
+  z-index: var(--z-fullscreen);
+}
+.z-error {
+  z-index: var(--z-error);
+}
+.z-debug {
+  z-index: var(--z-debug);
+}
+
+.z-qr-scanner {
+  z-index: var(--z-qr-scanner);
+}
+
+/* ===== RESPONSIVE Z-INDEX ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+  :root {
+    /* Mobile có thể cần điều chỉnh z-index cho touch interactions */
+    --z-mobile-menu: 150;
+    --z-mobile-overlay: 450;
+  }
+
+  .z-mobile-menu {
+    z-index: var(--z-mobile-menu);
+  }
+  .z-mobile-overlay {
+    z-index: var(--z-mobile-overlay);
+  }
+}

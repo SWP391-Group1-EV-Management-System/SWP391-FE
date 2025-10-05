@@ -1,4 +1,58 @@
 {
+  "packages": [
+    {
+      "Package_ID": "PK001",
+      "Package_Name": "Gói cơ bản",
+      "Description": "Gói dịch vụ cơ bản dành cho người mới",
+      "Billing_cycle": "monthly",
+      "Price": 99000,
+      "Unit": "VNĐ",
+      "Quota": 50,
+      "Average_Quota": 1.6,
+      "Status": "active",
+      "Sign_Pack_Date": "2025-01-01",
+      "Closed_Pack_Date": "2025-12-31"
+    },
+    {
+      "Package_ID": "PK002",
+      "Package_Name": "Gói nâng cao",
+      "Description": "Gói dịch vụ nâng cao với nhiều ưu đãi hơn",
+      "Billing_cycle": "monthly",
+      "Price": 199000,
+      "Unit": "VNĐ",
+      "Quota": 150,
+      "Average_Quota": 5,
+      "Status": "active",
+      "Sign_Pack_Date": "2025-01-15",
+      "Closed_Pack_Date": "2025-12-31"
+    },
+    {
+      "Package_ID": "PK003",
+      "Package_Name": "Gói chuyên nghiệp",
+      "Description": "Gói dịch vụ chuyên nghiệp dành cho doanh nghiệp",
+      "Billing_cycle": "monthly",
+      "Price": 499000,
+      "Unit": "VNĐ",
+      "Quota": 500,
+      "Average_Quota": 16.6,
+      "Status": "active",
+      "Sign_Pack_Date": "2025-02-01",
+      "Closed_Pack_Date": "2025-12-31"
+    },
+    {
+      "Package_ID": "PK004",
+      "Package_Name": "Gói cao cấp",
+      "Description": "Gói dịch vụ cao cấp với đầy đủ tính năng",
+      "Billing_cycle": "monthly",
+      "Price": 999000,
+      "Unit": "VNĐ",
+      "Quota": 1000,
+      "Average_Quota": 33.3,
+      "Status": "active",
+      "Sign_Pack_Date": "2025-02-15",
+      "Closed_Pack_Date": "2025-12-31"
+    }
+  ],
     "users": [
       {
         "user_id": "USR0001",

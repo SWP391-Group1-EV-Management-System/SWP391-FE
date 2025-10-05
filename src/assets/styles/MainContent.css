@@ -10,8 +10,8 @@ html {
 
 /* Main content styles */
 .main-content {
-  margin-left: 250px;
-  padding: 20px;
+  margin-left: 140px;
+  padding: 30px;
   transition: margin-left 0.3s ease;
   min-height: calc(100vh - 60px); /* Trừ navbar height */
   overflow-y: auto; /* Cho phép scroll trong main content */

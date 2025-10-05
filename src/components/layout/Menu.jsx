@@ -13,7 +13,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import {
-  BsChevronLeft,
   BsClock,
   BsCCircle,
   BsCreditCard,
@@ -23,24 +22,30 @@ import {
   BsMap,
   BsBookmarkStar,
 } from "react-icons/bs";
+import { MdMenuOpen } from "react-icons/md";
 import { Button } from "react-bootstrap";
 import Logo from "../../assets/images/logo.png";
 import "../../assets/styles/Menu.css";
 
 // Danh sách các menu items với id, label, icon và path
 const menuItems = [
-  { id: "home", label: "Trang chủ", icon: BsHouse, path: "/home" },
-  { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "/map" },
-  { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/energy" },
-  { id: "history", label: "Lịch sử", icon: BsClock, path: "/history" },
-  { id: "payment", label: "Thanh toán", icon: BsCreditCard, path: "/payment" },
+  { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
+  { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "/app/map" },
+  { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/app/energy" },
+  { id: "history", label: "Lịch sử", icon: BsClock, path: "/app/history" },
   {
-    id: "favorite",
+    id: "payment",
+    label: "Thanh toán",
+    icon: BsCreditCard,
+    path: "/app/payment",
+  },
+  {
+    id: "servicepackage",
     label: "Gói dịch vụ",
     icon: BsBookmarkStar,
-    path: "/favorite",
+    path: "/app/servicepackage",
   },
-  { id: "setting", label: "Cài đặt", icon: BsGear, path: "/setting" },
+  { id: "setting", label: "Cài đặt", icon: BsGear, path: "/app/setting" },
 ];
 
 const Menu = ({ collapsed, onToggleCollapse }) => {
@@ -49,9 +54,8 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
 
   // Tìm active menu item dựa trên current path
   const getActiveMenuIdFromPath = () => {
-    const currentItem = menuItems.find(
-      (item) => item.path === location.pathname
-    );
+    const currentPath = location.pathname;
+    const currentItem = menuItems.find((item) => item.path === currentPath);
     return currentItem ? currentItem.id : "home";
   };
 
@@ -65,8 +69,8 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
    * Effect đồng bộ activeMenuItem với URL hiện tại
    */
   useEffect(() => {
-    const path = location.pathname.substring(1) || "home";
-    setActiveMenuItem(path);
+    const newActiveId = getActiveMenuIdFromPath();
+    setActiveMenuItem(newActiveId);
   }, [location.pathname]);
 
   /**
@@ -87,16 +91,6 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
     // Cleanup event listener
     return () => window.removeEventListener("resize", handleResize);
   }, [onToggleCollapse]);
-
-  /**
-   * Cập nhật active menu khi route thay đổi
-   */
-  useEffect(() => {
-    const newActiveId = getActiveMenuIdFromPath();
-    if (newActiveId !== activeMenuItem) {
-      setActiveMenuItem(newActiveId);
-    }
-  }, [location.pathname]);
 
   /**
    * Xử lý click vào menu item với React Router
@@ -165,8 +159,32 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
             }`}
             alt="Eco-Z Logo"
             src={Logo}
+            onClick={() => navigate("/app/home")}
+            style={{ cursor: "pointer" }}
           />
         </header>
+
+        {/* Nút toggle thu gọn/mở rộng sidebar */}
+        <Button
+          variant="light"
+          className={`sidebar-toggle d-flex align-items-left justify-content-left${
+            collapsed ? "" : " sidebar-toggle-open"
+          }`}
+          aria-label="Toggle sidebar"
+          onClick={() => onToggleCollapse((prev) => !prev)}
+          tabIndex="-1"
+          onFocus={(e) => {
+            e.preventDefault();
+            e.target.blur();
+          }}
+        >
+          <MdMenuOpen
+            className={`sidebar-toggle-icon${
+              collapsed ? "" : " sidebar-toggle-icon-open"
+            }`}
+            aria-hidden="true"
+          />
+        </Button>
 
         {/* Container chứa menu items và active indicators */}
         <div
@@ -263,30 +281,6 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
             <div className="sidebar-footer-text">2025 Group 1 SE1818</div>
           )}
         </footer>
-
-        {/* Nút toggle thu gọn/mở rộng sidebar */}
-        <Button
-          variant="light"
-          className={`sidebar-toggle d-flex align-items-center justify-content-center${
-            collapsed ? "" : " sidebar-toggle-open"
-          }`}
-          aria-label="Toggle sidebar"
-          onClick={() => onToggleCollapse((prev) => !prev)}
-          tabIndex="-1"
-          // Ngăn chặn focus effects cho nút toggle
-          onFocus={(e) => {
-            e.preventDefault();
-            e.target.blur();
-          }}
-        >
-          {/* Icon mũi tên với rotation animation */}
-          <BsChevronLeft
-            className={`sidebar-toggle-icon${
-              collapsed ? "" : " sidebar-toggle-icon-open"
-            }`}
-            aria-hidden="true"
-          />
-        </Button>
       </div>
     </nav>
   );

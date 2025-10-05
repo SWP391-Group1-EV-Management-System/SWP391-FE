@@ -1,5 +1,5 @@
 import React from "react";
-import { Container, Row, Col } from "react-bootstrap";
+import { Row, Col, Space } from "antd";
 import EnergyHeader from "../components/energy/EnergyHeader";
 import BatteryProgress from "../components/energy/BatteryProgress";
 import CurrentTime from "../components/energy/CurrentTime";
@@ -7,48 +7,52 @@ import EnergyStats from "../components/energy/EnergyStats";
 import TechnicalDetails from "../components/energy/TechnicalDetails";
 import PricingInfo from "../components/energy/PricingInfo";
 import { useEnergySession } from "../hooks/useEnergySession";
-import "../assets/styles/energy/EnergyPage.css";
 
 const EnergyPage = () => {
   const { sessionData, currentTime, statusConfig } = useEnergySession();
 
   return (
-    <div className="charging-session-container">
-      <Container fluid className="px-4">
-        {/* Header Section */}
-        <EnergyHeader 
-          sessionData={sessionData} 
-          statusConfig={statusConfig} 
-        />
+    <div style={{ 
+      padding: '20px',
+      background: 'white',
+      minHeight: '100vh'
+    }}>
+      <div style={{ 
+        maxWidth: '1400px', 
+        margin: '0 auto' 
+      }}>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          {/* Header Section - Full Width */}
+          <EnergyHeader sessionData={sessionData} statusConfig={statusConfig} />
 
-        {/* Main Content */}
-        <Row className="g-4 mb-4">
-          <Col lg={6}>
-            <BatteryProgress 
-              batteryLevel={sessionData.batteryLevel}
-              statusConfig={statusConfig}
-            />
-          </Col>
+          {/* Row 1: 2 Columns Equal Size */}
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={12}>
+              <BatteryProgress
+                batteryLevel={sessionData.batteryLevel}
+                isCharging={statusConfig.isCharging}
+                isCompleted={statusConfig.isCompleted}
+              />
+            </Col>
+            <Col xs={24} lg={12}>
+              <CurrentTime currentTime={currentTime} />
+            </Col>
+          </Row>
 
-          <Col lg={6}>
-            <CurrentTime currentTime={currentTime} />
-          </Col>
-        </Row>
+          {/* Row 2: 3 Columns Equal Size */}
+          <EnergyStats sessionData={sessionData} />
 
-        {/* Stats Cards */}
-        <EnergyStats sessionData={sessionData} />
-
-        {/* Technical Details */}
-        <Row className="g-4">
-          <Col lg={6}>
-            <TechnicalDetails sessionData={sessionData} />
-          </Col>
-
-          <Col lg={6}>
-            <PricingInfo sessionData={sessionData} />
-          </Col>
-        </Row>
-      </Container>
+          {/* Row 3: 2 Columns Equal Size */}
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={12}>
+              <TechnicalDetails sessionData={sessionData} />
+            </Col>
+            <Col xs={24} lg={12}>
+              <PricingInfo sessionData={sessionData} />
+            </Col>
+          </Row>
+        </Space>
+      </div>
     </div>
   );
 };
