@@ -18,33 +18,64 @@ function Login() {
   const handleBackToWelcome = () => {
     navigate("/");
   };
+  const handleLogin = async (e) => {
+    e.preventDefault(); // Ngăn reload trang
+    const email = e.target.username.value;
+    const password = e.target.password.value;
+
+    console.log("Thông tin đăng nhập:", { email }); // Không log mật khẩu vì lý do bảo mật
+
+    try {
+      const loginData = {
+        email: email,
+        password: password,
+      };
+      const response = await fetch("http://localhost:8080/users/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json, text/plain, */*",
+        },
+        body: JSON.stringify({ email, password }), // Gửi dữ liệu dưới dạng JSON
+        credentials: "include", // Để nhận và gửi cookies session
+      });
+      let responseData = await response.json();
+      if (response.ok) {
+        console.log("Đăng nhập thành công");
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("user", JSON.stringify(responseData));
+        //const storedUser = localStorage.getItem("user");
+        //const user = JSON.parse(storedUser);
+        // user.firstName
+        navigate("/home");
+      } else {
+        console.error("Lỗi đăng nhập:", responseData);
+        const errorMessage =
+          typeof responseData === "string" ? responseData : responseData.message || "Sai email hoặc mật khẩu";
+        alert(errorMessage);
+      }
+    } catch (error) {
+      console.error("Lỗi kết nối:", error);
+      alert("Không thể kết nối đến server. Vui lòng thử lại sau.");
+    }
+  };
 
   return (
     <>
       <div className="login-page">
         <div className="login-container">
           <div className="login-inner">
-            <button
-              className="back-to-welcome-btn"
-              onClick={handleBackToWelcome}
-              aria-label="Quay lại trang chính"
-            >
+            <button className="back-to-welcome-btn" onClick={handleBackToWelcome} aria-label="Quay lại trang chính">
               <IoClose size={24} />
             </button>
             <h2>Đăng nhập</h2>
-            <form>
+            <form onSubmit={handleLogin}>
               <div>
                 <label htmlFor="username">
                   <CgMail size={28} />
                   Gmail
                 </label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  required
-                  placeholder="email@example.com"
-                />
+                <input type="text" id="username" name="username" required placeholder="email@example.com" />
               </div>
               <div className="password-field">
                 <label htmlFor="password">
@@ -65,11 +96,7 @@ function Login() {
                     onClick={togglePasswordVisibility}
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                   >
-                    {showPassword ? (
-                      <IoEyeOffOutline size={20} />
-                    ) : (
-                      <IoEyeOutline size={20} />
-                    )}
+                    {showPassword ? <IoEyeOffOutline size={20} /> : <IoEyeOutline size={20} />}
                   </button>
                 </div>
               </div>
