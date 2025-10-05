@@ -14,6 +14,7 @@ import Register from "./page/Register.jsx";
 import WelcomePage from "./page/WelcomePage.jsx";
 import SessionStaffPage from "./page/SessionStaffPage.jsx";
 import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
+import OTPVerification from "./page/OTPVerification.jsx";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="otp-verification" element={<OTPVerification />} />
 
         {/* Protected Main App Routes */}
         <Route path="/app" element={<Layout />}>

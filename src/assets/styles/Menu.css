@@ -255,7 +255,7 @@
 
 .sidebar-toggle {
   position: relative !important;
-  margin: 10px 0 0 20px !important;
+  margin: 10px auto 0 auto !important;
   display: block !important;
   transform: none;
   background: transparent !important;
@@ -288,7 +288,7 @@
 .sidebar-collapsed .sidebar-toggle {
   width: 30px !important;
   height: 30px !important;
-  margin: 8px 0 0 20px !important;
+  margin: 8px auto 0 auto !important;
   padding: 0 !important;
 }
 
@@ -375,14 +375,14 @@
   .sidebar-toggle {
     width: 28px !important;
     height: 28px !important;
-    margin: 8px 0 0 20px !important;
+    margin: 8px auto 0 auto !important;
     padding: 0 !important;
   }
 
   .sidebar-collapsed .sidebar-toggle {
     width: 25px !important;
     height: 25px !important;
-    margin: 6px 0 0 20px !important;
+    margin: 6px auto 0 auto !important;
     padding: 0 !important;
   }
 
@@ -480,14 +480,14 @@
   .sidebar-toggle {
     width: 30px !important;
     height: 30px !important;
-    margin: 8px 0 0 20px !important;
+    margin: 8px auto 0 auto !important;
     padding: 0 !important;
   }
 
   .sidebar-collapsed .sidebar-toggle {
     width: 28px !important;
     height: 28px !important;
-    margin: 6px 0 0 20px !important;
+    margin: 6px auto 0 auto !important;
     padding: 0 !important;
   }
 
@@ -617,7 +617,7 @@
   .sidebar-collapsed .sidebar-toggle {
     width: 30px !important;
     height: 30px !important;
-    margin: 8px 0 0 20px !important;
+    margin: 8px auto 0 auto !important;
     padding: 0 !important;
   }
 

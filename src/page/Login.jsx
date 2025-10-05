@@ -99,7 +99,7 @@ function Login() {
               <div className="register-prompt">
                 <div>Không có tài khoản?</div>
                 <a
-                  href="#"
+                  href="/register"
                   style={{
                     color: "#0b9459",
                     fontWeight: "bold",
