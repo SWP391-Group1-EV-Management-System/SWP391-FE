@@ -47,7 +47,7 @@ function Login() {
         //const storedUser = localStorage.getItem("user");
         //const user = JSON.parse(storedUser);
         // user.firstName
-        navigate("/home");
+        navigate("/app/home");
       } else {
         console.error("Lỗi đăng nhập:", responseData);
         const errorMessage =
