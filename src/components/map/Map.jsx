@@ -75,8 +75,8 @@ function GGMap() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        height: '100vh',
-        width: '100vw'
+        height: '100%',
+        width: '100%'
       }}
     >
       <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: '100%' }}>
@@ -91,7 +91,9 @@ function GGMap() {
             mapTypeControl: false,
             fullscreenControl: false,
             disableDefaultUI: true,
-            gestureHandling: 'greedy'
+            gestureHandling: 'greedy',
+            keyboardShortcuts: false,
+            clickableIcons: false
           }}
           onLoad={map => setMap(map)}
         >
@@ -106,64 +108,67 @@ function GGMap() {
         style={{
           position: 'absolute',
           top: 16,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          minWidth: 600,
+          left: 16,
+          maxWidth: 500,
           zIndex: 1000,
           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
         }}
       >
-        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-          <Row gutter={[16, 16]} align="middle">
-            <Col span={8}>
+        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+          <Row gutter={[8, 8]} align="middle">
+            <Col span={24}>
               <Autocomplete>
                 <Input 
                   placeholder="Origin" 
                   ref={originRef}
                   prefix={<EnvironmentOutlined />}
+                  size="small"
                 />
               </Autocomplete>
             </Col>
-            <Col span={8}>
+            <Col span={24}>
               <Autocomplete>
                 <Input
                   placeholder="Destination"
                   ref={destiantionRef}
                   prefix={<EnvironmentOutlined />}
+                  size="small"
                 />
               </Autocomplete>
             </Col>
-            <Col span={8}>
-              <Space>
-                <Button type="primary" onClick={calculateRoute}>
+            <Col span={24}>
+              <Space size="small">
+                <Button type="primary" onClick={calculateRoute} size="small">
                   Calculate Route
                 </Button>
                 <Button 
                   icon={<CloseOutlined />} 
                   onClick={clearRoute}
+                  size="small"
+                />
+                <Button
+                  type="primary"
+                  shape="circle"
+                  icon={<AimOutlined />}
+                  onClick={centerMap}
+                  disabled={!map}
+                  title="Center map to default location"
+                  size="small"
                 />
               </Space>
             </Col>
           </Row>
           
-          <Row gutter={[16, 16]} align="middle" justify="space-between">
-            <Col>
-              <Text strong>Distance: {distance}</Text>
-            </Col>
-            <Col>
-              <Text strong>Duration: {duration}</Text>
-            </Col>
-            <Col>
-              <Button
-                type="primary"
-                shape="circle"
-                icon={<AimOutlined />}
-                onClick={centerMap}
-                disabled={!map}
-                title="Center map to default location"
-              />
-            </Col>
-          </Row>
+          {(distance || duration) && (
+            <Row gutter={[8, 8]} align="middle">
+              <Col span={12}>
+                <Text strong style={{ fontSize: '12px' }}>Distance: {distance}</Text>
+              </Col>
+              <Col span={12}>
+                <Text strong style={{ fontSize: '12px' }}>Duration: {duration}</Text>
+              </Col>
+            </Row>
+          )}
         </Space>
       </Card>
     </div>
