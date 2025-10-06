@@ -1,6 +1,3 @@
-import React from "react";
-import { FaSearch, FaRegBell, FaRegEnvelope } from "react-icons/fa";
-import "../../assets/styles/MyNavbar.css";
 import React, { useState } from "react";
 import { FaSearch, FaRegBell, FaRegEnvelope } from "react-icons/fa";
 import "../../assets/styles/MyNavbar.css";
@@ -15,10 +12,17 @@ function MyNavbar({ collapsed }) {
     if (name.length <= maxLength) return name;
     return name.substring(0, maxLength) + "...";
   };
+  
   const storedUser = localStorage.getItem("user");
   const userSession = storedUser ? JSON.parse(storedUser) : null;
-  // Có thể nhận userName từ props hoặc state trong tương lai
-  const userName = `${userSession.firstName} ${userSession.lastName}`; // Placeholder, sau này sẽ đọc từ data
+    // Có thể nhận userName từ props hoặc state trong tương lai
+    //const userName = `${userSession.firstName} ${userSession.lastName}`; // Placeholder, sau này sẽ đọc từ data
+
+  // Kiểm tra null safety trước khi truy cập properties
+  const userName = userSession && userSession.firstName && userSession.lastName
+    ? `${userSession.firstName} ${userSession.lastName}`
+    : "Guest User";
+
   // Xử lý khi click vào nút QR
   const handleQRClick = () => {
     setIsQRScannerOpen(true);
@@ -42,7 +46,6 @@ function MyNavbar({ collapsed }) {
       <div className="navbar-content">
         {/* Search Bar */}
         <div className="search-container">
-          <input type="text" placeholder="Tìm kiếm..." className="search-input" />
           <input type="text" placeholder="Tìm kiếm..." className="search-input" />
           <FaSearch className="search-icon" />
         </div>
