@@ -58,6 +58,14 @@ function HomePage() {
     reliability: 0, // System reliability percentage
   });
 
+  // Read user info from localStorage and compute a display name
+  // Move this to component scope so it's available during render
+  const storedUser = localStorage.getItem("user");
+  const userSession = storedUser ? JSON.parse(storedUser) : null;
+  const userName = userSession && (userSession.firstName )
+    ? `${userSession.firstName || ""}`.trim()
+    : "Guest User";
+
   // ==================== EFFECTS ====================
 
   /**
@@ -249,7 +257,8 @@ function HomePage() {
             <Col lg={9}>
               <div className="d-flex align-items-center mb-2">
                 <div>
-                  <h1 className="hero-title mb-1">Chào mừng [user] đến với Eco-Z</h1>
+                
+                  <h1 className="hero-title mb-1">Chào mừng {userName} đến với Eco-Z</h1>
                   <p className="hero-subtitle mb-0">
                     Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và
                     thân thiện môi trường

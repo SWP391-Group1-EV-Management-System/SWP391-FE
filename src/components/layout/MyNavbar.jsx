@@ -19,8 +19,8 @@ function MyNavbar({ collapsed }) {
     //const userName = `${userSession.firstName} ${userSession.lastName}`; // Placeholder, sau này sẽ đọc từ data
 
   // Kiểm tra null safety trước khi truy cập properties
-  const userName = userSession && userSession.firstName && userSession.lastName
-    ? `${userSession.firstName} ${userSession.lastName}`
+  const userName = userSession && userSession.firstName
+    ? `${userSession.firstName}`
     : "Guest User";
 
   // Xử lý khi click vào nút QR
