@@ -7,12 +7,7 @@
 import React, { useState, useEffect } from "react";
 
 // React Bootstrap Components
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-} from "react-bootstrap";
+import { Container, Row, Col, Card } from "react-bootstrap";
 
 // Custom Components
 import StationModal from "../components/station/StationModal.jsx";
@@ -40,11 +35,11 @@ import "../assets/styles/MapPage.css";
  */
 function MapPage() {
   // ==================== STATE MANAGEMENT ====================
-  
+
   const [mapStats, setMapStats] = useState({
     totalStations: 42,
     bookedStations: 8,
-    availableStations: 34
+    availableStations: 34,
   });
 
   // Modal state management
@@ -72,17 +67,46 @@ function MapPage() {
       normalChargingPrice: "2,500",
       amenities: ["WiFi", "Cafe", "Parking", "Security"],
       chargers: [
-        { id: 101, name: "Trụ A1", status: "available", power: "22 kW", type: "AC", bookings: 3 },
-        { id: 102, name: "Trụ A2", status: "busy", power: "22 kW", type: "AC", bookings: 5, estimatedWaitTime: 25 },
-        { id: 103, name: "Trụ A3", status: "available", power: "22 kW", type: "AC", bookings: 2 },
-        { id: 104, name: "Trụ A4", status: "available", power: "22 kW", type: "AC", bookings: 4 }
-      ]
+        {
+          id: 101,
+          name: "Trụ A1",
+          status: "available",
+          power: "22 kW",
+          type: "AC",
+          bookings: 3,
+        },
+        {
+          id: 102,
+          name: "Trụ A2",
+          status: "busy",
+          power: "22 kW",
+          type: "AC",
+          bookings: 5,
+          estimatedWaitTime: 25,
+        },
+        {
+          id: 103,
+          name: "Trụ A3",
+          status: "available",
+          power: "22 kW",
+          type: "AC",
+          bookings: 2,
+        },
+        {
+          id: 104,
+          name: "Trụ A4",
+          status: "available",
+          power: "22 kW",
+          type: "AC",
+          bookings: 4,
+        },
+      ],
     },
     {
       id: 2,
       name: "Trạm sạc Times City",
       status: "busy",
-      distance: "1.2 km", 
+      distance: "1.2 km",
       totalSlots: 12,
       availableSlots: 2,
       power: "50 kW",
@@ -98,11 +122,41 @@ function MapPage() {
       normalChargingPrice: "3,000",
       amenities: ["WiFi", "Shop", "Parking"],
       chargers: [
-        { id: 201, name: "Trụ B1", status: "busy", power: "50 kW", type: "DC Fast", bookings: 8, estimatedWaitTime: 15 },
-        { id: 202, name: "Trụ B2", status: "busy", power: "50 kW", type: "DC Fast", bookings: 6, estimatedWaitTime: 35 },
-        { id: 203, name: "Trụ B3", status: "available", power: "50 kW", type: "DC Fast", bookings: 4 },
-        { id: 204, name: "Trụ B4", status: "available", power: "50 kW", type: "DC Fast", bookings: 7 }
-      ]
+        {
+          id: 201,
+          name: "Trụ B1",
+          status: "busy",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 8,
+          estimatedWaitTime: 15,
+        },
+        {
+          id: 202,
+          name: "Trụ B2",
+          status: "busy",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 6,
+          estimatedWaitTime: 35,
+        },
+        {
+          id: 203,
+          name: "Trụ B3",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 4,
+        },
+        {
+          id: 204,
+          name: "Trụ B4",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 7,
+        },
+      ],
     },
     {
       id: 3,
@@ -111,7 +165,7 @@ function MapPage() {
       distance: "2.1 km",
       totalSlots: 6,
       availableSlots: 6,
-      power: "22 kW", 
+      power: "22 kW",
       type: "AC",
       address: "72A Nguyễn Trãi, Thanh Xuân, Hà Nội",
       phone: "024 3557 5555",
@@ -124,10 +178,31 @@ function MapPage() {
       normalChargingPrice: "2,700",
       amenities: ["WiFi", "Cafe", "Shop", "Parking", "Security"],
       chargers: [
-        { id: 301, name: "Trụ C1", status: "available", power: "22 kW", type: "AC", bookings: 2 },
-        { id: 302, name: "Trụ C2", status: "available", power: "22 kW", type: "AC", bookings: 5 },
-        { id: 303, name: "Trụ C3", status: "available", power: "22 kW", type: "AC", bookings: 1 }
-      ]
+        {
+          id: 301,
+          name: "Trụ C1",
+          status: "available",
+          power: "22 kW",
+          type: "AC",
+          bookings: 2,
+        },
+        {
+          id: 302,
+          name: "Trụ C2",
+          status: "available",
+          power: "22 kW",
+          type: "AC",
+          bookings: 5,
+        },
+        {
+          id: 303,
+          name: "Trụ C3",
+          status: "available",
+          power: "22 kW",
+          type: "AC",
+          bookings: 1,
+        },
+      ],
     },
     {
       id: 4,
@@ -137,7 +212,7 @@ function MapPage() {
       totalSlots: 4,
       availableSlots: 0,
       power: "22 kW",
-      type: "AC", 
+      type: "AC",
       address: "222 Trần Duy Hưng, Cầu Giấy, Hà Nội",
       phone: "024 3796 5588",
       email: "support@bigc-charging.vn",
@@ -147,8 +222,45 @@ function MapPage() {
       reviewCount: 23,
       fastChargingPrice: "3,500",
       normalChargingPrice: "2,800",
-      amenities: ["WiFi", "Shop", "Parking"]
-      // Không có chargers array - sẽ sử dụng fallback UI
+      amenities: ["WiFi", "Shop", "Parking"],
+      chargers: [
+        {
+          id: 401,
+          name: "Trụ D1",
+          status: "maintenance",
+          power: "22 kW",
+          type: "AC",
+          bookings: 0,
+          maintenanceNote: "Đang bảo trì hệ thống điện",
+        },
+        {
+          id: 402,
+          name: "Trụ D2",
+          status: "maintenance",
+          power: "22 kW",
+          type: "AC",
+          bookings: 0,
+          maintenanceNote: "Thay thế cáp sạc",
+        },
+        {
+          id: 403,
+          name: "Trụ D3",
+          status: "maintenance",
+          power: "22 kW",
+          type: "AC",
+          bookings: 0,
+          maintenanceNote: "Cập nhật phần mềm",
+        },
+        {
+          id: 404,
+          name: "Trụ D4",
+          status: "maintenance",
+          power: "22 kW",
+          type: "AC",
+          bookings: 0,
+          maintenanceNote: "Kiểm tra định kỳ",
+        },
+      ],
     },
     {
       id: 5,
@@ -168,9 +280,92 @@ function MapPage() {
       reviewCount: 167,
       fastChargingPrice: "4,000",
       normalChargingPrice: "3,200",
-      amenities: ["WiFi", "Cafe", "Shop", "Parking", "Security"]
-      // Không có chargers array - sẽ sử dụng fallback UI
-    }
+      amenities: ["WiFi", "Cafe", "Shop", "Parking", "Security"],
+      chargers: [
+        {
+          id: 501,
+          name: "Trụ E1",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 1,
+        },
+        {
+          id: 502,
+          name: "Trụ E2",
+          status: "busy",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 4,
+          estimatedWaitTime: 20,
+        },
+        {
+          id: 503,
+          name: "Trụ E3",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 2,
+        },
+        {
+          id: 504,
+          name: "Trụ E4",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 3,
+        },
+        {
+          id: 505,
+          name: "Trụ E5",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 0,
+        },
+        {
+          id: 506,
+          name: "Trụ E6",
+          status: "busy",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 5,
+          estimatedWaitTime: 12,
+        },
+        {
+          id: 507,
+          name: "Trụ E7",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 1,
+        },
+        {
+          id: 508,
+          name: "Trụ E8",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 2,
+        },
+        {
+          id: 509,
+          name: "Trụ E9",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 3,
+        },
+        {
+          id: 510,
+          name: "Trụ E10",
+          status: "available",
+          power: "50 kW",
+          type: "DC Fast",
+          bookings: 1,
+        },
+      ],
+    },
   ]);
 
   // ==================== HELPER FUNCTIONS ====================
@@ -265,14 +460,14 @@ function MapPage() {
                     {chargingStations.length} trụ sạc gần bạn
                   </div>
                 </div>
-                
+
                 <div className="stations-list">
                   {chargingStations.map((station) => (
-                    <div 
-                      key={station.id} 
+                    <div
+                      key={station.id}
                       className="station-item"
                       onClick={() => handleStationClick(station)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: "pointer" }}
                     >
                       <div className="station-header">
                         <h4 className="station-name">{station.name}</h4>
@@ -280,15 +475,19 @@ function MapPage() {
                           {getStatusText(station.status)}
                         </span>
                       </div>
-                      
+
                       <div className="station-details">
                         <div className="station-detail">
                           <BsGeoAlt className="station-detail-icon" />
-                          <span className="station-distance">{station.distance}</span>
+                          <span className="station-distance">
+                            {station.distance}
+                          </span>
                         </div>
                         <div className="station-detail">
                           <BsLightning className="station-detail-icon" />
-                          <span>{station.availableSlots}/{station.totalSlots} trống</span>
+                          <span>
+                            {station.availableSlots}/{station.totalSlots} trống
+                          </span>
                         </div>
                         <div className="station-detail">
                           <BsBattery className="station-detail-icon" />
@@ -309,7 +508,7 @@ function MapPage() {
       </Container>
 
       {/* Station Details Modal */}
-      <StationModal 
+      <StationModal
         isOpen={showModal}
         onClose={handleCloseModal}
         station={selectedStation}

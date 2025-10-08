@@ -50,7 +50,7 @@ const TechnicalDetails = ({ sessionData }) => {
         }}
       >
         <Space>
-          <SettingOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
+          <SettingOutlined style={{ fontSize: "24px", color: "#10b981" }} />
           <Title level={4} style={{ margin: 0, color: "#1a1a1a" }}>
             Thông số kỹ thuật
           </Title>
@@ -66,10 +66,10 @@ const TechnicalDetails = ({ sessionData }) => {
               align="middle"
               style={{
                 padding: "16px 20px",
-                backgroundColor: spec.highlight ? "#e6f7ff" : "#f8fafc",
+                backgroundColor: spec.highlight ? "#d1fae5" : "#f8fafc",
                 borderRadius: "12px",
                 border: spec.highlight
-                  ? "2px solid #91d5ff"
+                  ? "2px solid #10b981"
                   : "1px solid #e2e8f0",
                 transition: "all 0.3s ease",
               }}
@@ -88,7 +88,7 @@ const TechnicalDetails = ({ sessionData }) => {
               <Col>
                 <Text
                   style={{
-                    color: spec.highlight ? "#1890ff" : "#1f2937",
+                    color: spec.highlight ? "#10b981" : "#1f2937",
                     fontSize: "16px",
                     fontWeight: spec.highlight ? 700 : 600,
                     fontFamily: "monospace",
