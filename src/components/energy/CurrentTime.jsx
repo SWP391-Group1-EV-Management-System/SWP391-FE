@@ -27,7 +27,7 @@ const CurrentTime = ({ currentTime }) => {
         }}
       >
         <Space>
-          <ClockCircleOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
+          <ClockCircleOutlined style={{ fontSize: "24px", color: "#10b981" }} />
           <Title level={4} style={{ margin: 0, color: "#1a1a1a" }}>
             Thời gian hiện tại
           </Title>

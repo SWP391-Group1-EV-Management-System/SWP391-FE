@@ -29,7 +29,7 @@ const EnergyHeader = ({ sessionData, statusConfig }) => {
                 justifyContent: "center",
                 width: "64px",
                 height: "64px",
-                background: "linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)",
+                background: "linear-gradient(135deg, #10b981 0%, #34d399 100%)",
                 borderRadius: "16px",
                 color: "white",
                 fontSize: "32px",

@@ -4,10 +4,14 @@ import "../../assets/styles/MyNavbar.css";
 import { BsQrCodeScan } from "react-icons/bs";
 import { TbLogout } from "react-icons/tb";
 import QRScanner from "../qr/QRScanner";
+import QRResultModal from "../qr/QRResultModal";
 
 function MyNavbar({ collapsed }) {
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isQRResultModalOpen, setIsQRResultModalOpen] = useState(false);
+  const [qrResult, setQrResult] = useState("");
+  const [stationData, setStationData] = useState(null);
   const dropdownRef = useRef(null);
 
   // Function để giới hạn độ dài tên user
@@ -38,11 +42,46 @@ function MyNavbar({ collapsed }) {
   };
 
   // Xử lý khi quét QR thành công
-  const handleScanSuccess = (result) => {
+  const handleScanSuccess = async (result) => {
     console.log("QR Code được quét:", result);
-    alert(`QR Code: ${result}`);
+    setQrResult(result);
     setIsQRScannerOpen(false);
-    // Thêm logic xử lý kết quả QR ở đây
+
+    // Gọi API để lấy thông tin trụ sạc từ QR code
+    try {
+      // TODO: Thay thế bằng API call thực tế
+      // const response = await fetch(`/api/stations/qr/${result}`);
+      // const data = await response.json();
+
+      // Mock data để demo - thay thế bằng API call thực tế
+      const mockStationData = {
+        stationInfo: {
+          stationName: "Vincom Center",
+          chargerName: "Trụ A1",
+          chargerType: "AC 22kW",
+        },
+        chargingConfig: {
+          minBatteryLevel: 10,
+          maxBatteryLevel: 95,
+          defaultBatteryLevel: 80,
+          stepSize: 5,
+        },
+      };
+
+      setStationData(mockStationData);
+      setIsQRResultModalOpen(true);
+    } catch (error) {
+      console.error("Lỗi khi lấy thông tin trụ sạc:", error);
+      // Hiển thị thông báo lỗi hoặc sử dụng giá trị mặc định
+      setIsQRResultModalOpen(true);
+    }
+  };
+
+  // Xử lý đóng QR Result Modal
+  const handleCloseQRResultModal = () => {
+    setIsQRResultModalOpen(false);
+    setQrResult("");
+    setStationData(null);
   };
 
   // Xử lý toggle dropdown user
@@ -126,6 +165,14 @@ function MyNavbar({ collapsed }) {
         isOpen={isQRScannerOpen}
         onClose={handleCloseQRScanner}
         onScanSuccess={handleScanSuccess}
+      />
+
+      {/* QR Result Modal */}
+      <QRResultModal
+        isOpen={isQRResultModalOpen}
+        onClose={handleCloseQRResultModal}
+        qrResult={qrResult}
+        stationData={stationData}
       />
     </nav>
   );

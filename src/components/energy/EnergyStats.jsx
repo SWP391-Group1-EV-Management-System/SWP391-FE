@@ -13,11 +13,11 @@ const EnergyStats = ({ sessionData }) => {
       <Col xs={24} md={8}>
         <Card
           style={{
-            borderRadius: '16px',
-            border: '1px solid #e8f4fd',
-            boxShadow: '0 4px 16px rgba(24, 144, 255, 0.08)',
-            textAlign: 'center',
-            height: '100%'
+            borderRadius: "16px",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.04)",
+            textAlign: "center",
+            height: "100%",
           }}
           styles={{
             body: { padding: "24px" },
@@ -27,7 +27,7 @@ const EnergyStats = ({ sessionData }) => {
             <ThunderboltOutlined
               style={{
                 fontSize: "32px",
-                color: "#1890ff",
+                color: "#10b981",
                 marginBottom: "8px",
               }}
             />
@@ -49,11 +49,11 @@ const EnergyStats = ({ sessionData }) => {
       <Col xs={24} md={8}>
         <Card
           style={{
-            borderRadius: '16px',
-            border: '1px solid #e8f4fd',
-            boxShadow: '0 4px 16px rgba(24, 144, 255, 0.08)',
-            textAlign: 'center',
-            height: '100%'
+            borderRadius: "16px",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.04)",
+            textAlign: "center",
+            height: "100%",
           }}
           styles={{
             body: { padding: "24px" },
@@ -63,7 +63,7 @@ const EnergyStats = ({ sessionData }) => {
             <ClockCircleOutlined
               style={{
                 fontSize: "32px",
-                color: "#1890ff",
+                color: "#10b981",
                 marginBottom: "8px",
               }}
             />
@@ -84,11 +84,11 @@ const EnergyStats = ({ sessionData }) => {
       <Col xs={24} md={8}>
         <Card
           style={{
-            borderRadius: '16px',
-            border: '1px solid #e8f4fd',
-            boxShadow: '0 4px 16px rgba(24, 144, 255, 0.08)',
-            textAlign: 'center',
-            height: '100%'
+            borderRadius: "16px",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.04)",
+            textAlign: "center",
+            height: "100%",
           }}
           styles={{
             body: { padding: "24px" },
@@ -98,7 +98,7 @@ const EnergyStats = ({ sessionData }) => {
             <DollarOutlined
               style={{
                 fontSize: "32px",
-                color: "#1890ff",
+                color: "#10b981",
                 marginBottom: "8px",
               }}
             />
