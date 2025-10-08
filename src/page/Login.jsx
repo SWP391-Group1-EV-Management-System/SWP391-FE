@@ -10,7 +10,7 @@ import { IoClose } from "react-icons/io5";
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-//Cho huy
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
