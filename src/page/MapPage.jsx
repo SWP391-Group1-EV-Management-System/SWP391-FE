@@ -16,6 +16,7 @@ import {
 
 // Custom Components
 import StationModal from "../components/station/StationModal.jsx";
+import GGMap from "../components/map/Map.jsx";
 
 // Bootstrap Icons
 import {
@@ -249,13 +250,7 @@ function MapPage() {
           <Col lg={8} md={7}>
             <Card className="map-content-card">
               <div className="map-container">
-                <div className="map-placeholder">
-                  <BsMap className="map-placeholder-icon" />
-                  <div className="map-placeholder-text">Bản đồ trụ sạc</div>
-                  <div className="map-placeholder-subtext">
-                    Khu vực để tích hợp API Maps
-                  </div>
-                </div>
+                <GGMap />
               </div>
             </Card>
           </Col>

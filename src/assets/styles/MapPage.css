@@ -93,12 +93,10 @@
 
 .map-container {
   height: 100%;
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f8f9fa;
-  border-radius: 0 0 0 16px;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+  overflow: hidden;
 }
 
 .map-placeholder {
