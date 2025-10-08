@@ -83,7 +83,7 @@ function HomePage() {
       stations: 248, // Target: 248 active stations
       sessions: 1247, // Target: 1,247 sessions today
       users: 8932, // Target: 8,932 active users
-      reliability: 99, // Target: 99 reliability
+      reliability: 99.8, // Target: 99.8% reliability
     };
 
     let currentStep = 0;
@@ -144,11 +144,11 @@ function HomePage() {
       trend: "up",
     },
     {
-      label: "Điểm uy tín", // System reliability
-      value: `${animatedValues.reliability}`,
+      label: "Độ tin cậy", // System reliability
+      value: `${animatedValues.reliability}%`,
       icon: BsShield,
       gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)", // Green gradient
-      change: "+3",
+      change: "+0.2%",
       trend: "up",
     },
   ];
