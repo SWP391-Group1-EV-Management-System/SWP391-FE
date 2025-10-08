@@ -1,15 +1,17 @@
 /**
- * ElasticSlider Component
+ * ChargingTimeSlider Component
  *
- * Một slider tương tác với hiệu ứng elastic (đàn hồi) khi kéo ra ngoài giới hạn.
+ * Slider điều chỉnh thời gian sạc với hiệu ứng elastic (đàn hồi) khi kéo ra ngoài giới hạn.
  * Sử dụng Framer Motion để tạo animation mượt mà và hiệu ứng vật lý.
+ * Nhận giá trị min/max thời gian sạc từ backend.
  *
  * Features:
  * - Elastic overflow effect khi kéo ra ngoài
  * - Hover/Touch scale animation
- * - Stepped values (có thể nhảy theo bước)
- * - Custom icons cho left/right
- * - Callback khi giá trị thay đổi
+ * - Stepped values theo phút
+ * - Hiển thị thời gian dưới dạng phút/giờ
+ * - Icons clock cho left/right
+ * - Callback khi thời gian sạc thay đổi
  */
 
 import {
@@ -20,7 +22,7 @@ import {
   useTransform,
 } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { RiVolumeDownFill, RiVolumeUpFill } from "react-icons/ri";
+import { BsClock, BsClockFill } from "react-icons/bs";
 
 import "../../assets/styles/ElasticSlider.css";
 
@@ -28,40 +30,41 @@ import "../../assets/styles/ElasticSlider.css";
 const MAX_OVERFLOW = 50;
 
 /**
- * ElasticSlider - Main component
- * @param {number} defaultValue - Giá trị mặc định của slider (50)
- * @param {number} startingValue - Giá trị tối thiểu (0)
- * @param {number} maxValue - Giá trị tối đa (100)
+ * ChargingTimeSlider - Main component
+ * @param {number} defaultValue - Thời gian sạc mặc định (phút) (30)
+ * @param {number} minTime - Thời gian sạc tối thiểu từ BE (phút) (15)
+ * @param {number} maxTime - Thời gian sạc tối đa từ BE (phút) (480)
  * @param {string} className - CSS class tùy chỉnh
- * @param {boolean} isStepped - Có nhảy theo bước hay không (false)
- * @param {number} stepSize - Kích thước bước nhảy (1)
- * @param {JSX.Element} leftIcon - Icon bên trái slider
- * @param {JSX.Element} rightIcon - Icon bên phải slider
- * @param {function} onValueChange - Callback khi giá trị thay đổi
+ * @param {number} stepSize - Bước nhảy theo phút (15)
+ * @param {function} onTimeChange - Callback khi thời gian sạc thay đổi
+ * @param {boolean} loading - Trạng thái loading khi lấy data từ BE
  */
-export default function ElasticSlider({
-  defaultValue = 50,
-  startingValue = 0,
-  maxValue = 100,
+export default function ChargingTimeSlider({
+  defaultValue = 30,
+  minTime = 15,
+  maxTime = 480,
   className = "",
-  isStepped = false,
-  stepSize = 1,
-  leftIcon = <RiVolumeDownFill />,
-  rightIcon = <RiVolumeUpFill />,
-  onValueChange = () => {},
+  stepSize = 15,
+  onTimeChange = () => {},
+  loading = false,
 }) {
   return (
-    <div className={`slider-container ${className}`}>
-      <Slider
-        defaultValue={defaultValue}
-        startingValue={startingValue}
-        maxValue={maxValue}
-        isStepped={isStepped}
-        stepSize={stepSize}
-        leftIcon={leftIcon}
-        rightIcon={rightIcon}
-        onValueChange={onValueChange}
-      />
+    <div className={`slider-container charging-time-slider ${className}`}>
+      {loading ? (
+        <div className="loading-placeholder">Đang tải thông tin thời gian sạc...</div>
+      ) : (
+        <Slider
+          defaultValue={defaultValue}
+          startingValue={minTime}
+          maxValue={maxTime}
+          isStepped={true}
+          stepSize={stepSize}
+          leftIcon={<BsClock />}
+          rightIcon={<BsClockFill />}
+          onValueChange={onTimeChange}
+          isTimeSlider={true}
+        />
+      )}
     </div>
   );
 }
@@ -79,6 +82,7 @@ function Slider({
   leftIcon,
   rightIcon,
   onValueChange,
+  isTimeSlider = false,
 }) {
   // State lưu giá trị hiện tại của slider
   const [value, setValue] = useState(defaultValue);
@@ -180,6 +184,25 @@ function Slider({
     return ((value - startingValue) / totalRange) * 100;
   };
 
+  /**
+   * Format thời gian từ phút sang định dạng dễ đọc
+   * @param {number} minutes - Số phút
+   * @returns {string} Định dạng thời gian
+   */
+  const formatTime = (minutes) => {
+    if (minutes < 60) {
+      return `${minutes} phút`;
+    } else {
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      if (remainingMinutes === 0) {
+        return `${hours} giờ`;
+      } else {
+        return `${hours}h ${remainingMinutes}m`;
+      }
+    }
+  };
+
   // Render slider UI
   return (
     <>
@@ -273,8 +296,15 @@ function Slider({
         </motion.div>
       </motion.div>
 
-      {/* Value indicator hiển thị giá trị hiện tại */}
-      <p className="value-indicator">{Math.round(value)}</p>
+      {/* Time indicator hiển thị thời gian sạc hiện tại */}
+      <div className="time-indicator">
+        <p className="time-value">
+          {isTimeSlider ? formatTime(Math.round(value)) : Math.round(value)}
+        </p>
+        {isTimeSlider && (
+          <p className="time-label">Thời gian sạc</p>
+        )}
+      </div>
     </>
   );
 }
