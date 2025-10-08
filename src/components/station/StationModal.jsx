@@ -6,196 +6,127 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { Button } from "react-bootstrap";
-import { BsXLg, BsLightning, BsGeoAlt, BsClock, BsPeople, BsStarFill } from "react-icons/bs";
+import { 
+  IoClose, 
+  IoLocationOutline, 
+  IoTimeOutline, 
+  IoPeopleOutline, 
+  IoStarSharp,
+  IoFlashOutline,
+  IoCheckmarkCircle,
+  IoCloseCircle,
+  IoWifiOutline,
+  IoCarOutline,
+  IoShieldCheckmarkOutline,
+  IoStorefrontOutline,
+  IoCafeOutline,
+  IoPowerOutline,
+  IoSpeedometerOutline,
+  IoCardOutline
+} from "react-icons/io5";
+import { useStationPosts } from "../../hooks/useStationPosts";
+import "../../assets/styles/StationModal.css";
 
 const StationModal = ({ isOpen, onClose, station }) => {
+  // Hook để lấy danh sách trụ sạc với mock data
+  const { posts, loading, error, statistics } = useStationPosts(station?.id);
+
   if (!isOpen || !station) return null;
 
-  const handleBookCharger = (chargerId) => {
-    alert(`Đã đặt chỗ trụ sạc ${chargerId} tại ${station.name}!`);
+  const handleBookCharger = (postId) => {
+    alert(`Đã đặt chỗ trụ sạc ${postId} tại ${station.name}!`);
+  };
+
+  // Enhanced amenity icons mapping
+  const getAmenityIcon = (amenity) => {
+    const amenityLower = amenity.toLowerCase();
+    if (amenityLower.includes('wifi')) return IoWifiOutline;
+    if (amenityLower.includes('cafe') || amenityLower.includes('coffee')) return IoCafeOutline;
+    if (amenityLower.includes('shop') || amenityLower.includes('store')) return IoStorefrontOutline;
+    if (amenityLower.includes('parking') || amenityLower.includes('car')) return IoCarOutline;
+    if (amenityLower.includes('security')) return IoShieldCheckmarkOutline;
+    return IoStorefrontOutline; // Default
   };
 
   const modalContent = (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: "var(--z-modal-backdrop)",
-      }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          backgroundColor: "white",
-          borderRadius: "12px",
-          padding: "24px",
-          maxWidth: "600px",
-          width: "90%",
-          maxHeight: "80vh",
-          overflowY: "auto",
-          boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",
-          zIndex: "var(--z-modal)",
-          position: "relative",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="station-modal-backdrop" onClick={onClose}>
+      <div className="station-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "20px",
-            borderBottom: "2px solid #f0f0f0",
-            paddingBottom: "15px",
-          }}
-        >
-          <h4
-            style={{
-              margin: 0,
-              color: "#333",
-              fontSize: "1.5rem",
-              fontWeight: "600",
-            }}
-          >
-            {station.name}
-          </h4>
-          <button
-            onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              fontSize: "1.5rem",
-              cursor: "pointer",
-              color: "#666",
-              padding: "5px",
-              borderRadius: "50%",
-              width: "40px",
-              height: "40px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <BsXLg />
+        <div className="station-modal__header">
+          <h4 className="station-modal__title">{station.name}</h4>
+          <button onClick={onClose} className="station-modal__close-btn">
+            <IoClose />
           </button>
         </div>
 
         {/* Station Info */}
-        <div style={{ marginBottom: "24px" }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "10px",
-              color: "#666",
-            }}
-          >
-            <BsGeoAlt style={{ marginRight: "8px", fontSize: "1.1rem" }} />
+        <div className="station-info">
+          <div className="station-info__item">
+            <IoLocationOutline className="station-info__icon" />
             <span>{station.address}</span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "10px",
-              color: "#666",
-            }}
-          >
-            <BsClock style={{ marginRight: "8px", fontSize: "1.1rem" }} />
+          <div className="station-info__item">
+            <IoTimeOutline className="station-info__icon" />
             <span>{station.openHours || "Mở cửa 24/7"}</span>
           </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginBottom: "10px",
-              color: "#666",
-            }}
-          >
-            <BsPeople style={{ marginRight: "8px", fontSize: "1.1rem" }} />
-            <span>
-              {station.totalBookings || 0} người đã đặt chỗ hôm nay
-            </span>
+          <div className="station-info__item">
+            <IoPeopleOutline className="station-info__icon" />
+            <span>{station.totalBookings || 0} người đã đặt chỗ hôm nay</span>
           </div>
           {station.rating && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                color: "#666",
-              }}
-            >
-              <BsStarFill style={{ marginRight: "8px", fontSize: "1.1rem", color: "#ffc107" }} />
+            <div className="station-info__item">
+              <IoStarSharp className="station-info__icon station-info__icon--star" />
               <span>{station.rating}/5 ({station.reviewCount || 0} đánh giá)</span>
             </div>
           )}
         </div>
 
         {/* Station Details */}
-        <div style={{ marginBottom: "24px" }}>
-          <h5
-            style={{
-              marginBottom: "15px",
-              color: "#333",
-              fontSize: "1.2rem",
-              fontWeight: "600",
-            }}
-          >
-            Thông tin chi tiết
-          </h5>
+        <div className="station-details" style={{ display: 'flex', flexDirection: 'column' }}>
+          {/* Realtime Statistics */}
+          {posts.length > 0 && (
+            <div className="station-details__section" style={{ marginBottom: '20px', width: '100%' }}>
+              <div className="station-details__section-title">Thông tin chi tiết</div>
+              <div className="statistics-grid">
+                <div className="statistics-item statistics-item--available">
+                  <div className="statistics-number statistics-number--available">
+                    {statistics.available}
+                  </div>
+                  <div className="statistics-label statistics-number--available">Sẵn sàng</div>
+                </div>
+                <div className="statistics-item statistics-item--busy">
+                  <div className="statistics-number statistics-number--busy">
+                    {statistics.busy}
+                  </div>
+                  <div className="statistics-label statistics-number--busy">Đang sạc</div>
+                </div>
+                <div className="statistics-item statistics-item--inactive">
+                  <div className="statistics-number statistics-number--inactive">
+                    {statistics.inactive}
+                  </div>
+                  <div className="statistics-label statistics-number--inactive">Không hoạt động</div>
+                </div>
+                <div className="statistics-item statistics-item--total">
+                  <div className="statistics-number statistics-number--total">
+                    {statistics.total}
+                  </div>
+                  <div className="statistics-label statistics-number--total">Tổng cộng</div>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Amenities */}
           {station.amenities && station.amenities.length > 0 && (
-            <div style={{ marginBottom: "15px" }}>
-              <div
-                style={{
-                  color: "#333",
-                  fontWeight: "500",
-                  marginBottom: "8px",
-                }}
-              >
-                Tiện ích
-              </div>
-              <div style={{ marginLeft: "0px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
+            <div className="station-details__section" style={{ marginTop: '10px', width: '100%' }}>
+              <div className="station-details__section-title">Tiện ích</div>
+              <div className="amenities-list">
                 {station.amenities.map((amenity, index) => {
-                  const getAmenityIcon = (amenity) => {
-                    switch (amenity.toLowerCase()) {
-                      case 'wifi': return '📶';
-                      case 'cafe': case 'coffee': return '☕';
-                      case 'shop': case 'store': return '🏪';
-                      case 'parking': return '🚗';
-                      case 'security': return '🛡️';
-                      default: return '🔧';
-                    }
-                  };
+                  const IconComponent = getAmenityIcon(amenity);
                   
                   return (
-                    <span
-                      key={index}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "4px 8px",
-                        backgroundColor: "#e3f2fd",
-                        color: "#1976d2",
-                        borderRadius: "16px",
-                        fontSize: "0.85rem",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {getAmenityIcon(amenity) && (
-                        <span style={{ marginRight: "4px" }}>
-                          {getAmenityIcon(amenity)}
-                        </span>
-                      )}
+                    <span key={index} className="amenity-tag">
+                      <IconComponent className="amenity-icon" />
                       {amenity}
                     </span>
                   );
@@ -203,172 +134,106 @@ const StationModal = ({ isOpen, onClose, station }) => {
               </div>
             </div>
           )}
-
-          {/* Contact Info */}
-          {(station.phone || station.email) && (
-            <div style={{ marginBottom: "15px" }}>
-              <div
-                style={{
-                  color: "#333",
-                  fontWeight: "500",
-                  marginBottom: "8px",
-                }}
-              >
-                Liên hệ
-              </div>
-              <div style={{ marginLeft: "0px", color: "#666", fontSize: "0.9rem" }}>
-                {station.phone && (
-                  <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
-                    <span style={{ marginRight: "6px", fontSize: "0.9rem" }}>📞</span>
-                    {station.phone}
-                  </div>
-                )}
-                {station.email && (
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <span style={{ marginRight: "6px", fontSize: "0.9rem" }}>✉️</span>
-                    {station.email}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Chargers List */}
         <div>
-          <h5
-            style={{
-              marginBottom: "15px",
-              color: "#333",
-              fontSize: "1.2rem",
-              fontWeight: "600",
-            }}
-          >
-            Danh sách trụ sạc ({station.chargers?.length || station.totalSlots || 0})
+          <h5 className="chargers-section__title">
+            Danh sách trụ sạc ({posts.length > 0 ? posts.length : station.totalSlots || 0})
+            {loading && <span className="chargers-loading-text"> - Đang tải...</span>}
           </h5>
-          <div style={{ display: "grid", gap: "10px" }}>
-            {station.chargers?.length > 0 ? (
-              station.chargers.map((charger) => (
-              <div
-                key={charger.id}
-                style={{
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
-                  padding: "15px",
-                  backgroundColor: "#f9f9f9",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "10px",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <BsLightning
-                      style={{
-                        marginRight: "8px",
-                        fontSize: "1.1rem",
-                        color: "#28a745",
-                      }}
-                    />
-                    <strong>Trụ {charger.id}</strong>
+          
+          {error && <div className="chargers-error">{error}</div>}
+          
+          <div className="chargers-grid">
+            {posts.length > 0 ? (
+              posts.map((post) => (
+              <div key={post.id} className="charger-item">
+                <div className="charger-item__header">
+                  <div className="charger-item__title">
+                    <IoPowerOutline className={`charger-item__icon ${post.isActive ? 'charger-item__icon--active' : 'charger-item__icon--inactive'}`} />
+                    <strong>Trụ {post.id}</strong>
                   </div>
-                  <span
-                    style={{
-                      padding: "4px 12px",
-                      borderRadius: "20px",
-                      fontSize: "0.85rem",
-                      fontWeight: "500",
-                      backgroundColor:
-                        charger.status === "available" ? "#d4edda" : "#f8d7da",
-                      color:
-                        charger.status === "available" ? "#155724" : "#721c24",
-                    }}
-                  >
-                    {charger.status === "available"
-                      ? "Sẵn sàng"
-                      : "Đang sử dụng"}
-                  </span>
+                  <div className="charger-item__status-area">
+                    {post.isActive ? (
+                      <IoCheckmarkCircle className="charger-status-icon charger-status-icon--active" />
+                    ) : (
+                      <IoCloseCircle className="charger-status-icon charger-status-icon--inactive" />
+                    )}
+                    <span className={`charger-status-badge ${
+                      post.isAvailable ? 'charger-status-badge--available' : 
+                      post.isActive ? 'charger-status-badge--busy' : 'charger-status-badge--inactive'
+                    }`}>
+                      {post.isAvailable ? "Sẵn sàng" : 
+                       post.isActive ? "Đang sử dụng" : "Không hoạt động"}
+                    </span>
+                  </div>
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <div style={{ fontSize: "0.9rem", color: "#666" }}>
-                    <div>Công suất: {charger.power}</div>
-                    <div>Loại: {charger.type}</div>
-                    {charger.bookings && (
-                      <div style={{ fontSize: "0.85rem", color: "#28a745", fontWeight: "500" }}>
-                        {charger.bookings} lượt đặt hôm nay
+                <div className="charger-item__content">
+                  <div className="charger-item__details">
+                    <div>
+                      <IoFlashOutline style={{marginRight: '6px', fontSize: '1.3rem'}} />
+                      Công suất: {post.powerDisplay}
+                    </div>
+                    <div>
+                      <IoCardOutline style={{marginRight: '6px', fontSize: '1.3rem'}} />
+                      Giá: {post.feeDisplay}
+                    </div>
+                    {post.supportedTypes?.length > 0 && (
+                      <div>
+                        <IoSpeedometerOutline style={{marginRight: '6px', fontSize: '1.3rem'}} />
+                        Loại: {post.supportedTypes.join(", ")}
+                      </div>
+                    )}
+                    {post.currentSession && (
+                      <div className="charger-session-warning">
+                        <IoTimeOutline style={{marginRight: '6px', fontSize: '1.3rem'}} />
+                        Đang có session hoạt động
                       </div>
                     )}
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    {charger.estimatedWaitTime && charger.status !== "available" && (
-                      <div style={{ fontSize: "0.8rem", color: "#666", marginBottom: "5px" }}>
-                        Còn ~{charger.estimatedWaitTime} phút
-                      </div>
-                    )}
+                  <div className="charger-item__action">
                     <Button
-                      variant={
-                        charger.status === "available" ? "success" : "secondary"
-                      }
+                      variant={post.isAvailable ? "success" : "secondary"}
                       size="sm"
-                      disabled={charger.status !== "available"}
-                      onClick={() => handleBookCharger(charger.id)}
-                      style={{
-                        minWidth: "80px",
-                        fontWeight: "500",
-                      }}
+                      disabled={!post.isAvailable}
+                      onClick={() => handleBookCharger(post.id)}
+                      className="charger-book-btn"
                     >
-                      {charger.status === "available" ? "Đặt chỗ" : "Đã đặt"}
+                      {post.isAvailable ? "Đặt chỗ" : "Không khả dụng"}
                     </Button>
                   </div>
                 </div>
               </div>
               ))
+            ) : loading ? (
+              // Loading state
+              <div className="charger-empty-state">
+                <div>
+                  <IoPowerOutline className="charger-empty-state__icon charger-empty-state__icon--loading" />
+                </div>
+                <div>Đang tải danh sách trụ sạc...</div>
+              </div>
             ) : (
-              // Fallback UI khi không có thông tin chi tiết về chargers
-              <div
-                style={{
-                  border: "1px solid #e0e0e0",
-                  borderRadius: "8px",
-                  padding: "20px",
-                  backgroundColor: "#f9f9f9",
-                  textAlign: "center",
-                }}
-              >
-                <div style={{ marginBottom: "10px" }}>
-                  <BsLightning
-                    style={{
-                      fontSize: "2rem",
-                      color: "#28a745",
-                      marginBottom: "10px",
-                    }}
-                  />
+              // Empty state - không có trụ sạc
+              <div className="charger-empty-state">
+                <div>
+                  <IoPowerOutline className="charger-empty-state__icon" />
                 </div>
-                <div style={{ color: "#333", marginBottom: "5px" }}>
-                  <strong>{station.totalSlots || 0} trụ sạc</strong>
+                <div className="charger-empty-state__title">
+                  <strong>Chưa có thông tin chi tiết trụ sạc</strong>
                 </div>
-                <div style={{ color: "#666", fontSize: "0.9rem", marginBottom: "10px" }}>
-                  Công suất: {station.power} | Loại: {station.type}
+                <div className="charger-empty-state__subtitle">
+                  Tổng số trụ: {station.totalSlots || 0}
                 </div>
-                <div style={{ fontSize: "0.85rem", color: "#28a745", fontWeight: "500", marginBottom: "15px" }}>
-                  {station.availableSlots || 0} trụ còn trống
+                <div className="charger-empty-state__info">
+                  Khả dụng: {station.availableSlots || 0} trụ
                 </div>
                 <Button
                   variant={station.status === "available" ? "success" : "secondary"}
                   disabled={station.status !== "available"}
                   onClick={() => handleBookCharger("general")}
-                  style={{
-                    fontWeight: "500",
-                  }}
+                  className="charger-empty-state__btn"
                 >
                   {station.status === "available" ? "Đặt chỗ" : 
                    station.status === "maintenance" ? "Bảo trì" : "Đầy chỗ"}
