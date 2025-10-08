@@ -15,6 +15,7 @@ import WelcomePage from "./page/WelcomePage.jsx";
 import SessionStaffPage from "./page/SessionStaffPage.jsx";
 import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
 import OTPVerification from "./page/OTPVerification.jsx";
+import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
         <Route path="/app" element={<Layout />}>
           {/* Default route for /app */}
           
+          <Route path="evadmindashboard" element={<EVAdminDashboard />} />
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
           <Route path="energy" element={<EnergyPage />} />
