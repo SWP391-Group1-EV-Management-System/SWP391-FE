@@ -27,14 +27,6 @@ function WelcomePage() {
                 <a href="#">Contact</a>
               </div>
             </div>
-            <div className="welcome-btns">
-              <button className="welcome-login-btn" onClick={handleLogin}>
-                Login
-              </button>
-              <button className="welcome-register-btn" onClick={handleRegister}>
-                Register
-              </button>
-            </div>
           </div>
         </div>
         <div>ádasdadsasdasda</div>
