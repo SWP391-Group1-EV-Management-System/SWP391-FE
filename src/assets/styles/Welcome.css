@@ -1,6 +1,85 @@
 .welcomePage-header {
-    background: url(../images/Frame1.png);
-    background-size: cover;
-    background-position: center;
-    height: 100vh;
+  background: url(../images/Frame1.png);
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
+}
+
+.welcome-navbar {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  padding: 20px;
+}
+
+.welcome-navbar img {
+  height: 50px;
+  width: auto;
+}
+
+.welcome-navbar-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.welcome-navbar-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 18px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.welcome-navbar-links a:hover,
+.welcome-navbar-links a.active {
+  background-color: rgba(11, 148, 89, 0.1);
+  color: #0b9459;
+}
+
+.welcome-btns {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-left: auto;
+}
+
+.welcome-login-btn,
+.welcome-register-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.welcome-login-btn {
+  background: transparent;
+  color: #0b9459;
+  border: 2px solid #0b9459;
+}
+
+.welcome-login-btn:hover {
+  background: #0b9459;
+  color: white;
+}
+
+.welcome-register-btn {
+  background: #0b9459;
+  color: white;
+}
+
+.welcome-register-btn:hover {
+  background: #097a4a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(11, 148, 89, 0.3);
 }

@@ -15,14 +15,14 @@
 
 .register-inner {
   background: rgba(255, 255, 255, 0.54);
-  padding: 15px 30px 0;
+  padding: 20px 40px 0;
   border-radius: 25px;
   box-shadow: 0 4px 12px #98b691;
   width: 100%;
   max-width: 650px;
   backdrop-filter: blur(10px);
   position: relative;
-  max-height: 95vh;
+  max-height: 90vh;
   overflow-y: auto;
 }
 
@@ -54,11 +54,11 @@
 }
 
 .register-inner h2 {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   color: #333;
   text-align: center;
   font-weight: 800;
-  font-size: 42px;
+  font-size: 50px;
   color: #0b9459;
   text-shadow: 2px 2px 11px rgba(11, 148, 89, 0.4);
 }
@@ -87,25 +87,25 @@
 
 .register-inner input {
   width: 100%;
-  padding: 8px;
-  margin-bottom: 8px;
+  padding: 10px;
+  margin-bottom: 20px;
   border: 1px solid rgba(88, 88, 88, 0.3);
   border-radius: 10px;
   color: black;
   background-color: rgba(217, 217, 217, 0.16);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* Select dropdown styles */
 .register-inner select {
   width: 100%;
-  padding: 8px;
-  margin-bottom: 8px;
+  padding: 10px;
+  margin-bottom: 20px;
   border: 1px solid rgba(88, 88, 88, 0.3);
   border-radius: 10px;
   color: black;
   background-color: rgba(217, 217, 217, 0.16);
-  font-size: 15px;
+  font-size: 16px;
   cursor: pointer;
   appearance: none;
   background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
@@ -177,7 +177,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   margin-top: -5px;
 }
 
@@ -292,8 +292,8 @@
   display: flex;
   justify-content: center;
   text-align: center;
-  margin-top: 15px;
-  font-size: 15px;
+  margin-top: 20px;
+  font-size: 16px;
   color: #555;
   gap: 30px;
   align-items: center;
@@ -316,8 +316,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  margin-top: 10px;
-  margin-bottom: 15px;
+  margin-top: 20px;
   font-size: 10px;
   color: #777;
 }
@@ -360,7 +359,7 @@
 .form-row {
   display: flex;
   gap: 15px;
-  margin-bottom: 8px;
+  margin-bottom: 20px;
 }
 
 .form-field {
@@ -381,21 +380,21 @@
   display: flex;
   align-items: center;
   color: #0b9459;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
-  margin-bottom: 6px;
-  gap: 6px;
+  margin-bottom: 8px;
+  gap: 8px;
 }
 
 .form-field input,
 .form-field select {
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   border: 1px solid rgba(88, 88, 88, 0.3);
   border-radius: 10px;
   color: black;
   background-color: rgba(217, 217, 217, 0.16);
-  font-size: 15px;
+  font-size: 16px;
 }
 
 .form-field input:focus,
