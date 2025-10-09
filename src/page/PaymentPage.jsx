@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router';
 import { Row, Col, message } from 'antd';
-import PaymentHeader from '../components/payment/PaymentHeader';
+import PageHeader from '../components/PageHeader';
 import BookingDetails from '../components/payment/BookingDetails';
 import PaymentMethods from '../components/payment/PaymentMethods';
 import StatusPages from '../components/payment/StatusPages';
 import { usePayment } from '../hooks/usePayment';
 import { fetchChargingSessionForPayment } from '../services/paymentService';
 import { getUserBankCards } from '../utils/paymentUtils';
+import { DollarOutlined } from '@ant-design/icons';
 import '../assets/styles/payment/PaymentPage.css';
 
 const PaymentPage = () => {
@@ -167,7 +168,22 @@ const PaymentPage = () => {
   if (loading) {
     return (
       <div className="payment-container">
-        <PaymentHeader />
+        <PageHeader
+          title="EcoCharge Payment"
+          icon={<DollarOutlined />}
+          customStyle={{
+            marginTop: '6rem',
+            level: 1,
+            fontSize: '2.5rem',
+            fontWeight: 700,
+            letterSpacing: '0.5px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            maxWidth: '1200px',
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}
+        />
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p className="loading-text">Đang tải thông tin thanh toán...</p>
@@ -180,7 +196,22 @@ const PaymentPage = () => {
   if (error) {
     return (
       <div className="payment-container">
-        <PaymentHeader />
+        <PageHeader
+          title="EcoCharge Payment"
+          icon={<DollarOutlined />}
+          customStyle={{
+            marginTop: '6rem',
+            level: 1,
+            fontSize: '2.5rem',
+            fontWeight: 700,
+            letterSpacing: '0.5px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            maxWidth: '1200px',
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}
+        />
         <div className="error-container">
           <div className="error-card">
             <h2 className="error-title">Có lỗi xảy ra</h2>
@@ -204,7 +235,22 @@ const PaymentPage = () => {
   if (!reservationData) {
     return (
       <div className="payment-container">
-        <PaymentHeader />
+        <PageHeader
+          title="EcoCharge Payment"
+          icon={<DollarOutlined />}
+          customStyle={{
+            marginTop: '6rem',
+            level: 1,
+            fontSize: '2.5rem',
+            fontWeight: 700,
+            letterSpacing: '0.5px',
+            borderRadius: '12px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            maxWidth: '1200px',
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}
+        />
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p className="loading-text">Đang xử lý...</p>
@@ -229,7 +275,22 @@ const PaymentPage = () => {
   // Main payment page
   return (
     <div className="payment-container">
-      <PaymentHeader />
+      <PageHeader
+        title="EcoCharge Payment"
+        icon={<DollarOutlined />}
+        customStyle={{
+          marginTop: '6rem',
+          level: 1,
+          fontSize: '2.5rem',
+          fontWeight: 700,
+          letterSpacing: '0.5px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          maxWidth: '1200px',
+          marginLeft: 'auto',
+          marginRight: 'auto'
+        }}
+      />
       
       <div className="main-content">
         <Row gutter={[24, 24]} justify="center">

@@ -20,6 +20,7 @@ import {
 import ServicePackageCard from '../components/service/ServicePackageCard';
 import ServicePackageTable from '../components/service/ServicePackageTable';
 import ServicePackageForm from '../components/service/ServicePackageForm';
+import PageHeader from '../components/PageHeader';
 
 const { Content } = Layout;
 const { Title, Paragraph } = Typography;
@@ -265,14 +266,10 @@ const ServicePackage = () => {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           
           {/* Page Header */}
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <Title level={1} style={{ marginBottom: '8px' }}>
-              Service Package Management
-            </Title>
-            <Paragraph style={{ fontSize: '18px', color: '#595959' }}>
-              Quản lý và đăng ký các gói dịch vụ sạc điện
-            </Paragraph>
-          </div>
+          <PageHeader
+            title="Quản lý gói dịch vụ"
+            subtitle="Quản lý và đăng ký các gói dịch vụ sạc điện"
+          />
 
           {/* Main Content with Tabs */}
           <Card 
