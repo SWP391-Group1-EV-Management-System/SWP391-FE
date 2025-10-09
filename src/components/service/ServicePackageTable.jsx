@@ -15,6 +15,7 @@ import {
   PlusOutlined,
   EyeOutlined 
 } from '@ant-design/icons';
+import PageHeader from '../PageHeader';
 
 const { Title, Text } = Typography;
 
@@ -176,31 +177,15 @@ const ServicePackageTable = ({
   return (
     <Card>
       {/* Header */}
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        marginBottom: '20px'
-      }}>
-        <div>
-          <Title level={3} style={{ margin: 0 }}>
-            Quản lý gói dịch vụ
-          </Title>
-          <Text type="secondary">
-            Tổng số: {packages.length} gói dịch vụ
-          </Text>
-        </div>
-        
-        <Button 
-          type="primary"
-          icon={<PlusOutlined />}
-          size="large"
-          onClick={onAdd}
-          style={{ borderRadius: '8px' }}
-        >
-          Thêm gói mới
-        </Button>
-      </div>
+      <PageHeader
+        title="Quản lý gói dịch vụ"
+        subtitle={`Tổng số: ${packages.length} gói dịch vụ`}
+        actionButton={{
+          icon: <PlusOutlined />,
+          text: 'Thêm gói mới',
+          onClick: onAdd
+        }}
+      />
 
       {/* Bảng */}
       <Table

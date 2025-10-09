@@ -11,6 +11,9 @@ import { useChargingStations } from "../hooks/useChargingStations.js";
 import StationModal from "../components/station/StationModal.jsx";
 import GGMap from "../components/map/Map.jsx";
 
+// Import PageHeader
+import PageHeader from "../components/PageHeader";
+
 // Import icons
 import {
   BsLightning,
@@ -20,6 +23,7 @@ import {
   BsBattery,
   BsSpeedometer2,
 } from "react-icons/bs";
+import { EnvironmentOutlined } from '@ant-design/icons';
 
 // Import CSS
 import "../assets/styles/MapPage.css";
@@ -94,6 +98,10 @@ function MapPage() {
   // Giao diện component
   return (
     <div className="map-page-container">
+      <PageHeader
+        title="Bản đồ trạm sạc"
+        icon={<EnvironmentOutlined />}
+      />
       <Container fluid>
         {/* Phần thống kê tổng quan */}
         <Row className="map-stats-section g-4">

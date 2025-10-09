@@ -1,12 +1,13 @@
 import React from "react";
 import { Row, Col, Space } from "antd";
-import EnergyHeader from "../components/energy/EnergyHeader";
+import PageHeader from "../components/PageHeader";
 import BatteryProgress from "../components/energy/BatteryProgress";
 import CurrentTime from "../components/energy/CurrentTime";
 import EnergyStats from "../components/energy/EnergyStats";
 import TechnicalDetails from "../components/energy/TechnicalDetails";
 import PricingInfo from "../components/energy/PricingInfo";
 import { useEnergySession } from "../hooks/useEnergySession";
+import { ThunderboltOutlined } from '@ant-design/icons';
 
 const EnergyPage = () => {
   const { sessionData, currentTime, statusConfig } = useEnergySession();
@@ -23,7 +24,16 @@ const EnergyPage = () => {
       }}>
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
           {/* Header Section - Full Width */}
-          <EnergyHeader sessionData={sessionData} statusConfig={statusConfig} />
+          <PageHeader
+            title={sessionData.stationName}
+            icon={<ThunderboltOutlined />}
+            subtitle={sessionData.address}
+            statusTag={{
+              color: statusConfig.color,
+              icon: statusConfig.icon,
+              text: statusConfig.text
+            }}
+          />
 
           {/* Row 1: 2 Columns Equal Size */}
           <Row gutter={[16, 16]}>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Row, Col, Spin, Alert, ConfigProvider } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
-import HistoryHeader from '../components/history/HistoryHeader';
+import { LoadingOutlined, HistoryOutlined } from '@ant-design/icons';
+import PageHeader from '../components/PageHeader';
 import HistoryFilters from '../components/history/HistoryFilters';
 import HistorySummary from '../components/history/HistorySummary';
 import HistoryList from '../components/history/HistoryList';
@@ -153,7 +153,10 @@ const HistoryPage = () => {
       }}>
         <Row gutter={[0, 24]}>
           <Col span={24}>
-            <HistoryHeader />
+            <PageHeader
+              title="Lịch sử sạc xe điện"
+              icon={<HistoryOutlined />}
+            />
           </Col>
           
           <Col span={24}>

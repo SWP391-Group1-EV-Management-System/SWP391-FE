@@ -4,12 +4,16 @@ import {
   Badge, Typography, Tooltip, Row, Col, Input, List
 } from 'antd';
 import {
-  PlayCircleOutlined, PauseCircleOutlined, CheckCircleOutlined, 
-  DeleteOutlined, ReloadOutlined, SearchOutlined,
-  ThunderboltOutlined, ClockCircleOutlined, CheckOutlined,
-  DollarOutlined, UserOutlined, InfoCircleOutlined,
-  WifiOutlined, DisconnectOutlined
+  PlayCircleOutlined,
+  DeleteOutlined,
+  ReloadOutlined,
+  ClockCircleOutlined, 
+  CheckOutlined, 
+  UserOutlined, InfoCircleOutlined,
+  WifiOutlined, 
+  DisconnectOutlined
 } from '@ant-design/icons';
+import PageHeader from '../components/PageHeader';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
@@ -158,33 +162,16 @@ const WaitingStaffPage = () => {
       minHeight: '100vh' 
     }}>
       {/* Header Section */}
-      <Row justify="space-between" align="middle" style={{ marginBottom: 32 }}>
-        <Col>
-          <Title level={2} style={{ margin: 0, color: '#262626', fontWeight: '600' }}>
-            Hàng chờ
-          </Title>
-          <Text type="secondary" style={{ fontSize: '16px' }}>
-            Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và thân thiện môi trường
-          </Text>
-        </Col>
-        <Col>
-          <Button 
-            icon={<ReloadOutlined />} 
-            onClick={handleRefresh} 
-            loading={loading}
-            size="large"
-            style={{ 
-              backgroundColor: '#43e97b', 
-              borderColor: '#43e97b', 
-              color: '#fff',
-              borderRadius: '8px',
-              fontWeight: '500'
-            }}
-          >
-            Hệ thống hoạt động tốt
-          </Button>
-        </Col>
-      </Row>
+      <PageHeader
+        title="Chờ nhân viên"
+        icon={<ClockCircleOutlined />}
+        subtitle="Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và thân thiện môi trường"
+        actionButton={{
+          icon: <ReloadOutlined />,
+          text: 'Hệ thống hoạt động tốt',
+          onClick: handleRefresh
+        }}
+      />
 
       {/* Statistics Cards - bỏ growth */}
       <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
@@ -210,7 +197,7 @@ const WaitingStaffPage = () => {
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
-              bodyStyle={{ padding: '24px' }}
+              styles={{ body: { padding: '24px' } }}
             >
               <div style={{ textAlign: 'center' }}>
                 {/* Icon */}
@@ -269,7 +256,7 @@ const WaitingStaffPage = () => {
           border: '1px solid #e8e8e8',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}
-        bodyStyle={{ padding: '24px' }}
+        styles={{ body: { padding: '24px' } }}
       >
         <List
           dataSource={queueData}

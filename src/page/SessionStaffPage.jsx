@@ -9,6 +9,7 @@ import {
   ThunderboltOutlined, ClockCircleOutlined, CheckOutlined,
   DollarOutlined
 } from '@ant-design/icons';
+import PageHeader from '../components/PageHeader';
 
 const { Title } = Typography;
 const { Search } = Input;
@@ -378,33 +379,16 @@ const SessionStaffPage = () => {
       minHeight: '100vh' 
     }}>
       {/* Header Section */}
-      <Row justify="space-between" align="middle" style={{ marginBottom: 32 }}>
-        <Col>
-          <Title level={2} style={{ margin: 0, color: '#262626', fontWeight: '600' }}>
-            Quản lý phiên sạc & trạm
-          </Title>
-          <Typography.Text type="secondary" style={{ fontSize: '16px' }}>
-            Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và thân thiện môi trường
-          </Typography.Text>
-        </Col>
-        <Col>
-          <Button 
-            icon={<ReloadOutlined />} 
-            onClick={handleRefresh} 
-            loading={loading}
-            size="large"
-            style={{ 
-              backgroundColor: '#43e97b', 
-              borderColor: '#43e97b', 
-              color: '#fff',
-              borderRadius: '8px',
-              fontWeight: '500'
-            }}
-          >
-            Hệ thống hoạt động tốt
-          </Button>
-        </Col>
-      </Row>
+      <PageHeader
+        title="Phiên sạc nhân viên"
+        icon={<ThunderboltOutlined />}
+        subtitle="Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và thân thiện môi trường"
+        actionButton={{
+          icon: <ReloadOutlined />,
+          text: 'Hệ thống hoạt động tốt',
+          onClick: handleRefresh
+        }}
+      />
 
       {/* Statistics Cards với phong cách mới */}
       <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
@@ -430,7 +414,7 @@ const SessionStaffPage = () => {
                 e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)';
                 e.currentTarget.style.transform = 'translateY(0)';
               }}
-              bodyStyle={{ padding: '24px' }}
+              styles={{ body: { padding: '24px' } }}
             >
               <div style={{ textAlign: 'center' }}>
                 {/* Icon */}
@@ -490,7 +474,7 @@ const SessionStaffPage = () => {
           border: '1px solid #e8e8e8',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
         }}
-        bodyStyle={{ padding: '24px' }}
+        styles={{ body: { padding: '24px' } }}
         extra={
           <Space>
             <Badge count={3} color="orange" size="small">
