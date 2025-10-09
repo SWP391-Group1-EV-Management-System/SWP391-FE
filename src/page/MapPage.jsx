@@ -33,6 +33,7 @@ function MapPage() {
     loading,
     error,
     refresh: refreshStations,
+    fetchStationPosts,
   } = useChargingStations({
     autoFetch: true, // Tự động tải dữ liệu khi component được tạo
   });
@@ -63,9 +64,25 @@ function MapPage() {
   };
 
   // Xử lý khi click vào trạm sạc
-  const handleStationClick = (station) => {
-    setSelectedStation(station);
-    setShowModal(true);
+  const handleStationClick = async (station) => {
+    try {
+      // Lấy thông tin chi tiết trụ sạc của trạm
+      const stationPosts = await fetchStationPosts(station.id);
+
+      // Gắn thông tin trụ sạc vào station object
+      const stationWithPosts = {
+        ...station,
+        posts: stationPosts,
+      };
+
+      setSelectedStation(stationWithPosts);
+      setShowModal(true);
+    } catch (error) {
+      console.error("Error loading station details:", error);
+      // Vẫn hiển thị modal với thông tin cơ bản
+      setSelectedStation(station);
+      setShowModal(true);
+    }
   };
 
   // Xử lý đóng modal
@@ -84,7 +101,7 @@ function MapPage() {
             <Card className="map-stat-card stations">
               <BsLightning className="stat-icon" />
               <div className="stat-number">
-                {loading ? '...' : mapStats.totalStations}
+                {loading ? "..." : mapStats.totalStations}
               </div>
               <div className="stat-label">Tổng số trạm sạc</div>
             </Card>
@@ -93,7 +110,7 @@ function MapPage() {
             <Card className="map-stat-card sessions">
               <BsClock className="stat-icon" />
               <div className="stat-number">
-                {loading ? '...' : mapStats.availableStations}
+                {loading ? "..." : mapStats.availableStations}
               </div>
               <div className="stat-label">Số trạm sạc trống</div>
             </Card>
@@ -102,7 +119,7 @@ function MapPage() {
             <Card className="map-stat-card users">
               <BsPeople className="stat-icon" />
               <div className="stat-number">
-                {loading ? '...' : mapStats.bookedStations}
+                {loading ? "..." : mapStats.bookedStations}
               </div>
               <div className="stat-label">Số trạm đang sạc</div>
             </Card>
@@ -127,49 +144,60 @@ function MapPage() {
                 <div className="stations-list-header">
                   <h3 className="stations-list-title">Danh sách trạm sạc</h3>
                   <div className="stations-count">
-                    {loading ? 'Đang tải...' : `${chargingStations.length} trạm sạc gần bạn`}
+                    {loading
+                      ? "Đang tải..."
+                      : `${chargingStations.length} trạm sạc gần bạn`}
                   </div>
                 </div>
 
                 <div className="stations-list">
                   {loading ? (
-                    <div className="loading-container" style={{ 
-                      textAlign: 'center', 
-                      padding: '2rem',
-                      color: '#666'
-                    }}>
+                    <div
+                      className="loading-container"
+                      style={{
+                        textAlign: "center",
+                        padding: "2rem",
+                        color: "#666",
+                      }}
+                    >
                       <div>Đang tải danh sách trạm sạc...</div>
                     </div>
                   ) : error ? (
-                    <div className="error-container" style={{
-                      textAlign: 'center',
-                      padding: '2rem',
-                      color: '#dc3545',
-                      backgroundColor: '#f8d7da',
-                      borderRadius: '8px',
-                      margin: '1rem 0'
-                    }}>
-                      <div style={{ marginBottom: '1rem' }}>❌ {error}</div>
-                      <button 
+                    <div
+                      className="error-container"
+                      style={{
+                        textAlign: "center",
+                        padding: "2rem",
+                        color: "#dc3545",
+                        backgroundColor: "#f8d7da",
+                        borderRadius: "8px",
+                        margin: "1rem 0",
+                      }}
+                    >
+                      <div style={{ marginBottom: "1rem" }}>❌ {error}</div>
+                      <button
                         onClick={refreshStations}
                         style={{
-                          padding: '0.5rem 1rem',
-                          backgroundColor: '#007bff',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer'
+                          padding: "0.5rem 1rem",
+                          backgroundColor: "#007bff",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "4px",
+                          cursor: "pointer",
                         }}
                       >
                         Thử lại
                       </button>
                     </div>
                   ) : chargingStations.length === 0 ? (
-                    <div className="no-data-container" style={{
-                      textAlign: 'center',
-                      padding: '2rem',
-                      color: '#666'
-                    }}>
+                    <div
+                      className="no-data-container"
+                      style={{
+                        textAlign: "center",
+                        padding: "2rem",
+                        color: "#666",
+                      }}
+                    >
                       Không có trạm sạc nào trong khu vực này
                     </div>
                   ) : (
@@ -197,7 +225,8 @@ function MapPage() {
                           <div className="station-detail">
                             <BsLightning className="station-detail-icon" />
                             <span>
-                              {station.availableSlots}/{station.totalSlots} trống
+                              {station.availableSlots}/{station.totalSlots}{" "}
+                              trống
                             </span>
                           </div>
                           <div className="station-detail">

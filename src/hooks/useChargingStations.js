@@ -3,8 +3,8 @@
  * Đơn giản hóa việc gọi API và quản lý state
  */
 
-import { useState, useEffect } from 'react';
-import { chargingStationService } from '../services/chargingStationService.js';
+import { useState, useEffect } from "react";
+import { chargingStationService } from "../services/chargingStationService.js";
 
 /**
  * Hook quản lý dữ liệu trạm sạc
@@ -24,27 +24,29 @@ export const useChargingStations = (options = {}) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Hàm tải danh sách trạm sạc (sử dụng mock data cho testing)
+  // Hàm tải danh sách trạm sạc
   const fetchStations = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Gọi API thật để lấy danh sách trạm sạc
+      // Gọi API để lấy danh sách trạm sạc
       const stations = await chargingStationService.getAllStations();
       setStations(stations);
-      
+
       // Tính toán thống kê từ dữ liệu API
       const stats = {
         totalStations: stations.length,
-        availableStations: stations.reduce((sum, station) => sum + (station.availableSlots || 0), 0),
-        bookedStations: stations.reduce((sum, station) => sum + ((station.numberOfPosts || 0) - (station.availableSlots || 0)), 0),
+        availableStations: stations.filter(
+          (station) => station.status === "available"
+        ).length,
+        bookedStations: stations.filter((station) => station.status === "busy")
+          .length,
       };
       setStatistics(stats);
-
     } catch (err) {
-      console.error('Lỗi khi tải trạm sạc:', err);
-      setError(err.message || 'Không thể tải danh sách trạm sạc');
+      console.error("Lỗi khi tải trạm sạc:", err);
+      setError(err.message || "Không thể tải danh sách trạm sạc");
     } finally {
       setLoading(false);
     }
@@ -67,6 +69,16 @@ export const useChargingStations = (options = {}) => {
     }
   }, [autoFetch]);
 
+  // Hàm lấy trụ sạc theo ID trạm
+  const fetchStationPosts = async (stationId) => {
+    try {
+      return await chargingStationService.getStationPosts(stationId);
+    } catch (err) {
+      console.error(`Lỗi khi tải trụ sạc cho trạm ${stationId}:`, err);
+      throw err;
+    }
+  };
+
   // Trả về dữ liệu và các hàm để sử dụng
   return {
     // Dữ liệu chính
@@ -77,6 +89,7 @@ export const useChargingStations = (options = {}) => {
 
     // Các hàm điều khiển
     fetchStations,
+    fetchStationPosts,
     refresh,
     clearError,
 
