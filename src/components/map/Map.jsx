@@ -24,6 +24,8 @@ function GGMap() {
   const [directionsResponse, setDirectionsResponse] = useState(null)
   const [distance, setDistance] = useState('')
   const [duration, setDuration] = useState('')
+  const [matrixDistance, setMatrixDistance] = useState('')
+  const [matrixDuration, setMatrixDuration] = useState('')
 
   /** @type React.MutableRefObject<HTMLInputElement> */
   const originRef = useRef()
@@ -38,23 +40,43 @@ function GGMap() {
     if (originRef.current.input.value === '' || destiantionRef.current.input.value === '') {
       return
     }
-    // eslint-disable-next-line no-undef
+    // Directions API
     const directionsService = new google.maps.DirectionsService()
     const results = await directionsService.route({
       origin: originRef.current.input.value,
       destination: destiantionRef.current.input.value,
-      // eslint-disable-next-line no-undef
       travelMode: google.maps.TravelMode.DRIVING,
     })
     setDirectionsResponse(results)
     setDistance(results.routes[0].legs[0].distance.text)
     setDuration(results.routes[0].legs[0].duration.text)
+
+    // Distance Matrix API
+    const distanceMatrixService = new google.maps.DistanceMatrixService()
+    distanceMatrixService.getDistanceMatrix(
+      {
+        origins: [originRef.current.input.value],
+        destinations: [destiantionRef.current.input.value],
+        travelMode: google.maps.TravelMode.DRIVING,
+      },
+      (response, status) => {
+        if (status === 'OK') {
+          const element = response.rows[0].elements[0]
+          setMatrixDistance(element.distance.text)
+          setMatrixDuration(element.duration.text)
+        } else {
+          console.error('Distance Matrix API error:', status)
+        }
+      }
+    )
   }
 
   function clearRoute() {
     setDirectionsResponse(null)
     setDistance('')
     setDuration('')
+    setMatrixDistance('')
+    setMatrixDuration('')
     originRef.current.input.value = ''
     destiantionRef.current.input.value = ''
   }
@@ -162,10 +184,21 @@ function GGMap() {
           {(distance || duration) && (
             <Row gutter={[8, 8]} align="middle">
               <Col span={12}>
-                <Text strong style={{ fontSize: '12px' }}>Distance: {distance}</Text>
+                <Text strong style={{ fontSize: '12px' }}>Distance (Route): {distance}</Text>
               </Col>
               <Col span={12}>
-                <Text strong style={{ fontSize: '12px' }}>Duration: {duration}</Text>
+                <Text strong style={{ fontSize: '12px' }}>Duration (Route): {duration}</Text>
+              </Col>
+            </Row>
+          )}
+
+          {(matrixDistance || matrixDuration) && (
+            <Row gutter={[8, 8]} align="middle">
+              <Col span={12}>
+                <Text strong style={{ fontSize: '12px' }}>Distance (Matrix): {matrixDistance}</Text>
+              </Col>
+              <Col span={12}>
+                <Text strong style={{ fontSize: '12px' }}>Duration (Matrix): {matrixDuration}</Text>
               </Col>
             </Row>
           )}

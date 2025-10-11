@@ -19,9 +19,6 @@ const EnergyStats = ({ sessionData }) => {
             textAlign: "center",
             height: "100%",
           }}
-          styles={{
-            body: { padding: "24px" },
-          }}
         >
           <Space direction="vertical" size="small" style={{ width: "100%" }}>
             <ThunderboltOutlined
@@ -55,9 +52,6 @@ const EnergyStats = ({ sessionData }) => {
             textAlign: "center",
             height: "100%",
           }}
-          styles={{
-            body: { padding: "24px" },
-          }}
         >
           <Space direction="vertical" size="small" style={{ width: "100%" }}>
             <ClockCircleOutlined
@@ -89,9 +83,6 @@ const EnergyStats = ({ sessionData }) => {
             boxShadow: "0 4px 16px rgba(0, 0, 0, 0.04)",
             textAlign: "center",
             height: "100%",
-          }}
-          styles={{
-            body: { padding: "24px" },
           }}
         >
           <Space direction="vertical" size="small" style={{ width: "100%" }}>

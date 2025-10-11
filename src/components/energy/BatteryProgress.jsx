@@ -1,21 +1,9 @@
 import React from "react";
-import { Card, Progress, Typography, Space, Tag } from "antd";
-import {
-  ThunderboltOutlined,
-  CheckCircleOutlined,
-  PauseCircleOutlined,
-} from "@ant-design/icons";
+import { Card, Progress, Typography, Space } from "antd";
 
 const { Title } = Typography;
 
-const BatteryProgress = ({
-  batteryLevel = 75,
-  isCharging = false,
-  isCompleted = false,
-}) => {
-  /**
-   * Custom Battery Icon Component
-   */
+const BatteryProgress = ({ batteryLevel = 75 }) => {
   const BatteryIcon = ({ level, color = "#10b981" }) => {
     const batteryWidth = 24;
     const batteryHeight = 14;
@@ -28,7 +16,6 @@ const BatteryProgress = ({
         viewBox="0 0 28 18"
         style={{ display: "inline-block", verticalAlign: "middle" }}
       >
-        {/* Battery body */}
         <rect
           x="1"
           y="3"
@@ -39,8 +26,6 @@ const BatteryProgress = ({
           stroke={color}
           strokeWidth="2"
         />
-
-        {/* Battery positive terminal */}
         <rect
           x={batteryWidth + 1}
           y="7"
@@ -49,8 +34,6 @@ const BatteryProgress = ({
           rx="1"
           fill={color}
         />
-
-        {/* Battery fill */}
         <rect
           x="3"
           y="5"
@@ -64,35 +47,6 @@ const BatteryProgress = ({
     );
   };
 
-  /**
-   * Xác định trạng thái pin
-   */
-  const getBatteryStatus = () => {
-    if (isCompleted) {
-      return {
-        label: "Hoàn thành",
-        icon: <CheckCircleOutlined />,
-        color: "#52c41a",
-      };
-    }
-
-    if (isCharging) {
-      return {
-        label: "Đang sạc",
-        icon: <ThunderboltOutlined spin />,
-        color: "#10b981",
-      };
-    }
-
-    return {
-      label: "Dừng sạc",
-      icon: <PauseCircleOutlined />,
-      color: "#8c8c8c",
-    };
-  };
-
-  const batteryStatus = getBatteryStatus();
-
   return (
     <Card
       style={{
@@ -100,18 +54,15 @@ const BatteryProgress = ({
         border: "1px solid #e5e7eb",
         boxShadow: "0 4px 16px rgba(5, 119, 70, 0.08)",
         textAlign: "center",
-      }}
-      styles={{
-        body: { padding: "24px" },
+        padding: "24px",
       }}
     >
-      {/* Header */}
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
-          marginBottom: "24px",
+          marginBottom: "16px",
         }}
       >
         <Space>
@@ -120,23 +71,7 @@ const BatteryProgress = ({
             Trạng thái pin
           </Title>
         </Space>
-        <Tag
-          color={batteryStatus.color}
-          style={{
-            fontSize: "12px",
-            fontWeight: 600,
-            borderRadius: "8px",
-            padding: "4px 12px",
-          }}
-        >
-          <Space size={4}>
-            {batteryStatus.icon}
-            {batteryStatus.label}
-          </Space>
-        </Tag>
       </div>
-
-      {/* Main Progress Circle Only */}
       <Progress
         type="circle"
         percent={batteryLevel}

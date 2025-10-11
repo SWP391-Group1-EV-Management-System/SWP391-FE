@@ -46,7 +46,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         borderRadius: "16px",
         border: "1px solid #e5e7eb",
         boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-        marginBottom: "24px",
+        marginBottom: "15px",
         ...customStyle
       }}
       styles={{

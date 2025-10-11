@@ -41,7 +41,7 @@ const PricingInfo = ({ sessionData }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "24px",
+          marginBottom: "20px",
         }}
       >
         <Space>
@@ -97,13 +97,13 @@ const PricingInfo = ({ sessionData }) => {
         ))}
       </Space>
 
-      <Divider style={{ margin: "16px 0" }} />
+      <Divider style={{ margin: "15px 0"}} />
 
       {/* Cost Summary */}
       <div
         style={{
           background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
-          padding: "24px",
+          padding: "15px",
           borderRadius: "12px",
           border: "2px solid #10b981",
           textAlign: "center",
