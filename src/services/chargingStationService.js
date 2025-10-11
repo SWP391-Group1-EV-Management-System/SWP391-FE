@@ -87,12 +87,14 @@ export const chargingStationService = {
       const mappedPosts = stationDataMapper.mapPostsFromApi(response.data);
       return mappedPosts;
     } catch (error) {
+      // Log debug information before throwing error
+      console.error("Error details:", error);
+      if (error.response) {
+        console.error("Response status:", error.response.status);
+        console.error("Response data:", error.response.data);
+      }
       throw this.handleError(error, "Không thể tải danh sách trụ sạc");
-      console.log("Response status:", response.status);
-      console.log("Response text:", await response.text());
-
     }
-    
   },
 
   /**
@@ -145,9 +147,6 @@ export const stationDataMapper = {
    * @returns {Object} UI-formatted station object
    */
   mapStationFromApi(apiStation) {
-    // Get coordinates based on station ID or name
-    const coordinates = this.getStationCoordinates(apiStation);
-
     return {
       // Core station data from API
       id: apiStation.idChargingStation,
@@ -159,9 +158,9 @@ export const stationDataMapper = {
       numberOfPosts: apiStation.numberOfPosts || 0,
       chargingPosts: apiStation.chargingPosts || [],
 
-      // Map coordinates - from coordinates mapping or API if available
-      lat: apiStation.latitude || coordinates.lat,
-      lng: apiStation.longitude || coordinates.lng,
+      // Map coordinates - use API data if available, otherwise default values
+      lat: apiStation.latitude || 21.0285, // Default to Hanoi coordinates
+      lng: apiStation.longitude || 105.8542,
 
       // Computed fields for UI display
       distance: "N/A", // Will be calculated based on user location
