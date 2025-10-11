@@ -1,0 +1,347 @@
+/**
+ * MAP COMPONENT STYLES
+ * 
+ * CSS styles for the interactive map component
+ * Organized by component sections for easy maintenance
+ */
+
+/* ===============================
+   MAIN MAP CONTAINER
+   =============================== */
+
+.map-wrapper {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.map-container {
+  height: 100%;
+  width: 100%;
+}
+
+/* ===============================
+   CONTROL PANEL STYLES
+   =============================== */
+
+.map-control-panel {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  max-width: 350px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.map-instructions {
+  padding: 8px;
+  background-color: #f0f9ff;
+  border: 1px solid #bae0ff;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #1890ff;
+}
+
+.map-instructions strong {
+  font-weight: 600;
+}
+
+/* ===============================
+   INPUT FIELD STYLES
+   =============================== */
+
+.map-origin-input {
+  width: 100%;
+}
+
+.map-destination-input {
+  width: 100%;
+}
+
+.map-destination-input.selected {
+  background-color: #f6ffed;
+  border-color: #52c41a;
+}
+
+/* ===============================
+   BUTTON STYLES
+   =============================== */
+
+.map-button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.map-calculate-button {
+  min-width: 120px;
+}
+
+.map-clear-button {
+  min-width: 40px;
+}
+
+.map-location-button {
+  color: #52c41a;
+  border-color: #52c41a;
+}
+
+.map-location-button.inactive {
+  color: inherit;
+  border-color: inherit;
+}
+
+/* ===============================
+   ROUTE INFO DISPLAY
+   =============================== */
+
+.map-route-info {
+  padding: 8px;
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.map-route-distance {
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.map-route-duration {
+  color: #52c41a;
+  font-weight: 600;
+}
+
+.map-route-status {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #389e0d;
+}
+
+/* ===============================
+   POPUP STYLES
+   =============================== */
+
+.map-user-popup {
+  min-width: 150px;
+  text-align: center;
+}
+
+.map-user-popup h4 {
+  margin: 0 0 8px 0;
+  color: #52c41a;
+}
+
+.map-user-popup p {
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.map-user-popup .ant-btn {
+  margin-top: 8px;
+}
+
+.map-station-popup {
+  min-width: 220px;
+}
+
+.map-station-popup h4 {
+  margin: 0 0 8px 0;
+  color: #1890ff;
+}
+
+.map-station-popup .station-address {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.map-station-popup .station-status-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+}
+
+.map-station-popup .station-info-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+  font-size: 12px;
+}
+
+.map-station-popup .ant-btn {
+  margin-top: 8px;
+}
+
+.map-station-popup .ant-btn + .ant-btn {
+  margin-top: 4px;
+}
+
+/* ===============================
+   STATUS BADGES
+   =============================== */
+
+.station-status-badge {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 12px;
+  border: 1px solid;
+}
+
+.station-status-badge.available {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border-color: #b7eb8f;
+}
+
+.station-status-badge.busy {
+  background-color: #fff2f0;
+  color: #ff4d4f;
+  border-color: #ffccc7;
+}
+
+.station-status-badge.maintenance {
+  background-color: #fff7e6;
+  color: #faad14;
+  border-color: #ffd591;
+}
+
+.station-slots-info {
+  font-size: 11px;
+  color: #666;
+}
+
+/* ===============================
+   LOADING & ERROR STATES
+   =============================== */
+
+.map-loading-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2000;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.map-error-notification {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 2000;
+  background: #fff2f0;
+  border: 1px solid #ffccc7;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #ff4d4f;
+  font-size: 12px;
+}
+
+.map-location-error {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 2000;
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: #fa8c16;
+  font-size: 12px;
+  max-width: 300px;
+}
+
+.map-location-error.with-other-error {
+  bottom: 56px;
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+   =============================== */
+
+@media (max-width: 768px) {
+  .map-control-panel {
+    left: 8px;
+    right: 8px;
+    top: 8px;
+    max-width: none;
+  }
+
+  .map-instructions {
+    font-size: 10px;
+  }
+
+  .map-route-info {
+    font-size: 11px;
+  }
+
+  .map-station-popup {
+    min-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-control-panel {
+    left: 4px;
+    right: 4px;
+    top: 4px;
+  }
+
+  .map-station-popup .station-info-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+/* ===============================
+   ACCESSIBILITY
+   =============================== */
+
+.map-control-panel:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.map-location-button:focus,
+.map-calculate-button:focus,
+.map-clear-button:focus {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+}
+
+/* ===============================
+   ANIMATIONS
+   =============================== */
+
+.map-control-panel {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.map-route-info {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

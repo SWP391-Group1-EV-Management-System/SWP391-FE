@@ -15,7 +15,6 @@ html {
   transition: margin-left 0.3s ease;
   min-height: calc(100vh - 60px); /* Trừ navbar height */
   overflow-y: auto; /* Cho phép scroll trong main content */
-  background-color: white;
   position: relative;
   z-index: 1;
 }

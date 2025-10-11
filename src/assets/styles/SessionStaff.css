@@ -1,0 +1,640 @@
+/**
+ * SESSION STAFF PAGE STYLES
+ * 
+ * CSS styles for the charging session management interface
+ * Organized by component sections for easy maintenance
+ */
+
+/* ===============================
+   PAGE LAYOUT
+   =============================== */
+
+.session-staff-page {
+  padding: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.session-staff-content {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ===============================
+   STATISTICS CARDS
+   =============================== */
+
+.session-stats-row {
+  margin-bottom: 24px;
+}
+
+.session-stats-card {
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.session-stats-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.session-stats-card .ant-statistic-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.session-stats-card .ant-statistic-content {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* Status-specific card colors */
+.session-stats-card.total {
+  border-left: 4px solid #1890ff;
+}
+
+.session-stats-card.charging {
+  border-left: 4px solid #52c41a;
+}
+
+.session-stats-card.completed {
+  border-left: 4px solid #722ed1;
+}
+
+.session-stats-card.revenue {
+  border-left: 4px solid #fa8c16;
+}
+
+/* ===============================
+   MAIN TABLE CONTAINER
+   =============================== */
+
+.session-table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.session-table-header {
+  padding: 16px 24px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.session-table-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0;
+}
+
+.session-table-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* ===============================
+   SEARCH AND FILTER CONTROLS
+   =============================== */
+
+.session-search-input {
+  width: 300px;
+  min-width: 200px;
+  border-radius: 8px;
+}
+
+.session-filter-button {
+  border-color: #d9d9d9;
+}
+
+.session-refresh-button {
+  border-color: #52c41a;
+  color: #52c41a;
+}
+
+.session-refresh-button:hover {
+  background-color: #f6ffed;
+  border-color: #73d13d;
+  color: #73d13d;
+}
+
+/* ===============================
+   TABLE STYLES
+   =============================== */
+
+.session-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.session-table .ant-table-thead > tr > th {
+  background-color: #fafafa;
+  font-weight: 600;
+  color: #262626;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.session-table .ant-table-tbody > tr:hover > td {
+  background-color: #f5f9ff;
+}
+
+.session-table .ant-table-tbody > tr > td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* ===============================
+   STATUS TAGS
+   =============================== */
+
+.session-status-tag {
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 12px;
+  padding: 4px 12px;
+  border: none;
+}
+
+.session-status-tag.charging {
+  background-color: #f6ffed;
+  color: #52c41a;
+  border: 1px solid #b7eb8f;
+}
+
+.session-status-tag.completed {
+  background-color: #f9f0ff;
+  color: #722ed1;
+  border: 1px solid #d3adf7;
+}
+
+.session-status-tag.paused {
+  background-color: #fff7e6;
+  color: #fa8c16;
+  border: 1px solid #ffd591;
+}
+
+.session-status-tag.terminated {
+  background-color: #fff2f0;
+  color: #ff4d4f;
+  border: 1px solid #ffccc7;
+}
+
+/* ===============================
+   ACTION BUTTONS
+   =============================== */
+
+.session-action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.session-action-button {
+  min-width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.session-action-button.start {
+  background-color: #43e97b;
+  border-color: #43e97b;
+  color: #fff;
+}
+
+.session-action-button.start:hover {
+  background-color: #20c760;
+  border-color: #20c760;
+  color: #fff;
+}
+
+.session-action-button.stop {
+  background-color: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+}
+
+.session-action-button.stop:hover {
+  background-color: #d9363e;
+  border-color: #d9363e;
+  color: #fff;
+}
+
+.session-action-button.payment {
+  background-color: #43e97b;
+  border-color: #43e97b;
+  color: #fff;
+}
+
+.session-action-button.payment:hover {
+  background-color: #20c760;
+  border-color: #20c760;
+  color: #fff;
+}
+
+.session-action-button.terminate {
+  background-color: #ff7875;
+  border-color: #ff7875;
+  color: #fff;
+}
+
+.session-action-button.terminate:hover {
+  background-color: #ff4d4f;
+  border-color: #ff4d4f;
+  color: #fff;
+}
+
+/* ===============================
+   LOADING AND EMPTY STATES
+   =============================== */
+
+.session-loading-container {
+  padding: 48px;
+  text-align: center;
+}
+
+.session-loading-spinner {
+  font-size: 24px;
+  color: #1890ff;
+}
+
+/* ===============================
+   TEXT AND TYPOGRAPHY STYLES
+   =============================== */
+
+.session-text-success {
+  color: #43e97b !important;
+}
+
+.session-text-dark {
+  color: #000 !important;
+}
+
+.session-text-muted {
+  color: #999 !important;
+}
+
+.session-text-center {
+  text-align: center;
+}
+
+.session-text-large {
+  font-size: 32px;
+}
+
+.session-text-gray {
+  color: #6c757d;
+}
+
+.session-stats-card-title {
+  color: #8c8c8c;
+  font-size: 14px;
+  font-weight: 400;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.session-stats-card-value {
+  color: #262626 !important;
+  font-weight: 600 !important;
+  font-size: 36px !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+}
+
+/* ===============================
+   STATISTIC VALUE STYLES
+   =============================== */
+
+.session-statistic-value-success {
+  color: #43e97b;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.session-statistic-value-warning {
+  color: #fa8c16;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* ===============================
+   LAYOUT AND SPACING
+   =============================== */
+
+.session-margin-bottom-16 {
+  margin-bottom: 16px;
+}
+
+.session-margin-bottom-24 {
+  margin-bottom: 24px;
+}
+
+.session-margin-bottom-32 {
+  margin-bottom: 32px;
+}
+
+.session-padding-24 {
+  padding: 24px;
+}
+
+.session-padding-vertical-40 {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.session-height-600 {
+  height: 600px;
+}
+
+/* ===============================
+   CARD AND CONTAINER STYLES
+   =============================== */
+
+.session-card-white {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.session-card-light {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.session-header-bordered {
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+}
+
+/* ===============================
+   TABLE CELL STYLES
+   =============================== */
+
+.session-table-cell-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.session-table-cell-center {
+  text-align: center;
+}
+
+.session-table-cell-bold {
+  font-weight: 600;
+}
+
+/* ===============================
+   BUTTON STYLES
+   =============================== */
+
+.session-button-success-ghost {
+  color: #43e97b;
+  border-color: #43e97b;
+  background: transparent;
+}
+
+.session-button-success-ghost:hover {
+  color: #fff;
+  background-color: #43e97b;
+  border-color: #43e97b;
+}
+
+.session-button-success-ghost {
+  border-radius: 8px;
+}
+
+.session-button-danger-ghost {
+  color: #ff4d4f;
+  border-color: #ff4d4f;
+  background: transparent;
+}
+
+.session-button-danger-ghost:hover {
+  color: #fff;
+  background-color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.session-empty-state {
+  padding: 48px;
+  text-align: center;
+  color: #999;
+}
+
+.session-empty-state .anticon {
+  font-size: 48px;
+  color: #d9d9d9;
+  margin-bottom: 16px;
+}
+
+.session-empty-state h3 {
+  color: #999;
+  margin-bottom: 8px;
+}
+
+.session-empty-state p {
+  color: #bfbfbf;
+}
+
+/* ===============================
+   MODAL STYLES
+   =============================== */
+
+.session-modal .ant-modal-header {
+  background-color: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.session-modal .ant-modal-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.session-modal .ant-modal-body {
+  padding: 24px;
+}
+
+.session-modal .ant-modal-footer {
+  border-top: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+   =============================== */
+
+@media (max-width: 1200px) {
+  .session-staff-page {
+    padding: 16px;
+  }
+
+  .session-search-input {
+    width: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .session-staff-page {
+    padding: 12px;
+  }
+
+  .session-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .session-table-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .session-search-input {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .session-stats-card .ant-statistic-content {
+    font-size: 24px;
+  }
+
+  .session-action-buttons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .session-staff-page {
+    padding: 8px;
+  }
+
+  .session-stats-row .ant-col {
+    margin-bottom: 12px;
+  }
+
+  .session-table-container {
+    border-radius: 4px;
+  }
+
+  .session-table .ant-table-tbody > tr > td {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .session-action-button {
+    min-width: 28px;
+    height: 28px;
+  }
+}
+
+/* ===============================
+   PRINT STYLES
+   =============================== */
+
+@media print {
+  .session-staff-page {
+    background-color: white;
+  }
+
+  .session-table-actions,
+  .session-action-buttons {
+    display: none;
+  }
+
+  .session-table-container {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+
+/* ===============================
+   ACCESSIBILITY
+   =============================== */
+
+.session-action-button:focus {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+}
+
+.session-table:focus-within {
+  outline: 2px solid #1890ff;
+  outline-offset: -2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .session-stats-card {
+    border: 2px solid #000;
+  }
+
+  .session-status-tag {
+    border: 2px solid;
+  }
+
+  .session-table .ant-table-thead > tr > th {
+    border-bottom: 3px solid #000;
+  }
+}
+
+/* ===============================
+   ANIMATIONS
+   =============================== */
+
+.session-stats-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.session-table-container {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.session-action-button {
+  transition: all 0.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.session-status-tag {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

@@ -86,6 +86,8 @@
 /* Details Section */
 .station-details {
   margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
 }
 
 .station-details__title {
@@ -96,7 +98,14 @@
 }
 
 .station-details__section {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.station-details__section--with-top-margin {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  width: 100%;
 }
 
 .station-details__section-title {
@@ -244,6 +253,12 @@
 
 .charger-item__icon--inactive {
   color: #6c757d;
+}
+
+/* Icon styles for charger details */
+.charger-detail-icon {
+  margin-right: 6px;
+  font-size: 1.3rem;
 }
 
 .charger-item__status-area {

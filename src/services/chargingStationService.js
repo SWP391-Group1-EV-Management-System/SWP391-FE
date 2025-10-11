@@ -1,113 +1,155 @@
 /**
- * Service quản lý API và xử lý dữ liệu trạm sạc điện
- * Chứa các hàm gọi API và chuyển đổi dữ liệu
+ * CHARGING STATION SERVICE
+ *
+ * This service handles all API calls related to EV charging stations
+ * and provides data transformation utilities for UI components.
+ *
+ * Features:
+ * - Get all charging stations
+ * - Get station details by ID
+ * - Get charging posts for a station
+ * - Data mapping from API to UI format
+ * - Comprehensive error handling
+ *
+ * @module ChargingStationService
  */
+
 import axios from "axios";
 
-// Địa chỉ API backend, lấy từ file .env hoặc dùng mặc định
+/**
+ * API Configuration
+ */
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
-// Tạo instance axios với cấu hình mặc định
+// Create configured axios instance
 const apiClient = axios.create({
-  baseURL: API_BASE_URL, // Địa chỉ gốc API
-  timeout: 10000, // Thời gian chờ tối đa: 10 giây
+  baseURL: API_BASE_URL,
+  timeout: 10000, // 10 second timeout
   headers: {
-    "Content-Type": "application/json", // Định dạng dữ liệu JSON
+    "Content-Type": "application/json",
   },
 });
 
 /**
- * Service chứa các hàm gọi API liên quan đến trạm sạc
+ * ===============================
+ * MAIN SERVICE OBJECT
+ * ===============================
  */
 export const chargingStationService = {
   /**
-   * Lấy danh sách tất cả trạm sạc từ server
-   * @returns {Array} Mảng các trạm sạc đã được xử lý
+   * Fetch all charging stations from the API
+   *
+   * @returns {Promise<Array>} Array of mapped charging station objects
+   * @throws {Error} When API request fails
    */
   async getAllStations() {
     try {
-      // Gọi API endpoint để lấy tất cả trạm sạc
       const response = await apiClient.get("/charging/station/all");
-
-      // Xử lý và map dữ liệu từ API
-      const stations = response.data || [];
-      return stationDataMapper.mapStationsFromApi(stations);
+      const mappedStations = stationDataMapper.mapStationsFromApi(
+        response.data
+      );
+      return mappedStations;
     } catch (error) {
-      // Xử lý và ném lỗi với thông báo dễ hiểu
       throw this.handleError(error, "Không thể tải danh sách trạm sạc");
     }
   },
 
   /**
-   * Lấy thông tin chi tiết một trạm sạc cụ thể
-   * @param {string} stationId - ID của trạm sạc cần lấy
-   * @returns {Object} Thông tin chi tiết trạm sạc
+   * Fetch detailed information for a specific charging station
+   *
+   * @param {string} stationId - The unique identifier of the charging station
+   * @returns {Promise<Object>} Mapped charging station object
+   * @throws {Error} When station is not found or API request fails
    */
   async getStationById(stationId) {
     try {
-      // Gọi API với ID trạm sạc cụ thể
       const response = await apiClient.get(`/charging/station/${stationId}`);
-
-      // Chuyển đổi dữ liệu từ format API sang format giao diện
       const mappedStation = stationDataMapper.mapStationFromApi(response.data);
       return mappedStation;
     } catch (error) {
-      // Xử lý lỗi khi không tìm thấy trạm sạc
       throw this.handleError(error, "Không tìm thấy trạm sạc");
     }
   },
 
   /**
-   * Lấy danh sách trụ sạc của một trạm cụ thể
-   * @param {string} stationId - ID của trạm sạc
-   * @returns {Array} Mảng các trụ sạc trong trạm
+   * Fetch all charging posts for a specific station
+   *
+   * @param {string} stationId - The unique identifier of the charging station
+   * @returns {Promise<Array>} Array of mapped charging post objects
+   * @throws {Error} When API request fails
    */
   async getStationPosts(stationId) {
     try {
-      // Gọi API lấy trụ sạc theo ID trạm
       const response = await apiClient.get(
         `/charging/station/posts/${stationId}`
       );
-
-      // Xử lý và map dữ liệu từ API
-      const posts = response.data || [];
-      return stationDataMapper.mapPostsFromApi(posts);
+      const mappedPosts = stationDataMapper.mapPostsFromApi(response.data);
+      return mappedPosts;
     } catch (error) {
-      // Xử lý lỗi khi không tải được danh sách trụ sạc
       throw this.handleError(error, "Không thể tải danh sách trụ sạc");
+      console.log("Response status:", response.status);
+      console.log("Response text:", await response.text());
+
     }
+    
   },
 
   /**
-   * Xử lý và chuyển đổi lỗi API thành thông báo dễ hiểu
-   * @param {Error} error - Lỗi từ API
-   * @param {string} defaultMessage - Thông báo mặc định
-   * @returns {Error} Lỗi với thông báo đã xử lý
+   * Transform API errors into user-friendly error messages
+   *
+   * @param {Error} error - The original error object
+   * @param {string} defaultMessage - Fallback error message
+   * @returns {Error} New error with user-friendly message
    */
   handleError(error, defaultMessage) {
+    // Handle HTTP response errors
     if (error.response) {
       const status = error.response.status;
-      // Xử lý các mã lỗi HTTP phổ biến
-      if (status === 400) return new Error("Yêu cầu không hợp lệ");
-      if (status === 401) return new Error("Cần đăng nhập");
-      if (status === 404) return new Error("Không tìm thấy dữ liệu");
-      if (status === 500) return new Error("Lỗi server");
-      return new Error(defaultMessage);
-    } else if (error.request) {
-      return new Error("Không thể kết nối đến server");
-    } else {
-      return new Error(defaultMessage);
+      switch (status) {
+        case 400:
+          return new Error("Yêu cầu không hợp lệ");
+        case 401:
+          return new Error("Cần đăng nhập");
+        case 404:
+          return new Error("Không tìm thấy dữ liệu");
+        case 500:
+          return new Error("Lỗi server");
+        default:
+          return new Error(defaultMessage);
+      }
     }
+
+    // Handle network errors
+    if (error.request) {
+      return new Error("Không thể kết nối đến server");
+    }
+
+    // Handle other errors
+    return new Error(defaultMessage);
   },
 };
 
-// Utility để xử lý dữ liệu trạm sạc
+/**
+ * ===============================
+ * DATA MAPPING UTILITIES
+ * ===============================
+ *
+ * These utilities transform raw API data into UI-friendly formats
+ */
 export const stationDataMapper = {
-  // Chuyển đổi dữ liệu từ API sang format component
+  /**
+   * Transform API station data to UI format
+   *
+   * @param {Object} apiStation - Raw station data from API
+   * @returns {Object} UI-formatted station object
+   */
   mapStationFromApi(apiStation) {
+    // Get coordinates based on station ID or name
+    const coordinates = this.getStationCoordinates(apiStation);
+
     return {
-      // Map từ backend entity fields
+      // Core station data from API
       id: apiStation.idChargingStation,
       name: apiStation.nameChargingStation || "Không có tên",
       address: apiStation.address || "Chưa có địa chỉ",
@@ -117,45 +159,70 @@ export const stationDataMapper = {
       numberOfPosts: apiStation.numberOfPosts || 0,
       chargingPosts: apiStation.chargingPosts || [],
 
-      // Các field tính toán thêm cho UI - đơn giản hóa
-      distance: "N/A",
+      // Map coordinates - from coordinates mapping or API if available
+      lat: apiStation.latitude || coordinates.lat,
+      lng: apiStation.longitude || coordinates.lng,
+
+      // Computed fields for UI display
+      distance: "N/A", // Will be calculated based on user location
       totalSlots: apiStation.numberOfPosts || 0,
       availableSlots: this.calculateAvailableSlots(apiStation.chargingPosts),
       power: this.calculateTotalPower(apiStation.chargingPosts),
-      type: "AC/DC", // Đơn giản hóa - không phân loại phức tạp
-      openHours: "24/7",
-      rating: 0,
-      reviewCount: 0,
+      type: "AC/DC", // Simplified charging type
+      openHours: "24/7", // Default operating hours
+      rating: 0, // Placeholder for future feature
+      reviewCount: 0, // Placeholder for future feature
     };
   },
 
-  // Chuyển đổi trạng thái hoạt động sang status UI
+  /**
+   * Convert boolean active status to UI status string
+   *
+   * @param {boolean} isActive - Station active status from API
+   * @returns {string} UI status: 'available' | 'maintenance'
+   */
   mapActiveStatus(isActive) {
     return isActive ? "available" : "maintenance";
   },
 
-  // Tính số cổng sạc khả dụng
+  /**
+   * Calculate number of available charging slots
+   *
+   * @param {Array} chargingPosts - Array of charging posts
+   * @returns {number} Number of available slots
+   */
   calculateAvailableSlots(chargingPosts) {
     if (!Array.isArray(chargingPosts)) return 0;
     return chargingPosts.filter((post) => post.isAvailable === true).length;
   },
 
-  // Tính tổng công suất trạm (sử dụng maxPower từ trụ sạc)
+  /**
+   * Calculate total power capacity of a station
+   *
+   * @param {Array} chargingPosts - Array of charging posts
+   * @returns {string} Formatted power string (e.g., "150 kW")
+   */
   calculateTotalPower(chargingPosts) {
     if (!Array.isArray(chargingPosts)) return "N/A";
+
     const totalPower = chargingPosts.reduce((sum, post) => {
       return sum + (post.maxPower || 0);
     }, 0);
+
     return totalPower > 0 ? `${totalPower} kW` : "N/A";
   },
 
-  // Tính toán thống kê trạm sạc
+  /**
+   * Calculate comprehensive statistics for all stations
+   *
+   * @param {Array} stations - Array of station objects
+   * @returns {Object} Statistics object with counts and totals
+   */
   calculateStatistics(stations) {
     const totalStations = stations.length;
     const activeStations = stations.filter((s) => s.isActive === true).length;
     const inactiveStations = totalStations - activeStations;
 
-    // Tính tổng cổng sạc
     const totalPosts = stations.reduce(
       (sum, station) => sum + (station.numberOfPosts || 0),
       0
@@ -173,7 +240,7 @@ export const stationDataMapper = {
       totalPosts,
       availablePosts,
       busyPosts,
-      // Thêm mapping cho MapPage
+      // Additional mappings for UI components
       availableStations: availablePosts,
       bookedStations: busyPosts,
       averagePostsPerStation:
@@ -181,16 +248,26 @@ export const stationDataMapper = {
     };
   },
 
-  // Map danh sách stations từ API
+  /**
+   * Transform array of API stations to UI format
+   *
+   * @param {Array} apiStations - Raw stations from API
+   * @returns {Array} Array of UI-formatted station objects
+   */
   mapStationsFromApi(apiStations) {
     if (!Array.isArray(apiStations)) return [];
     return apiStations.map((station) => this.mapStationFromApi(station));
   },
 
-  // Map trụ sạc từ API - đơn giản hóa
+  /**
+   * Transform API charging post data to UI format
+   *
+   * @param {Object} apiPost - Raw charging post data from API
+   * @returns {Object} UI-formatted charging post object
+   */
   mapPostFromApi(apiPost) {
     return {
-      // Map trực tiếp từ backend entity
+      // Core post data
       id: apiPost.idChargingPost,
       isActive: apiPost.isActive,
       maxPower: apiPost.maxPower || 0,
@@ -198,7 +275,7 @@ export const stationDataMapper = {
       chargingSessions: apiPost.chargingSessions || [],
       chargingTypes: apiPost.chargingType || [],
 
-      // Display fields đơn giản
+      // UI display fields
       powerDisplay: `${apiPost.maxPower || 0} kW`,
       feeDisplay: `${apiPost.chargingFeePerKWh || 0} VNĐ/kWh`,
       status: apiPost.isActive ? "available" : "maintenance",
@@ -210,13 +287,23 @@ export const stationDataMapper = {
     };
   },
 
-  // Map danh sách trụ sạc từ API
+  /**
+   * Transform array of API charging posts to UI format
+   *
+   * @param {Array} apiPosts - Raw charging posts from API
+   * @returns {Array} Array of UI-formatted charging post objects
+   */
   mapPostsFromApi(apiPosts) {
     if (!Array.isArray(apiPosts)) return [];
     return apiPosts.map((post) => this.mapPostFromApi(post));
   },
 
-  // Kiểm tra trụ có đang được sử dụng không - giữ lại vì cần thiết
+  /**
+   * Check if a charging post is currently in use
+   *
+   * @param {Array} chargingSessions - Array of charging sessions
+   * @returns {boolean} True if post is busy
+   */
   isPostBusy(chargingSessions) {
     if (!Array.isArray(chargingSessions)) return false;
     return chargingSessions.some(

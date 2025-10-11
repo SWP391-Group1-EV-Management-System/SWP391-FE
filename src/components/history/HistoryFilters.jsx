@@ -1,44 +1,44 @@
-import React from 'react';
-import { Row, Col, Input, Select, Form } from 'antd';
+import React from "react";
+import { Row, Col, Input, Select, Form } from "antd";
+import "../../assets/styles/HistoryFilters.css";
 
 const { Option } = Select;
 
-const HistoryFilters = ({ searchTerm, setSearchTerm, sortOrder, setSortOrder }) => {
+const HistoryFilters = ({
+  searchTerm,
+  setSearchTerm,
+  sortOrder,
+  setSortOrder,
+}) => {
   return (
-    <div style={{ marginBottom: '2rem' }}>
+    <div className="history-filters-container">
       <Row gutter={16} align="bottom">
         <Col flex="auto">
-          <Form.Item 
-            label="Tìm kiếm" 
-            style={{ marginBottom: 0 }}
-            labelCol={{ style: { fontWeight: 600, fontSize: '1.4rem', color: '#155724' } }}
+          <Form.Item
+            label="Tìm kiếm"
+            className="history-filters-form-item"
+            labelCol={{ className: "history-filters-label" }}
           >
             <Input
               placeholder="Tên trạm, mã giao dịch..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               size="large"
-              style={{ 
-                borderRadius: '6px',
-                fontSize: '1.4rem'
-              }}
+              className="history-search-input"
             />
           </Form.Item>
         </Col>
-        <Col style={{ minWidth: '200px' }}>
-          <Form.Item 
-            label="Sắp xếp theo thời gian" 
-            style={{ marginBottom: 0 }}
-            labelCol={{ style: { fontWeight: 600, fontSize: '1.4rem', color: '#155724' } }}
+        <Col className="history-sort-column">
+          <Form.Item
+            label="Sắp xếp theo thời gian"
+            className="history-filters-form-item"
+            labelCol={{ className: "history-filters-label" }}
           >
             <Select
               value={sortOrder}
               onChange={setSortOrder}
               size="large"
-              style={{ 
-                width: '100%',
-                fontSize: '1.4rem'
-              }}
+              className="history-sort-select"
             >
               <Option value="desc">Mới nhất</Option>
               <Option value="asc">Cũ nhất</Option>

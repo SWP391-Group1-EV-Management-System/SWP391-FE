@@ -1,0 +1,32 @@
+/**
+ * HISTORY FILTERS.CSS
+ * Contains only the inline styles moved from HistoryFilters.jsx
+ */
+
+.history-filters-container {
+  margin-bottom: 2rem;
+}
+
+.history-filters-form-item {
+  margin-bottom: 0;
+}
+
+.history-filters-label {
+  font-weight: 600;
+  font-size: 1.4rem;
+  color: #155724;
+}
+
+.history-search-input {
+  border-radius: 6px;
+  font-size: 1.4rem;
+}
+
+.history-sort-column {
+  min-width: 200px;
+}
+
+.history-sort-select {
+  width: 100%;
+  font-size: 1.4rem;
+}

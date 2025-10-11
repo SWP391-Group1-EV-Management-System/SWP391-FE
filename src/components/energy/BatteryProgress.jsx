@@ -143,9 +143,9 @@ const BatteryProgress = ({
         format={(percent) => (
           <div
             style={{
-              fontSize: "36px",
-              fontWeight: 700,
-              color: "#1a1a1a",
+              fontSize: "2.2rem",
+              fontWeight: "700",
+              color: "#10b981",
               lineHeight: 1,
             }}
           >

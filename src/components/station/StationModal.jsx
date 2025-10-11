@@ -6,11 +6,11 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { Button } from "react-bootstrap";
-import { 
-  IoClose, 
-  IoLocationOutline, 
-  IoTimeOutline, 
-  IoPeopleOutline, 
+import {
+  IoClose,
+  IoLocationOutline,
+  IoTimeOutline,
+  IoPeopleOutline,
   IoStarSharp,
   IoFlashOutline,
   IoCheckmarkCircle,
@@ -22,7 +22,7 @@ import {
   IoCafeOutline,
   IoPowerOutline,
   IoSpeedometerOutline,
-  IoCardOutline
+  IoCardOutline,
 } from "react-icons/io5";
 import { useStationPosts } from "../../hooks/useStationPosts";
 import "../../assets/styles/StationModal.css";
@@ -40,11 +40,14 @@ const StationModal = ({ isOpen, onClose, station }) => {
   // Enhanced amenity icons mapping
   const getAmenityIcon = (amenity) => {
     const amenityLower = amenity.toLowerCase();
-    if (amenityLower.includes('wifi')) return IoWifiOutline;
-    if (amenityLower.includes('cafe') || amenityLower.includes('coffee')) return IoCafeOutline;
-    if (amenityLower.includes('shop') || amenityLower.includes('store')) return IoStorefrontOutline;
-    if (amenityLower.includes('parking') || amenityLower.includes('car')) return IoCarOutline;
-    if (amenityLower.includes('security')) return IoShieldCheckmarkOutline;
+    if (amenityLower.includes("wifi")) return IoWifiOutline;
+    if (amenityLower.includes("cafe") || amenityLower.includes("coffee"))
+      return IoCafeOutline;
+    if (amenityLower.includes("shop") || amenityLower.includes("store"))
+      return IoStorefrontOutline;
+    if (amenityLower.includes("parking") || amenityLower.includes("car"))
+      return IoCarOutline;
+    if (amenityLower.includes("security")) return IoShieldCheckmarkOutline;
     return IoStorefrontOutline; // Default
   };
 
@@ -76,54 +79,66 @@ const StationModal = ({ isOpen, onClose, station }) => {
           {station.rating && (
             <div className="station-info__item">
               <IoStarSharp className="station-info__icon station-info__icon--star" />
-              <span>{station.rating}/5 ({station.reviewCount || 0} đánh giá)</span>
+              <span>
+                {station.rating}/5 ({station.reviewCount || 0} đánh giá)
+              </span>
             </div>
           )}
         </div>
 
         {/* Station Details */}
-        <div className="station-details" style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className="station-details">
           {/* Realtime Statistics */}
           {posts.length > 0 && (
-            <div className="station-details__section" style={{ marginBottom: '20px', width: '100%' }}>
-              <div className="station-details__section-title">Thông tin chi tiết</div>
+            <div className="station-details__section">
+              <div className="station-details__section-title">
+                Thông tin chi tiết
+              </div>
               <div className="statistics-grid">
                 <div className="statistics-item statistics-item--available">
                   <div className="statistics-number statistics-number--available">
                     {statistics.available}
                   </div>
-                  <div className="statistics-label statistics-number--available">Sẵn sàng</div>
+                  <div className="statistics-label statistics-number--available">
+                    Sẵn sàng
+                  </div>
                 </div>
                 <div className="statistics-item statistics-item--busy">
                   <div className="statistics-number statistics-number--busy">
                     {statistics.busy}
                   </div>
-                  <div className="statistics-label statistics-number--busy">Đang sạc</div>
+                  <div className="statistics-label statistics-number--busy">
+                    Đang sạc
+                  </div>
                 </div>
                 <div className="statistics-item statistics-item--inactive">
                   <div className="statistics-number statistics-number--inactive">
                     {statistics.inactive}
                   </div>
-                  <div className="statistics-label statistics-number--inactive">Không hoạt động</div>
+                  <div className="statistics-label statistics-number--inactive">
+                    Không hoạt động
+                  </div>
                 </div>
                 <div className="statistics-item statistics-item--total">
                   <div className="statistics-number statistics-number--total">
                     {statistics.total}
                   </div>
-                  <div className="statistics-label statistics-number--total">Tổng cộng</div>
+                  <div className="statistics-label statistics-number--total">
+                    Tổng cộng
+                  </div>
                 </div>
               </div>
             </div>
           )}
-          
+
           {/* Amenities */}
           {station.amenities && station.amenities.length > 0 && (
-            <div className="station-details__section" style={{ marginTop: '10px', width: '100%' }}>
+            <div className="station-details__section--with-top-margin">
               <div className="station-details__section-title">Tiện ích</div>
               <div className="amenities-list">
                 {station.amenities.map((amenity, index) => {
                   const IconComponent = getAmenityIcon(amenity);
-                  
+
                   return (
                     <span key={index} className="amenity-tag">
                       <IconComponent className="amenity-icon" />
@@ -139,72 +154,89 @@ const StationModal = ({ isOpen, onClose, station }) => {
         {/* Chargers List */}
         <div>
           <h5 className="chargers-section__title">
-            Danh sách trụ sạc ({posts.length > 0 ? posts.length : station.totalSlots || 0})
-            {loading && <span className="chargers-loading-text"> - Đang tải...</span>}
+            Danh sách trụ sạc (
+            {posts.length > 0 ? posts.length : station.totalSlots || 0})
+            {loading && (
+              <span className="chargers-loading-text"> - Đang tải...</span>
+            )}
           </h5>
-          
+
           {error && <div className="chargers-error">{error}</div>}
-          
+
           <div className="chargers-grid">
             {posts.length > 0 ? (
               posts.map((post) => (
-              <div key={post.id} className="charger-item">
-                <div className="charger-item__header">
-                  <div className="charger-item__title">
-                    <IoPowerOutline className={`charger-item__icon ${post.isActive ? 'charger-item__icon--active' : 'charger-item__icon--inactive'}`} />
-                    <strong>Trụ {post.id}</strong>
-                  </div>
-                  <div className="charger-item__status-area">
-                    {post.isActive ? (
-                      <IoCheckmarkCircle className="charger-status-icon charger-status-icon--active" />
-                    ) : (
-                      <IoCloseCircle className="charger-status-icon charger-status-icon--inactive" />
-                    )}
-                    <span className={`charger-status-badge ${
-                      post.isAvailable ? 'charger-status-badge--available' : 
-                      post.isActive ? 'charger-status-badge--busy' : 'charger-status-badge--inactive'
-                    }`}>
-                      {post.isAvailable ? "Sẵn sàng" : 
-                       post.isActive ? "Đang sử dụng" : "Không hoạt động"}
-                    </span>
-                  </div>
-                </div>
-                <div className="charger-item__content">
-                  <div className="charger-item__details">
-                    <div>
-                      <IoFlashOutline style={{marginRight: '6px', fontSize: '1.3rem'}} />
-                      Công suất: {post.powerDisplay}
+                <div key={post.id} className="charger-item">
+                  <div className="charger-item__header">
+                    <div className="charger-item__title">
+                      <IoPowerOutline
+                        className={`charger-item__icon ${
+                          post.isActive
+                            ? "charger-item__icon--active"
+                            : "charger-item__icon--inactive"
+                        }`}
+                      />
+                      <strong>Trụ {post.id}</strong>
                     </div>
-                    <div>
-                      <IoCardOutline style={{marginRight: '6px', fontSize: '1.3rem'}} />
-                      Giá: {post.feeDisplay}
+                    <div className="charger-item__status-area">
+                      {post.isActive ? (
+                        <IoCheckmarkCircle className="charger-status-icon charger-status-icon--active" />
+                      ) : (
+                        <IoCloseCircle className="charger-status-icon charger-status-icon--inactive" />
+                      )}
+                      <span
+                        className={`charger-status-badge ${
+                          post.isAvailable
+                            ? "charger-status-badge--available"
+                            : post.isActive
+                            ? "charger-status-badge--busy"
+                            : "charger-status-badge--inactive"
+                        }`}
+                      >
+                        {post.isAvailable
+                          ? "Sẵn sàng"
+                          : post.isActive
+                          ? "Đang sử dụng"
+                          : "Không hoạt động"}
+                      </span>
                     </div>
-                    {post.supportedTypes?.length > 0 && (
+                  </div>
+                  <div className="charger-item__content">
+                    <div className="charger-item__details">
                       <div>
-                        <IoSpeedometerOutline style={{marginRight: '6px', fontSize: '1.3rem'}} />
-                        Loại: {post.supportedTypes.join(", ")}
+                        <IoFlashOutline className="charger-detail-icon" />
+                        Công suất: {post.powerDisplay}
                       </div>
-                    )}
-                    {post.currentSession && (
-                      <div className="charger-session-warning">
-                        <IoTimeOutline style={{marginRight: '6px', fontSize: '1.3rem'}} />
-                        Đang có session hoạt động
+                      <div>
+                        <IoCardOutline className="charger-detail-icon" />
+                        Giá: {post.feeDisplay}
                       </div>
-                    )}
-                  </div>
-                  <div className="charger-item__action">
-                    <Button
-                      variant={post.isAvailable ? "success" : "secondary"}
-                      size="sm"
-                      disabled={!post.isAvailable}
-                      onClick={() => handleBookCharger(post.id)}
-                      className="charger-book-btn"
-                    >
-                      {post.isAvailable ? "Đặt chỗ" : "Không khả dụng"}
-                    </Button>
+                      {post.supportedTypes?.length > 0 && (
+                        <div>
+                          <IoSpeedometerOutline className="charger-detail-icon" />
+                          Loại: {post.supportedTypes.join(", ")}
+                        </div>
+                      )}
+                      {post.currentSession && (
+                        <div className="charger-session-warning">
+                          <IoTimeOutline className="charger-detail-icon" />
+                          Đang có session hoạt động
+                        </div>
+                      )}
+                    </div>
+                    <div className="charger-item__action">
+                      <Button
+                        variant={post.isAvailable ? "success" : "secondary"}
+                        size="sm"
+                        disabled={!post.isAvailable}
+                        onClick={() => handleBookCharger(post.id)}
+                        className="charger-book-btn"
+                      >
+                        {post.isAvailable ? "Đặt chỗ" : "Không khả dụng"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
               ))
             ) : loading ? (
               // Loading state
@@ -230,13 +262,18 @@ const StationModal = ({ isOpen, onClose, station }) => {
                   Khả dụng: {station.availableSlots || 0} trụ
                 </div>
                 <Button
-                  variant={station.status === "available" ? "success" : "secondary"}
+                  variant={
+                    station.status === "available" ? "success" : "secondary"
+                  }
                   disabled={station.status !== "available"}
                   onClick={() => handleBookCharger("general")}
                   className="charger-empty-state__btn"
                 >
-                  {station.status === "available" ? "Đặt chỗ" : 
-                   station.status === "maintenance" ? "Bảo trì" : "Đầy chỗ"}
+                  {station.status === "available"
+                    ? "Đặt chỗ"
+                    : station.status === "maintenance"
+                    ? "Bảo trì"
+                    : "Đầy chỗ"}
                 </Button>
               </div>
             )}

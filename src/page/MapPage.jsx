@@ -1,20 +1,32 @@
-// Trang hiển thị bản đồ và danh sách trạm sạc
+/**
+ * MAP PAGE COMPONENT
+ *
+ * Main page for displaying charging stations map and management interface.
+ *
+ * Features:
+ * - Interactive map with charging stations
+ * - Real-time statistics dashboard
+ * - Station list with filtering capabilities
+ * - Station detail modal
+ * - Responsive design for all devices
+ *
+ * @component
+ */
+
 import React, { useState } from "react";
 
-// Import thư viện UI
+// UI Framework Components
 import { Container, Row, Col, Card } from "react-bootstrap";
 
-// Import hook tùy chỉnh để quản lý dữ liệu trạm sạc
+// Custom Hooks
 import { useChargingStations } from "../hooks/useChargingStations.js";
 
-// Import các component con
+// Child Components
 import StationModal from "../components/station/StationModal.jsx";
 import GGMap from "../components/map/Map.jsx";
-
-// Import PageHeader
 import PageHeader from "../components/PageHeader";
 
-// Import icons
+// Icons
 import {
   BsLightning,
   BsPeople,
@@ -23,14 +35,25 @@ import {
   BsBattery,
   BsSpeedometer2,
 } from "react-icons/bs";
-import { EnvironmentOutlined } from '@ant-design/icons';
+import { EnvironmentOutlined } from "@ant-design/icons";
 
-// Import CSS
+// Styles
 import "../assets/styles/MapPage.css";
+import "../assets/styles/utilities.css";
 
-// Component chính cho trang bản đồ
+/**
+ * Main Map Page Component
+ *
+ * Renders the charging stations map interface with statistics and station list
+ */
 function MapPage() {
-  // Sử dụng hook để lấy dữ liệu trạm sạc
+  /**
+   * ===============================
+   * DATA MANAGEMENT
+   * ===============================
+   */
+
+  // Fetch charging stations data and statistics
   const {
     stations: chargingStations,
     statistics: mapStats,
@@ -39,41 +62,67 @@ function MapPage() {
     refresh: refreshStations,
     fetchStationPosts,
   } = useChargingStations({
-    autoFetch: true, // Tự động tải dữ liệu khi component được tạo
+    autoFetch: true, // Auto-load data on component mount
   });
 
-  // State quản lý modal hiển thị chi tiết trạm sạc
+  /**
+   * ===============================
+   * LOCAL STATE
+   * ===============================
+   */
+
+  // Modal state for station details
   const [showModal, setShowModal] = useState(false);
   const [selectedStation, setSelectedStation] = useState(null);
 
-  // Các hàm tiện ích
+  /**
+   * ===============================
+   * UTILITY FUNCTIONS
+   * ===============================
+   */
 
-  // Chuyển đổi trạng thái thành text tiếng Việt
+  /**
+   * Convert station status to Vietnamese display text
+   *
+   * @param {string} status - Station status code
+   * @returns {string} Localized status text
+   */
   const getStatusText = (status) => {
-    switch (status) {
-      case "available":
-        return "Còn trống";
-      case "busy":
-        return "Đang sử dụng";
-      case "maintenance":
-        return "Bảo trì";
-      default:
-        return "Không xác định";
-    }
+    const statusMap = {
+      available: "Còn trống",
+      busy: "Đang sử dụng",
+      maintenance: "Bảo trì",
+    };
+    return statusMap[status] || "Không xác định";
   };
 
-  // Lấy class CSS cho trạng thái
+  /**
+   * Get CSS class name for station status styling
+   *
+   * @param {string} status - Station status code
+   * @returns {string} CSS class name
+   */
   const getStatusClass = (status) => {
     return `station-status ${status}`;
   };
 
-  // Xử lý khi click vào trạm sạc
+  /**
+   * ===============================
+   * EVENT HANDLERS
+   * ===============================
+   */
+
+  /**
+   * Handle station item click - loads detailed information and shows modal
+   *
+   * @param {Object} station - The selected charging station object
+   */
   const handleStationClick = async (station) => {
     try {
-      // Lấy thông tin chi tiết trụ sạc của trạm
+      // Fetch detailed charging posts information for the station
       const stationPosts = await fetchStationPosts(station.id);
 
-      // Gắn thông tin trụ sạc vào station object
+      // Combine station data with posts information
       const stationWithPosts = {
         ...station,
         posts: stationPosts,
@@ -83,30 +132,34 @@ function MapPage() {
       setShowModal(true);
     } catch (error) {
       console.error("Error loading station details:", error);
-      // Vẫn hiển thị modal với thông tin cơ bản
+
+      // Show modal with basic station info even if posts loading fails
       setSelectedStation(station);
       setShowModal(true);
     }
   };
 
-  // Xử lý đóng modal
+  /**
+   * Handle modal close - resets selected station state
+   */
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedStation(null);
   };
 
-  // Giao diện component
+  /**
+   * ===============================
+   * RENDER COMPONENT
+   * ===============================
+   */
   return (
     <div className="map-page-container">
-      <PageHeader
-        title="Bản đồ trạm sạc"
-        icon={<EnvironmentOutlined />}
-      />
+      <PageHeader title="Bản đồ trạm sạc" icon={<EnvironmentOutlined />} />
       <Container fluid>
-        {/* Phần thống kê tổng quan */}
-        <Row className="map-stats-section g-4">
+        {/* Statistics Overview Section */}
+        <Row className="map-stats-section">
           <Col lg={4} md={4} sm={12}>
-            <Card className="map-stat-card stations">
+            <Card className="map-stat-card total-stations">
               <BsLightning className="stat-icon" />
               <div className="stat-number">
                 {loading ? "..." : mapStats.totalStations}
@@ -115,7 +168,7 @@ function MapPage() {
             </Card>
           </Col>
           <Col lg={4} md={4} sm={12}>
-            <Card className="map-stat-card sessions">
+            <Card className="map-stat-card available-stations">
               <BsClock className="stat-icon" />
               <div className="stat-number">
                 {loading ? "..." : mapStats.availableStations}
@@ -124,7 +177,7 @@ function MapPage() {
             </Card>
           </Col>
           <Col lg={4} md={4} sm={12}>
-            <Card className="map-stat-card users">
+            <Card className="map-stat-card busy-stations">
               <BsPeople className="stat-icon" />
               <div className="stat-number">
                 {loading ? "..." : mapStats.bookedStations}
@@ -134,20 +187,20 @@ function MapPage() {
           </Col>
         </Row>
 
-        {/* Phần nội dung chính - Bản đồ và Danh sách trạm sạc */}
+        {/* Main Content Section - Map and Station List */}
         <Row className="map-main-content">
-          {/* Cột bản đồ */}
+          {/* Map Column */}
           <Col lg={8} md={7}>
             <Card className="map-content-card">
               <div className="map-container">
-                <GGMap />
+                <GGMap onStationClick={handleStationClick} />
               </div>
             </Card>
           </Col>
 
-          {/* Cột danh sách trạm sạc */}
+          {/* Station List Column */}
           <Col lg={4} md={5}>
-            <Card className="map-content-card">
+            <Card className="stations-list-card">
               <div className="stations-list-container">
                 <div className="stations-list-header">
                   <h3 className="stations-list-title">Danh sách trạm sạc</h3>
@@ -160,61 +213,31 @@ function MapPage() {
 
                 <div className="stations-list">
                   {loading ? (
-                    <div
-                      className="loading-container"
-                      style={{
-                        textAlign: "center",
-                        padding: "2rem",
-                        color: "#666",
-                      }}
-                    >
+                    <div className="stations-loading-state">
+                      <div className="loading-spinner">⚡</div>
                       <div>Đang tải danh sách trạm sạc...</div>
                     </div>
                   ) : error ? (
-                    <div
-                      className="error-container"
-                      style={{
-                        textAlign: "center",
-                        padding: "2rem",
-                        color: "#dc3545",
-                        backgroundColor: "#f8d7da",
-                        borderRadius: "8px",
-                        margin: "1rem 0",
-                      }}
-                    >
-                      <div style={{ marginBottom: "1rem" }}>❌ {error}</div>
+                    <div className="stations-error-state">
+                      <div className="error-message">❌ {error}</div>
                       <button
+                        className="retry-button"
                         onClick={refreshStations}
-                        style={{
-                          padding: "0.5rem 1rem",
-                          backgroundColor: "#007bff",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "4px",
-                          cursor: "pointer",
-                        }}
                       >
                         Thử lại
                       </button>
                     </div>
                   ) : chargingStations.length === 0 ? (
-                    <div
-                      className="no-data-container"
-                      style={{
-                        textAlign: "center",
-                        padding: "2rem",
-                        color: "#666",
-                      }}
-                    >
-                      Không có trạm sạc nào trong khu vực này
+                    <div className="stations-empty-state">
+                      <div className="empty-icon">🔍</div>
+                      <div>Không có trạm sạc nào trong khu vực này</div>
                     </div>
                   ) : (
                     chargingStations.map((station) => (
                       <div
                         key={station.id}
-                        className="station-item"
+                        className="station-list-item"
                         onClick={() => handleStationClick(station)}
-                        style={{ cursor: "pointer" }}
                       >
                         <div className="station-header">
                           <h4 className="station-name">{station.name}</h4>

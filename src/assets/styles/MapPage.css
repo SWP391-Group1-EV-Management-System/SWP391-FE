@@ -132,11 +132,100 @@
 
 /* ==================== CHARGING STATIONS LIST ==================== */
 
+.stations-list-card {
+  border-radius: 16px !important;
+  height: 600px;
+}
+
 .stations-list-container {
   height: 100%;
   padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
+}
+
+/* Station List States */
+.stations-loading-state,
+.stations-error-state,
+.stations-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.loading-spinner {
+  width: 3rem;
+  height: 3rem;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-icon,
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.error-icon {
+  color: #ef4444;
+}
+
+.empty-icon {
+  color: #9ca3af;
+}
+
+.retry-button {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
+}
+
+.retry-button:hover {
+  background: #5a67d8;
+}
+
+.station-list-item {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 0 0.25rem 1rem 0.25rem;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.station-list-item:hover {
+  background: #e3f2fd;
+  border-color: #667eea;
+  transform: translateX(4px);
+}
+
+.station-list-item:last-child {
+  margin-bottom: 0;
 }
 
 .stations-list-header {
@@ -162,27 +251,6 @@
   overflow-y: auto;
   max-height: 450px;
   padding: 0 0.5rem;
-}
-
-.station-item {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin: 0 0.25rem 1rem 0.25rem;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-}
-
-.station-item:hover {
-  background: #e3f2fd;
-  border-color: #667eea;
-  transform: translateX(4px);
-}
-
-.station-item:last-child {
-  margin-bottom: 0;
 }
 
 .station-header {
@@ -296,7 +364,7 @@
     font-size: 2rem;
   }
 
-  .station-item {
+  .station-list-item {
     padding: 1rem;
   }
 

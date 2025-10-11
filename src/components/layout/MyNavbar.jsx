@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaSearch, FaRegBell, FaRegEnvelope } from "react-icons/fa";
+import { FaRegBell, FaRegEnvelope } from "react-icons/fa";
 import "../../assets/styles/MyNavbar.css";
 import { BsQrCodeScan } from "react-icons/bs";
 import { TbLogout } from "react-icons/tb";
@@ -112,15 +112,6 @@ function MyNavbar({ collapsed }) {
   return (
     <nav className={`top-navbar ${collapsed ? "collapsed" : ""}`}>
       <div className="navbar-content">
-        {/* Search Bar */}
-        <div className="search-container">
-          <input
-            type="text"
-            placeholder="Tìm kiếm..."
-            className="search-input"
-          />
-          <FaSearch className="search-icon" />
-        </div>
 
         {/* Right Side Icons */}
         <div className="navbar-right">

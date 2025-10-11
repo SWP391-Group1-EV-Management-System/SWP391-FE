@@ -24,48 +24,10 @@
 
 .navbar-content {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-end;
+  align-items: flex-end;
   width: 100%;
   padding: 10px 20px 0 20px;
-}
-
-.search-container {
-  position: relative;
-  display: flex;
-  align-items: center;
-  max-width: 400px;
-  flex: 1;
-}
-
-.search-icon {
-  position: absolute;
-  left: 363px;
-  color: #0b9459;
-  font-size: 22px;
-  z-index: 1;
-}
-
-.search-input {
-  width: 100%;
-  padding: 8px 12px 8px 20px;
-  border: 1px solid #ced4da;
-  border-radius: 7px;
-  background-color: #f8f9fa;
-  box-shadow: 0 0 14.7px 0 rgba(0, 0, 0, 0.25);
-  font-size: 17px;
-  outline: none;
-  transition: all 0.3s ease;
-}
-.search-input::placeholder {
-  font-style: italic;
-  color: #002b16;
-}
-
-.search-input:focus {
-  border-color: #80bdff;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-  background-color: #ffffff;
 }
 
 .navbar-right {
@@ -180,14 +142,6 @@
     left: 89px; /* Phù hợp với menu collapsed width 55px */
   }
 
-  .search-icon {
-    left: 263px;
-  }
-
-  .search-container {
-    max-width: 300px;
-  }
-
   .nav-icon {
     font-size: 22px; /* Giảm nhẹ cho tablet */
   }
@@ -205,21 +159,6 @@
 
   .top-navbar.collapsed {
     left: 78px; /* Menu width 55px khi thu gọn */
-  }
-
-  .search-container {
-    max-width: 200px; /* Giảm chiều rộng search để tránh overflow */
-    margin-right: 10px;
-  }
-
-  .search-input {
-    padding: 6px 10px 6px 15px;
-    font-size: 13px;
-  }
-
-  .search-icon {
-    left: 176px;
-    font-size: 14px;
   }
 
   .navbar-right {
@@ -258,36 +197,7 @@
   .navbar-content {
     padding: 10px 0 0 0;
   }
-
-  .search-container {
-    max-width: 120px; /* Giảm mạnh để tránh overflow */
-  }
-
-  .search-input {
-    padding: 5px 8px 5px 10px;
-    font-size: 12px;
-  }
-
-  .search-input::placeholder {
-    opacity: 0 !important;
-  }
-
-  .search-icon {
-    left: 40px;
-    font-size: 12px;
-  }
-
-  /* Khi sidebar collapsed ở 480px - giống các responsive khác */
-  .top-navbar.collapsed .search-input::placeholder {
-    opacity: 1 !important; /* Hiện placeholder khi collapsed */
-    color: #002b16;
-    font-style: italic;
-  }
-
-  .top-navbar.collapsed .search-icon {
-    left: 97px; /* Hiện search icon khi collapsed */
-  }
-
+  
   .navbar-right {
     gap: 6px;
   }
