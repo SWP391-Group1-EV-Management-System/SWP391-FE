@@ -3,23 +3,21 @@ const API_BASE_URL = 'http://localhost:3001';
 export const fetchChargingHistory = async () => {
   try {
     // Fetch multiple endpoints to get complete data
-    const [sessionsRes, stationsRes, postsRes, paymentsRes, usersRes] = await Promise.all([
+    const [sessionsRes, stationsRes, postsRes, usersRes] = await Promise.all([
       fetch(`${API_BASE_URL}/charging_session`),
       fetch(`${API_BASE_URL}/charging_station`),
       fetch(`${API_BASE_URL}/charging_post`),
-      fetch(`${API_BASE_URL}/payment`),
       fetch(`${API_BASE_URL}/users`)
     ]);
 
-    if (!sessionsRes.ok || !stationsRes.ok || !postsRes.ok || !paymentsRes.ok || !usersRes.ok) {
+    if (!sessionsRes.ok || !stationsRes.ok || !postsRes.ok || !usersRes.ok) {
       throw new Error('Failed to fetch data from API');
     }
 
-    const [sessions, stations, posts, payments, users] = await Promise.all([
+    const [sessions, stations, posts, users] = await Promise.all([
       sessionsRes.json(),
       stationsRes.json(),
       postsRes.json(),
-      paymentsRes.json(),
       usersRes.json()
     ]);
 
@@ -27,7 +25,6 @@ export const fetchChargingHistory = async () => {
     const enrichedSessions = sessions.map(session => {
       const station = stations.find(s => s.id_charging_station === session.station_id);
       const post = posts.find(p => p.idChargingPost === session.charging_post_id);
-      const payment = payments.find(p => p.charging_session_id === session.charging_session_id);
       const user = users.find(u => u.user_id === session.user_id);
 
       return {
@@ -40,12 +37,6 @@ export const fetchChargingHistory = async () => {
         post_name: `Cổng ${post?.idChargingPost || 'N/A'}`,
         max_power: post?.maxPower || 0,
         charging_fee: post?.charging_fee_per_kwh || 0,
-        
-        // Payment info
-        payment_id: payment?.payment_id || '',
-        payment_method: payment?.payment_method || 'Chưa thanh toán',
-        is_paid: payment?.is_paid || false,
-        paid_at: payment?.paid_at,
         
         // User info
         user_name: user ? `${user.first_name} ${user.last_name}` : 'Người dùng không xác định',
@@ -66,7 +57,7 @@ export const fetchChargingHistory = async () => {
         station: station?.name_charging_station || 'Trạm không xác định',
         port: `Cổng ${post?.idChargingPost || 'N/A'}`,
         plugType: getChargingType(post?.maxPower),
-        transactionId: payment?.payment_id || session.charging_session_id,
+        transactionId: session.charging_session_id,
         
         // Calculate additional display data
         batteryStart: Math.floor(Math.random() * 30) + 10, // 10-40% (mock)

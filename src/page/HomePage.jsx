@@ -23,7 +23,6 @@ import {
   BsLightning, // Lightning icon for charging/energy
   BsMap, // Map icon for location services
   BsClock, // Clock icon for time/history
-  BsCreditCard, // Card icon for payments
   BsBookmarkStar, // Bookmark star for favorites/promotions
   BsShield, // Shield icon for security/reliability
   BsGlobe, // Globe icon for global/network

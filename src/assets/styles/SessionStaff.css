@@ -235,17 +235,6 @@
   color: #fff;
 }
 
-.session-action-button.payment {
-  background-color: #43e97b;
-  border-color: #43e97b;
-  color: #fff;
-}
-
-.session-action-button.payment:hover {
-  background-color: #20c760;
-  border-color: #20c760;
-  color: #fff;
-}
 
 .session-action-button.terminate {
   background-color: #ff7875;

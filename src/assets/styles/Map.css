@@ -21,103 +21,54 @@
 }
 
 /* ===============================
-   CONTROL PANEL STYLES
+   USER LOCATION BUTTON STYLES
    =============================== */
 
-.map-control-panel {
+.map-user-location-button {
   position: absolute;
-  top: 16px;
+  bottom: 16px;
   left: 16px;
-  max-width: 350px;
   z-index: 1000;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  background-color: #1890ff;
+  border-color: #1890ff;
 }
 
-.map-instructions {
-  padding: 8px;
-  background-color: #f0f9ff;
-  border: 1px solid #bae0ff;
-  border-radius: 6px;
-  font-size: 11px;
+.map-user-location-button:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.4);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
+}
+
+.map-user-location-button:focus {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
+}
+
+.map-refresh-location-button {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-color: #d9d9d9;
+  color: #595959;
+}
+
+.map-refresh-location-button:hover {
+  background-color: #f5f5f5;
+  border-color: #40a9ff;
   color: #1890ff;
+  box-shadow: 0 6px 16px rgba(24, 144, 255, 0.2);
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
 }
 
-.map-instructions strong {
-  font-weight: 600;
+.map-refresh-location-button:focus {
+  outline: 2px solid #1890ff;
+  outline-offset: 2px;
 }
 
-/* ===============================
-   INPUT FIELD STYLES
-   =============================== */
 
-.map-origin-input {
-  width: 100%;
-}
-
-.map-destination-input {
-  width: 100%;
-}
-
-.map-destination-input.selected {
-  background-color: #f6ffed;
-  border-color: #52c41a;
-}
-
-/* ===============================
-   BUTTON STYLES
-   =============================== */
-
-.map-button-group {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.map-calculate-button {
-  min-width: 120px;
-}
-
-.map-clear-button {
-  min-width: 40px;
-}
-
-.map-location-button {
-  color: #52c41a;
-  border-color: #52c41a;
-}
-
-.map-location-button.inactive {
-  color: inherit;
-  border-color: inherit;
-}
-
-/* ===============================
-   ROUTE INFO DISPLAY
-   =============================== */
-
-.map-route-info {
-  padding: 8px;
-  background-color: #f6ffed;
-  border: 1px solid #b7eb8f;
-  border-radius: 6px;
-  font-size: 12px;
-}
-
-.map-route-distance {
-  color: #52c41a;
-  font-weight: 600;
-}
-
-.map-route-duration {
-  color: #52c41a;
-  font-weight: 600;
-}
-
-.map-route-status {
-  margin-top: 4px;
-  font-size: 11px;
-  color: #389e0d;
-}
 
 /* ===============================
    POPUP STYLES
@@ -264,19 +215,9 @@
    =============================== */
 
 @media (max-width: 768px) {
-  .map-control-panel {
-    left: 8px;
-    right: 8px;
-    top: 8px;
-    max-width: none;
-  }
-
-  .map-instructions {
-    font-size: 10px;
-  }
-
-  .map-route-info {
-    font-size: 11px;
+  .map-user-location-button {
+    bottom: 12px;
+    left: 12px;
   }
 
   .map-station-popup {
@@ -285,10 +226,9 @@
 }
 
 @media (max-width: 480px) {
-  .map-control-panel {
-    left: 4px;
-    right: 4px;
-    top: 4px;
+  .map-user-location-button {
+    bottom: 8px;
+    left: 8px;
   }
 
   .map-station-popup .station-info-row {
@@ -301,47 +241,7 @@
    ACCESSIBILITY
    =============================== */
 
-.map-control-panel:focus-within {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-}
-
-.map-location-button:focus,
-.map-calculate-button:focus,
-.map-clear-button:focus {
+.map-user-location-button:focus {
   outline: 2px solid #1890ff;
   outline-offset: 2px;
-}
-
-/* ===============================
-   ANIMATIONS
-   =============================== */
-
-.map-control-panel {
-  animation: slideInLeft 0.3s ease-out;
-}
-
-@keyframes slideInLeft {
-  from {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.map-route-info {
-  animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }

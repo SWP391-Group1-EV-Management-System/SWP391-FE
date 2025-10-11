@@ -150,22 +150,7 @@ const SessionStaffPage = () => {
               }, 1000);
             },
           }),
-        payment: () =>
-          Modal.confirm({
-            title: "Xác nhận thanh toán",
-            content: `Xác nhận thanh toán ${record.totalAmount.toLocaleString()} VND cho phiên sạc ${
-              record.sessionId
-            }?`,
-            okText: "Xác nhận",
-            cancelText: "Hủy",
-            onOk: () => {
-              setLoading(true);
-              setTimeout(() => {
-                setLoading(false);
-                message.success("Đã xác nhận thanh toán thành công!");
-              }, 1000);
-            },
-          }),
+
         delete: () =>
           Modal.confirm({
             title: "Xóa phiên sạc",
@@ -345,16 +330,6 @@ const SessionStaffPage = () => {
                 />
               </Tooltip>
             )}
-
-            <Tooltip title="Xác nhận thanh toán">
-              <Button
-                size="small"
-                className="session-action-button payment"
-                icon={<CheckCircleOutlined />}
-                onClick={() => handleAction("payment", record)}
-                disabled={record.status === SESSION_STATUS.CHARGING}
-              />
-            </Tooltip>
 
             <Tooltip title="Xóa phiên sạc">
               <Button
