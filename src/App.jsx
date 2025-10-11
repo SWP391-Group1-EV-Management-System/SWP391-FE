@@ -5,7 +5,6 @@ import HomePage from "./page/HomePage.jsx";
 import MapPage from "./page/MapPage.jsx";
 import EnergyPage from "./page/EnergyPage.jsx";
 import HistoryPage from "./page/HistoryPage.jsx";
-import PaymentPage from "./page/PaymentPage.jsx";
 import ServicePackage from "./page/ServicePackage.jsx";
 import SettingPage from "./page/SettingPage.jsx";
 import NotFoundPage from "./page/NotFoundPage.jsx";
@@ -39,7 +38,6 @@ function App() {
           <Route path="map" element={<MapPage />} />
           <Route path="energy" element={<EnergyPage />} />
           <Route path="history" element={<HistoryPage />} />
-          <Route path="payment" element={<PaymentPage />} />
           <Route path="servicepackage" element={<ServicePackage />} />
           <Route path="setting" element={<SettingPage />} />
           <Route path="sessionstaff" element={<SessionStaffPage />} />

@@ -34,12 +34,6 @@ const menuItems = [
   { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/app/energy" },
   { id: "history", label: "Lịch sử", icon: BsClock, path: "/app/history" },
   {
-    id: "payment",
-    label: "Thanh toán",
-    icon: BsCreditCard,
-    path: "/app/payment",
-  },
-  {
     id: "servicepackage",
     label: "Gói dịch vụ",
     icon: BsBookmarkStar,

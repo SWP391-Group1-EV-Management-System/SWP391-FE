@@ -36,7 +36,6 @@ export const useHistoryData = () => {
       return (
         session.station_name.toLowerCase().includes(searchLower) ||
         session.charging_session_id.toLowerCase().includes(searchLower) ||
-        (session.payment_id && session.payment_id.toLowerCase().includes(searchLower)) ||
         (session.user_name && session.user_name.toLowerCase().includes(searchLower))
       );
     });
