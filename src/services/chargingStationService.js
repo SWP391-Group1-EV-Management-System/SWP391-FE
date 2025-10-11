@@ -152,8 +152,8 @@ export const stationDataMapper = {
       id: apiStation.idChargingStation,
       name: apiStation.nameChargingStation || "Không có tên",
       address: apiStation.address || "Chưa có địa chỉ",
-      isActive: apiStation.isActive,
-      status: this.mapActiveStatus(apiStation.isActive),
+      active: apiStation.active,
+      status: this.mapActiveStatus(apiStation.active),
       establishedTime: apiStation.establishedTime,
       numberOfPosts: apiStation.numberOfPosts || 0,
       chargingPosts: apiStation.chargingPosts || [],
@@ -177,11 +177,11 @@ export const stationDataMapper = {
   /**
    * Convert boolean active status to UI status string
    *
-   * @param {boolean} isActive - Station active status from API
+   * @param {boolean} active - Station active status from API
    * @returns {string} UI status: 'available' | 'maintenance'
    */
-  mapActiveStatus(isActive) {
-    return isActive ? "available" : "maintenance";
+  mapActiveStatus(active) {
+    return active ? "available" : "maintenance";
   },
 
   /**
@@ -219,7 +219,7 @@ export const stationDataMapper = {
    */
   calculateStatistics(stations) {
     const totalStations = stations.length;
-    const activeStations = stations.filter((s) => s.isActive === true).length;
+    const activeStations = stations.filter((s) => s.active === true).length;
     const inactiveStations = totalStations - activeStations;
 
     const totalPosts = stations.reduce(
@@ -268,7 +268,7 @@ export const stationDataMapper = {
     return {
       // Core post data
       id: apiPost.idChargingPost,
-      isActive: apiPost.isActive,
+      active: apiPost.active,
       maxPower: apiPost.maxPower || 0,
       chargingFeePerKWh: apiPost.chargingFeePerKWh || 0,
       chargingSessions: apiPost.chargingSessions || [],
@@ -277,9 +277,9 @@ export const stationDataMapper = {
       // UI display fields
       powerDisplay: `${apiPost.maxPower || 0} kW`,
       feeDisplay: `${apiPost.chargingFeePerKWh || 0} VNĐ/kWh`,
-      status: apiPost.isActive ? "available" : "maintenance",
+      status: apiPost.active ? "available" : "maintenance",
       isAvailable:
-        apiPost.isActive && !this.isPostBusy(apiPost.chargingSessions),
+        apiPost.active && !this.isPostBusy(apiPost.chargingSessions),
       supportedTypes: apiPost.chargingType?.map(
         (type) => type.typeName || type.name || "AC"
       ) || ["AC"],

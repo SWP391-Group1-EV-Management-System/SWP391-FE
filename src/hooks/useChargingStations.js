@@ -38,9 +38,9 @@ export const useChargingStations = (options = {}) => {
       const stats = {
         totalStations: stations.length,
         availableStations: stations.filter(
-          (station) => station.status === "available"
+          (station) => station.active === true
         ).length,
-        bookedStations: stations.filter((station) => station.status === "busy")
+        bookedStations: stations.filter((station) => station.active === false)
           .length,
       };
       setStatistics(stats);

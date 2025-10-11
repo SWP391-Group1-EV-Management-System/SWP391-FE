@@ -61,10 +61,10 @@ export const useStationPosts = (stationId) => {
     available: posts.filter(p => p.isAvailable).length,
     
     // Số trụ sạc đang bận (không khả dụng nhưng vẫn hoạt động)
-    busy: posts.length - posts.filter(p => p.isAvailable).length - posts.filter(p => !p.isActive).length,
+    busy: posts.length - posts.filter(p => p.isAvailable).length - posts.filter(p => !p.active).length,
     
     // Số trụ sạc không hoạt động (bảo trì, hỏng hóc)
-    inactive: posts.filter(p => !p.isActive).length,
+    inactive: posts.filter(p => !p.active).length,
   };
 
   // Trả về tất cả dữ liệu cần thiết cho component
