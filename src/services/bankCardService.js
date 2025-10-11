@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'http://localhost:8080';
 
 // Lấy danh sách thẻ ngân hàng của user
 export const fetchUserBankCards = async (userId) => {

@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Typography, Space } from "antd";
+import { Card, Typography, Space, Button } from "antd";
 import { ClockCircleOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
@@ -62,6 +62,28 @@ const CurrentTime = ({ currentTime }) => {
           day: "numeric",
         })}
       </Text>
+
+      {/* Stop Charging Button in its own border */}
+      <div
+        style={{
+          marginTop: "32px",
+          padding: "10px",
+        }}
+      >
+        <Button
+          type="primary"
+          danger
+          style={{ width: "100%", fontSize: "20px", height: "56px", border: "none", outline: "none", boxShadow: "none" }}
+          onClick={() => {
+            
+          }}
+        >
+          <span style={{ fontSize: "20px", fontWeight: "bold" }}>
+            Dừng sạc
+          </span>
+        </Button>
+      </div>
+
     </Card>
   );
 };

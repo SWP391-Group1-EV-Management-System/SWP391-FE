@@ -1,10 +1,6 @@
 import React from "react";
 import { Card, Progress, Typography, Space, Tag } from "antd";
-import {
-  ThunderboltOutlined,
-  CheckCircleOutlined,
-  PauseCircleOutlined,
-} from "@ant-design/icons";
+
 
 const { Title } = Typography;
 
@@ -63,36 +59,6 @@ const BatteryProgress = ({
       </svg>
     );
   };
-
-  /**
-   * Xác định trạng thái pin
-   */
-  const getBatteryStatus = () => {
-    if (isCompleted) {
-      return {
-        label: "Hoàn thành",
-        icon: <CheckCircleOutlined />,
-        color: "#52c41a",
-      };
-    }
-
-    if (isCharging) {
-      return {
-        label: "Đang sạc",
-        icon: <ThunderboltOutlined spin />,
-        color: "#10b981",
-      };
-    }
-
-    return {
-      label: "Dừng sạc",
-      icon: <PauseCircleOutlined />,
-      color: "#8c8c8c",
-    };
-  };
-
-  const batteryStatus = getBatteryStatus();
-
   return (
     <Card
       style={{
@@ -120,20 +86,7 @@ const BatteryProgress = ({
             Trạng thái pin
           </Title>
         </Space>
-        <Tag
-          color={batteryStatus.color}
-          style={{
-            fontSize: "12px",
-            fontWeight: 600,
-            borderRadius: "8px",
-            padding: "4px 12px",
-          }}
-        >
-          <Space size={4}>
-            {batteryStatus.icon}
-            {batteryStatus.label}
-          </Space>
-        </Tag>
+        
       </div>
 
       {/* Main Progress Circle Only */}
