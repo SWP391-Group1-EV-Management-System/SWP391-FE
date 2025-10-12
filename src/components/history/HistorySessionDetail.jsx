@@ -22,7 +22,7 @@ const HistorySessionDetail = ({ session }) => {
       padding: '2rem'
     }}>
       <Row gutter={[24, 24]}>
-        <Col lg={12} xs={24}>
+        <Col span={24}>
           <Card
             style={{
               background: '#ffffff',
@@ -40,7 +40,7 @@ const HistorySessionDetail = ({ session }) => {
               <Title 
                 level={4} 
                 style={{ 
-                  color: '#28a745', 
+                  color: 'black', 
                   fontWeight: 700,
                   marginBottom: '2rem',
                   borderBottom: '3px solid #28a745',
@@ -50,53 +50,79 @@ const HistorySessionDetail = ({ session }) => {
                   letterSpacing: '0.5px',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem'
+                  gap: '0.75rem',
+                  background: '#fff', // nền trắng
+                  boxShadow: '0 2px 8px rgba(40,167,69,0.07)'
                 }}
               >
                 <BarChartOutlined style={{ 
-                  fontSize: '2rem',
-                  background: 'linear-gradient(135deg, #28a745, #34ce57)',
+                  fontSize: '2.6rem',
+                  background: 'linear-gradient(135deg, #28a745, #34ce57)', // icon xanh lá
                   borderRadius: '50%',
-                  width: '3rem',
-                  height: '3rem',
+                  width: '3.6rem',
+                  height: '3.6rem',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: 'white'
+                  color: 'white',
+                  boxShadow: '0 0 0 4px #eafaf1' // viền xanh lá nhạt quanh icon
                 }} />
                 Thông tin chi tiết
               </Title>
               
-              <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                {[
-                  { label: 'Mã phiên sạc:', value: session.charging_session_id },
-                  { label: 'Công suất tối đa:', value: `${session.max_power || session.maxPower || 'N/A'} kW` },
-                  { label: 'Công suất trung bình:', value: `${session.avgPower || 'N/A'} kW` },
-                  { label: 'Pin đầu:', value: `${session.batteryStart || 'N/A'}%` },
-                  { label: 'Pin cuối:', value: `${session.batteryEnd || 'N/A'}%` }
-                ].map((item, index) => (
-                  <div key={index} style={detailItemStyle}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <Text style={{ 
-                        color: '#28a745',
-                        fontWeight: 700,
-                        fontSize: '1.4rem',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.3px'
-                      }}>
+              <table
+                style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  background: '#fff', // nền trắng
+                  boxShadow: 'none',
+                  border: '1px solid #28a745', // viền xanh lá
+                  margin: 0,
+                  borderRadius: 0,
+                  fontSize: '1.7rem'
+                }}
+              >
+                <tbody>
+                  {[
+                    { label: 'Mã phiên sạc:', value: session.charging_session_id },
+                    { label: 'Công suất tối đa:', value: `${session.max_power || session.maxPower || 'N/A'} kW` },
+                    { label: 'Công suất trung bình:', value: `${session.avgPower || 'N/A'} kW` },
+                    { label: 'Pin đầu:', value: `${session.batteryStart || 'N/A'}%` },
+                    { label: 'Pin cuối:', value: `${session.batteryEnd || 'N/A'}%` }
+                  ].map((item, index) => (
+                    <tr key={index} style={{ borderBottom: index !== 4 ? '1px solid #e9ecef' : 'none' }}>
+                      <td
+                        style={{
+                          padding: '1.5rem 2.5rem',
+                          color: '#212529', // chữ đen
+                          fontWeight: 700,
+                          fontSize: '1.35rem',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.3px',
+                          width: '50%',
+                          background: index % 2 === 0 ? '#f8fffe' : '#fff', // nền trắng/xanh lá nhạt xen kẽ
+                          borderLeft: '4px solid #28a745' // viền xanh lá bên trái
+                        }}
+                      >
                         {item.label}
-                      </Text>
-                      <Text style={{ 
-                        color: '#155724',
-                        fontWeight: 700,
-                        fontSize: '1.5rem'
-                      }}>
+                      </td>
+                      <td
+                        style={{
+                          padding: '1.5rem 2.5rem',
+                          color: '#212529', // chữ đen
+                          fontWeight: 700,
+                          fontSize: '1.45rem',
+                          textAlign: 'right',
+                          background: index % 2 === 0 ? '#fff' : '#eafaf1', // nền trắng/xanh lá nhạt xen kẽ
+                          borderRight: '4px solid #28a745' // viền xanh lá bên phải
+                        }}
+                      >
                         {item.value}
-                      </Text>
-                    </div>
-                  </div>
-                ))}
-              </Space>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </Space>
           </Card>
         </Col>
