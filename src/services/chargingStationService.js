@@ -65,7 +65,9 @@ export const chargingStationService = {
   async getStationById(stationId) {
     try {
       const response = await apiClient.get(`/charging/station/${stationId}`);
+      console.log('API trả về trạm:', response.data);
       const mappedStation = stationDataMapper.mapStationFromApi(response.data);
+      console.log('Mapped trạm:', mappedStation);
       return mappedStation;
     } catch (error) {
       throw this.handleError(error, "Không tìm thấy trạm sạc");
@@ -84,7 +86,9 @@ export const chargingStationService = {
       const response = await apiClient.get(
         `/charging/station/posts/${stationId}`
       );
+      console.log('API trả về trụ:', response.data);
       const mappedPosts = stationDataMapper.mapPostsFromApi(response.data);
+      console.log('Mapped trụ:', mappedPosts);
       return mappedPosts;
     } catch (error) {
       // Log debug information before throwing error
@@ -150,7 +154,7 @@ export const stationDataMapper = {
     return {
       // Core station data from API
       id: apiStation.idChargingStation,
-      name: apiStation.nameChargingStation || "Không có tên",
+      name: apiStation.nameChargingStation || apiStation.name || "Không có tên",
       address: apiStation.address || "Chưa có địa chỉ",
       active: apiStation.active,
       status: this.mapActiveStatus(apiStation.active),
@@ -268,6 +272,7 @@ export const stationDataMapper = {
     return {
       // Core post data
       id: apiPost.idChargingPost,
+      name: apiPost.nameChargingPost || apiPost.name || `Trụ ${apiPost.idChargingPost}`,
       active: apiPost.active,
       maxPower: apiPost.maxPower || 0,
       chargingFeePerKWh: apiPost.chargingFeePerKWh || 0,

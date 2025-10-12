@@ -32,6 +32,7 @@ export const useChargingStations = (options = {}) => {
 
       // Gọi API để lấy danh sách trạm sạc
       const stations = await chargingStationService.getAllStations();
+      console.log('Danh sách trạm lấy từ API:', stations);
       setStations(stations);
 
       // Tính toán thống kê từ dữ liệu API
