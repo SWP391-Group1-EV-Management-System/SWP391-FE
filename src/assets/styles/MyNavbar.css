@@ -1,36 +1,37 @@
+/* ==================== TOP NAVBAR ==================== */
+
 .top-navbar {
   position: fixed;
   top: 0;
-  left: 240px; /* Mặc định menu mở rộng */
+  left: 240px;
   right: 0;
   height: 60px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.33) 0%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  display: flex;
+  background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.33) 0%,
+      rgba(255, 255, 255, 0) 100%);
   box-shadow: 0 0 4px rgba(255, 255, 255, 0.08);
-  align-items: center;
-  z-index: var(--z-navbar);
+  z-index: 1000;
   transition: left 0.3s ease;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
 .top-navbar.collapsed {
-  left: 90px; /* Khi menu thu gọn */
+  left: 90px;
 }
 
 .navbar-content {
+  height: 100%;
   display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: space-between;
   width: 100%;
   padding: 10px 20px 0 20px;
 }
 
-.navbar-right {
+/* ==================== LEFT SIDE - ICONS ==================== */
+
+.navbar-left {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -52,9 +53,43 @@
   transform: translateY(-1px);
 }
 
+/* QR Button với label "Quét mã" */
+.icon-item.qr-button {
+  width: auto;
+  padding: 8px 16px;
+  border-radius: 20px;
+  background-color: #0b9459;
+  gap: 8px;
+}
+
+.icon-item.qr-button:hover {
+  background-color: #0d9e5f;
+  box-shadow: 0 4px 12px rgba(11, 148, 89, 0.3);
+}
+
+.icon-item.qr-button .nav-icon {
+  color: white;
+  font-size: 20px;
+}
+
+.btn-label {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 .nav-icon {
   color: #0b9459;
-  font-size: 24px; /* Đồng bộ với sidebar-menu-icon */
+  font-size: 24px;
+}
+
+/* ==================== RIGHT SIDE - USER ==================== */
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
 .line {
@@ -79,6 +114,27 @@
   background-color: rgba(211, 255, 236, 0.6);
 }
 
+.user-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0b9459;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0b9459, #93f1c9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+/* ==================== DROPDOWN MENU ==================== */
+
 .user-dropdown {
   position: absolute;
   top: 100%;
@@ -88,7 +144,7 @@
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: var(--z-dropdown);
+  z-index: 1001;
   min-width: 120px;
   overflow: hidden;
 }
@@ -115,112 +171,69 @@
 
 .dropdown-item:last-child:hover {
   background-color: #f8d7da;
-}
-
-.user-name {
   font-size: 14px;
-  font-weight: 500;
-  color: #0b9459;
 }
 
-.user-avatar {
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.dropdown-item:hover {
+  background-color: #f5f5f5;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .top-navbar {
-    left: 220px; /* Phù hợp với menu width 170px trên tablet */
-  }
-
-  .top-navbar.collapsed {
-    left: 89px; /* Phù hợp với menu collapsed width 55px */
-  }
-
-  .nav-icon {
-    font-size: 22px; /* Giảm nhẹ cho tablet */
-  }
-
-  .line {
-    height: 28px; /* Giảm chiều cao cho tablet */
-    width: 2px;
-  }
+.dropdown-item:last-child:hover {
+  background-color: #fff2f0;
+  color: #ff4d4f;
 }
+
+.dropdown-divider {
+  height: 1px;
+  background-color: #f0f0f0;
+  margin: 4px 0;
+}
+
+/* ==================== RESPONSIVE ==================== */
 
 @media (max-width: 768px) {
   .top-navbar {
-    left: 189px; /* Menu width 170px trên mobile khi mở */
+    left: 0;
+    height: 56px;
   }
-
+  
   .top-navbar.collapsed {
-    left: 78px; /* Menu width 55px khi thu gọn */
+    left: 0;
   }
-
-  .navbar-right {
-    gap: 8px; /* Giảm gap để tiết kiệm không gian */
+  
+  .navbar-content {
+    padding: 0 16px;
   }
-
-  .icon-item {
-    width: 30px;
-    height: 30px;
+  
+  .navbar-left {
+    gap: 12px;
   }
-
-  .nav-icon {
-    font-size: 18px; /* Đồng bộ với sidebar-menu-icon mobile */
-  }
-
-  .line {
-    height: 25px; /* Giảm chiều cao cho mobile */
-    width: 1.5px; /* Giảm độ dày cho mobile */
-  }
-
-  .user-avatar {
-    width: 30px;
-    height: 30px;
+  
+  .user-name {
+    display: none;
   }
 }
 
 @media (max-width: 480px) {
-  .top-navbar {
-    left: 155px; /* Giữ nguyên menu width */
-  }
-
-  .top-navbar.collapsed {
-    left: 79px;
-  }
-
   .navbar-content {
-    padding: 10px 0 0 0;
+    padding: 0 12px;
   }
   
-  .navbar-right {
-    gap: 6px;
+  .navbar-left {
+    gap: 8px;
   }
-
+  
   .icon-item {
-    width: 28px;
-    height: 28px;
+    padding: 6px;
   }
-
+  
   .nav-icon {
-    font-size: 18px; /* Đồng bộ với sidebar-menu-icon mobile */
+    font-size: 18px;
   }
-
-  .user-name {
-    display: none;
-  }
-
-  .line {
-    display: none;
-  }
-
+  
   .user-avatar {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
   }
 }

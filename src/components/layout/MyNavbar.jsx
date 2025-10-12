@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaRegBell, FaRegEnvelope } from "react-icons/fa";
-import "../../assets/styles/MyNavbar.css";
 import { BsQrCodeScan } from "react-icons/bs";
-import { TbLogout } from "react-icons/tb";
+import { TbLogout, TbUser, TbSettings } from "react-icons/tb";
 import QRScanner from "../qr/QRScanner";
 import QRResultModal from "../qr/QRResultModal";
+import "../../assets/styles/MyNavbar.css";
 
 function MyNavbar({ collapsed }) {
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
@@ -14,46 +14,23 @@ function MyNavbar({ collapsed }) {
   const [stationData, setStationData] = useState(null);
   const dropdownRef = useRef(null);
 
-  // Function để giới hạn độ dài tên user
-  const truncateUserName = (name, maxLength = 12) => {
-    if (name.length <= maxLength) return name;
-    return name.substring(0, maxLength) + "...";
-  };
-
   const storedUser = localStorage.getItem("user");
   const userSession = storedUser ? JSON.parse(storedUser) : null;
-  // Có thể nhận userName từ props hoặc state trong tương lai
-  //const userName = `${userSession.firstName} ${userSession.lastName}`; // Placeholder, sau này sẽ đọc từ data
+  
+  const userName = userSession && userSession.firstName
+    ? `${userSession.firstName}`
+    : "Guest User";
 
-  // Kiểm tra null safety trước khi truy cập properties
-  const userName =
-    userSession && userSession.firstName
-      ? `${userSession.firstName}`
-      : "Guest User";
+  // Xử lý QR Scanner
+  const handleQRClick = () => setIsQRScannerOpen(true);
+  const handleCloseQRScanner = () => setIsQRScannerOpen(false);
 
-  // Xử lý khi click vào nút QR
-  const handleQRClick = () => {
-    setIsQRScannerOpen(true);
-  };
-
-  // Xử lý khi đóng QR Scanner
-  const handleCloseQRScanner = () => {
-    setIsQRScannerOpen(false);
-  };
-
-  // Xử lý khi quét QR thành công
   const handleScanSuccess = async (result) => {
     console.log("QR Code được quét:", result);
     setQrResult(result);
     setIsQRScannerOpen(false);
 
-    // Gọi API để lấy thông tin trụ sạc từ QR code
     try {
-      // TODO: Thay thế bằng API call thực tế
-      // const response = await fetch(`/api/stations/qr/${result}`);
-      // const data = await response.json();
-
-      // Mock data để demo - thay thế bằng API call thực tế
       const mockStationData = {
         stationInfo: {
           stationName: "Vincom Center",
@@ -72,27 +49,21 @@ function MyNavbar({ collapsed }) {
       setIsQRResultModalOpen(true);
     } catch (error) {
       console.error("Lỗi khi lấy thông tin trụ sạc:", error);
-      // Hiển thị thông báo lỗi hoặc sử dụng giá trị mặc định
       setIsQRResultModalOpen(true);
     }
   };
 
-  // Xử lý đóng QR Result Modal
   const handleCloseQRResultModal = () => {
     setIsQRResultModalOpen(false);
     setQrResult("");
     setStationData(null);
   };
 
-  // Xử lý toggle dropdown user
-  const handleUserClick = () => {
-    setIsUserDropdownOpen(!isUserDropdownOpen);
-  };
+  const handleUserClick = () => setIsUserDropdownOpen(!isUserDropdownOpen);
 
-  // Xử lý logout
   const handleLogout = () => {
     localStorage.removeItem("user");
-    window.location.href = "/login"; // Hoặc sử dụng navigate từ react-router
+    window.location.href = "/login";
   };
 
   // Đóng dropdown khi click bên ngoài
@@ -104,46 +75,58 @@ function MyNavbar({ collapsed }) {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <nav className={`top-navbar ${collapsed ? "collapsed" : ""}`}>
       <div className="navbar-content">
-
-        {/* Right Side Icons */}
-        <div className="navbar-right">
+        {/* Left Side - QR and Icons */}
+        <div className="navbar-left">
           <div
-            className="icon-item"
+            className="icon-item qr-button"
             onClick={handleQRClick}
-            style={{ cursor: "pointer" }}
+            title="Quét QR Code"
           >
             <BsQrCodeScan className="nav-icon" />
+            <span className="btn-label">Quét mã</span>
           </div>
-          <div className="icon-item">
+          <div className="icon-item" title="Thông báo">
             <FaRegBell className="nav-icon" />
           </div>
-          <div className="icon-item">
+          <div className="icon-item" title="Tin nhắn">
             <FaRegEnvelope className="nav-icon" />
           </div>
+        </div>
+
+        {/* Right Side - User Profile */}
+        <div className="navbar-right">
           <div className="line"></div>
           <div
             className="user-profile"
             onClick={handleUserClick}
             ref={dropdownRef}
           >
-            <span className="user-name" title={userName}>
-              {truncateUserName(userName)}
-            </span>
-            <div className="user-avatar"></div>
+            <span className="user-name">{userName}</span>
+            <div className="user-avatar">
+              {userName.charAt(0).toUpperCase()}
+            </div>
 
             {/* User Dropdown Menu */}
             {isUserDropdownOpen && (
               <div className="user-dropdown">
+                <div className="dropdown-item">
+                  <TbUser size={18} />
+                  <span>Tài khoản</span>
+                </div>
+                <div className="dropdown-item">
+                  <TbSettings size={18} />
+                  <span>Cài đặt</span>
+                </div>
+                <div className="dropdown-divider"></div>
                 <div className="dropdown-item" onClick={handleLogout}>
-                  <TbLogout size={20} /> Logout
+                  <TbLogout size={18} />
+                  <span>Đăng xuất</span>
                 </div>
               </div>
             )}
