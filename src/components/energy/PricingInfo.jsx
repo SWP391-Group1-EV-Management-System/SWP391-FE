@@ -68,6 +68,7 @@ const PricingInfo = ({ sessionData }) => {
               backgroundColor: "#f8fafc",
               borderRadius: "8px",
               border: "1px solid #e2e8f0",
+              marginBottom: index !== pricingItems.length - 1 ? "8px" : 0,
             }}
           >
             <Col>
@@ -97,13 +98,11 @@ const PricingInfo = ({ sessionData }) => {
         ))}
       </Space>
 
-      <Divider style={{ margin: "16px 0" }} />
-
       {/* Cost Summary */}
       <div
         style={{
           background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
-          padding: "24px",
+          padding: "19px",
           borderRadius: "12px",
           border: "2px solid #10b981",
           textAlign: "center",

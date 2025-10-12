@@ -91,14 +91,6 @@
   align-items: center;
   gap: 16px;
 }
-
-.line {
-  background: #0b9459;
-  border-radius: 4px;
-  width: 2px;
-  height: 31px;
-}
-
 .user-profile {
   position: relative;
   display: flex;
