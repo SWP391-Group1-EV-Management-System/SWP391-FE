@@ -88,21 +88,30 @@ const ServicePackageCard = ({
         body: { padding: '24px' } // Fixed: Changed from bodyStyle
       }}
       actions={[
-        <Button 
-          key="subscribe"
-          type={config.buttonType}
-          size="large"
-          block
-          onClick={handleSubscribe}
-          style={{
-            height: '48px',
-            fontSize: '16px',
-            fontWeight: 600,
-            borderRadius: '8px'
-          }}
-        >
-          Đăng ký ngay
-        </Button>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0 16px' }}>
+          <Button 
+            key="subscribe"
+            type="primary"
+            size="large"
+            block
+            onClick={handleSubscribe}
+            style={{
+              height: '48px',
+              fontSize: '16px',
+              fontWeight: 600,
+              borderRadius: '24px',
+              background: config.color,
+              borderColor: config.color,
+              color: '#fff',
+              boxShadow: `0 2px 8px ${config.color}33`,
+              width: '100%',
+              margin: 0,
+            }}
+            className="custom-package-btn"
+          >
+            Đăng ký ngay
+          </Button>
+        </div>
       ]}
     >
       {/* Header với icon và tag */}
@@ -143,7 +152,9 @@ const ServicePackageCard = ({
             <Text strong>Giá:</Text>
           </Space>
           <Title level={4} style={{ margin: 0, color: config.color }}>
-            {price.toLocaleString('vi-VN')} VNĐ
+            {typeof price === 'number' && !isNaN(price)
+              ? price.toLocaleString('vi-VN') + ' VNĐ'
+              : 'Chưa cập nhật'}
           </Title>
         </div>
         
@@ -157,6 +168,20 @@ const ServicePackageCard = ({
           </Text>
         </div>
       </Space>
+      <style>{`
+        .custom-package-btn {
+          background: ${config.color} !important;
+          border-color: ${config.color} !important;
+          color: #fff !important;
+        }
+        .custom-package-btn:hover, .custom-package-btn:focus {
+          filter: brightness(0.92);
+        }
+        .ant-card-actions {
+          background: transparent !important;
+          border-top: none !important;
+        }
+      `}</style>
     </Card>
   );
 };
