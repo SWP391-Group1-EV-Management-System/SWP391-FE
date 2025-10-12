@@ -1,6 +1,5 @@
 // src/apiService.js
 // Centralized API service for all controllers/entities
-import { api } from './api';
 
 // ===================== ENTITY LIST =====================
 // BookingEntity {
@@ -99,7 +98,7 @@ export const carAPI = {
 // Register & Login APIs
 export const authAPI = {
   register: (data) => api.post('/api/auth/register', data),
-  login: (data) => api.post('/api/auth/login', data),
+  login: (data) => api.post('/users/login', data), // Sửa endpoint đăng nhập cho đúng với BE
   refreshToken: (refreshToken) => api.post('/api/auth/refresh', { refreshToken }),
   logout: () => api.post('/api/auth/logout'),
   getProfile: () => api.get('/api/auth/profile'),

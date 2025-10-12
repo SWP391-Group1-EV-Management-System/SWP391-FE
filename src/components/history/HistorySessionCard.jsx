@@ -7,6 +7,9 @@ import HistorySessionDetail from './HistorySessionDetail';
 const { Text, Title } = Typography;
 
 const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
+  // Log giá trị tên trạm và tên trụ khi render card
+  console.log('Card:', session.charging_session_id, 'Trạm:', session.station_name, 'Trụ:', session.post_name);
+
   const getStatusColor = (status) => {
     const statusMap = {
       'success': 'success',

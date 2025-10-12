@@ -34,6 +34,7 @@ export const useStationPosts = (stationId) => {
       try {
         // Gọi API thật để lấy danh sách trụ sạc theo trạm
         const data = await chargingStationService.getStationPosts(stationId);
+        console.log('Danh sách trụ lấy từ API:', data);
         setPosts(data || []);
       } catch (err) {
         // Xử lý lỗi - hiển thị thông báo cho người dùng
