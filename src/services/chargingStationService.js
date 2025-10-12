@@ -98,6 +98,49 @@ export const chargingStationService = {
   },
 
   /**
+   * Create a new charging session
+   *
+   * @param {Object} bookingData - Booking data for creating session
+   * @returns {Promise<Object>} Created session data
+   * @throws {Error} When API request fails
+   */
+  async createChargingSession(bookingData) {
+    try {
+      const response = await apiClient.post("/charging/session/create", bookingData);
+      
+      // Kiểm tra response structure phù hợp với API đã cung cấp
+      if (response.data && response.data.success) {
+        return {
+          success: true,
+          data: response.data.data,
+          message: response.data.message || "Tạo phiên sạc thành công"
+        };
+      } else {
+        return {
+          success: false,
+          message: response.data?.message || "Không thể tạo phiên sạc"
+        };
+      }
+    } catch (error) {
+      console.error("Error creating charging session:", error);
+      if (error.response) {
+        console.error("Response status:", error.response.status);
+        console.error("Response data:", error.response.data);
+        
+        return {
+          success: false,
+          message: error.response.data?.message || "Lỗi từ server"
+        };
+      }
+      
+      return {
+        success: false,
+        message: "Không thể kết nối đến server"
+      };
+    }
+  },
+
+  /**
    * Transform API errors into user-friendly error messages
    *
    * @param {Error} error - The original error object
@@ -221,7 +264,7 @@ export const stationDataMapper = {
     const totalStations = stations.length;
     const activeStations = stations.filter((s) => s.active === true).length;
     const inactiveStations = totalStations - activeStations;
-
+    
     const totalPosts = stations.reduce(
       (sum, station) => sum + (station.numberOfPosts || 0),
       0

@@ -1,0 +1,261 @@
+/* WaitingQueue Component Styles */
+.waiting-queue-container {
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 16px rgba(24, 144, 255, 0.08);
+  text-align: center;
+  height: 282px;
+  display: flex;
+  flex-direction: column;
+}
+
+.waiting-queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.waiting-queue-icon {
+  color: #10b77f;
+  font-size: 24px;
+}
+
+.waiting-queue-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0;
+  margin-bottom: 0!important;
+}
+
+.queue-position-display {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.position-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 8px;
+}
+
+.queue-number {
+  font-size: 6rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #10b77f;
+  text-shadow: 0 2px 4px rgba(16, 183, 127, 0.2);
+}
+
+.estimated-time-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.time-value-large {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.queue-label {
+  font-size: 12px;
+  color: #8c8c8c;
+  text-align: center;
+}
+
+.progress-container {
+  margin: 12px 0;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.progress-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.progress-percentage {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1890ff;
+}
+
+.progress-info {
+  margin-top: 8px;
+  text-align: center;
+}
+
+.progress-text {
+  font-size: 11px;
+  color: #8c8c8c;
+}
+
+.controls-container {
+  width: 100%;           /* Full width container */
+  margin-top: 16px;
+}
+
+.controls-container .ant-btn {
+  width: 100%;           /* Button chiếm full width */
+  height: 40px;          /* Chiều cao lớn hơn */
+  font-weight: 600;      /* Chữ dày hơn */
+  font-size: 16px;       /* Font size lớn hơn */
+}
+
+.time-info-container {
+  margin: 12px 0;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.info-icon {
+  color: #1890ff;
+  font-size: 12px;
+  min-width: 14px;
+}
+
+.info-text {
+  font-size: 11px;
+  color: #8c8c8c;
+  text-align: center;
+}
+
+.status-tags {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.status-tag {
+  font-size: 11px;
+  border-radius: 12px;
+  padding: 2px 8px;
+}
+
+.queue-tips {
+  margin-top: 12px;
+  padding: 8px;
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  border-radius: 8px;
+}
+
+.tips-text {
+  font-size: 11px;
+  color: #10b981;
+  line-height: 1.4;
+  margin: 0;
+  text-align: left;
+}
+
+.arrival-time-controls {
+  width: 100%;           /* Full width container */
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  gap: 8px;              /* Khoảng cách giữa buttons */
+}
+
+.arrival-time-controls .ant-btn {
+  width: 100%;           /* Tất cả buttons chiếm full width */
+  height: 40px;          /* Chiều cao đồng nhất */
+  font-weight: 500;      /* Chữ dày hơn */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .waiting-queue-container {
+    height: 260px;
+  }
+
+  .waiting-queue-body {
+    padding: 16px;
+  }
+  
+  .position-time-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .queue-number {
+    font-size: 3rem;
+  }
+  
+  .time-value-large {
+    font-size: 2rem;
+  }
+  
+  .info-row {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .waiting-queue-container {
+    height: 240px;
+  }
+
+  .queue-number {
+    font-size: 2.5rem;
+  }
+  
+  .time-value-large {
+    font-size: 1.8rem;
+  }
+  
+  .waiting-queue-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .status-tags {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* Animation cho queue number */
+.queue-number {
+  animation: pulse-queue 2s ease-in-out infinite;
+}
+
+@keyframes pulse-queue {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Hover effect cho card */
+.waiting-queue-container:hover {
+  box-shadow: 0 6px 20px rgba(24, 144, 255, 0.15);
+  transition: box-shadow 0.3s ease;
+}
