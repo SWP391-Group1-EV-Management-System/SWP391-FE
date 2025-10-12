@@ -6,9 +6,11 @@ import { TbLock } from "react-icons/tb"; // Sửa từ TbLockPassword
 import { IoIosArrowForward } from "react-icons/io";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { IoClose } from "react-icons/io5";
+import { useLogin } from "../hooks/useLogin";
 
 function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const { login } = useLogin();
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -18,46 +20,12 @@ function Login() {
   const handleBackToWelcome = () => {
     navigate("/");
   };
+
   const handleLogin = async (e) => {
-    e.preventDefault(); // Ngăn reload trang
+    e.preventDefault();
     const email = e.target.username.value;
     const password = e.target.password.value;
-
-    console.log("Thông tin đăng nhập:", { email }); // Không log mật khẩu vì lý do bảo mật
-
-    try {
-      const loginData = {
-        email: email,
-        password: password,
-      };
-      const response = await fetch("http://localhost:8080/users/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json, text/plain, */*",
-        },
-        body: JSON.stringify({ email, password }), // Gửi dữ liệu dưới dạng JSON
-        credentials: "include", // Để nhận và gửi cookies session
-      });
-      let responseData = await response.json();
-      if (response.ok) {
-        console.log("Đăng nhập thành công");
-        localStorage.setItem("isLoggedIn", "true");
-        localStorage.setItem("user", JSON.stringify(responseData));
-        //const storedUser = localStorage.getItem("user");
-        //const user = JSON.parse(storedUser);
-        // user.firstName
-        navigate("/app/home");
-      } else {
-        console.error("Lỗi đăng nhập:", responseData);
-        const errorMessage =
-          typeof responseData === "string" ? responseData : responseData.message || "Sai email hoặc mật khẩu";
-        alert(errorMessage);
-      }
-    } catch (error) {
-      console.error("Lỗi kết nối:", error);
-      alert("Không thể kết nối đến server. Vui lòng thử lại sau.");
-    }
+    await login(email, password);
   };
 
   return (
