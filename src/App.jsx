@@ -15,6 +15,7 @@ import SessionStaffPage from "./page/SessionStaffPage.jsx";
 import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
 import OTPVerification from "./page/OTPVerification.jsx";
 import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
+import UserManagementPage from "./page/UserManagementPage.jsx";
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
           <Route path="setting" element={<SettingPage />} />
           <Route path="sessionstaff" element={<SessionStaffPage />} />
           <Route path="waitingstaff" element={<WaitingStaffPage />} />
+          <Route path="usermanagement" element={<UserManagementPage />} />
         </Route>
 
         {/* 404 Page */}
