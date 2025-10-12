@@ -65,7 +65,7 @@ const DriverTable = ({ search }) => {
       )}
       <style>{`
         .table-row-even { background: #f6fff4; }
-        .table-row-odd { background: #fff; }
+        .table-row-odd { background: transparent; }
         .ant-table-tbody > tr:hover > td { background: #e6f7e6 !important; }
       `}</style>
     </>
