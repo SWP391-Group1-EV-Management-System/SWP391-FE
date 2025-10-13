@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 import { BarChart, PieChart } from '@mui/x-charts';
 import PageHeader from "../components/PageHeader";
+import ReportSection from '../components/ReportSection';
 
 const ROW_GUTTER = 20; // Define a constant for the gutter value
 
@@ -162,6 +163,9 @@ function DashboardContent() {
           </Card>
         </Col>
       </Row>
+
+      {/* Báo cáo & Thống kê Section */}
+      <ReportSection />
     </div>
   );
 }
