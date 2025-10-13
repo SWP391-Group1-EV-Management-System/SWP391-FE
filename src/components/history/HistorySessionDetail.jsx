@@ -27,14 +27,11 @@ const HistorySessionDetail = ({ session }) => {
             style={{
               background: '#ffffff',
               borderRadius: '12px',
-              border: '1px solid #d4edda',
-              borderLeft: '4px solid #28a745',
+              border: 'none', // bỏ viền
               boxShadow: '0 4px 12px rgba(40, 167, 69, 0.08)',
               height: '100%'
             }}
-            styles={{ 
-              body: { padding: '2rem' }
-            }}
+            bodyStyle={{ padding: '2rem' }}
           >
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <Title 
@@ -51,13 +48,13 @@ const HistorySessionDetail = ({ session }) => {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.75rem',
-                  background: '#fff', // nền trắng
+                  background: '#fff',
                   boxShadow: '0 2px 8px rgba(40,167,69,0.07)'
                 }}
               >
                 <BarChartOutlined style={{ 
                   fontSize: '2.6rem',
-                  background: 'linear-gradient(135deg, #28a745, #34ce57)', // icon xanh lá
+                  background: 'linear-gradient(135deg, #28a745, #34ce57)',
                   borderRadius: '50%',
                   width: '3.6rem',
                   height: '3.6rem',
@@ -65,7 +62,7 @@ const HistorySessionDetail = ({ session }) => {
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'white',
-                  boxShadow: '0 0 0 4px #eafaf1' // viền xanh lá nhạt quanh icon
+                  boxShadow: '0 0 0 4px #eafaf1'
                 }} />
                 Thông tin chi tiết
               </Title>
@@ -74,9 +71,9 @@ const HistorySessionDetail = ({ session }) => {
                 style={{
                   width: '100%',
                   borderCollapse: 'collapse',
-                  background: '#fff', // nền trắng
+                  background: '#fff',
                   boxShadow: 'none',
-                  border: '1px solid #28a745', // viền xanh lá
+                  border: 'none', // bỏ viền
                   margin: 0,
                   borderRadius: 0,
                   fontSize: '1.7rem'
@@ -90,7 +87,15 @@ const HistorySessionDetail = ({ session }) => {
                     { label: 'Pin đầu:', value: `${session.batteryStart || 'N/A'}%` },
                     { label: 'Pin cuối:', value: `${session.batteryEnd || 'N/A'}%` }
                   ].map((item, index) => (
-                    <tr key={index} style={{ borderBottom: index !== 4 ? '1px solid #e9ecef' : 'none' }}>
+                    <tr
+                      key={index}
+                      style={{
+                        transition: 'background 0.3s',
+                        cursor: 'pointer'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = '#eafaf1'}
+                      onMouseLeave={e => e.currentTarget.style.background = index % 2 === 0 ? '#f8fffe' : '#fff'}
+                    >
                       <td
                         style={{
                           padding: '1.5rem 2.5rem',
@@ -100,8 +105,8 @@ const HistorySessionDetail = ({ session }) => {
                           textTransform: 'uppercase',
                           letterSpacing: '0.3px',
                           width: '50%',
-                          background: index % 2 === 0 ? '#f8fffe' : '#fff', // nền trắng/xanh lá nhạt xen kẽ
-                          borderLeft: '4px solid #28a745' // viền xanh lá bên trái
+                          background: index % 2 === 0 ? '#f8fffe' : '#fff',
+                          borderLeft: 'none' // bỏ viền trái
                         }}
                       >
                         {item.label}
@@ -113,8 +118,8 @@ const HistorySessionDetail = ({ session }) => {
                           fontWeight: 700,
                           fontSize: '1.45rem',
                           textAlign: 'right',
-                          background: index % 2 === 0 ? '#fff' : '#eafaf1', // nền trắng/xanh lá nhạt xen kẽ
-                          borderRight: '4px solid #28a745' // viền xanh lá bên phải
+                          background: index % 2 === 0 ? '#fff' : '#eafaf1',
+                          borderRight: 'none' // bỏ viền phải
                         }}
                       >
                         {item.value}
