@@ -43,6 +43,7 @@ import {
   DollarOutlined,
 } from "@ant-design/icons";
 import PageHeader from "../components/PageHeader";
+import ReportModal from "../components/ReportModal";
 import "../assets/styles/SessionStaff.css";
 import "../assets/styles/utilities.css";
 
@@ -67,6 +68,7 @@ const SessionStaffPage = () => {
   const [filteredSessions, setFilteredSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Memoized stats data với màu chính #43e97b
   const statsData = useMemo(
@@ -167,6 +169,16 @@ const SessionStaffPage = () => {
               message.success("Đã xóa phiên sạc thành công!");
             },
           }),
+        confirmPayment: () =>
+          Modal.confirm({
+            title: "Xác nhận thanh toán",
+            content: `Bạn có chắc chắn muốn xác nhận thanh toán cho phiên sạc ${record.sessionId}?`,
+            okText: "Xác nhận",
+            cancelText: "Hủy",
+            onOk: () => {
+              message.success("Đã xác nhận thanh toán thành công!");
+            },
+          }),
       };
       actions[action]?.();
     },
@@ -180,6 +192,15 @@ const SessionStaffPage = () => {
       message.success("Đã làm mới dữ liệu!");
     }, 1500);
   }, []);
+
+  // Report modal handlers
+  const handleOpenReportModal = () => setIsReportModalOpen(true);
+  const handleCloseReportModal = () => setIsReportModalOpen(false);
+  const handleAddReport = (values) => {
+    // You can handle report submission here
+    // For now, just log
+    console.log("Report added:", values);
+  };
 
   // Memoized table columns với màu sắc mới
   const columns = useMemo(
@@ -311,7 +332,7 @@ const SessionStaffPage = () => {
         width: 180,
         render: (_, record) => (
           <Space wrap>
-            {record.status === SESSION_STATUS.CHARGING ? (
+            {record.status === SESSION_STATUS.CHARGING && (
               <Tooltip title="Dừng phiên sạc">
                 <Button
                   size="small"
@@ -320,13 +341,15 @@ const SessionStaffPage = () => {
                   onClick={() => handleAction("stop", record)}
                 />
               </Tooltip>
-            ) : (
-              <Tooltip title="Khởi động phiên sạc">
+            )}
+
+            {record.status === SESSION_STATUS.COMPLETED && (
+              <Tooltip title="Xác nhận thanh toán">
                 <Button
                   size="small"
-                  className="session-action-button start"
-                  icon={<PlayCircleOutlined />}
-                  onClick={() => handleAction("start", record)}
+                  className="session-action-button confirm-payment"
+                  icon={<DollarOutlined />}
+                  onClick={() => handleAction("confirmPayment", record)}
                 />
               </Tooltip>
             )}
@@ -354,21 +377,49 @@ const SessionStaffPage = () => {
 
   // Load charging sessions data from API on component mount
   useEffect(() => {
-    /**
-     * Fetch all charging sessions from the backend API
-     * Transforms API data to table-compatible format
-     */
+    const mockChargingSessions = [
+      {
+        id: "S001",
+        user: { name: "Nguyen Van A" },
+        chargingPost: { name: "Post 1", power: 50 },
+        startTime: "2025-10-14T08:00:00Z",
+        endTime: "2025-10-14T10:00:00Z",
+        status: "completed",
+        energyConsumed: 20.5,
+        totalAmount: 410000,
+      },
+      {
+        id: "S002",
+        user: { name: "Tran Thi B" },
+        chargingPost: { name: "Post 2", power: 30 },
+        startTime: "2025-10-14T09:00:00Z",
+        endTime: null,
+        status: "charging",
+        energyConsumed: 10.2,
+        totalAmount: 204000,
+      },
+      {
+        id: "S003",
+        user: { name: "Le Van C" },
+        chargingPost: { name: "Post 3", power: 20 },
+        startTime: "2025-10-13T14:00:00Z",
+        endTime: "2025-10-13T15:30:00Z",
+        status: "completed",
+        energyConsumed: 15.0,
+        totalAmount: 300000,
+      },
+    ];
+
     const fetchChargingSessions = async () => {
       setLoading(true);
 
       try {
-        // TODO: Replace with actual API endpoint when backend is ready
-        const response = await fetch("/api/charging-sessions");
-        const data = await response.json();
+        // Simulate API call delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        // Transform API data to UI table format
-        const mappedData = data.map((session, index) => ({
-          key: index + 1, // Unique row key for Ant Design Table
+        // Transform mock data to UI table format
+        const mappedData = mockChargingSessions.map((session, index) => ({
+          key: index + 1,
           sessionId: session.id,
           userDriver: session.user?.name || "N/A",
           post: `${session.chargingPost?.name || "N/A"} (${
@@ -384,16 +435,11 @@ const SessionStaffPage = () => {
           totalAmount: session.totalAmount || 0,
         }));
 
-        // Update state with fetched data
         setChargingSessions(mappedData);
         setFilteredSessions(mappedData);
       } catch (error) {
         console.error("Error fetching charging sessions:", error);
         message.error("Không thể tải dữ liệu phiên sạc");
-
-        // Fallback to empty state on error
-        setChargingSessions([]);
-        setFilteredSessions([]);
       } finally {
         setLoading(false);
       }
@@ -475,21 +521,32 @@ const SessionStaffPage = () => {
           </Space>
         }
       >
-        {/* Search Bar */}
-        <div className="session-margin-bottom-16">
-          <Search
-            placeholder="Tìm kiếm theo mã phiên sạc hoặc tên người dùng..."
-            allowClear
-            enterButton={
-              <Button className="session-button-success-ghost">
-                <SearchOutlined />
-              </Button>
-            }
+        {/* Search Bar + Report Button */}
+        <div className="session-margin-bottom-16" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ flex: 1, marginRight: 16 }}>
+            <Search
+              placeholder="Tìm kiếm theo mã phiên sạc hoặc tên người dùng..."
+              allowClear
+              enterButton={
+                <Button className="session-button-success-ghost">
+                  <SearchOutlined />
+                </Button>
+              }
+              size="large"
+              onSearch={handleSearch}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="session-search-input"
+            />
+          </div>
+          <Button
+            type="primary"
+            danger
             size="large"
-            onSearch={handleSearch}
-            onChange={(e) => setSearchText(e.target.value)}
-            className="session-search-input"
-          />
+            style={{ minWidth: 200 }}
+            onClick={handleOpenReportModal}
+          >
+            Báo cáo sự cố trụ sạc
+          </Button>
         </div>
 
         <Table
@@ -511,6 +568,15 @@ const SessionStaffPage = () => {
           rowClassName={(record, index) =>
             index % 2 === 0 ? "table-row-light" : "table-row-dark"
           }
+        />
+        <ReportModal
+          open={isReportModalOpen}
+          onClose={handleCloseReportModal}
+          reportData={null}
+          isAdmin={false}
+          onAddReport={handleAddReport}
+          initialValues={{ title: "", description: "", type: "", isUrgent: false }}
+          validationSchema={null}
         />
       </Card>
     </div>

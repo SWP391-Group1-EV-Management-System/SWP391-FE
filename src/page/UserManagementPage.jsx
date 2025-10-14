@@ -6,15 +6,113 @@ import StaffTable from '../components/user/StaffTable';
 import PageHeader from '../components/PageHeader';
 import ServicePackageForm from '../components/service/ServicePackageForm';
 import ServicePackageTable from '../components/service/ServicePackageTable';
+import ServicePackageManagement from '../components/service/ServicePackageManagement';
 import { FaUserAlt } from "react-icons/fa";
 import { GiftOutlined } from '@ant-design/icons';
+import axios from 'axios';
+import ReportList from '../components/ReportList';
 
 const { Title, Paragraph } = Typography;
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+
+// User CRUD API
+const fetchUsers = async () => {
+  try {
+    const res = await axios.get(`${API_BASE_URL}/users/getAllUsers`);
+    console.log('API users response:', res.data);
+    return res.data;
+  } catch {
+    message.error('Không thể tải danh sách người dùng!');
+    return [];
+  }
+};
+const addUser = async (userData) => {
+  try {
+    const res = await axios.post(`${API_BASE_URL}/users`, userData);
+    message.success('Thêm người dùng thành công!');
+    return res.data;
+  } catch {
+    message.error('Thêm người dùng thất bại!');
+    return null;
+  }
+};
+const updateUser = async (userID, userData) => {
+  try {
+    const res = await axios.put(`${API_BASE_URL}/users/update/${userID}`, userData);
+    message.success('Cập nhật người dùng thành công!');
+    return res.data;
+  } catch {
+    message.error('Cập nhật người dùng thất bại!');
+    return null;
+  }
+};
+const deleteUser = async (userID) => {
+  try {
+    await axios.delete(`${API_BASE_URL}/users/delete/${userID}`);
+    message.success('Xóa người dùng thành công!');
+    return true;
+  } catch {
+    message.error('Xóa người dùng thất bại!');
+    return false;
+  }
+};
+
+// Chuẩn hóa dữ liệu user từ API về UI
+const mapUserFromApi = (apiUser) => ({
+  id: apiUser.userID || apiUser.id,
+  firstName: apiUser.firstName || '',
+  lastName: apiUser.lastName || '',
+  email: apiUser.email || '',
+  gender: apiUser.gender === true ? 'Male' : apiUser.gender === false ? 'Female' : '',
+  phone: apiUser.phoneNumber || apiUser.phone || '',
+  role: (apiUser.role || '').toLowerCase() === 'driver' ? 'Driver' : (apiUser.role || '').toLowerCase() === 'manager' ? 'Manager' : (apiUser.role || '').toLowerCase() === 'staff' ? 'Staff' : apiUser.role,
+  status: apiUser.status === true ? 'Active' : 'Inactive',
+  birthDate: apiUser.birthDate || '',
+  createdAt: apiUser.createdAt || '',
+  password: apiUser.password || '',
+});
 
 const UserManagementPage = () => {
   // User search
   const [search, setSearch] = useState('');
   const handleSearch = (e) => setSearch(e.target.value);
+
+  // User data state
+  const [users, setUsers] = useState([]);
+  const [userLoading, setUserLoading] = useState(false);
+
+  // Fetch users on mount
+  React.useEffect(() => {
+    setUserLoading(true);
+    fetchUsers().then(data => {
+      setUsers(Array.isArray(data) ? data.map(mapUserFromApi) : []);
+      setUserLoading(false);
+    });
+  }, []);
+
+  // User CRUD handlers
+  const handleAddUser = async (userData) => {
+    setUserLoading(true);
+    await addUser(userData);
+    const data = await fetchUsers();
+    setUsers(Array.isArray(data) ? data.map(mapUserFromApi) : []);
+    setUserLoading(false);
+  };
+  const handleEditUser = async (userID, userData) => {
+    setUserLoading(true);
+    await updateUser(userID, userData);
+    const data = await fetchUsers();
+    setUsers(Array.isArray(data) ? data.map(mapUserFromApi) : []);
+    setUserLoading(false);
+  };
+  const handleDeleteUser = async (userID) => {
+    setUserLoading(true);
+    await deleteUser(userID);
+    const data = await fetchUsers();
+    setUsers(Array.isArray(data) ? data.map(mapUserFromApi) : []);
+    setUserLoading(false);
+  };
 
   // Service package state
   const [packages, setPackages] = useState([
@@ -78,9 +176,9 @@ const UserManagementPage = () => {
           defaultActiveKey="1"
           tabBarStyle={{ color: '#166534', fontWeight: 600 }}
           items={[
-            { key: '1', label: <span className="tab-animate">Driver</span>, children: <DriverTable search={search} /> },
-            { key: '2', label: <span className="tab-animate">Manager</span>, children: <ManagerTable search={search} /> },
-            { key: '3', label: <span className="tab-animate">Staff</span>, children: <StaffTable search={search} /> },
+            { key: '1', label: <span className="tab-animate">Driver</span>, children: <DriverTable search={search} users={users} loading={userLoading} onAdd={handleAddUser} onEdit={handleEditUser} onDelete={handleDeleteUser} /> },
+            { key: '2', label: <span className="tab-animate">Manager</span>, children: <ManagerTable search={search} users={users} loading={userLoading} onAdd={handleAddUser} onEdit={handleEditUser} onDelete={handleDeleteUser} /> },
+            { key: '3', label: <span className="tab-animate">Staff</span>, children: <StaffTable search={search} users={users} loading={userLoading} onAdd={handleAddUser} onEdit={handleEditUser} onDelete={handleDeleteUser} /> },
           ]}
         />
       )
@@ -89,14 +187,15 @@ const UserManagementPage = () => {
       key: 'service',
       label: <span className="tab-animate">Quản lý gói dịch vụ</span>,
       children: (
+        <ServicePackageManagement />
+      )
+    },
+    {
+      key: 'report',
+      label: <span className="tab-animate">Quản lý báo cáo</span>,
+      children: (
         <div style={{ padding: '20px 0' }}>
-          <ServicePackageTable
-            packages={packages}
-            loading={loading}
-            onAdd={handleAddPackage}
-            onEdit={handleEditPackage}
-            onDelete={handleDeletePackage}
-          />
+          <ReportList />
         </div>
       )
     }
@@ -116,7 +215,7 @@ const UserManagementPage = () => {
             transition: 'font-size 0.3s cubic-bezier(.4,2,.6,1)',
             display: 'inline-block',
           }}>
-            <FaUserAlt style={{ marginRight: 8, color: '#10b981' }} /> User Management
+            <FaUserAlt style={{ marginRight: 8, color: '#10b981' }} /> Management Page
           </span>
         }
         customStyle={{ fontSize: '40px', fontWeight: 900, letterSpacing: '1px', level: 1 }}

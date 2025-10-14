@@ -1,111 +1,42 @@
 import React, { useEffect } from 'react';
-import { 
-  Modal, 
-  Form, 
-  Input, 
-  InputNumber, 
-  Select, 
-  Typography,
-  Space,
-  Row,
-  Col
-} from 'antd';
-import { 
-  EditOutlined, 
-  PlusOutlined,
-  GiftOutlined, // Thay thế PackageOutlined
-  DollarOutlined,
-  ClockCircleOutlined,
-  TagOutlined
-} from '@ant-design/icons';
+import { Modal, Typography, Space, Row, Col, Select } from 'antd';
+import { EditOutlined, PlusOutlined, GiftOutlined, DollarOutlined, ClockCircleOutlined, TagOutlined } from '@ant-design/icons';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
-const { TextArea } = Input;
 const { Option } = Select;
 const { Title } = Typography;
 
-/**
- * Component form để thêm/sửa gói dịch vụ
- * Sử dụng Ant Design Form và Modal
- */
-const ServicePackageForm = ({ 
-  isOpen = false, 
-  initialData = null, 
-  onSubmit, 
+// Yup validation schema
+const ServicePackageSchema = Yup.object().shape({
+  name: Yup.string()
+    .required('Vui lòng nhập tên gói dịch vụ')
+    .min(3, 'Tên gói phải có ít nhất 3 ký tự')
+    .max(100, 'Tên gói không được quá 100 ký tự'),
+  description: Yup.string()
+    .required('Vui lòng nhập mô tả')
+    .min(10, 'Mô tả phải có ít nhất 10 ký tự'),
+  price: Yup.number()
+    .typeError('Giá phải là số')
+    .required('Vui lòng nhập giá')
+    .min(0, 'Giá phải là số dương'),
+  duration: Yup.string()
+    .required('Vui lòng nhập thời hạn'),
+  type: Yup.string()
+    .required('Vui lòng chọn loại gói'),
+});
+
+const ServicePackageForm = ({
+  isOpen = false,
+  initialData = null,
+  onSubmit,
   onCancel,
   mode = 'add',
   loading = false
 }) => {
-  
-  const [form] = Form.useForm();
-
-  // Reset form khi mở/đóng hoặc thay đổi data
-  useEffect(() => {
-    if (isOpen) {
-      if (initialData && mode === 'edit') {
-        // Edit mode - điền dữ liệu cũ
-        form.setFieldsValue(initialData);
-      } else {
-        // Add mode - reset form với giá trị mặc định
-        form.resetFields();
-      }
-    }
-  }, [isOpen, initialData, mode, form]);
-
-  /**
-   * Xử lý submit form
-   */
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
-      const submitData = {
-        ...values,
-        id: initialData?.id || Date.now() // Tạo ID tạm thời cho demo
-      };
-
-      console.log(`📝 ${mode === 'edit' ? 'Update' : 'Create'} package:`, submitData);
-      
-      if (onSubmit) {
-        await onSubmit(submitData);
-      }
-    } catch (error) {
-      console.error('Form validation failed:', error);
-    }
-  };
-
-  /**
-   * Xử lý cancel
-   */
-  const handleCancel = () => {
-    form.resetFields();
-    if (onCancel) {
-      onCancel();
-    }
-  };
-
-  /**
-   * Rules validation
-   */
-  const validationRules = {
-    name: [
-      { required: true, message: 'Vui lòng nhập tên gói dịch vụ' },
-      { min: 3, message: 'Tên gói phải có ít nhất 3 ký tự' },
-      { max: 100, message: 'Tên gói không được quá 100 ký tự' }
-    ],
-    description: [
-      { required: true, message: 'Vui lòng nhập mô tả' },
-      { min: 10, message: 'Mô tả phải có ít nhất 10 ký tự' }
-    ],
-    price: [
-      { required: true, message: 'Vui lòng nhập giá' },
-      { type: 'number', min: 0, message: 'Giá phải là số dương' }
-    ],
-    duration: [
-      { required: true, message: 'Vui lòng nhập thời hạn' }
-    ],
-    type: [
-      { required: true, message: 'Vui lòng chọn loại gói' }
-    ]
-  };
+  const initialValues = initialData && mode === 'edit'
+    ? initialData
+    : { name: '', description: '', price: '', duration: '', type: 'Prepaid' };
 
   return (
     <Modal
@@ -118,127 +49,137 @@ const ServicePackageForm = ({
         </Space>
       }
       open={isOpen}
-      onOk={handleSubmit}
-      onCancel={handleCancel}
-      okText={mode === 'edit' ? 'Cập nhật' : 'Thêm mới'}
-      cancelText="Hủy"
-      confirmLoading={loading}
+      onCancel={onCancel}
+      footer={null}
       width={600}
-      destroyOnHidden={true} // Fixed: Changed from destroyOnClose
+      destroyOnHidden={true}
       maskClosable={false}
-      okButtonProps={{
-        size: 'large',
-        style: { borderRadius: '6px' }
-      }}
-      cancelButtonProps={{
-        size: 'large',
-        style: { borderRadius: '6px' }
-      }}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={{
-          type: 'Prepaid'
+      <Formik
+        initialValues={initialValues}
+        validationSchema={ServicePackageSchema}
+        enableReinitialize
+        onSubmit={async (values, { setSubmitting, resetForm }) => {
+          const submitData = {
+            ...values,
+            id: initialData?.id || Date.now()
+          };
+          await onSubmit?.(submitData);
+          setSubmitting(false);
+          resetForm();
         }}
-        autoComplete="off"
-        style={{ marginTop: '20px' }}
       >
-        {/* Tên gói */}
-        <Form.Item
-          name="name"
-          label="Tên gói dịch vụ"
-          rules={validationRules.name}
-        >
-          <Input
-            placeholder="VD: Gói Premium, Gói Standard..."
-            prefix={<GiftOutlined style={{ color: '#1890ff' }} />}
-            size="large"
-            style={{ borderRadius: '6px' }}
-          />
-        </Form.Item>
+        {({ isSubmitting, handleSubmit, setFieldValue, values }) => (
+          <Form style={{ marginTop: '20px' }}>
+            {/* Tên gói */}
+            <div style={{ marginBottom: 16 }}>
+              <label htmlFor="name">Tên gói dịch vụ</label>
+              <Field name="name">
+                {({ field }) => (
+                  <input
+                    {...field}
+                    placeholder="VD: Gói Premium, Gói Standard..."
+                    prefix={<GiftOutlined style={{ color: '#1890ff' }} />}
+                    size="large"
+                    style={{ borderRadius: '6px', width: '100%', padding: '8px' }}
+                  />
+                )}
+              </Field>
+              <ErrorMessage name="name" component="div" style={{ color: 'red' }} />
+            </div>
 
-        {/* Mô tả */}
-        <Form.Item
-          name="description"
-          label="Mô tả chi tiết"
-          rules={validationRules.description}
-        >
-          <TextArea
-            rows={4}
-            placeholder="Nhập mô tả chi tiết về gói dịch vụ..."
-            showCount
-            maxLength={500}
-            style={{ borderRadius: '6px' }}
-          />
-        </Form.Item>
+            {/* Mô tả */}
+            <div style={{ marginBottom: 16 }}>
+              <label htmlFor="description">Mô tả chi tiết</label>
+              <Field name="description">
+                {({ field }) => (
+                  <textarea
+                    {...field}
+                    rows={4}
+                    placeholder="Nhập mô tả chi tiết về gói dịch vụ..."
+                    maxLength={500}
+                    style={{ borderRadius: '6px', width: '100%', padding: '8px' }}
+                  />
+                )}
+              </Field>
+              <ErrorMessage name="description" component="div" style={{ color: 'red' }} />
+            </div>
 
-        {/* Giá và Loại gói */}
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              name="price"
-              label="Giá (VNĐ)"
-              rules={validationRules.price}
-            >
-              <InputNumber
-                style={{ width: '100%', borderRadius: '6px' }}
-                placeholder="Nhập giá"
-                prefix={<DollarOutlined />}
-                formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-                parser={value => value.replace(/\$\s?|(,*)/g, '')}
-                min={0}
-                size="large"
-              />
-            </Form.Item>
-          </Col>
+            {/* Giá và Loại gói */}
+            <Row gutter={16}>
+              <Col span={12}>
+                <div style={{ marginBottom: 16 }}>
+                  <label htmlFor="price">Giá (VNĐ)</label>
+                  <Field name="price">
+                    {({ field }) => (
+                      <input
+                        {...field}
+                        type="number"
+                        min={0}
+                        placeholder="Nhập giá"
+                        style={{ borderRadius: '6px', width: '100%', padding: '8px' }}
+                      />
+                    )}
+                  </Field>
+                  <ErrorMessage name="price" component="div" style={{ color: 'red' }} />
+                </div>
+              </Col>
+              <Col span={12}>
+                <div style={{ marginBottom: 16 }}>
+                  <label htmlFor="type">Loại gói</label>
+                  <Select
+                    value={values.type}
+                    onChange={value => setFieldValue('type', value)}
+                    size="large"
+                    style={{ borderRadius: '6px', width: '100%' }}
+                    suffixIcon={<TagOutlined />}
+                  >
+                    <Option value="Prepaid">🔵 Prepaid</Option>
+                    <Option value="VIP">👑 VIP</Option>
+                    <Option value="Postpaid">🔒 Postpaid</Option>
+                  </Select>
+                  <ErrorMessage name="type" component="div" style={{ color: 'red' }} />
+                </div>
+              </Col>
+            </Row>
 
-          <Col span={12}>
-            <Form.Item
-              name="type"
-              label="Loại gói"
-              rules={validationRules.type}
-            >
-              <Select
-                placeholder="Chọn loại gói"
-                size="large"
-                style={{ borderRadius: '6px' }}
-                suffixIcon={<TagOutlined />}
+            {/* Thời hạn */}
+            <div style={{ marginBottom: 16 }}>
+              <label htmlFor="duration">Thời hạn sử dụng</label>
+              <Field name="duration">
+                {({ field }) => (
+                  <input
+                    {...field}
+                    placeholder="VD: 30 ngày, 90 ngày, 1 năm..."
+                    prefix={<ClockCircleOutlined style={{ color: '#1890ff' }} />}
+                    size="large"
+                    style={{ borderRadius: '6px', width: '100%', padding: '8px' }}
+                  />
+                )}
+              </Field>
+              <ErrorMessage name="duration" component="div" style={{ color: 'red' }} />
+            </div>
+
+            <div style={{ textAlign: 'right', marginTop: 24 }}>
+              <button
+                type="button"
+                onClick={onCancel}
+                disabled={isSubmitting || loading}
+                style={{ marginRight: 8, borderRadius: '6px', padding: '8px 16px' }}
               >
-                <Option value="Prepaid">
-                  <Space>
-                    🔵 Prepaid
-                  </Space>
-                </Option>
-                <Option value="VIP">
-                  <Space>
-                    👑 VIP
-                  </Space>
-                </Option>
-                <Option value="Postpaid">
-                  <Space>
-                    🔒 Postpaid
-                  </Space>
-                </Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
-
-        {/* Thời hạn */}
-        <Form.Item
-          name="duration"
-          label="Thời hạn sử dụng"
-          rules={validationRules.duration}
-        >
-          <Input
-            placeholder="VD: 30 ngày, 90 ngày, 1 năm..."
-            prefix={<ClockCircleOutlined style={{ color: '#1890ff' }} />}
-            size="large"
-            style={{ borderRadius: '6px' }}
-          />
-        </Form.Item>
-      </Form>
+                Hủy
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting || loading}
+                style={{ borderRadius: '6px', padding: '8px 16px', background: '#1890ff', color: '#fff' }}
+              >
+                {mode === 'edit' ? 'Cập nhật' : 'Thêm mới'}
+              </button>
+            </div>
+          </Form>
+        )}
+      </Formik>
     </Modal>
   );
 };
