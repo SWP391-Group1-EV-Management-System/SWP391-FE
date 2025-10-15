@@ -347,7 +347,7 @@ const SessionStaffPage = () => {
               <Tooltip title="Xác nhận thanh toán">
                 <Button
                   size="small"
-                  className="session-action-button confirm-payment"
+                  className="session-action-button confirm-payment cursor-target"
                   icon={<DollarOutlined />}
                   onClick={() => handleAction("confirmPayment", record)}
                 />

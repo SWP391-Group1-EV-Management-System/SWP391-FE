@@ -16,10 +16,12 @@ import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
 import OTPVerification from "./page/OTPVerification.jsx";
 import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
 import UserManagementPage from "./page/UserManagementPage.jsx";
+import TargetCursor from "./components/TargetCursor.jsx";
 
 function App() {
   return (
     <BrowserRouter>
+      <TargetCursor />
       <Routes>
         {/* Root redirect to app */}
         <Route path="/" element={<Navigate to="/app/home" replace />} />

@@ -84,17 +84,17 @@ function MyNavbar({ collapsed }) {
         {/* Left Side - QR and Icons */}
         <div className="navbar-left">
           <div
-            className="icon-item qr-button"
+            className="icon-item qr-button cursor-target"
             onClick={handleQRClick}
             title="Quét QR Code"
           >
             <BsQrCodeScan className="nav-icon" />
             <span className="btn-label">Quét mã</span>
           </div>
-          <div className="icon-item" title="Thông báo">
+          <div className="icon-item cursor-target" title="Thông báo">
             <FaRegBell className="nav-icon" />
           </div>
-          <div className="icon-item" title="Tin nhắn">
+          <div className="icon-item cursor-target" title="Tin nhắn">
             <FaRegEnvelope className="nav-icon" />
           </div>
         </div>
@@ -103,7 +103,7 @@ function MyNavbar({ collapsed }) {
         <div className="navbar-right">
           <div className="line"></div>
           <div
-            className="user-profile"
+            className="user-profile cursor-target"
             onClick={handleUserClick}
             ref={dropdownRef}
           >
@@ -124,7 +124,7 @@ function MyNavbar({ collapsed }) {
                   <span>Cài đặt</span>
                 </div>
                 <div className="dropdown-divider"></div>
-                <div className="dropdown-item" onClick={handleLogout}>
+                <div className="dropdown-item cursor-target" onClick={handleLogout}>
                   <TbLogout size={18} />
                   <span>Đăng xuất</span>
                 </div>

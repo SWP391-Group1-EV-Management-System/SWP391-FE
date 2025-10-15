@@ -1,6 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router";
 import "../assets/styles/Welcome.css";
+import WelcomePageBody from "../components/welcome/WelcomePageBody";
+import WelcomePageHeader from "../components/welcome/WelcomePageHeader";
 
 function WelcomePage() {
   const navigate = useNavigate();
@@ -12,24 +14,18 @@ function WelcomePage() {
   const handleRegister = () => {
     navigate("/register");
   };
+
   return (
     <>
       <div className="welcomePage-container">
         <div className="welcomePage-content">
-          <div className="welcomePage-header">
-            <div className="welcome-navbar">
-              <img src="/src/assets/images/logo.png" alt="Logo" />
-              <div className="welcome-navbar-links">
-                <a href="#" className="active">
-                  Home
-                </a>
-                <a href="#">About</a>
-                <a href="#">Contact</a>
-              </div>
-            </div>
+          <div id="welcome-header">
+            <WelcomePageHeader />
+          </div>
+          <div id="welcome-body">
+            <WelcomePageBody />
           </div>
         </div>
-        <div>ádasdadsasdasda</div>
       </div>
     </>
   );

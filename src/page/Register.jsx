@@ -136,7 +136,7 @@ function Register() {
         <div className="register-container">
           <div className="register-inner">
             <button
-              className="back-to-welcome-btn"
+              className="back-to-welcome-btn cursor-target"
               onClick={handleBackToWelcome}
               aria-label="Quay lại trang chính"
             >
@@ -272,7 +272,7 @@ function Register() {
                     />
                     <button
                       type="button"
-                      className="password-toggle-btn"
+                      className="password-toggle-btn cursor-target"
                       onClick={togglePasswordVisibility}
                       aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                     >
@@ -301,7 +301,7 @@ function Register() {
                     />
                     <button
                       type="button"
-                      className="password-toggle-btn"
+                      className="password-toggle-btn cursor-target"
                       onClick={toggleConfirmPasswordVisibility}
                       aria-label={
                         showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
@@ -321,16 +321,16 @@ function Register() {
                   <input type="checkbox" id="agree-terms" required />
                   <span className="checkmark"></span>
                   <span>
-                    Tôi đồng ý với <a href="#">điều khoản sử dụng</a>
+                    Tôi đồng ý với <a href="#" className="cursor-target">điều khoản sử dụng</a>
                   </span>
                 </label>
               </div>
-              <button type="submit" className="register-button" disabled={isLoading}>
+              <button type="submit" className="register-button cursor-target" disabled={isLoading}>
                 {isLoading ? "Đang gửi..." : "Gửi mã xác thực"} <IoIosArrowForward size={24} />
               </button>
               <div className="login-prompt">
                 <div>Đã có tài khoản?</div>
-                <a href="/login" className="login-link">
+                <a href="/login" className="login-link cursor-target">
                   Đăng nhập
                 </a>
               </div>

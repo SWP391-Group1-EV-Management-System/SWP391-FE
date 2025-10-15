@@ -221,7 +221,7 @@ function MapPage() {
                     <div className="stations-error-state">
                       <div className="error-message">❌ {error}</div>
                       <button
-                        className="retry-button"
+                        className="retry-button cursor-target"
                         onClick={refreshStations}
                       >
                         Thử lại
@@ -236,7 +236,7 @@ function MapPage() {
                     chargingStations.map((station) => (
                       <div
                         key={station.id}
-                        className="station-list-item"
+                        className="station-list-item cursor-target"
                         onClick={() => handleStationClick(station)}
                       >
                         <div className="station-header">

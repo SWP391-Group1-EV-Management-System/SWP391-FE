@@ -1,0 +1,392 @@
+.welcomePageBody-header {
+    background: url(../images/background.png);
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    position: relative;
+}
+
+.welcomePageBody-cover-background {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(98, 98, 98, 0.55);
+    border-radius: 0px;
+    position: relative;
+}
+
+.welcomePageBody-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+.welcomePageBody-title-header {
+    font-size: 160px;
+    font-weight: bold;
+    color: #ffffff;
+    margin: 0;
+    margin-bottom: 10px;
+    text-align: center;
+    text-shadow: 4px 5px 5.3px rgba(0, 0, 0, 0.68);
+}
+
+.welcomePageBody-title-subheader {
+    font-size: 55px;
+    color: #ffffff;
+    margin: 0;
+    text-align: center;
+    font-weight: medium;
+    text-shadow: 4px 5px 5.3px rgba(0, 0, 0, 0.68);
+}
+
+/* Main Content Container - overlapping header and body */
+.main-content-container {
+    position: absolute;
+    top: 74vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 95%;
+    max-width: 1600px;
+    background-color: rgba(245, 245, 245, 0.77);
+    border-radius: 32px 32px 0 0;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+    min-height: 80vh;
+}
+
+/* Stats Section */
+.stats-section {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    margin-bottom: 100px;
+    flex-wrap: wrap;
+    position: relative;
+}
+
+.stat-card {
+    text-align: center;
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+}
+
+/* Add divider lines between stat cards */
+.stat-card:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 150px;
+    background-color: hsl(0, 0%, 0%, 0.17);
+}
+
+.stat-number {
+    font-size: 65px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.stat-number.green {
+    background-image: linear-gradient(to bottom, rgba(2, 119, 63, 0.91), rgba(3, 164, 86, 0.62));
+    /* Gradient */
+    -webkit-background-clip: text;
+    /* Áp dụng background lên chữ */
+    background-clip: text;
+    color: transparent;
+    /* Đảm bảo chữ trở nên trong suốt để chỉ hiển thị gradient */
+}
+
+.stat-title {
+    font-size: 35px;
+    font-weight: 600;
+    color: #000000;
+    margin-bottom: 12px;
+}
+
+.stat-description {
+    font-size: 21px;
+    color: #000000;
+    line-height: 1.4;
+}
+
+/* Package Section */
+.package-section {
+    display: flex;
+    gap: 70px;
+    justify-content: center;
+    margin-bottom: 100px;
+    flex-wrap: wrap;
+    padding: 20px 0;
+    /* Add padding to accommodate glow effect */
+}
+
+.package-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    flex: 1;
+    min-width: 280px;
+    max-width: 390px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(0);
+    /* Remove overflow: hidden to allow glow effect */
+}
+
+.package-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.package-header {
+    margin-bottom: 16px;
+}
+
+.package-badge {
+    color: #008E4A;
+    border-radius: 20px;
+    font-size: 24px;
+    font-weight: 650;
+    display: inline-block;
+    font-weight: 500;
+}
+
+.package-subtitle {
+    font-size: 14px;
+    color: #000000;
+}
+
+.package-price {
+    font-size: 35px;
+    font-weight: bold;
+    color: #008E4A;
+    margin-bottom: 16px;
+}
+
+.package-btn {
+    position: relative;
+    background: linear-gradient(to right, #4DF366, #00B152);
+    color: white;
+    border: none;
+    padding: 7px 19px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 23px;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 16px;
+    transition: all 0.3s;
+    box-shadow: 0 0 0 rgba(77, 243, 102, 0);
+    /* Bắt đầu không có shadow */
+}
+
+.package-btn:hover {
+    box-shadow: 0 0 20px rgba(77, 243, 102, 0.6),
+        0 0 40px rgba(77, 243, 102, 0.4),
+        0 0 60px rgba(77, 243, 102, 0.2);
+    /* Hiệu ứng glow nhiều lớp */
+    transform: translateY(-2px);
+    /* Nhấc nhẹ lên một chút */
+}
+
+.package-features {
+    text-align: left;
+}
+
+.feature {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+/* Bottom Section */
+.bottom-section {
+    text-align: center;
+    margin-bottom: 120px;
+}
+
+.main-title {
+    font-size: 40px;
+    font-weight: bold;
+    color: black;
+    margin-bottom: 20px;
+}
+
+.register-btn {
+    background: linear-gradient(45deg, #4DF366, #00B152, #04ffc0, #02e674);
+    background-size: 400% 400%;
+    color: black;
+    border: none;
+    padding: 14px 23px;
+    border-radius: 35px;
+    font-size: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+
+    /* Animated rotating shadow */
+    box-shadow:
+        0 0 20px rgba(77, 243, 102, 0.6),
+        0 0 40px rgba(77, 243, 102, 0.3),
+        0 0 60px rgba(77, 243, 102, 0.2);
+
+    animation: rotatingShadow 3s linear infinite, rotatingBackground 4s ease-in-out infinite;
+}
+
+@keyframes rotatingBackground {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    25% {
+        background-position: 100% 50%;
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    75% {
+        background-position: 0% 100%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes rotatingShadow {
+    0% {
+        box-shadow:
+            0 0 20px rgba(77, 243, 102, 0.8),
+            5px 5px 30px rgba(77, 243, 102, 0.6),
+            10px 10px 40px rgba(77, 243, 102, 0.4);
+    }
+
+    25% {
+        box-shadow:
+            0 0 20px rgba(0, 177, 82, 0.8),
+            -5px 5px 30px rgba(0, 177, 82, 0.6),
+            -10px 10px 40px rgba(0, 177, 82, 0.4);
+    }
+
+    50% {
+        box-shadow:
+            0 0 20px rgba(4, 255, 192, 0.8),
+            -5px -5px 30px rgba(4, 255, 192, 0.6),
+            -10px -10px 40px rgba(4, 255, 192, 0.4);
+    }
+
+    75% {
+        box-shadow:
+            0 0 20px rgba(2, 230, 116, 0.8),
+            5px -5px 30px rgba(2, 230, 116, 0.6),
+            10px -10px 40px rgba(2, 230, 116, 0.4);
+    }
+
+    100% {
+        box-shadow:
+            0 0 20px rgba(77, 243, 102, 0.8),
+            5px 5px 30px rgba(77, 243, 102, 0.6),
+            10px 10px 40px rgba(77, 243, 102, 0.4);
+    }
+}
+
+.register-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    animation: rotatingShadow 1.5s linear infinite, rotatingBackground 2s ease-in-out infinite;
+    /* Faster on hover */
+    box-shadow:
+        0 0 30px rgba(4, 255, 192, 1),
+        0 0 50px rgba(2, 230, 116, 0.8),
+        0 0 70px rgba(77, 243, 102, 0.6);
+}
+
+/* Footer Section */
+.footer-section {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    gap: 40px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.contact-info {
+    display: flex;
+    min-width: 200px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.contact-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #000000;
+    font-size: 14px;
+}
+
+.contact-detail {
+    display: flex;
+    align-items: center;
+    font-size: 15px;
+    color: #000000;
+    line-height: 1.6;
+}
+
+
+
+.package-card:before {
+    content: "";
+    z-index: -1;
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    bottom: -8px;
+    left: -8px;
+    background: linear-gradient(135deg, #60efff 0%, #00ff87 50%, #4DF366 100%);
+    transform: translate3d(0px, 0px, 0) scale(0.98);
+    filter: blur(18px);
+    opacity: 0.5;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: inherit;
+}
+
+.package-card:hover:before {
+    opacity: 0.8;
+    transform: translate3d(0px, -2px, 0) scale(1.03);
+    filter: blur(22px);
+}
+
+/* 
+* Prevents issues when the parent creates a 
+* stacking context. (For example, using the transform
+* property )
+*/
+.package-card::after {
+    content: "";
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: inherit;
+    border-radius: inherit;
+}

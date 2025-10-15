@@ -150,7 +150,7 @@ function OTPVerification() {
       <div className="otp-container">
         <div className="otp-inner">
           <button
-            className="back-btn"
+            className="back-btn cursor-target"
             onClick={() => navigate("/register")}
             aria-label="Quay lại đăng ký"
           >
@@ -204,7 +204,7 @@ function OTPVerification() {
 
             <button
               type="submit"
-              className="verify-button"
+              className="verify-button cursor-target"
               disabled={isLoading || otp.join("").length !== 6}
             >
               {isLoading ? "Đang xác thực..." : "Xác thực"}
@@ -216,7 +216,7 @@ function OTPVerification() {
                   Chưa nhận được mã?{" "}
                   <button
                     type="button"
-                    className="resend-button"
+                    className="resend-button cursor-target"
                     onClick={handleResendOTP}
                     disabled={isResending}
                   >
