@@ -24,7 +24,7 @@ function NotFoundPage() {
                 <h3 className="h2">Look like you're lost</h3>
                 <p>the page you are looking for not available!</p>
                 <button
-                  className="link_404"
+                  className="link_404 cursor-target"
                   onClick={handleGoHome}
                   style={{ border: "none", cursor: "pointer" }}
                 >

@@ -33,7 +33,7 @@ function Login() {
       <div className="login-page">
         <div className="login-container">
           <div className="login-inner">
-            <button className="back-to-welcome-btn" onClick={handleBackToWelcome} aria-label="Quay lại trang chính">
+            <button className="back-to-welcome-btn cursor-target" onClick={handleBackToWelcome} aria-label="Quay lại trang chính">
               <IoClose size={24} />
             </button>
             <h2>Đăng nhập</h2>
@@ -60,7 +60,7 @@ function Login() {
                   />
                   <button
                     type="button"
-                    className="password-toggle-btn"
+                    className="password-toggle-btn cursor-target"
                     onClick={togglePasswordVisibility}
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                   >
@@ -74,12 +74,13 @@ function Login() {
                   <span className="checkmark"></span>
                   <span>Nhớ mật khẩu</span>
                 </label>
-                <a href="#" className="forgot-password-link">
+                <a href="#" className="forgot-password-link cursor-target">
                   Quên mật khẩu?
                 </a>
               </div>
               <button
                 type="submit"
+                className="cursor-target"
                 style={{
                   fontSize: "20px",
                   fontWeight: "bold",
@@ -95,6 +96,7 @@ function Login() {
                 <div>Không có tài khoản?</div>
                 <a
                   href="/register"
+                  className="cursor-target"
                   style={{
                     color: "#0b9459",
                     fontWeight: "bold",
