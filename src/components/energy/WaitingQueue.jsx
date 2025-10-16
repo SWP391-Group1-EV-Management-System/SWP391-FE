@@ -1,6 +1,10 @@
 import React from "react";
 import { Card, Typography, Space, Tag, Progress, Button } from "antd";
-import { ClockCircleOutlined, TeamOutlined, CarOutlined } from "@ant-design/icons";
+import {
+  ClockCircleOutlined,
+  TeamOutlined,
+  CarOutlined,
+} from "@ant-design/icons";
 import "../../assets/styles/WaitingQueue.css";
 
 const { Title, Text } = Typography;
@@ -31,7 +35,9 @@ const WaitingQueue = ({
   };
 
   // Tính progress based on position
-  const progressPercent = Math.round(((totalInQueue - queuePosition + 1) / totalInQueue) * 100);
+  const progressPercent = Math.round(
+    ((totalInQueue - queuePosition + 1) / totalInQueue) * 100
+  );
 
   // Xác định màu sắc dựa trên thời gian chờ
   const getColorByWaitTime = () => {
@@ -48,25 +54,34 @@ const WaitingQueue = ({
         {/* Header */}
         <div className="waiting-queue-header">
           <TeamOutlined className="waiting-queue-icon" />
-          <Title level={4} className="waiting-queue-title">
-            Hàng chờ
-          </Title>
+          <div className="header-left">
+            <Title level={4} className="waiting-queue-title">
+              Hàng chờ
+            </Title>
+          </div>
+          <div className="header-right">
+            <div className="queue-tips inline">
+              <Text className="tips-text">
+                💡 Thời gian ước tính có thể thay đổi tùy thuộc vào tình hình
+                thực tế
+              </Text>
+            </div>
+          </div>
         </div>
 
         {/* Queue Position & Estimated Time */}
         <div className="queue-position-display">
           <div className="position-time-row">
-            <div className="queue-number">
-              #{queuePosition}
-            </div>
+            <div className="queue-number">#{queuePosition}</div>
             {queuePosition === 1 && (
               <div className="estimated-time-display">
-                <Text className="time-value-large" style={{ color: getColorByWaitTime() }}>
+                <Text
+                  className="time-value-large"
+                  style={{ color: getColorByWaitTime() }}
+                >
                   {formatTime(estimatedTotal)}
                 </Text>
-                <Text className="time-label">
-                  thời gian ước tính
-                </Text>
+                <Text className="time-label">thời gian ước tính</Text>
               </div>
             )}
           </div>
@@ -75,7 +90,12 @@ const WaitingQueue = ({
         {/* Progress Bar for Time */}
         <div className="progress-container">
           <Progress
-            percent={Math.round((currentSessionRemaining / (currentSessionRemaining + (queuePosition - 1) * averageSessionTime)) * 100)}
+            percent={Math.round(
+              (currentSessionRemaining /
+                (currentSessionRemaining +
+                  (queuePosition - 1) * averageSessionTime)) *
+                100
+            )}
             strokeColor={getColorByWaitTime()}
             showInfo={false}
           />
@@ -83,7 +103,7 @@ const WaitingQueue = ({
 
         {/* Nút điều khiển */}
         <div className="controls-container">
-          <Button 
+          <Button
             danger
             type="primary"
             onClick={() => {
@@ -96,12 +116,7 @@ const WaitingQueue = ({
           </Button>
         </div>
 
-        {/* Tips */}
-        <div className="queue-tips">
-          <Text className="tips-text">
-            💡 Thời gian ước tính có thể thay đổi tùy thuộc vào tình hình thực tế
-          </Text>
-        </div>
+        {/* (Tip moved into header) */}
       </div>
     </Card>
   );

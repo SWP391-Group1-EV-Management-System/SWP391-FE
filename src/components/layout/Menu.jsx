@@ -148,7 +148,7 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
           }`}
         >
           <img
-            className={`sidebar-logo cursor-target${
+            className={`sidebar-logo${
               collapsed ? " sidebar-logo-collapsed" : ""
             }`}
             alt="Eco-Z Logo"
@@ -161,7 +161,7 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
         {/* Nút toggle thu gọn/mở rộng sidebar */}
         <Button
           variant="light"
-          className={`sidebar-toggle cursor-target d-flex align-items-left justify-content-left${
+          className={`sidebar-toggle d-flex align-items-left justify-content-left${
             collapsed ? "" : " sidebar-toggle-open"
           }`}
           aria-label="Toggle sidebar"
@@ -216,7 +216,7 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
             <Button
               key={item.id}
               variant="ghost"
-              className={`sidebar-menu-item cursor-target d-flex align-items-center${
+              className={`sidebar-menu-item d-flex align-items-center${
                 collapsed
                   ? " sidebar-menu-item-collapsed justify-content-center"
                   : " justify-content-start"

@@ -33,7 +33,11 @@ function Login() {
       <div className="login-page">
         <div className="login-container">
           <div className="login-inner">
-            <button className="back-to-welcome-btn cursor-target" onClick={handleBackToWelcome} aria-label="Quay lại trang chính">
+            <button
+              className="back-to-welcome-btn"
+              onClick={handleBackToWelcome}
+              aria-label="Quay lại trang chính"
+            >
               <IoClose size={24} />
             </button>
             <h2>Đăng nhập</h2>
@@ -43,7 +47,13 @@ function Login() {
                   <CgMail size={28} />
                   Gmail
                 </label>
-                <input type="text" id="username" name="username" required placeholder="email@example.com" />
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  required
+                  placeholder="email@example.com"
+                />
               </div>
               <div className="password-field">
                 <label htmlFor="password">
@@ -60,11 +70,15 @@ function Login() {
                   />
                   <button
                     type="button"
-                    className="password-toggle-btn cursor-target"
+                    className="password-toggle-btn"
                     onClick={togglePasswordVisibility}
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                   >
-                    {showPassword ? <IoEyeOffOutline size={20} /> : <IoEyeOutline size={20} />}
+                    {showPassword ? (
+                      <IoEyeOffOutline size={20} />
+                    ) : (
+                      <IoEyeOutline size={20} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -74,13 +88,13 @@ function Login() {
                   <span className="checkmark"></span>
                   <span>Nhớ mật khẩu</span>
                 </label>
-                <a href="#" className="forgot-password-link cursor-target">
+                <a href="#" className="forgot-password-link">
                   Quên mật khẩu?
                 </a>
               </div>
               <button
                 type="submit"
-                className="cursor-target"
+                className=""
                 style={{
                   fontSize: "20px",
                   fontWeight: "bold",
@@ -96,7 +110,7 @@ function Login() {
                 <div>Không có tài khoản?</div>
                 <a
                   href="/register"
-                  className="cursor-target"
+                  className=""
                   style={{
                     color: "#0b9459",
                     fontWeight: "bold",

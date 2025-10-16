@@ -20,7 +20,7 @@ function Register() {
     gender: "",
     phoneNumber: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,9 +33,9 @@ function Register() {
   // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -62,7 +62,10 @@ function Register() {
 
     try {
       // Call API to register + send OTP
-      console.log("Making API call to:", 'http://localhost:8080/users/register');
+      console.log(
+        "Making API call to:",
+        "http://localhost:8080/users/register"
+      );
       console.log("Request body:", {
         email: formData.email,
         firstName: formData.firstName,
@@ -70,13 +73,13 @@ function Register() {
         birthDate: formData.birthDate,
         gender: formData.gender,
         phoneNumber: formData.phoneNumber,
-        password: formData.password
+        password: formData.password,
       });
 
-      const response = await fetch('http://localhost:8080/users/register', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/users/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           email: formData.email,
@@ -85,15 +88,17 @@ function Register() {
           birthDate: formData.birthDate,
           gender: formData.gender,
           phoneNumber: formData.phoneNumber,
-          password: formData.password
-        })
+          password: formData.password,
+        }),
       });
 
       console.log("Response received:", response);
       console.log("Response status:", response.status);
 
       if (response.ok) {
-        console.log("Registration successful! OTP sent. Navigating to OTP page");
+        console.log(
+          "Registration successful! OTP sent. Navigating to OTP page"
+        );
         // Registration successful + OTP sent, redirect to OTP verification
         navigate("/otp-verification", {
           state: {
@@ -104,9 +109,9 @@ function Register() {
               birthDate: formData.birthDate,
               gender: formData.gender === "true",
               phoneNumber: formData.phoneNumber,
-              password: formData.password
-            }
-          }
+              password: formData.password,
+            },
+          },
         });
       } else {
         console.log("Response not OK, status:", response.status);
@@ -136,18 +141,14 @@ function Register() {
         <div className="register-container">
           <div className="register-inner">
             <button
-              className="back-to-welcome-btn cursor-target"
+              className="back-to-welcome-btn"
               onClick={handleBackToWelcome}
               aria-label="Quay lại trang chính"
             >
               <IoClose size={24} />
             </button>
             <h2>Đăng ký</h2>
-            {error && (
-              <div className="error-message">
-                {error}
-              </div>
-            )}
+            {error && <div className="error-message">{error}</div>}
             <form onSubmit={handleSubmit}>
               {/* Row 1: Email và Số điện thoại */}
               <div className="form-row">
@@ -182,7 +183,7 @@ function Register() {
                   />
                 </div>
               </div>
-              
+
               {/* Row 2: Họ và Tên */}
               <div className="form-row">
                 <div className="form-field half-width">
@@ -216,7 +217,7 @@ function Register() {
                   />
                 </div>
               </div>
-              
+
               {/* Row 3: Ngày sinh và Giới tính */}
               <div className="form-row">
                 <div className="form-field half-width">
@@ -252,7 +253,7 @@ function Register() {
                   </select>
                 </div>
               </div>
-              
+
               {/* Row 4: Mật khẩu */}
               <div className="form-row">
                 <div className="form-field half-width password-field">
@@ -272,9 +273,11 @@ function Register() {
                     />
                     <button
                       type="button"
-                      className="password-toggle-btn cursor-target"
+                      className="password-toggle-btn"
                       onClick={togglePasswordVisibility}
-                      aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                      aria-label={
+                        showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+                      }
                     >
                       {showPassword ? (
                         <IoEyeOffOutline size={20} />
@@ -301,7 +304,7 @@ function Register() {
                     />
                     <button
                       type="button"
-                      className="password-toggle-btn cursor-target"
+                      className="password-toggle-btn"
                       onClick={toggleConfirmPasswordVisibility}
                       aria-label={
                         showConfirmPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"
@@ -321,16 +324,21 @@ function Register() {
                   <input type="checkbox" id="agree-terms" required />
                   <span className="checkmark"></span>
                   <span>
-                    Tôi đồng ý với <a href="#" className="cursor-target">điều khoản sử dụng</a>
+                    Tôi đồng ý với <a href="#">điều khoản sử dụng</a>
                   </span>
                 </label>
               </div>
-              <button type="submit" className="register-button cursor-target" disabled={isLoading}>
-                {isLoading ? "Đang gửi..." : "Gửi mã xác thực"} <IoIosArrowForward size={24} />
+              <button
+                type="submit"
+                className="register-button"
+                disabled={isLoading}
+              >
+                {isLoading ? "Đang gửi..." : "Gửi mã xác thực"}{" "}
+                <IoIosArrowForward size={24} />
               </button>
               <div className="login-prompt">
                 <div>Đã có tài khoản?</div>
-                <a href="/login" className="login-link cursor-target">
+                <a href="/login" className="login-link">
                   Đăng nhập
                 </a>
               </div>

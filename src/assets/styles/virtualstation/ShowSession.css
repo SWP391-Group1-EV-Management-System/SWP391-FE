@@ -1,0 +1,228 @@
+.charging-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+}
+
+.charging-wrapper {
+  max-width: 600px;
+  width: 100%;
+}
+
+.charging-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #4ade80 0%, #10b981 100%);
+  border-radius: 50%;
+  margin-bottom: 20px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.charging-title {
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.charging-subtitle {
+  color: #94a3b8;
+  font-size: 1rem;
+}
+
+.charging-card {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  padding: 40px;
+  border: 1px solid #334155;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.battery-display {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.car-icon-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 30px;
+}
+
+.charging-badge {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #22c55e;
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.battery-percentage {
+  font-size: 4rem;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 15px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 16px;
+  background: #334155;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  transition: width 1s ease-out;
+  position: relative;
+}
+
+.progress-fill::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.2);
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.battery-red {
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+}
+
+.battery-yellow {
+  background: linear-gradient(90deg, #eab308 0%, #ca8a04 100%);
+}
+
+.battery-blue {
+  background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+}
+
+.battery-green {
+  background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: rgba(51, 65, 85, 0.5);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid #475569;
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  margin-bottom: 10px;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+.info-box {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.info-text {
+  color: #93c5fd;
+  font-size: 0.875rem;
+}
+
+.stop-button {
+  width: 100%;
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.3);
+}
+
+.stop-button:hover {
+  background: linear-gradient(90deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgba(239, 68, 68, 0.4);
+}
+
+.charging-footer {
+  text-align: center;
+  margin-top: 24px;
+  color: #64748b;
+  font-size: 0.875rem;
+}

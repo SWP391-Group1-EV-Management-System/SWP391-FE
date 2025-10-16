@@ -16,10 +16,11 @@ function MyNavbar({ collapsed }) {
 
   const storedUser = localStorage.getItem("user");
   const userSession = storedUser ? JSON.parse(storedUser) : null;
-  
-  const userName = userSession && userSession.firstName
-    ? `${userSession.firstName}`
-    : "Guest User";
+
+  const userName =
+    userSession && userSession.firstName
+      ? `${userSession.firstName}`
+      : "Guest User";
 
   // Xử lý QR Scanner
   const handleQRClick = () => setIsQRScannerOpen(true);
@@ -84,17 +85,17 @@ function MyNavbar({ collapsed }) {
         {/* Left Side - QR and Icons */}
         <div className="navbar-left">
           <div
-            className="icon-item qr-button cursor-target"
+            className="icon-item qr-button"
             onClick={handleQRClick}
             title="Quét QR Code"
           >
             <BsQrCodeScan className="nav-icon" />
             <span className="btn-label">Quét mã</span>
           </div>
-          <div className="icon-item cursor-target" title="Thông báo">
+          <div className="icon-item" title="Thông báo">
             <FaRegBell className="nav-icon" />
           </div>
-          <div className="icon-item cursor-target" title="Tin nhắn">
+          <div className="icon-item" title="Tin nhắn">
             <FaRegEnvelope className="nav-icon" />
           </div>
         </div>
@@ -103,7 +104,7 @@ function MyNavbar({ collapsed }) {
         <div className="navbar-right">
           <div className="line"></div>
           <div
-            className="user-profile cursor-target"
+            className="user-profile"
             onClick={handleUserClick}
             ref={dropdownRef}
           >
@@ -124,7 +125,7 @@ function MyNavbar({ collapsed }) {
                   <span>Cài đặt</span>
                 </div>
                 <div className="dropdown-divider"></div>
-                <div className="dropdown-item cursor-target" onClick={handleLogout}>
+                <div className="dropdown-item" onClick={handleLogout}>
                   <TbLogout size={18} />
                   <span>Đăng xuất</span>
                 </div>

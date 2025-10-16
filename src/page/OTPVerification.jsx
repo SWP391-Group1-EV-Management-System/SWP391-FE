@@ -16,7 +16,7 @@ function OTPVerification() {
   const location = useLocation();
   const email = location.state?.email || "";
   const inputRefs = useRef([]);
-  
+
   console.log("OTPVerification component loaded");
   console.log("Location state:", location.state);
   console.log("Email from location:", email);
@@ -25,7 +25,7 @@ function OTPVerification() {
   useEffect(() => {
     if (timer > 0) {
       const interval = setInterval(() => {
-        setTimer(prev => {
+        setTimer((prev) => {
           if (prev <= 1) {
             setCanResend(true);
             return 0;
@@ -42,27 +42,30 @@ function OTPVerification() {
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Handle resend OTP
   const handleResendOTP = async () => {
     if (!canResend || isResending) return;
-    
+
     setIsResending(true);
     setError("");
-    
+
     try {
       console.log("Resending OTP to:", email);
-      const response = await axios.post('http://localhost:8080/users/register', {
-        email: email,
-        firstName: location.state?.userData?.firstName || "",
-        lastName: location.state?.userData?.lastName || "",
-        birthDate: location.state?.userData?.birthDate || "",
-        gender: location.state?.userData?.gender || false,
-        phoneNumber: location.state?.userData?.phoneNumber || "",
-        password: location.state?.userData?.password || ""
-      });
+      const response = await axios.post(
+        "http://localhost:8080/users/register",
+        {
+          email: email,
+          firstName: location.state?.userData?.firstName || "",
+          lastName: location.state?.userData?.lastName || "",
+          birthDate: location.state?.userData?.birthDate || "",
+          gender: location.state?.userData?.gender || false,
+          phoneNumber: location.state?.userData?.phoneNumber || "",
+          password: location.state?.userData?.password || "",
+        }
+      );
 
       console.log("OTP resent successfully");
       setTimer(60); // Reset timer to 1 minute
@@ -86,11 +89,11 @@ function OTPVerification() {
 
   const handleInputChange = (index, value) => {
     if (value.length > 1) return;
-    
+
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-    
+
     // Auto focus next input
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
@@ -106,30 +109,33 @@ function OTPVerification() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    
+
     const otpCode = otp.join("");
     console.log("OTP Verification - Submit started");
     console.log("Email:", email);
     console.log("OTP:", otpCode);
     console.log("OTP length:", otpCode.length);
-    
+
     if (otpCode.length !== 6) {
       setError("Vui lòng nhập đầy đủ mã OTP 6 số!");
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       console.log("Sending OTP verification request...");
-      const response = await axios.post("http://localhost:8080/users/register/verify-otp", {
-        email: email, 
-        otp: otpCode 
-      });
-      
+      const response = await axios.post(
+        "http://localhost:8080/users/register/verify-otp",
+        {
+          email: email,
+          otp: otpCode,
+        }
+      );
+
       console.log("OTP verification response status:", response.status);
       console.log("OTP verification response:", response.data);
-      
+
       alert("Xác thực thành công! Tài khoản đã được tạo.");
       navigate("/login");
     } catch (error) {
@@ -150,7 +156,7 @@ function OTPVerification() {
       <div className="otp-container">
         <div className="otp-inner">
           <button
-            className="back-btn cursor-target"
+            className="back-btn"
             onClick={() => navigate("/register")}
             aria-label="Quay lại đăng ký"
           >
@@ -167,11 +173,7 @@ function OTPVerification() {
             </p>
           </div>
 
-          {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
+          {error && <div className="error-message">{error}</div>}
 
           {!email && (
             <div className="warning-message">
@@ -204,7 +206,7 @@ function OTPVerification() {
 
             <button
               type="submit"
-              className="verify-button cursor-target"
+              className="verify-button"
               disabled={isLoading || otp.join("").length !== 6}
             >
               {isLoading ? "Đang xác thực..." : "Xác thực"}
@@ -216,7 +218,7 @@ function OTPVerification() {
                   Chưa nhận được mã?{" "}
                   <button
                     type="button"
-                    className="resend-button cursor-target"
+                    className="resend-button"
                     onClick={handleResendOTP}
                     disabled={isResending}
                   >
