@@ -13,11 +13,16 @@
  *
  * @module ChargingStationService
  */
+/*
+  - Dịch vụ quản lý trạm sạc
+  - File này gom các hàm gọi API liên quan đến trạm sạc và các hàm map dữ liệu
+  - Mục tiêu: tách logic gọi API và chuyển đổi dữ liệu để UI có thể dùng trực tiếp
+*/
 
 import axios from "axios";
 
 /**
- * API Configuration
+ * Cấu hình API
  */
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
@@ -33,15 +38,15 @@ const apiClient = axios.create({
 
 /**
  * ===============================
- * MAIN SERVICE OBJECT
+ * ĐỐI TƯỢNG DỊCH VỤ CHÍNH
  * ===============================
  */
 export const chargingStationService = {
   /**
-   * Fetch all charging stations from the API
+   * Lấy danh sách tất cả trạm sạc từ API
    *
-   * @returns {Promise<Array>} Array of mapped charging station objects
-   * @throws {Error} When API request fails
+   * @returns {Promise<Array>} Mảng các đối tượng trạm đã được map
+   * @throws {Error} Khi yêu cầu API thất bại
    */
   async getAllStations() {
     try {
@@ -51,23 +56,29 @@ export const chargingStationService = {
       );
       return mappedStations;
     } catch (error) {
+      // Trường hợp lỗi: chuyển lỗi gốc thành Error có message dễ hiểu
       throw this.handleError(error, "Không thể tải danh sách trạm sạc");
     }
   },
 
   /**
-   * Fetch detailed information for a specific charging station
+   * Lấy thông tin chi tiết cho 1 trạm sạc cụ thể
    *
-   * @param {string} stationId - The unique identifier of the charging station
-   * @returns {Promise<Object>} Mapped charging station object
-   * @throws {Error} When station is not found or API request fails
+   * @param {string} stationId - ID duy nhất của trạm sạc
+   * @returns {Promise<Object>} Đối tượng trạm đã được map cho UI
+   * @throws {Error} Khi không tìm thấy trạm hoặc yêu cầu API lỗi
    */
   async getStationById(stationId) {
     try {
       const response = await apiClient.get(`/charging/station/${stationId}`);
-      console.log('API trả về trạm:', response.data);
+      // Debug: in ra dữ liệu thô từ API (giữ để thuận tiện khi dev)
+      console.log("API trả về trạm:", response.data);
+
+      // Map dữ liệu API sang cấu trúc mà UI mong đợi
       const mappedStation = stationDataMapper.mapStationFromApi(response.data);
-      console.log('Mapped trạm:', mappedStation);
+
+      // Debug: in kết quả đã map
+      console.log("Mapped trạm:", mappedStation);
       return mappedStation;
     } catch (error) {
       throw this.handleError(error, "Không tìm thấy trạm sạc");
@@ -75,20 +86,25 @@ export const chargingStationService = {
   },
 
   /**
-   * Fetch all charging posts for a specific station
+   * Lấy danh sách các trụ (posts) của một trạm
    *
-   * @param {string} stationId - The unique identifier of the charging station
-   * @returns {Promise<Array>} Array of mapped charging post objects
-   * @throws {Error} When API request fails
+   * @param {string} stationId - ID của trạm sạc
+   * @returns {Promise<Array>} Mảng các trụ đã được map
+   * @throws {Error} Khi yêu cầu API thất bại
    */
   async getStationPosts(stationId) {
     try {
       const response = await apiClient.get(
         `/charging/station/posts/${stationId}`
       );
-      console.log('API trả về trụ:', response.data);
+      // Debug: log dữ liệu thô
+      console.log("API trả về trụ:", response.data);
+
+      // Map danh sách trụ (posts) sang dạng UI-friendly
       const mappedPosts = stationDataMapper.mapPostsFromApi(response.data);
-      console.log('Mapped trụ:', mappedPosts);
+
+      // Debug: log kết quả sau khi map
+      console.log("Mapped trụ:", mappedPosts);
       return mappedPosts;
     } catch (error) {
       // Log debug information before throwing error
@@ -102,54 +118,61 @@ export const chargingStationService = {
   },
 
   /**
-   * Create a new charging session
+   * Tạo một phiên sạc mới (booking)
    *
-   * @param {Object} bookingData - Booking data for creating session
-   * @returns {Promise<Object>} Created session data
-   * @throws {Error} When API request fails
+   * @param {Object} bookingData - Dữ liệu booking để tạo phiên
+   * @returns {Promise<Object>} Object trả về thông tin phiên (success/message/data)
+   * @throws {Error} Khi yêu cầu API thất bại
    */
   async createChargingSession(bookingData) {
     try {
-      const response = await apiClient.post("/charging/session/create", bookingData);
-      
-      // Kiểm tra response structure phù hợp với API đã cung cấp
+      const response = await apiClient.post(
+        "/charging/session/create",
+        bookingData
+      );
+      // Kiểm tra cấu trúc response từ API.
+      // Nhiều API trả cấu trúc: { success: boolean, data: ..., message: '...'}
       if (response.data && response.data.success) {
         return {
           success: true,
           data: response.data.data,
-          message: response.data.message || "Tạo phiên sạc thành công"
+          message: response.data.message || "Tạo phiên sạc thành công",
         };
       } else {
+        // Trường hợp API trả thành công HTTP nhưng nội dung báo lỗi
         return {
           success: false,
-          message: response.data?.message || "Không thể tạo phiên sạc"
+          message: response.data?.message || "Không thể tạo phiên sạc",
         };
       }
     } catch (error) {
+      // Ghi log lỗi để dev debug
       console.error("Error creating charging session:", error);
       if (error.response) {
         console.error("Response status:", error.response.status);
         console.error("Response data:", error.response.data);
-        
+
+        // Trả về object rõ ràng cho UI xử lý (không throw) vì hàm này dùng pattern success/fail
         return {
           success: false,
-          message: error.response.data?.message || "Lỗi từ server"
+          message: error.response.data?.message || "Lỗi từ server",
         };
       }
-      
+
+      // Lỗi mạng / không có phản hồi
       return {
         success: false,
-        message: "Không thể kết nối đến server"
+        message: "Không thể kết nối đến server",
       };
     }
   },
 
   /**
-   * Transform API errors into user-friendly error messages
+   * Chuyển lỗi từ API thành thông báo dễ hiểu cho người dùng
    *
-   * @param {Error} error - The original error object
-   * @param {string} defaultMessage - Fallback error message
-   * @returns {Error} New error with user-friendly message
+   * @param {Error} error - Đối tượng lỗi gốc
+   * @param {string} defaultMessage - Thông báo dự phòng nếu không đoán được lỗi
+   * @returns {Error} Error mới với message thân thiện
    */
   handleError(error, defaultMessage) {
     // Handle HTTP response errors
@@ -157,14 +180,19 @@ export const chargingStationService = {
       const status = error.response.status;
       switch (status) {
         case 400:
+          // Bad Request
           return new Error("Yêu cầu không hợp lệ");
         case 401:
+          // Unauthorized - cần token/đăng nhập
           return new Error("Cần đăng nhập");
         case 404:
+          // Không tìm thấy resource
           return new Error("Không tìm thấy dữ liệu");
         case 500:
+          // Lỗi server nội bộ
           return new Error("Lỗi server");
         default:
+          // Các trường hợp khác trả về message mặc định truyền vào
           return new Error(defaultMessage);
       }
     }
@@ -175,23 +203,24 @@ export const chargingStationService = {
     }
 
     // Handle other errors
+    // Nếu không phải lỗi HTTP hay network thì trả về message mặc định
     return new Error(defaultMessage);
   },
 };
 
 /**
  * ===============================
- * DATA MAPPING UTILITIES
+ * TIỆN ÍCH CHUYỂN ĐỔI DỮ LIỆU
  * ===============================
  *
- * These utilities transform raw API data into UI-friendly formats
+ * Các hàm ở đây chuyển dữ liệu thô từ API sang định dạng dễ dùng cho UI
  */
 export const stationDataMapper = {
   /**
-   * Transform API station data to UI format
+   * Chuyển dữ liệu trạm từ API sang định dạng UI
    *
-   * @param {Object} apiStation - Raw station data from API
-   * @returns {Object} UI-formatted station object
+   * @param {Object} apiStation - Dữ liệu thô trạm từ API
+   * @returns {Object} Đối tượng trạm cho UI
    */
   mapStationFromApi(apiStation) {
     return {
@@ -209,33 +238,33 @@ export const stationDataMapper = {
       lat: apiStation.latitude || 21.0285, // Default to Hanoi coordinates
       lng: apiStation.longitude || 105.8542,
 
-      // Computed fields for UI display
-      distance: "N/A", // Will be calculated based on user location
+      // Trường thông tin tính toán/hiển thị cho UI
+      distance: "N/A", // Khoảng cách sẽ được tính dựa vào vị trí người dùng (nếu có)
       totalSlots: apiStation.numberOfPosts || 0,
       availableSlots: this.calculateAvailableSlots(apiStation.chargingPosts),
       power: this.calculateTotalPower(apiStation.chargingPosts),
-      type: "AC/DC", // Simplified charging type
-      openHours: "24/7", // Default operating hours
-      rating: 0, // Placeholder for future feature
-      reviewCount: 0, // Placeholder for future feature
+      type: "AC/DC", // Giá trị tạm (có thể lấy từ API nếu chi tiết)
+      openHours: "24/7", // Mặc định
+      rating: 0, // Placeholder - tính năng đánh giá sau
+      reviewCount: 0, // Placeholder
     };
   },
 
   /**
-   * Convert boolean active status to UI status string
+   * Chuyển trạng thái boolean 'active' sang chuỗi trạng thái cho UI
    *
-   * @param {boolean} active - Station active status from API
-   * @returns {string} UI status: 'available' | 'maintenance'
+   * @param {boolean} active - Trạng thái active từ API
+   * @returns {string} 'available' hoặc 'maintenance'
    */
   mapActiveStatus(active) {
     return active ? "available" : "maintenance";
   },
 
   /**
-   * Calculate number of available charging slots
+   * Tính số trụ/slot đang sẵn sàng
    *
-   * @param {Array} chargingPosts - Array of charging posts
-   * @returns {number} Number of available slots
+   * @param {Array} chargingPosts - Mảng các trụ
+   * @returns {number} Số trụ có isAvailable = true
    */
   calculateAvailableSlots(chargingPosts) {
     if (!Array.isArray(chargingPosts)) return 0;
@@ -243,10 +272,10 @@ export const stationDataMapper = {
   },
 
   /**
-   * Calculate total power capacity of a station
+   * Tính tổng công suất của trạm (cộng maxPower của mọi trụ)
    *
-   * @param {Array} chargingPosts - Array of charging posts
-   * @returns {string} Formatted power string (e.g., "150 kW")
+   * @param {Array} chargingPosts - Mảng trụ sạc
+   * @returns {string} Chuỗi công suất ví dụ: "150 kW" hoặc "N/A"
    */
   calculateTotalPower(chargingPosts) {
     if (!Array.isArray(chargingPosts)) return "N/A";
@@ -255,20 +284,21 @@ export const stationDataMapper = {
       return sum + (post.maxPower || 0);
     }, 0);
 
+    // Trả về chuỗi ví dụ: "150 kW" hoặc "N/A" nếu không có dữ liệu
     return totalPower > 0 ? `${totalPower} kW` : "N/A";
   },
 
   /**
-   * Calculate comprehensive statistics for all stations
+   * Tính các chỉ số thống kê tổng hợp cho danh sách trạm
    *
-   * @param {Array} stations - Array of station objects
-   * @returns {Object} Statistics object with counts and totals
+   * @param {Array} stations - Mảng trạm
+   * @returns {Object} Object chứa tổng số, số trạm active, số trụ, v.v.
    */
   calculateStatistics(stations) {
     const totalStations = stations.length;
     const activeStations = stations.filter((s) => s.active === true).length;
     const inactiveStations = totalStations - activeStations;
-    
+
     const totalPosts = stations.reduce(
       (sum, station) => sum + (station.numberOfPosts || 0),
       0
@@ -295,10 +325,10 @@ export const stationDataMapper = {
   },
 
   /**
-   * Transform array of API stations to UI format
+   * Chuyển mảng trạm API sang mảng trạm cho UI
    *
-   * @param {Array} apiStations - Raw stations from API
-   * @returns {Array} Array of UI-formatted station objects
+   * @param {Array} apiStations - Mảng trạm thô từ API
+   * @returns {Array} Mảng trạm đã map
    */
   mapStationsFromApi(apiStations) {
     if (!Array.isArray(apiStations)) return [];
@@ -306,28 +336,32 @@ export const stationDataMapper = {
   },
 
   /**
-   * Transform API charging post data to UI format
+   * Chuyển dữ liệu trụ sạc từ API sang định dạng UI
    *
-   * @param {Object} apiPost - Raw charging post data from API
-   * @returns {Object} UI-formatted charging post object
+   * @param {Object} apiPost - Dữ liệu trụ thô từ API
+   * @returns {Object} Đối tượng trụ cho UI
    */
   mapPostFromApi(apiPost) {
     return {
       // Core post data
       id: apiPost.idChargingPost,
-      name: apiPost.nameChargingPost || apiPost.name || `Trụ ${apiPost.idChargingPost}`,
+      name:
+        apiPost.nameChargingPost ||
+        apiPost.name ||
+        `Trụ ${apiPost.idChargingPost}`,
       active: apiPost.active,
       maxPower: apiPost.maxPower || 0,
       chargingFeePerKWh: apiPost.chargingFeePerKWh || 0,
       chargingSessions: apiPost.chargingSessions || [],
       chargingTypes: apiPost.chargingType || [],
 
-      // UI display fields
+      // Trường hiển thị cho UI
       powerDisplay: `${apiPost.maxPower || 0} kW`,
       feeDisplay: `${apiPost.chargingFeePerKWh || 0} VNĐ/kWh`,
       status: apiPost.active ? "available" : "maintenance",
-      isAvailable:
-        apiPost.active && !this.isPostBusy(apiPost.chargingSessions),
+      // isAvailable = trụ active và không có session đang chạy
+      isAvailable: apiPost.active && !this.isPostBusy(apiPost.chargingSessions),
+      // supportedTypes: chuyển mảng đối tượng type sang chuỗi tên
       supportedTypes: apiPost.chargingType?.map(
         (type) => type.typeName || type.name || "AC"
       ) || ["AC"],
@@ -335,10 +369,10 @@ export const stationDataMapper = {
   },
 
   /**
-   * Transform array of API charging posts to UI format
+   * Chuyển mảng trụ sạc từ API sang mảng trụ cho UI
    *
-   * @param {Array} apiPosts - Raw charging posts from API
-   * @returns {Array} Array of UI-formatted charging post objects
+   * @param {Array} apiPosts - Mảng trụ thô
+   * @returns {Array} Mảng trụ đã map
    */
   mapPostsFromApi(apiPosts) {
     if (!Array.isArray(apiPosts)) return [];
@@ -346,14 +380,15 @@ export const stationDataMapper = {
   },
 
   /**
-   * Check if a charging post is currently in use
+   * Kiểm tra xem một trụ có đang được sử dụng hay không
    *
-   * @param {Array} chargingSessions - Array of charging sessions
-   * @returns {boolean} True if post is busy
+   * @param {Array} chargingSessions - Mảng các phiên sạc liên quan đến trụ
+   * @returns {boolean} true nếu có phiên đang ACTIVE/CHARGING
    */
   isPostBusy(chargingSessions) {
     if (!Array.isArray(chargingSessions)) return false;
     return chargingSessions.some(
+      // Nếu có session với trạng thái ACTIVE hoặc CHARGING => trụ đang bận
       (session) => session.status === "ACTIVE" || session.status === "CHARGING"
     );
   },

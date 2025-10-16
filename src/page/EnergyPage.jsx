@@ -74,26 +74,34 @@ const EnergyPage = ({ userId = "user123" }) => { // Default userId for testing
   }
 
   return (
-    <div style={{ 
-      padding: '20px',
-      background: 'white',
-      minHeight: '100vh'
-    }}>
-      <div style={{ 
-        maxWidth: '1400px', 
-        margin: '0 auto' 
-      }}>
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+    <div
+      style={{
+        padding: "20px",
+        background: "white",
+        minHeight: "100vh",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: "1400px",
+          margin: "0 auto",
+        }}
+      >
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
           {/* Header Section - Full Width */}
           <PageHeader
             title={sessionData.stationName || "Trạm sạc"}
             icon={<ThunderboltOutlined />}
             subtitle={sessionData.address || ""}
-            statusTag={statusConfig ? {
-              color: statusConfig.color,
-              icon: statusConfig.icon,
-              text: statusConfig.text
-            } : null}
+            statusTag={
+              statusConfig
+                ? {
+                    color: statusConfig.color,
+                    icon: statusConfig.icon,
+                    text: statusConfig.text,
+                  }
+                : null
+            }
           />
 
           {/* Row 1: 2 Columns Equal Size */}
@@ -104,6 +112,9 @@ const EnergyPage = ({ userId = "user123" }) => { // Default userId for testing
                 isCharging={statusConfig?.isCharging || false}
                 isCompleted={statusConfig?.isCompleted || false}
               />
+            </Col>
+            <Col xs={24} lg={12}>
+              <CurrentTime currentTime={currentTime} />
             </Col>
             {/* Nếu là booking thì dùng cái này */}
             <Col xs={24} lg={12}>
@@ -116,7 +127,7 @@ const EnergyPage = ({ userId = "user123" }) => { // Default userId for testing
                 onSessionEnd={(sessionInfo) => {
                   console.log("Session ended:", sessionInfo);
                   // Cập nhật trạng thái session
-                  updateSessionStatus('stop');
+                  updateSessionStatus("stop");
                 }}
                 onTimeExpired={() => {
                   console.log("Session time expired");
@@ -144,7 +155,8 @@ const EnergyPage = ({ userId = "user123" }) => { // Default userId for testing
               />
             </Col>
           </Row>
-
+          
+          <EnergyStats sessionData={sessionData} />
 
           {/* Row 2: 2 Columns Equal Size */}
           <Row gutter={[16, 16]}>
