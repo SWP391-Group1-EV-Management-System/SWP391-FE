@@ -24,7 +24,7 @@ function App() {
       <TargetCursor />
       <Routes>
         {/* Root redirect to app */}
-        <Route path="/" element={<Navigate to="/app/home" replace />} />
+        <Route path="/abc" element={<Navigate to="/app/home" replace />} />
 
 
         {/* Welcome & Auth Routes */}
