@@ -1,171 +1,158 @@
 import React from "react";
-import { Card, Row, Col, Statistic } from "antd";
+import { Card, Row, Col, Statistic, Table, Tag, Typography, Space } from "antd";
 import {
   ThunderboltOutlined,
   SafetyOutlined,
   GlobalOutlined,
   ArrowUpOutlined,
+  DollarOutlined,
+  AlertOutlined,
+  EnvironmentOutlined,
 } from "@ant-design/icons";
-import { BarChart, PieChart } from '@mui/x-charts';
 import PageHeader from "../components/PageHeader";
-import ReportSection from '../components/ReportSection';
+import { Area } from '@ant-design/plots';
 
-const ROW_GUTTER = 20; // Define a constant for the gutter value
+const { Title, Text } = Typography;
+
+const revenueData = [
+  { day: 'Thứ 2', revenue: 580 },
+  { day: 'Thứ 3', revenue: 720 },
+  { day: 'Thứ 4', revenue: 650 },
+  { day: 'Thứ 5', revenue: 890 },
+  { day: 'Thứ 6', revenue: 920 },
+  { day: 'Thứ 7', revenue: 780 },
+  { day: 'CN', revenue: 1050 }
+];
+
+const activities = [
+  { time: '10:30', user: 'john.doe@gmail.com', station: 'Vincom Thao Dien', action: 'Bắt đầu phiên sạc (DC-01)' },
+  { time: '10:25', user: 'jane.smith@gmail.com', station: 'Gigamall Thu Duc', action: 'Thanh toán thành công (300.000đ)' },
+  { time: '10:15', user: 'staff_member_1', station: 'Vincom Thao Dien', action: 'Báo cáo sự cố (AC-03)' },
+  { time: '09:55', user: 'peter.jones@gmail.com', station: 'Landmark 81', action: 'Hoàn thành phiên sạc (DC-02)' }
+];
 
 function DashboardContent() {
-  const chartData = [
-    { type: "Trạm 1", sessions: 35 },
-    { type: "Trạm 2", sessions: 45 },
-    { type: "Trạm 3", sessions: 25 },
-    { type: "Trạm 4", sessions: 55 },
-  ];
-
-  const pieData = [
-    { type: "Hoạt động", value: 70 },
-    { type: "Bảo trì", value: 20 },
-    { type: "Ngừng", value: 10 },
-  ];
-
-  // Cấu hình cho biểu đồ cột (BarChart) từ @mui/x-charts
-  const barChartConfig = {
-    xAxis: [{ scaleType: 'band', data: chartData.map(item => item.type) }],
-    series: [{ data: chartData.map(item => item.sessions), color: '#228B22' }],
-    height: 300,
-  };
-
-  // Cấu hình cho biểu đồ tròn (PieChart) từ @mui/x-charts
-  const pieChartConfig = {
-    series: [{
-      data: pieData.map(item => ({ label: item.type, value: item.value })),
-      innerRadius: 0,
-      outerRadius: 100,
-      colors: ['#228B22', '#9ACD32', '#B0E0A8'],
-    }],
-    height: 300,
+  // Cấu hình cho biểu đồ AreaChart của Ant Design Plots
+  const areaConfig = {
+    data: revenueData,
+    xField: 'day',
+    yField: 'revenue',
+    height: 280,
+    smooth: true,
+    areaStyle: { fill: 'l(90) 0:#1890ff 1:#e6f7ff' },
+    color: '#1890ff',
+    xAxis: { label: { style: { fill: '#8c8c8c', fontSize: 12 } } },
+    yAxis: { label: { style: { fill: '#8c8c8c', fontSize: 12 } } },
+    tooltip: { formatter: (datum) => ({ name: 'Doanh thu', value: `${datum.revenue}đ` }) }
   };
 
   return (
-    <div className="dashboard-container">
-      <PageHeader
-        title="Bảng điều khiển tổng quan"
-        icon={<ThunderboltOutlined />}
-      />
-      
-      <Row gutter={[24, 24]} style={{ marginBottom: "24px" }}>
-        {[
-          {
-            icon: <ThunderboltOutlined style={{ fontSize: 32, color: "#333" }} />,
-            title: "Trạm sạc hoạt động",
-            value: "248",
-            change: "+12%",
-            changeColor: "#4CAF50",
-          },
-          {
-            icon: <ThunderboltOutlined style={{ fontSize: 32, color: "#333" }} />,
-            title: "Phiên sạc tháng này",
-            value: "1.247",
-            change: "+8%",
-            changeColor: "#4CAF50",
-          },
-          {
-            icon: <GlobalOutlined style={{ fontSize: 32, color: "#333" }} />,
-            title: "Người dùng active",
-            value: "8.932",
-            change: "+15%",
-            changeColor: "#4CAF50",
-          },
-          {
-            icon: <SafetyOutlined style={{ fontSize: 32, color: "#333" }} />,
-            title: "Độ tin cậy",
-            value: "99.8%",
-            change: "+0.2%",
-            changeColor: "#4CAF50",
-          },
-        ].map((card, index) => (
-          <Col span={6} key={index}>
+    <div style={{ minHeight: '100vh', background: '#f0f2f5', padding: '24px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        <PageHeader
+          title="Bảng điều khiển tổng quan"
+          icon={<ThunderboltOutlined />}
+        />
+
+        {/* Stats Grid */}
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Space>
+                <DollarOutlined style={{ fontSize: 32, color: "#1890ff" }} />
+                <div>
+                  <Text type="secondary">Doanh thu hôm nay</Text>
+                  <Title level={3} style={{ margin: 0, color: "#262626" }}>1.250.000đ</Title>
+                </div>
+              </Space>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Space>
+                <ThunderboltOutlined style={{ fontSize: 32, color: "#52c41a" }} />
+                <div>
+                  <Text type="secondary">Trụ đang hoạt động</Text>
+                  <Title level={3} style={{ margin: 0, color: "#262626" }}>32</Title>
+                </div>
+              </Space>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Space>
+                <EnvironmentOutlined style={{ fontSize: 32, color: "#faad14" }} />
+                <div>
+                  <Text type="secondary">Số trạm</Text>
+                  <Title level={3} style={{ margin: 0, color: "#262626" }}>3</Title>
+                </div>
+              </Space>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card>
+              <Space>
+                <AlertOutlined style={{ fontSize: 32, color: "#ff4d4f" }} />
+                <div>
+                  <Text type="secondary">Sự cố mới</Text>
+                  <Title level={3} style={{ margin: 0, color: "#262626" }}>5</Title>
+                </div>
+              </Space>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Main Content Grid */}
+        <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
+          <Col xs={24} md={14}>
             <Card
-              style={{
-                backgroundColor: "#FFFFFF",
-                border: "1px solid #E0E0E0",
-                borderRadius: 8,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.03)",
-                padding: "12px",
-                height: "150px",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                overflow: "hidden",
-                transition: "transform 0.2s ease-out, box-shadow 0.2s ease-out", // Hiệu ứng mượt mà hơn
-              }}
-              hoverable
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.03)"; // Nảy nhẹ hơn
-                e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)"; // Tăng độ bóng
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)"; // Trở về kích thước ban đầu
-                e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.03)"; // Trở về độ bóng ban đầu
-              }}
+              title={<span style={{ fontWeight: 600 }}>Tổng quan trạm</span>}
+              style={{ borderRadius: 8, minHeight: 320 }}
             >
-              <div style={{ textAlign: "center", marginBottom: "8px" }}>{card.icon}</div>
-              <div style={{ textAlign: "center", color: "#666", fontSize: 14, marginBottom: "8px" }}>
-                {card.title}
-              </div>
-              <div style={{ textAlign: "center", fontSize: 28, fontWeight: "bold", marginBottom: "8px" }}>
-                {card.value}
-              </div>
-              <div style={{ textAlign: "center", color: card.changeColor, fontSize: 12 }}>
-                <ArrowUpOutlined /> {card.change}
+              <div style={{
+                background: '#fafafa',
+                borderRadius: '8px',
+                height: '320px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px dashed #d9d9d9'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <EnvironmentOutlined style={{ fontSize: 64, color: '#bfbfbf', marginBottom: 16 }} />
+                  <Text type="secondary" style={{ fontSize: 20, fontWeight: 500 }}>Map Placeholder</Text>
+                </div>
               </div>
             </Card>
           </Col>
-        ))}
-      </Row>
+          <Col xs={24} md={10}>
+            <Card
+              title={<span style={{ fontWeight: 600 }}>Doanh thu (7 ngày gần nhất)</span>}
+              style={{ borderRadius: 8 }}
+            >
+              <Area {...areaConfig} />
+            </Card>
+          </Col>
+        </Row>
 
-      <Row gutter={[24, 24]}>
-        <Col span={14}>
-          <Card
-            title="Thống kê phiên sạc theo trạm"
-            styles={{
-              header: {
-                color: "#145A32",
-                fontWeight: "bold",
-                textAlign: "center",
-              }
-            }}
-            style={{
-              borderRadius: 12,
-              border: "1px solid #E0E0E0",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-            }}
-          >
-            <BarChart {...barChartConfig} />
-          </Card>
-        </Col>
-
-        <Col span={10}>
-          <Card
-            title="Tỷ lệ trạng thái trạm"
-            styles={{
-              header: {
-                color: "#145A32", 
-                fontWeight: "bold",
-                textAlign: "center",
-              },
-            }}
-            style={{
-              borderRadius: 12,
-              border: "1px solid #E0E0E0",
-              boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-            }}
-          >
-            <PieChart {...pieChartConfig} />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Báo cáo & Thống kê Section */}
-      <ReportSection />
+        {/* Recent Activities */}
+        <Card
+          title={<span style={{ fontWeight: 600 }}>Hoạt động gần đây</span>}
+          style={{ borderRadius: 8, marginBottom: 24 }}
+        >
+          <Table
+            dataSource={activities}
+            pagination={false}
+            rowKey={(record) => record.time + record.user} // Sửa lại, không dùng index
+            columns={[
+              { title: 'Thời gian', dataIndex: 'time', key: 'time', width: 120 },
+              { title: 'Người dùng', dataIndex: 'user', key: 'user', width: 220 },
+              { title: 'Trạm', dataIndex: 'station', key: 'station', width: 200 },
+              { title: 'Hoạt động', dataIndex: 'action', key: 'action', render: (text) => <Tag color="blue">{text}</Tag> }
+            ]}
+          />
+        </Card>
+      </div>
     </div>
   );
 }
