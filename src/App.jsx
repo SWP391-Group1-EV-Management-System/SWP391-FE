@@ -1,13 +1,26 @@
-src / App.jsx;
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+import Layout from "./components/layout/Layout.jsx";
+import HomePage from "./page/HomePage.jsx";
+import MapPage from "./page/MapPage.jsx";
+import EnergyPage from "./page/EnergyPage.jsx";
+import HistoryPage from "./page/HistoryPage.jsx";
+import ServicePackage from "./page/ServicePackage.jsx";
+import SettingPage from "./page/SettingPage.jsx";
+import NotFoundPage from "./page/NotFoundPage.jsx";
+import Login from "./page/Login.jsx";
+import Register from "./page/Register.jsx";
+import WelcomePage from "./page/WelcomePage.jsx";
+import SessionStaffPage from "./page/SessionStaffPage.jsx";
+import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
 import OTPVerification from "./page/OTPVerification.jsx";
 import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
 import UserManagementPage from "./page/UserManagementPage.jsx";
-import TargetCursor from "./components/TargetCursor.jsx";
+import VirtualStationPage from "./page/VirtualStationPage.jsx";
 
 function App() {
   return (
     <BrowserRouter>
-      <TargetCursor />
       <Routes>
         {/* Root redirect to app */}
         <Route path="/" element={<Navigate to="/app/home" replace />} />
@@ -33,6 +46,8 @@ function App() {
           <Route path="waitingstaff" element={<WaitingStaffPage />} />
           <Route path="usermanagement" element={<UserManagementPage />} />
         </Route>
+
+        <Route path="virtualstation/:postId" element={<VirtualStationPage />} />
 
         {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />

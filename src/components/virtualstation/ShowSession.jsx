@@ -95,7 +95,7 @@ export default function ShowSession() {
           </div>
 
           <div className="stats-grid">
-            <div className="stat-card glass3d">
+            <div className="stat-card-show-session glass3d">
               <div className="stat-header">
                 <Clock size={20} />
                 <span>Thời gian</span>
@@ -103,7 +103,7 @@ export default function ShowSession() {
               <div className="stat-value">{formatTime(elapsedTime)}</div>
             </div>
 
-            <div className="stat-card glass3d">
+            <div className="stat-card-show-session glass3d">
               <div className="stat-header">
                 <Zap size={20} />
                 <span>Công suất</span>
@@ -111,7 +111,7 @@ export default function ShowSession() {
               <div className="stat-value">{power.toFixed(1)} kW</div>
             </div>
 
-            <div className="stat-card glass3d">
+            <div className="stat-card-show-session glass3d">
               <div className="stat-header">
                 <Battery size={20} />
                 <span>Năng lượng</span>
@@ -119,7 +119,7 @@ export default function ShowSession() {
               <div className="stat-value">{energy.toFixed(2)} kWh</div>
             </div>
 
-            <div className="stat-card glass3d">
+            <div className="stat-card-show-session glass3d">
               <div className="stat-header">
                 <Clock size={20} />
                 <span>Thời gian còn lại</span>

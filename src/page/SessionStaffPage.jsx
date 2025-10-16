@@ -347,7 +347,7 @@ const SessionStaffPage = () => {
               <Tooltip title="Xác nhận thanh toán">
                 <Button
                   size="small"
-                  className="session-action-button confirm-payment cursor-target"
+                  className="session-action-button confirm-payment"
                   icon={<DollarOutlined />}
                   onClick={() => handleAction("confirmPayment", record)}
                 />
@@ -522,7 +522,14 @@ const SessionStaffPage = () => {
         }
       >
         {/* Search Bar + Report Button */}
-        <div className="session-margin-bottom-16" style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div
+          className="session-margin-bottom-16"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
           <div style={{ flex: 1, marginRight: 16 }}>
             <Search
               placeholder="Tìm kiếm theo mã phiên sạc hoặc tên người dùng..."
@@ -575,7 +582,12 @@ const SessionStaffPage = () => {
           reportData={null}
           isAdmin={false}
           onAddReport={handleAddReport}
-          initialValues={{ title: "", description: "", type: "", isUrgent: false }}
+          initialValues={{
+            title: "",
+            description: "",
+            type: "",
+            isUrgent: false,
+          }}
           validationSchema={null}
         />
       </Card>
