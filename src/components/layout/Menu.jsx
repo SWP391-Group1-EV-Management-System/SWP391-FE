@@ -224,33 +224,6 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
               onClick={() => handleMenuItemClick(item.id, item.path)}
               aria-current={activeMenuItem === item.id ? "page" : undefined}
               tabIndex="-1"
-              // Ngăn chặn focus effects bằng nhiều layers
-              onFocus={(e) => {
-                e.preventDefault();
-                e.target.blur();
-              }}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.target.blur();
-              }}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                e.target.blur();
-              }}
-              onMouseUp={(e) => {
-                e.preventDefault();
-                e.target.blur();
-              }}
-              onTouchStart={(e) => {
-                e.preventDefault();
-              }}
-              autoFocus={false}
-              style={{
-                outline: "none !important",
-                boxShadow: "none !important",
-                border: "none !important",
-                WebkitTapHighlightColor: "transparent",
-              }}
             >
               <item.icon className="sidebar-menu-icon" aria-hidden="true" />
               {!collapsed && (
