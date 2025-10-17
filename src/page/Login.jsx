@@ -9,6 +9,7 @@ import { IoClose } from "react-icons/io5";
 import { useLogin } from "../hooks/useLogin";
 
 function Login() {
+  console.log("Login component rendered");
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useLogin();
   const navigate = useNavigate();
@@ -25,7 +26,13 @@ function Login() {
     e.preventDefault();
     const email = e.target.username.value;
     const password = e.target.password.value;
-    await login(email, password);
+    console.log("Login attempt", { email, password });
+    try {
+      const result = await login(email, password);
+      console.log("Login result", result);
+    } catch (err) {
+      console.error("Login error", err);
+    }
   };
 
   return (

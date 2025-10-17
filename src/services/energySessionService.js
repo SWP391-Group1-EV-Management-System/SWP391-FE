@@ -6,7 +6,8 @@
  */
 
 import axios from "axios";
-
+// enable sending cookies for all axios requests
+axios.defaults.withCredentials = true;
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 // Create configured axios instance
