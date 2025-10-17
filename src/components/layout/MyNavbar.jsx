@@ -5,7 +5,7 @@ import { TbLogout, TbUser, TbSettings } from "react-icons/tb";
 import QRScanner from "../qr/QRScanner";
 import QRResultModal from "../qr/QRResultModal";
 import "../../assets/styles/MyNavbar.css";
-import useAuth from "../../hooks/useLogout";
+import useLogout from "../../hooks/useLogout";
 
 function MyNavbar({ collapsed }) {
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
@@ -22,7 +22,7 @@ function MyNavbar({ collapsed }) {
     ? `${userSession.firstName}`
     : "Guest User";
 
-  const { logout } = useAuth();
+  const { logout } = useLogout();
 
   // Xử lý QR Scanner
   const handleQRClick = () => setIsQRScannerOpen(true);
@@ -64,7 +64,9 @@ function MyNavbar({ collapsed }) {
 
   const handleUserClick = () => setIsUserDropdownOpen(!isUserDropdownOpen);
 
-  const handleLogout = () => logout();
+  const handleLogout = () => {
+    logout();
+  };
 
   // Đóng dropdown khi click bên ngoài
   useEffect(() => {

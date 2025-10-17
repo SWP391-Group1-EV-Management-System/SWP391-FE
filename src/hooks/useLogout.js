@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { logoutApi } from "../services/authService";
 
-export default function useAuth() {
+export default function useLogout() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -13,9 +13,11 @@ export default function useAuth() {
     } catch (e) {
       console.error("Logout API error:", e);
       setError(e);
+      // continue to clear client session even if server fails
     } finally {
-      localStorage.removeItem("user");
+      try { localStorage.removeItem("user"); } catch (e) { console.error(e); }
       setLoading(false);
+      // redirect to login (force reload)
       window.location.href = "/login";
     }
   };
