@@ -1,9 +1,4 @@
-/* ===== GLOBAL FOCUS OVERRIDE - BẮT BUỘC PHẢI Ở TRÊN CÙNG ===== */
-/* ===== SIÊU MẠNH - LOẠI BỎ TẤT CẢ FOCUS EFFECTS ===== */
-.sidebar button {
-  border: none !important;
-}
-
+/* bỏ hiệu ứng hover mặc định của button */
 .sidebar button:hover {
   outline: 0 !important;
   outline: none !important;
