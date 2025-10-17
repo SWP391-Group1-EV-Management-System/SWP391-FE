@@ -6,22 +6,18 @@ export const useLogin = () => {
   const navigate = useNavigate();
 
   const login = useCallback(async (email, password) => {
+    console.log('[useLogin] login called', { email, password });
     try {
-      const userData = await loginService(email, password);
-      localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('user', JSON.stringify(userData));
-      // Đảm bảo lưu đúng userId
-      const userId = userData.userID || userData.userId || userData.id || userData.idUser;
-      if (userId) {
-        localStorage.setItem('userId', userId);
-        console.log('userId saved to localStorage:', userId);
-      } else {
-        console.warn('Không tìm thấy userId trong response đăng nhập:', userData);
+      const result = await loginService(email, password);
+      console.log('[useLogin] login result', result);
+      if (result.success) {
+        localStorage.setItem('isLoggedIn', 'true');
+        // JWT is now handled via HTTP-only cookie
+        navigate('/app/home');
+        return true;
       }
-      navigate('/app/home');
-      return true;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('[useLogin] Login error:', error);
       alert(error.message || 'Đăng nhập thất bại.');
       return false;
     }

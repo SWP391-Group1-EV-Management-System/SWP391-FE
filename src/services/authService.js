@@ -1,23 +1,46 @@
 export const login = async (email, password) => {
   try {
-    const response = await fetch('http://localhost:8080/users/login', {
-      method: 'POST',
+    const response = await fetch("http://localhost:8080/users/login", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json, text/plain, */*',
+        "Content-Type": "application/json",
+        Accept: "application/json, text/plain, */*",
       },
       body: JSON.stringify({ email, password }),
-      credentials: 'include',
+      credentials: "include", // Important for receiving the cookie
     });
+
+    const responseText = await response.text();
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Network error:', response.status, errorText);
-      throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+      if (response.status === 401) {
+        throw new Error("Sai tài khoản hoặc mật khẩu");
+      }
+      throw new Error("Không thể kết nối đến server. Vui lòng thử lại sau.");
     }
-    const responseData = await response.json();
-    return responseData;
+
+    // Since the backend sends plain text success message
+    return {
+      success: true,
+      message: responseText,
+    };
   } catch (error) {
-    console.error('Fetch error:', error);
-    throw new Error('Không thể kết nối đến server. Vui lòng thử lại sau.');
+    console.error("Fetch error:", error);
+    throw new Error("Không thể kết nối đến server. Vui lòng thử lại sau.");
   }
 };
+
+export async function logoutApi() {
+  const base = process.env.REACT_APP_API_BASE_URL || "";
+  const res = await fetch(`${base}/users/logout`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Logout failed: ${res.status} ${text}`);
+  }
+  return res;
+}
+export default { logoutApi };
