@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router";
 
 function WelcomePageHeader() {
   return (
@@ -14,7 +15,12 @@ function WelcomePageHeader() {
             <a href="#">Contact</a>
           </div>
         </div>
+         <div className="welcome-header-btn">
+          <Link to="/login" className="welcome-login-btn">Login</Link>
+          <Link to="/register" className="welcome-register-btn">Register</Link>
+        </div>
       </div>
+     
     </>
   );
 }

@@ -14,8 +14,9 @@
 }
 
 .welcome-navbar img {
-  height: 50px;
+  height: 120px;
   width: auto;
+  margin-left: 90px;
 }
 
 .welcome-navbar-links {
@@ -71,15 +72,19 @@
 .welcome-login-btn:hover {
   background: #0b9459;
   color: white;
+  text-decoration: none;
 }
 
 .welcome-register-btn {
   background: #0b9459;
   color: white;
+
 }
 
 .welcome-register-btn:hover {
-  background: #097a4a;
+  color: #0b9459;
+  background: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(11, 148, 89, 0.3);
+  text-decoration: none;
 }
