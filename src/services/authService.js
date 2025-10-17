@@ -31,16 +31,16 @@ export const login = async (email, password) => {
 };
 
 export async function logoutApi() {
-  const base = process.env.REACT_APP_API_BASE_URL || "";
-  const res = await fetch(`${base}/users/logout`, {
+  const response = await fetch("http://localhost:8080/users/logout", {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
   });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Logout failed: ${res.status} ${text}`);
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Logout failed: ${response.status} ${text}`);
   }
-  return res;
+  return response;
 }
+
 export default { logoutApi };
