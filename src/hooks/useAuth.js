@@ -1,18 +1,24 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { login as loginService, logoutApi, me as meService } from '../services/authService';
 
 export const useAuth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  // user state from server (cookie-based session)
   const [user, setUser] = useState(null);
 
-  // try to fetch current user on mount (if cookie/token exists)
+  // Chỉ auto-fetch user nếu KHÔNG ở trang login/register
   useEffect(() => {
     let mounted = true;
+    
+    // Skip auto-fetch ở các trang public
+    const publicPaths = ['/login', '/register', '/forgot-password'];
+    if (publicPaths.some(path => location.pathname.startsWith(path))) {
+      return;
+    }
+
     (async () => {
       try {
         const me = await meService();
@@ -21,8 +27,9 @@ export const useAuth = () => {
         // ignore - not logged in
       }
     })();
+    
     return () => { mounted = false; };
-  }, []);
+  }, [location.pathname]);
 
   const login = useCallback(async (email, password) => {
     setLoading(true);
@@ -30,7 +37,6 @@ export const useAuth = () => {
     try {
       const result = await loginService(email, password);
       if (result?.success) {
-        // after backend sets cookie, fetch /users/me to get user object
         try {
           const me = await meService();
           if (me) setUser(me);
@@ -60,7 +66,6 @@ export const useAuth = () => {
     } catch (e) {
       console.error('[useAuth] logout API error', e);
       setError(e);
-      // continue to clear client session even if server fails
     } finally {
       setUser(null);
       setLoading(false);
@@ -68,7 +73,6 @@ export const useAuth = () => {
     }
   }, []);
 
-  // expose user in the hook return value
   return { login, logout, loading, error, user, setUser };
 };
 
