@@ -5,7 +5,7 @@ import { TbLogout, TbUser, TbSettings } from "react-icons/tb";
 import QRScanner from "../qr/QRScanner";
 import QRResultModal from "../qr/QRResultModal";
 import "../../assets/styles/MyNavbar.css";
-import useLogout from "../../hooks/useLogout";
+import useAuth, { useLogout } from "../../hooks/useAuth";
 
 function MyNavbar({ collapsed }) {
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
@@ -15,13 +15,28 @@ function MyNavbar({ collapsed }) {
   const [stationData, setStationData] = useState(null);
   const dropdownRef = useRef(null);
 
-  const storedUser = localStorage.getItem("user");
-  const userSession = storedUser ? JSON.parse(storedUser) : null;
+  // use cookie-based auth hook to get current user
+  const { user } = useAuth();
 
-  const userName =
-    userSession && userSession.firstName
-      ? `${userSession.firstName}`
-      : "Guest User";
+  // helper lấy tên hiển thị và initial an toàn
+  const getDisplayName = (u) => {
+    if (!u) return "Guest User";
+    const first = (u.firstName || u.FirstName || u.name || u.Name || u.fullName || u.FullName || "").trim();
+    const last = (u.lastName || u.LastName || "").trim();
+    if (first && last) return `${first} ${last}`;
+    if (first) return first;
+    const email = (u.email || u.Email || "").trim();
+    if (email) return email.split("@")[0];
+    return "Guest User";
+  };
+
+  const getInitial = (dispName) => {
+    if (!dispName) return "G";
+    const s = String(dispName).trim();
+    return s.length ? s.charAt(0).toUpperCase() : "G";
+  };
+
+  const userName = getDisplayName(user);
 
   const { logout } = useLogout();
 
@@ -111,8 +126,8 @@ function MyNavbar({ collapsed }) {
             ref={dropdownRef}
           >
             <span className="user-name">{userName}</span>
-            <div className="user-avatar">
-              {userName.charAt(0).toUpperCase()}
+            <div className="user-avatar" aria-hidden="true">
+              {getInitial(userName)}
             </div>
 
             {/* User Dropdown Menu */}
