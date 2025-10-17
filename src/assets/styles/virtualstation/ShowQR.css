@@ -1,0 +1,33 @@
+.show-qr {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+/* Icon overlay in the center of QR */
+.qr-overlay-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none; /* icon shouldn't capture pointer events */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Size and style for the overlay icon */
+.overlay-icon-svg {
+  width: 70px;
+  height: 70px;
+  color: #0b9459; /* same green as QR foreground */
+  background: #e3f4f0; /* white background to maintain contrast */
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}

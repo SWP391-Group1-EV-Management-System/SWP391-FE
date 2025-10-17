@@ -1,0 +1,14 @@
+.show-qr {
+  min-height: 100vh; /* chiếm toàn bộ chiều cao viewport */
+  display: flex;
+  align-items: center; /* căn dọc giữa */
+  justify-content: center; /* căn ngang giữa */
+  background-image: url("../images/Frame 16.png");
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+
+

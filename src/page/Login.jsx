@@ -42,7 +42,11 @@ function Login() {
       <div className="login-page">
         <div className="login-container">
           <div className="login-inner">
-            <button className="back-to-welcome-btn" onClick={handleBackToWelcome} aria-label="Quay lại trang chính">
+            <button
+              className="back-to-welcome-btn"
+              onClick={handleBackToWelcome}
+              aria-label="Quay lại trang chính"
+            >
               <IoClose size={24} />
             </button>
             <h2>Đăng nhập</h2>
@@ -52,7 +56,13 @@ function Login() {
                   <CgMail size={28} />
                   Gmail
                 </label>
-                <input type="text" id="username" name="username" required placeholder="email@example.com" />
+                <input
+                  type="text"
+                  id="username"
+                  name="username"
+                  required
+                  placeholder="email@example.com"
+                />
               </div>
               <div className="password-field">
                 <label htmlFor="password">
@@ -73,7 +83,11 @@ function Login() {
                     onClick={togglePasswordVisibility}
                     aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                   >
-                    {showPassword ? <IoEyeOffOutline size={20} /> : <IoEyeOutline size={20} />}
+                    {showPassword ? (
+                      <IoEyeOffOutline size={20} />
+                    ) : (
+                      <IoEyeOutline size={20} />
+                    )}
                   </button>
                 </div>
               </div>
@@ -116,6 +130,7 @@ function Login() {
                 <div>Không có tài khoản?</div>
                 <a
                   href="/register"
+                  className=""
                   style={{
                     color: "#0b9459",
                     fontWeight: "bold",

@@ -16,6 +16,7 @@ import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
 import OTPVerification from "./page/OTPVerification.jsx";
 import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
 import UserManagementPage from "./page/UserManagementPage.jsx";
+import VirtualStationPage from "./page/VirtualStationPage.jsx";
 
 function App() {
   return (
@@ -23,7 +24,7 @@ function App() {
       <Routes>
         {/* Root redirect to app */}
         <Route path="/" element={<Navigate to="/app/home" replace />} />
-        
+
         {/* Welcome & Auth Routes */}
         <Route path="/welcome" element={<WelcomePage />} />
         <Route path="/login" element={<Login />} />
@@ -33,7 +34,7 @@ function App() {
         {/* Protected Main App Routes */}
         <Route path="/app" element={<Layout />}>
           {/* Default route for /app */}
-          
+
           <Route path="evadmindashboard" element={<EVAdminDashboard />} />
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
@@ -45,6 +46,8 @@ function App() {
           <Route path="waitingstaff" element={<WaitingStaffPage />} />
           <Route path="usermanagement" element={<UserManagementPage />} />
         </Route>
+
+        <Route path="virtualstation/:postId" element={<VirtualStationPage />} />
 
         {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />

@@ -17,6 +17,17 @@
   margin-bottom: 7px;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+}
+
+.header-right {
+  margin-left: auto; /* push to the right */
+  display: flex;
+  align-items: center;
+}
+
 .waiting-queue-icon {
   color: #10b77f;
   font-size: 24px;
@@ -27,7 +38,7 @@
   font-weight: 600;
   color: #1a1a1a;
   margin: 0;
-  margin-bottom: 0!important;
+  margin-bottom: 0 !important;
 }
 
 .queue-position-display {
@@ -108,15 +119,15 @@
 }
 
 .controls-container {
-  width: 100%;           /* Full width container */
+  width: 100%; /* Full width container */
   margin-top: 16px;
 }
 
 .controls-container .ant-btn {
-  width: 100%;           /* Button chiếm full width */
-  height: 40px;          /* Chiều cao lớn hơn */
-  font-weight: 600;      /* Chữ dày hơn */
-  font-size: 16px;       /* Font size lớn hơn */
+  width: 100%; /* Button chiếm full width */
+  height: 40px; /* Chiều cao lớn hơn */
+  font-weight: 600; /* Chữ dày hơn */
+  font-size: 16px; /* Font size lớn hơn */
 }
 
 .time-info-container {
@@ -164,6 +175,19 @@
   border-radius: 8px;
 }
 
+/* Inline variant to show the tip beside the title in the header */
+.queue-tips.inline {
+  margin-top: 0;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+.queue-tips.inline .tips-text {
+  color: #8c8c8c;
+  font-size: 12px;
+}
+
 .tips-text {
   font-size: 11px;
   color: #10b981;
@@ -173,16 +197,16 @@
 }
 
 .arrival-time-controls {
-  width: 100%;           /* Full width container */
+  width: 100%; /* Full width container */
   display: flex;
   flex-direction: column; /* Stack buttons vertically */
-  gap: 8px;              /* Khoảng cách giữa buttons */
+  gap: 8px; /* Khoảng cách giữa buttons */
 }
 
 .arrival-time-controls .ant-btn {
-  width: 100%;           /* Tất cả buttons chiếm full width */
-  height: 40px;          /* Chiều cao đồng nhất */
-  font-weight: 500;      /* Chữ dày hơn */
+  width: 100%; /* Tất cả buttons chiếm full width */
+  height: 40px; /* Chiều cao đồng nhất */
+  font-weight: 500; /* Chữ dày hơn */
 }
 
 /* Responsive Design */
@@ -194,20 +218,20 @@
   .waiting-queue-body {
     padding: 16px;
   }
-  
+
   .position-time-row {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .queue-number {
     font-size: 3rem;
   }
-  
+
   .time-value-large {
     font-size: 2rem;
   }
-  
+
   .info-row {
     justify-content: flex-start;
   }
@@ -221,16 +245,16 @@
   .queue-number {
     font-size: 2.5rem;
   }
-  
+
   .time-value-large {
     font-size: 1.8rem;
   }
-  
+
   .waiting-queue-header {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .status-tags {
     flex-direction: column;
     gap: 4px;
