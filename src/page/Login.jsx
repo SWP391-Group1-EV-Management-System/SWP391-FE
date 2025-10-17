@@ -6,12 +6,12 @@ import { TbLock } from "react-icons/tb"; // Sửa từ TbLockPassword
 import { IoIosArrowForward } from "react-icons/io";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { IoClose } from "react-icons/io5";
-import { useLogin } from "../hooks/useLogin";
+import { useLogin } from "../hooks/useAuth";
 
 function Login() {
   console.log("Login component rendered");
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useLogin();
+  const { login, loading, error } = useLogin();
   const navigate = useNavigate();
 
   const togglePasswordVisibility = () => {
@@ -26,12 +26,14 @@ function Login() {
     e.preventDefault();
     const email = e.target.username.value;
     const password = e.target.password.value;
-    console.log("Login attempt", { email, password });
     try {
-      const result = await login(email, password);
-      console.log("Login result", result);
+      const success = await login(email, password);
+      if (!success) {
+        // login hook exposes error which will be displayed; nothing else needed here
+        console.warn('Login failed');
+      }
     } catch (err) {
-      console.error("Login error", err);
+      console.error('Login error', err);
     }
   };
 
@@ -44,7 +46,7 @@ function Login() {
               <IoClose size={24} />
             </button>
             <h2>Đăng nhập</h2>
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleLogin} aria-busy={loading}>
               <div>
                 <label htmlFor="username">
                   <CgMail size={28} />
@@ -87,6 +89,7 @@ function Login() {
               </div>
               <button
                 type="submit"
+                disabled={loading}
                 style={{
                   fontSize: "20px",
                   fontWeight: "bold",
@@ -96,8 +99,19 @@ function Login() {
                   gap: "8px",
                 }}
               >
-                Đăng nhập <IoIosArrowForward size={24} />
+                {loading ? 'Đang đăng nhập...' : (
+                  <>
+                    Đăng nhập <IoIosArrowForward size={24} />
+                  </>
+                )}
               </button>
+
+              {error && (
+                <div className="form-error" role="alert" style={{ color: 'red', marginTop: 12 }}>
+                  {error.message || String(error)}
+                </div>
+              )}
+
               <div className="register-prompt">
                 <div>Không có tài khoản?</div>
                 <a
