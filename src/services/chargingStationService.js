@@ -19,24 +19,10 @@
   - Mục tiêu: tách logic gọi API và chuyển đổi dữ liệu để UI có thể dùng trực tiếp
 */
 
-import axios from "axios";
-
-/**
- * Cấu hình API
- */
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
-// enable sending cookies for all axios requests
-axios.defaults.withCredentials = true;
-// Create configured axios instance
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000, // 10 second timeout
-  headers: {
-    "Content-Type": "application/json",
-
-  },
-});
+import api from "../utils/axios.js";
+// Using shared axios instance (`api`) which centralizes baseURL, withCredentials,
+// and token refresh logic. Endpoints below include the '/api' prefix to match
+// the backend routing.
 
 /**
  * ===============================
@@ -52,7 +38,7 @@ export const chargingStationService = {
    */
   async getAllStations() {
     try {
-      const response = await apiClient.get("/charging/station/all");
+      const response = await api.get("/api/charging/station/all");
       const mappedStations = stationDataMapper.mapStationsFromApi(
         response.data
       );
@@ -72,7 +58,7 @@ export const chargingStationService = {
    */
   async getStationById(stationId) {
     try {
-      const response = await apiClient.get(`/charging/station/${stationId}`);
+      const response = await api.get(`/api/charging/station/${stationId}`);
       // Debug: in ra dữ liệu thô từ API (giữ để thuận tiện khi dev)
       console.log("API trả về trạm:", response.data);
 
@@ -96,9 +82,7 @@ export const chargingStationService = {
    */
   async getStationPosts(stationId) {
     try {
-      const response = await apiClient.get(
-        `/charging/station/posts/${stationId}`
-      );
+      const response = await api.get(`/api/charging/station/posts/${stationId}`);
       // Debug: log dữ liệu thô
       console.log("API trả về trụ:", response.data);
 
@@ -128,10 +112,7 @@ export const chargingStationService = {
    */
   async createChargingSession(bookingData) {
     try {
-      const response = await apiClient.post(
-        "/charging/session/create",
-        bookingData
-      );
+      const response = await api.post("/api/charging/session/create", bookingData);
       // Kiểm tra cấu trúc response từ API.
       // Nhiều API trả cấu trúc: { success: boolean, data: ..., message: '...'}
       if (response.data && response.data.success) {

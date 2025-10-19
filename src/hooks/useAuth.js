@@ -1,6 +1,6 @@
 import { useCallback, useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router';
-import { login as loginService, logoutApi, me as meService } from '../services/authService';
+import { login as loginService, logoutApi, getUserProfile } from '../services/authService';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -9,10 +9,26 @@ export const useAuth = () => {
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
 
+  // Fetch user profile helper
+  const fetchUserProfile = useCallback(async () => {
+    try {
+      setLoading(true);
+      const me = await getUserProfile();
+      if (me) setUser(me);
+      return me;
+    } catch (e) {
+      console.error('[useAuth] fetchUserProfile error', e);
+      setUser(null);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Chỉ auto-fetch user nếu KHÔNG ở trang login/register
   useEffect(() => {
     let mounted = true;
-    
+
     // Skip auto-fetch ở các trang public
     const publicPaths = ['/login', '/register', '/forgot-password'];
     if (publicPaths.some(path => location.pathname.startsWith(path))) {
@@ -21,15 +37,15 @@ export const useAuth = () => {
 
     (async () => {
       try {
-        const me = await meService();
-        if (mounted && me) setUser(me);
+        if (!mounted) return;
+        await fetchUserProfile();
       } catch (e) {
         // ignore - not logged in
       }
     })();
-    
+
     return () => { mounted = false; };
-  }, [location.pathname]);
+  }, [location.pathname, fetchUserProfile]);
 
   const login = useCallback(async (email, password) => {
     setLoading(true);
@@ -38,10 +54,9 @@ export const useAuth = () => {
       const result = await loginService(email, password);
       if (result?.success) {
         try {
-          const me = await meService();
-          if (me) setUser(me);
+          await fetchUserProfile();
         } catch (e) {
-          console.error('[useAuth] fetch /users/me after login failed', e);
+          console.error('[useAuth] fetchUserProfile after login failed', e);
         }
 
         navigate('/app/home');
@@ -56,7 +71,7 @@ export const useAuth = () => {
     } finally {
       setLoading(false);
     }
-  }, [navigate]);
+  }, [navigate, fetchUserProfile]);
 
   const logout = useCallback(async () => {
     setLoading(true);
@@ -73,7 +88,7 @@ export const useAuth = () => {
     }
   }, []);
 
-  return { login, logout, loading, error, user, setUser };
+  return { login, logout, loading, error, user, setUser, fetchUserProfile };
 };
 
 // Role-based access control hook

@@ -38,6 +38,7 @@ import {
 
 // Component Styles
 import "../assets/styles/HomePage.css";
+import useAuth from "../hooks/useAuth";
 
 /**
  * HomePage Functional Component
@@ -57,14 +58,20 @@ function HomePage() {
     reliability: 0, // System reliability percentage
   });
 
-  // Read user info from localStorage and compute a display name
-  // Move this to component scope so it's available during render
-  const storedUser = localStorage.getItem("user");
-  const userSession = storedUser ? JSON.parse(storedUser) : null;
-  const userName = userSession && (userSession.firstName )
-    ? `${userSession.firstName || ""}`.trim()
-    : "Guest User";
+  // Use authenticated profile from hook instead of localStorage
+  const { user, loading, fetchUserProfile } = useAuth();
 
+  useEffect(() => {
+    // ensure profile is loaded when HomePage mounts
+    fetchUserProfile().catch(() => {});
+  }, [fetchUserProfile]);
+
+  const userName = loading
+    ? "Đang tải..."
+    : user
+    ? `${(user.firstName || "").trim()} ${(user.lastName || "").trim()}`.trim() || (user.email ? user.email.split("@")[0] : "Guest User")
+    : "Guest User";
+  
   // ==================== EFFECTS ====================
 
   /**

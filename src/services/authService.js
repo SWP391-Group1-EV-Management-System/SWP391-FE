@@ -1,77 +1,75 @@
+import api from '../utils/axios';
+
+/**
+ * Đăng nhập
+ */
 export const login = async (email, password) => {
   try {
-    const response = await fetch("http://localhost:8080/users/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json, text/plain, */*",
-      },
-      body: JSON.stringify({ email, password }),
-      credentials: "include", // Important for receiving the cookie
-    });
-
-    const responseText = await response.text();
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error("Sai tài khoản hoặc mật khẩu");
-      }
-      throw new Error("Không thể kết nối đến server. Vui lòng thử lại sau.");
-    }
-
-    // Try to parse JSON if server returned JSON, otherwise keep text message
-    let parsed = null;
-    try {
-      parsed = JSON.parse(responseText);
-    } catch (e) {
-      // not JSON, ignore
-    }
-
+    const response = await api.post('/users/login', { email, password });
+    
+    // Backend set cookies (jwt, refresh) qua Set-Cookie
+    const data = response.data;
+    
     return {
       success: true,
-      message: parsed?.message || responseText,
-      data: parsed || null,
+      message: typeof data === 'string' ? data : data?.message || 'Đăng nhập thành công!',
+      data: data || null,
     };
   } catch (error) {
-    console.error("Fetch error:", error);
-    throw new Error("Không thể kết nối đến server. Vui lòng thử lại sau.");
+    if (error?.response?.status === 401) {
+      throw new Error('Sai tài khoản hoặc mật khẩu');
+    }
+    
+    const serverMsg = typeof error.response?.data === 'string'
+      ? error.response.data
+      : error.response?.data?.message || 'Đăng nhập thất bại';
+    
+    throw new Error(serverMsg);
   }
 };
 
-export async function logoutApi() {
-  const response = await fetch("http://localhost:8080/users/logout", {
-    method: "POST",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
-  });
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Logout failed: ${response.status} ${text}`);
+/**
+ * Đăng xuất
+ */
+export const logoutApi = async () => {
+  try {
+    const response = await api.post('/users/logout');
+    
+    // Hiển thị thông báo thành công
+    const msg = typeof response.data === 'string' 
+      ? response.data 
+      : 'Đăng xuất thành công!';
+    
+    console.log(msg);
+    return response;
+    
+  } catch (error) {
+    console.error('Lỗi đăng xuất:', error);
+    throw new Error('Đăng xuất thất bại');
   }
-  return response;
-}
+};
 
-// Fetch current user using cookie-based session
-export async function me() {
-  const response = await fetch("http://localhost:8080/api/users/me", {
-    method: "GET",
-    credentials: "include",
-    headers: { Accept: "application/json" },
-  });
-  // If not authorized, return null instead of throwing to allow frontend to handle gracefully
-  if (response.status === 401 || response.status === 403) {
-    console.debug('[authService.me] not authenticated, status=', response.status);
-    return null;
+/**
+ * Lấy thông tin user hiện tại
+ * QUAN TRỌNG: Không catch lỗi 401 ở đây để interceptor xử lý
+ */
+export const getUserProfile = async () => {
+  try {
+    console.log('📡 Đang gọi API /api/users/me...');
+    const response = await api.get('/api/users/me');
+    
+    console.log('✅ Lấy thông tin user thành công:', response.data);
+    
+    // Trả về user object (có thể wrapped hoặc không)
+    return response.data?.user || response.data;
+    
+  } catch (error) {
+    console.error('❌ Lỗi lấy thông tin user:', error.response?.status, error.message);
+    
+    // KHÔNG catch 401 ở đây - để interceptor xử lý
+    // Chỉ throw lỗi lên để caller xử lý
+    throw error;
   }
+};
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Fetch /api/users/me failed: ${response.status} ${text}`);
-  }
-
-  const data = await response.json();
-  // API might return { user: { ... } } or the user object directly
-  return data?.user || data;
-}
-
-export default { login, logoutApi, me };
+export default { login, logoutApi, getUserProfile };

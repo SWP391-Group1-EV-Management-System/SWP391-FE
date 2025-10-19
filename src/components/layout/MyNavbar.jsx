@@ -16,7 +16,12 @@ function MyNavbar({ collapsed }) {
   const dropdownRef = useRef(null);
 
   // use cookie-based auth hook to get current user
-  const { user } = useAuth();
+  const { user, loading, fetchUserProfile } = useAuth();
+
+  // Ensure we have the latest profile when navbar mounts
+  useEffect(() => {
+    fetchUserProfile().catch(() => {});
+  }, [fetchUserProfile]);
 
   // helper lấy tên hiển thị và initial an toàn
   const getDisplayName = (u) => {
@@ -36,9 +41,20 @@ function MyNavbar({ collapsed }) {
     return s.length ? s.charAt(0).toUpperCase() : "G";
   };
 
-  const userName = getDisplayName(user);
+  // Greeting and avatar initial
+  const greeting = loading
+    ? "Đang tải..."
+    : user
+    ? `${ (user.firstName || "").trim() } ${ (user.lastName || "").trim() }`.trim()
+    : getDisplayName(user);
+
+  const avatarInitial = user
+    ? getInitial(`${user.firstName || ''} ${user.lastName || ''}`)
+    : getInitial(greeting);
 
   const { logout } = useLogout();
+
+  // role badge mapping removed — we no longer display a colored role badge here
 
   // Xử lý QR Scanner
   const handleQRClick = () => setIsQRScannerOpen(true);
@@ -125,9 +141,11 @@ function MyNavbar({ collapsed }) {
             onClick={handleUserClick}
             ref={dropdownRef}
           >
-            <span className="user-name">{userName}</span>
+            <div className="user-info">
+              <span className="user-name">{greeting}</span>
+            </div>
             <div className="user-avatar" aria-hidden="true">
-              {getInitial(userName)}
+              {avatarInitial}
             </div>
 
             {/* User Dropdown Menu */}

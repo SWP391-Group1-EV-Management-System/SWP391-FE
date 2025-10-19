@@ -11,7 +11,7 @@ import { useEnergySession } from "../hooks/useEnergySession";
 import { ThunderboltOutlined } from '@ant-design/icons';
 import ArrivalTime from "../components/energy/ArrivalTime";
 
-const EnergyPage = ({ userId = "user123" }) => { // Default userId for testing
+const EnergyPage = ({ userId = "" }) => { // Default userId for testing
   const { 
     sessionData, 
     currentTime, 
