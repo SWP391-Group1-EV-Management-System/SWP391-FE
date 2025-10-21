@@ -27,7 +27,7 @@ function Register() {
   const navigate = useNavigate();
 
   const handleBackToWelcome = () => {
-    navigate("/");
+    navigate("/welcome");
   };
 
   // Handle input changes

@@ -19,7 +19,7 @@ function Login() {
   };
 
   const handleBackToWelcome = () => {
-    navigate("/");
+    navigate("/welcome");
   };
 
   const handleLogin = async (e) => {
@@ -97,7 +97,7 @@ function Login() {
                   <span className="checkmark"></span>
                   <span>Nhớ mật khẩu</span>
                 </label>
-                <a href="#" className="forgot-password-link">
+                <a href="/forgot-password" className="forgot-password-link">
                   Quên mật khẩu?
                 </a>
               </div>
