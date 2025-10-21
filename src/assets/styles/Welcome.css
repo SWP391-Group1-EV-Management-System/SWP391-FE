@@ -5,46 +5,6 @@
   height: 100vh;
 }
 
-.welcome-navbar {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  position: relative;
-  padding: 20px;
-}
-
-.welcome-navbar img {
-  height: 120px;
-  width: auto;
-  margin-left: 90px;
-}
-
-.welcome-navbar-links {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.welcome-navbar-links a {
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  font-size: 18px;
-  padding: 8px 16px;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.welcome-navbar-links a:hover,
-.welcome-navbar-links a.active {
-  background-color: rgba(11, 148, 89, 0.1);
-  color: #0b9459;
-}
-
 .welcome-btns {
   display: flex;
   gap: 15px;

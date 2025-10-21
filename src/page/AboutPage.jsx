@@ -1,12 +1,12 @@
 import React from "react";
-import "../../assets/styles/WelcomePageBody.css";
+import "../assets/styles/WelcomePageBody.css";
 import {
   MdOutlineLocationOn,
   MdPhoneIphone,
   MdOutlineMailOutline,
   MdOutlineContactPage,
 } from "react-icons/md";
-import SocialFooter from "./SocialFooter";
+import SocialFooter from "../components/welcome/SocialFooter";
 
 function WelcomePageBody() {
   return (
