@@ -1,0 +1,42 @@
+.welcome-navbar {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 20px;
+    z-index: 100;
+    margin: 30px;
+}
+
+.welcome-navbar-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: white;
+    padding: 10px 20px;
+    border-radius: 30px;
+}
+
+.welcome-navbar-links a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    font-size: 18px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.welcome-navbar-links a:hover {
+    color: #0b9459;
+    border-radius: 30px;
+}
+.welcome-navbar-links a.active {
+    background-color: rgba(11, 148, 89, 0.1);
+    color: #0b9459;
+    border-radius: 30px;
+}

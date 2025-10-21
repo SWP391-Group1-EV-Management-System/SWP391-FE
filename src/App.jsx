@@ -18,6 +18,8 @@ import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
 import UserManagementPage from "./page/UserManagementPage.jsx";
 import VirtualStationPage from "./page/VirtualStationPage.jsx";
 import ForgotPasswordPage from "./page/ForgotPasswordPage.jsx";
+import AboutPage from "./page/AboutPage.jsx";
+import NavbarWelcome from "./components/welcome/NavbarWelcome.jsx";
 
 function App() {
   return (
@@ -27,7 +29,10 @@ function App() {
         <Route path="/" element={<Navigate to="/app/home" replace />} />
 
         {/* Welcome & Auth Routes */}
-        <Route path="/welcome" element={<WelcomePage />} />
+        <Route element={<NavbarWelcome />}>
+          <Route path="/welcome" element={<WelcomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+        </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="otp-verification" element={<OTPVerification />} />
