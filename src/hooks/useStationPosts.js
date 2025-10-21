@@ -4,8 +4,6 @@ import { chargingStationService } from '../services/chargingStationService';
 /**
  * Hook quản lý danh sách trụ sạc của một trạm cụ thể
  * Lấy thông tin chi tiết các trụ sạc và tính toán thống kê
- * @param {string} stationId - ID của trạm sạc cần lấy thông tin
- * @returns {Object} - Dữ liệu trụ sạc, trạng thái loading và thống kê
  */
 export const useStationPosts = (stationId) => {
   // State lưu trữ danh sách trụ sạc

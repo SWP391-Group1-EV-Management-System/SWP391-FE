@@ -84,8 +84,6 @@ function MapPage() {
   /**
    * Convert station status to Vietnamese display text
    *
-   * @param {string} status - Station status code
-   * @returns {string} Localized status text
    */
   const getStatusText = (status) => {
     const statusMap = {
@@ -99,8 +97,6 @@ function MapPage() {
   /**
    * Get CSS class name for station status styling
    *
-   * @param {string} status - Station status code
-   * @returns {string} CSS class name
    */
   const getStatusClass = (status) => {
     return `station-status ${status}`;
@@ -115,7 +111,6 @@ function MapPage() {
   /**
    * Handle station item click - loads detailed information and shows modal
    *
-   * @param {Object} station - The selected charging station object
    */
   const handleStationClick = async (station) => {
     try {

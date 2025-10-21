@@ -57,7 +57,7 @@ function Login() {
                   Gmail
                 </label>
                 <input
-                  type="text"
+                  type="email"
                   id="username"
                   name="username"
                   required

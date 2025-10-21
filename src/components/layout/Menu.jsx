@@ -115,8 +115,6 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
 
   /**
    * Xử lý click vào menu item với React Router
-   * @param {string} id - ID của menu item được click
-   * @param {string} path - Path để navigate
    */
   const handleMenuItemClick = (id, path) => {
     // Không làm gì nếu đã active
@@ -136,14 +134,12 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
 
   /**
    * Tìm index của menu item hiện tại trong mảng
-   * @returns {number} Index của active menu item, -1 nếu không tìm thấy
    */
   const getActiveIndex = () =>
     menuItems.findIndex((item) => item.id === activeMenuItem);
 
   /**
    * Tính toán vị trí top cho active indicator
-   * @returns {number} Giá trị top tính bằng pixel
    */
   const getHighlightTop = () => {
     const index = getActiveIndex();

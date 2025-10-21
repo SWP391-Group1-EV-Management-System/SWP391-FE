@@ -42,7 +42,6 @@ import useAuth from "../hooks/useAuth";
 
 /**
  * HomePage Functional Component
- * @returns {JSX.Element} The rendered homepage dashboard
  */
 function HomePage() {
   // ==================== STATE MANAGEMENT ====================
