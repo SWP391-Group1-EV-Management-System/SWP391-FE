@@ -1,5 +1,5 @@
 /**
- * Menu.jsx - Component Sidebar Menu Responsive
+ * Menu.jsx - Component Sidebar Menu Responsive với phân quyền
  *
  * Component này tạo ra một sidebar menu responsive với các tính năng:
  * - Thu gọn/mở rộng sidebar
@@ -8,6 +8,7 @@
  * - Hover effects và focus management
  * - Bootstrap integration
  * - React Router integration
+ * - Role-based menu items (Admin, Staff, Manager)
  */
 
 import React, { useState, useEffect } from "react";
@@ -21,40 +22,66 @@ import {
   BsLightning,
   BsMap,
   BsBookmarkStar,
+  BsPeopleFill,
+  BsClipboardData,
+  BsHourglassSplit,
 } from "react-icons/bs";
-import { MdMenuOpen } from "react-icons/md";
+import { MdMenuOpen, MdDashboard } from "react-icons/md";
 import { Button } from "react-bootstrap";
+import { useRole } from "../../hooks/useAuth"; // Import useRole hook
 import Logo from "../../assets/images/logo.png";
 import "../../assets/styles/Menu.css";
 
-// Danh sách các menu items với id, label, icon và path
-const menuItems = [
-  { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
-  { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "/app/map" },
-  { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/app/energy" },
-  { id: "history", label: "Lịch sử", icon: BsClock, path: "/app/history" },
-  {
-    id: "servicepackage",
-    label: "Gói dịch vụ",
-    icon: BsBookmarkStar,
-    path: "/app/servicepackage",
-  },
-  { id: "setting", label: "Cài đặt", icon: BsGear, path: "/app/setting" },
-];
+// Định nghĩa menu items cho từng role
+const menuItemsByRole = {
+  ADMIN: [
+    { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
+    { id: "evadmindashboard", label: "Dashboard", icon: MdDashboard, path: "/app/evadmindashboard" },
+    { id: "usermanagement", label: "User Management", icon: BsPeopleFill, path: "/app/usermanagement" },
+  ],
+  STAFF: [
+    { id: "sessionstaff", label: "Session Staff", icon: BsClipboardData, path: "/app/sessionstaff" },
+    { id: "waitingstaff", label: "Waiting Staff", icon: BsHourglassSplit, path: "/app/waitingstaff" },
+  ],
+  MANAGER: [
+    { id: "usermanagement", label: "User Manager", icon: BsPeopleFill, path: "/app/usermanagement" },
+    { id: "evadmindashboard", label: "Dashboard", icon: MdDashboard, path: "/app/evadmindashboard" },
+  ],
+  DRIVER: [
+    { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
+    { id: "map", label: "Bản đồ trạm", icon: BsMap, path: "/app/map" },
+    { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/app/energy" },
+    { id: "history", label: "Lịch sử", icon: BsClock, path: "/app/history" },
+    {
+      id: "servicepackage",
+      label: "Gói dịch vụ",
+      icon: BsBookmarkStar,
+      path: "/app/servicepackage",
+    },
+    { id: "setting", label: "Cài đặt", icon: BsGear, path: "/app/setting" },
+  ],
+};
 
 const Menu = ({ collapsed, onToggleCollapse }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { userRole } = useRole(); // Lấy role từ useRole hook
+
+  // Xác định role hiện tại (nếu là array thì lấy phần tử đầu tiên, nếu không có thì mặc định DRIVER)
+  const currentRole = Array.isArray(userRole) ? userRole[0] : userRole || 'DRIVER';
+  
+  // Lấy menu items dựa trên role
+  const menuItems = menuItemsByRole[currentRole] || menuItemsByRole.DRIVER;
 
   // Tìm active menu item dựa trên current path
   const getActiveMenuIdFromPath = () => {
     const currentPath = location.pathname;
     const currentItem = menuItems.find((item) => item.path === currentPath);
-    return currentItem ? currentItem.id : "home";
+    return currentItem ? currentItem.id : menuItems[0]?.id || "home";
   };
 
   // State quản lý menu item hiện tại được chọn
-  const [activeMenuItem, setActiveMenuItem] = useState("home");
+  const [activeMenuItem, setActiveMenuItem] = useState(menuItems[0]?.id || "home");
 
   // State quản lý animation khi chuyển đổi active item
   const [isAnimating, setIsAnimating] = useState(false);
@@ -153,7 +180,7 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
             }`}
             alt="Eco-Z Logo"
             src={Logo}
-            onClick={() => navigate("/app/home")}
+            onClick={() => navigate(menuItems[0]?.path || "/app/home")}
             style={{ cursor: "pointer" }}
           />
         </header>
