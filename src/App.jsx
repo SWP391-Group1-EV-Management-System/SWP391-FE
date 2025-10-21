@@ -17,6 +17,7 @@ import OTPVerification from "./page/OTPVerification.jsx";
 import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
 import UserManagementPage from "./page/UserManagementPage.jsx";
 import VirtualStationPage from "./page/VirtualStationPage.jsx";
+import ForgotPasswordPage from "./page/ForgotPasswordPage.jsx";
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="otp-verification" element={<OTPVerification />} />
+        <Route path="forgot-password" element={<ForgotPasswordPage />} />
 
         {/* Protected Main App Routes */}
         <Route path="/app" element={<Layout />}>
