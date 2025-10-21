@@ -8,8 +8,6 @@ import { chargingStationService } from "../services/chargingStationService.js";
 
 /**
  * Hook quản lý dữ liệu trạm sạc
- * @param {Object} options - Tùy chọn cấu hình
- * @returns {Object} Dữ liệu và các hàm điều khiển
  */
 export const useChargingStations = (options = {}) => {
   const { autoFetch = true } = options;

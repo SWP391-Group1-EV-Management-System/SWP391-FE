@@ -41,7 +41,6 @@ import "../assets/styles/HomePage.css";
 
 /**
  * HomePage Functional Component
- * @returns {JSX.Element} The rendered homepage dashboard
  */
 function HomePage() {
   // ==================== STATE MANAGEMENT ====================

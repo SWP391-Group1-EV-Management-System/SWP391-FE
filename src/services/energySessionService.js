@@ -22,8 +22,6 @@ const apiClient = axios.create({
 export const energySessionService = {
   /**
    * Lấy thông tin phiên sạc hiện tại của user
-   * @param {string} userId - ID của user
-   * @returns {Promise<Object>} Thông tin phiên sạc
    */
   async getCurrentSession(userId) {
     try {
@@ -54,8 +52,6 @@ export const energySessionService = {
 
   /**
    * Tạo phiên sạc mới
-   * @param {Object} bookingData - Dữ liệu booking
-   * @returns {Promise<Object>} Thông tin phiên sạc được tạo
    */
   async createSession(bookingData) {
     try {
@@ -86,9 +82,6 @@ export const energySessionService = {
 
   /**
    * Cập nhật trạng thái phiên sạc
-   * @param {string} sessionId - ID của phiên sạc
-   * @param {string} status - Trạng thái mới (start, pause, stop)
-   * @returns {Promise<Object>} Kết quả cập nhật
    */
   async updateSessionStatus(sessionId, status) {
     try {
@@ -119,9 +112,6 @@ export const energySessionService = {
 
   /**
    * Lấy lịch sử phiên sạc
-   * @param {string} userId - ID của user
-   * @param {Object} options - Tùy chọn phân trang
-   * @returns {Promise<Object>} Danh sách lịch sử
    */
   async getSessionHistory(userId, options = {}) {
     try {
@@ -156,8 +146,6 @@ export const energySessionService = {
 
   /**
    * Map dữ liệu từ API response sang format UI
-   * @param {Object} apiData - Dữ liệu từ API
-   * @returns {Object} Dữ liệu đã được format
    */
   mapSessionDataFromApi(apiData) {
     if (!apiData) return null;
@@ -205,8 +193,6 @@ export const energySessionService = {
 
   /**
    * Map status từ API sang UI format
-   * @param {string} apiStatus - Status từ API
-   * @returns {string} Status cho UI
    */
   mapStatusFromApi(apiStatus) {
     const statusMap = {
@@ -222,8 +208,6 @@ export const energySessionService = {
 
   /**
    * Format duration từ seconds sang mm:ss hoặc hh:mm:ss
-   * @param {number} seconds - Số giây
-   * @returns {string} Thời gian đã format
    */
   formatDuration(seconds) {
     const hours = Math.floor(seconds / 3600);
@@ -239,8 +223,6 @@ export const energySessionService = {
 
   /**
    * Tính toán thời gian còn lại dự kiến
-   * @param {Object} sessionData - Dữ liệu phiên sạc
-   * @returns {string} Thời gian còn lại
    */
   calculateTimeLeft(sessionData) {
     if (!sessionData.targetBatteryLevel || !sessionData.currentBatteryLevel) {

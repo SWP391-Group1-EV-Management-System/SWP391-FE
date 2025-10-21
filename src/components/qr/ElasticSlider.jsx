@@ -31,13 +31,6 @@ const MAX_OVERFLOW = 50;
 
 /**
  * ChargingTimeSlider - Main component
- * @param {number} defaultValue - Thời gian sạc mặc định (phút) (30)
- * @param {number} minTime - Thời gian sạc tối thiểu từ BE (phút) (15)
- * @param {number} maxTime - Thời gian sạc tối đa từ BE (phút) (480)
- * @param {string} className - CSS class tùy chỉnh
- * @param {number} stepSize - Bước nhảy theo phút (15)
- * @param {function} onTimeChange - Callback khi thời gian sạc thay đổi
- * @param {boolean} loading - Trạng thái loading khi lấy data từ BE
  */
 export default function ChargingTimeSlider({
   defaultValue = 30,
@@ -175,7 +168,6 @@ function Slider({
 
   /**
    * Tính phần trăm để hiển thị slider range (thanh màu xanh)
-   * @returns {number} Phần trăm từ 0-100
    */
   const getRangePercentage = () => {
     const totalRange = maxValue - startingValue;
@@ -186,8 +178,6 @@ function Slider({
 
   /**
    * Format thời gian từ phút sang định dạng dễ đọc
-   * @param {number} minutes - Số phút
-   * @returns {string} Định dạng thời gian
    */
   const formatTime = (minutes) => {
     if (minutes < 60) {
@@ -316,9 +306,6 @@ function Slider({
  * - Khi kéo nhẹ: dễ dàng di chuyển
  * - Khi kéo mạnh: ngày càng khó khăn (như lò xo)
  *
- * @param {number} value - Khoảng cách overflow (pixel)
- * @param {number} max - Giá trị overflow tối đa
- * @returns {number} Giá trị sau khi áp dụng decay
  */
 function decay(value, max) {
   if (max === 0) {
