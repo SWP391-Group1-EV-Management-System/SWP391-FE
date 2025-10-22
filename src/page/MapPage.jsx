@@ -210,7 +210,7 @@ function MapPage() {
                 <div className="stations-list">
                   {loading ? (
                     <div className="stations-loading-state">
-                      <LoadingSpinner 
+                      <LoadingSpinner
                         type="pulse"
                         size="medium"
                         color="primary"

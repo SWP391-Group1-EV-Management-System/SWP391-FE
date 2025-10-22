@@ -17,7 +17,7 @@ const RootRedirect = () => {
   if (loading) {
     return (
       <div style={{ height: "100vh" }}>
-        <LoadingSpinner 
+        <LoadingSpinner
           type="pulse"
           size="large"
           color="primary"

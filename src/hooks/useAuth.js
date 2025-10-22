@@ -34,7 +34,13 @@ export const useAuth = () => {
     let mounted = true;
 
     // Skip auto-fetch ở các trang public
-    const publicPaths = ["/login", "/register", "/forgot-password", "/welcome", "/about"];
+    const publicPaths = [
+      "/login",
+      "/register",
+      "/forgot-password",
+      "/welcome",
+      "/about",
+    ];
     if (publicPaths.some((path) => location.pathname.startsWith(path))) {
       return;
     }
