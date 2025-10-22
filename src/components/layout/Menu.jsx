@@ -35,7 +35,6 @@ import "../../assets/styles/Menu.css";
 // Định nghĩa menu items cho từng role
 const menuItemsByRole = {
   ADMIN: [
-    { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
     { id: "evadmindashboard", label: "Dashboard", icon: MdDashboard, path: "/app/evadmindashboard" },
     { id: "usermanagement", label: "User Management", icon: BsPeopleFill, path: "/app/usermanagement" },
   ],

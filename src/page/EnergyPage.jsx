@@ -11,7 +11,7 @@ import { useEnergySession } from "../hooks/useEnergySession";
 import { ThunderboltOutlined } from '@ant-design/icons';
 import ArrivalTime from "../components/energy/ArrivalTime";
 
-const EnergyPage = ({ userId = "" }) => { // Default userId for testing
+const EnergyPage = (userID) => {
   const { 
     sessionData, 
     currentTime, 
@@ -20,7 +20,7 @@ const EnergyPage = ({ userId = "" }) => { // Default userId for testing
     error, 
     createSession, 
     updateSessionStatus 
-  } = useEnergySession(userId);
+  } = useEnergySession(userID);
 
   // Handle loading và error states
   if (isLoading) {

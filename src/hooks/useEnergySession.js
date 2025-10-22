@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { getStatusConfig } from "../utils/energyUtils";
 import { energySessionService } from "../services/energySessionService";
 
-export const useEnergySession = (userId = null) => {
+export const useEnergySession = (userID = null) => {
   const [sessionData, setSessionData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,26 +11,10 @@ export const useEnergySession = (userId = null) => {
   // Fetch session data từ API
   useEffect(() => {
     const fetchSessionData = async () => {
-      if (!userId) {
-        // Fallback data nếu không có userId
-        setSessionData({
-          stationName: "Trạm sạc Vincom Center",
-          address: "123 Đường ABC, Quận 1, TP.HCM",
-          socketType: "CCS2",
-          power: "50kW",
-          batteryLevel: 65,
-          timeElapsed: "00:45:30",
-          estimatedTimeLeft: "01:20:15",
-          energyCharged: "32.5",
-          estimatedCost: "125,000",
-          status: "charging",
-          pricePerKwh: "3,500",
-          pricePerMin: "500",
-          chargingPower: "45.2",
-          voltage: "380V",
-          current: "118A"
-        });
+      if (!userID) {
         setIsLoading(false);
+        setError("Vui lòng đăng nhập để xem phiên sạc");
+        console.warn("useEnergySession: userID is null or undefined");
         return;
       }
 
@@ -38,29 +22,13 @@ export const useEnergySession = (userId = null) => {
         setIsLoading(true);
         setError(null);
         
-        const response = await energySessionService.getCurrentSession(userId);
+        const response = await energySessionService.getCurrentSession(userID);
         
         if (response.success && response.data) {
           setSessionData(response.data);
         } else {
-          // Không có phiên sạc đang hoạt động, dùng dữ liệu mặc định
-          setSessionData({
-            stationName: "Chưa có phiên sạc",
-            address: "Vui lòng tạo phiên sạc mới",
-            socketType: "N/A",
-            power: "0kW",
-            batteryLevel: 0,
-            timeElapsed: "00:00:00",
-            estimatedTimeLeft: "00:00:00",
-            energyCharged: "0",
-            estimatedCost: "0",
-            status: "idle",
-            pricePerKwh: "0",
-            pricePerMin: "0",
-            chargingPower: "0",
-            voltage: "0V",
-            current: "0A"
-          });
+          setSessionData(null);
+          setError(response.message || "Không có phiên sạc đang hoạt động");
         }
       } catch (err) {
         console.error("Error fetching session data:", err);
@@ -72,7 +40,7 @@ export const useEnergySession = (userId = null) => {
     };
 
     fetchSessionData();
-  }, [userId]);
+  }, [userID]);
 
   // Update current time mỗi giây
   useEffect(() => {
@@ -84,11 +52,11 @@ export const useEnergySession = (userId = null) => {
 
   // Real-time update session data (polling mỗi 30 giây)
   useEffect(() => {
-    if (!userId || !sessionData?.sessionId) return;
+    if (!userID || !sessionData?.sessionId) return;
 
     const updateInterval = setInterval(async () => {
       try {
-        const response = await energySessionService.getCurrentSession(userId);
+        const response = await energySessionService.getCurrentSession(userID);
         if (response.success && response.data) {
           setSessionData(response.data);
         }
@@ -98,7 +66,7 @@ export const useEnergySession = (userId = null) => {
     }, 30000); // Update mỗi 30 giây
 
     return () => clearInterval(updateInterval);
-  }, [userId, sessionData?.sessionId]);
+  }, [userID, sessionData?.sessionId]);
 
   const statusConfig = sessionData ? getStatusConfig(sessionData.status) : null;
 
@@ -106,6 +74,7 @@ export const useEnergySession = (userId = null) => {
   const createSession = async (bookingData) => {
     try {
       setIsLoading(true);
+      setError(null);
       const response = await energySessionService.createSession(bookingData);
       
       if (response.success) {
@@ -125,7 +94,11 @@ export const useEnergySession = (userId = null) => {
   };
 
   const updateSessionStatus = async (status) => {
-    if (!sessionData?.sessionId) return;
+    if (!sessionData?.sessionId) {
+      const errorMsg = "Không tìm thấy phiên sạc";
+      setError(errorMsg);
+      return { success: false, message: errorMsg };
+    }
 
     try {
       const response = await energySessionService.updateSessionStatus(sessionData.sessionId, status);
@@ -144,6 +117,28 @@ export const useEnergySession = (userId = null) => {
     }
   };
 
+  const refetch = async () => {
+    if (!userID) return;
+    
+    try {
+      setIsLoading(true);
+      setError(null);
+      const response = await energySessionService.getCurrentSession(userID);
+      
+      if (response.success && response.data) {
+        setSessionData(response.data);
+      } else {
+        setSessionData(null);
+        setError(response.message || "Không có phiên sạc đang hoạt động");
+      }
+    } catch (err) {
+      console.error("Error refetching session data:", err);
+      setError("Không thể tải lại thông tin phiên sạc");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return {
     sessionData,
     setSessionData,
@@ -153,15 +148,6 @@ export const useEnergySession = (userId = null) => {
     error,
     createSession,
     updateSessionStatus,
-    refetch: () => {
-      if (userId) {
-        // Re-fetch session data
-        energySessionService.getCurrentSession(userId).then(response => {
-          if (response.success && response.data) {
-            setSessionData(response.data);
-          }
-        });
-      }
-    }
+    refetch
   };
 };

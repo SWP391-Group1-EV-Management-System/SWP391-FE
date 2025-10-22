@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router";
+import { message } from "antd";
 import "../../assets/styles/QRResultModal.css";
 import ElasticSlider from "./ElasticSlider";
 import { BsBattery, BsLightning } from "react-icons/bs";
+import { energySessionService } from "../../services/energySessionService";
+import { getUserProfile } from "../../services/userService";
 
 function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
   const navigate = useNavigate();
   const [selectedBatteryLevel, setSelectedBatteryLevel] = useState(80);
+  const [isLoading, setIsLoading] = useState(false);
 
   if (!isOpen) return null;
 
@@ -23,27 +27,56 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     stationName: "Đang tải...",
     chargerName: "Trụ A1",
     chargerType: "AC 22kW",
+    chargingStationId: null,
+    chargingPostId: null,
   };
 
   // Xử lý khi click "Bắt đầu sạc"
-  const handleStartCharging = () => {
-    // Lưu thông tin session sạc vào localStorage hoặc context
-    const chargingSession = {
-      qrCode: qrResult,
-      stationInfo,
-      targetBatteryLevel: selectedBatteryLevel,
-      startTime: new Date().toISOString(),
-      sessionId: `session_${Date.now()}`,
-    };
+  const handleStartCharging = async () => {
+    try {
+      setIsLoading(true);
 
-    localStorage.setItem(
-      "currentChargingSession",
-      JSON.stringify(chargingSession)
-    );
+      // Lấy thông tin user hiện tại
+      const userProfile = await getUserProfile();
+      const userId = userProfile?.userId || userProfile?.id;
 
-    // Đóng modal và điều hướng đến EnergyPage
-    onClose();
-    navigate("/app/energy");
+      if (!userId) {
+        message.error("Vui lòng đăng nhập để bắt đầu sạc");
+        return;
+      }
+
+      // Chuẩn bị dữ liệu để tạo session
+      const bookingData = {
+        userId: userId,
+        chargingStationId: stationInfo.chargingStationId || qrResult,
+        chargingPostId: stationInfo.chargingPostId,
+        targetBatteryLevel: selectedBatteryLevel,
+        qrCode: qrResult,
+        // Các thông tin bổ sung nếu cần
+        startTime: new Date().toISOString(),
+      };
+
+      // Gọi API tạo phiên sạc
+      const response = await energySessionService.createSession(bookingData);
+
+      if (response.success) {
+        message.success("Bắt đầu phiên sạc thành công!");
+        
+        // Lưu sessionId vào localStorage nếu cần
+        localStorage.setItem("currentSessionId", response.data.sessionId);
+        
+        // Đóng modal và điều hướng đến EnergyPage
+        onClose();
+        navigate("/app/energy");
+      } else {
+        message.error(response.message || "Không thể bắt đầu phiên sạc");
+      }
+    } catch (error) {
+      console.error("Error starting charging session:", error);
+      message.error("Lỗi khi bắt đầu phiên sạc. Vui lòng thử lại!");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return createPortal(
@@ -93,14 +126,16 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           <button
             className="qr-result-btn qr-result-btn-secondary"
             onClick={onClose}
+            disabled={isLoading}
           >
             Đóng
           </button>
           <button
             className="qr-result-btn qr-result-btn-primary"
             onClick={handleStartCharging}
+            disabled={isLoading}
           >
-            Bắt đầu sạc
+            {isLoading ? "Đang xử lý..." : "Bắt đầu sạc"}
           </button>
         </div>
       </div>
