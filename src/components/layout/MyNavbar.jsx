@@ -32,12 +32,12 @@ function MyNavbar({ collapsed }) {
   const userName = user && user.firstName ? `${user.firstName}` : "Guest User";
 
   // === Các hàm xử lý QR Scanner ===
-  
+
   /**
    * Mở modal quét QR code
    */
   const handleQRClick = () => setIsQRScannerOpen(true);
-  
+
   /**
    * Đóng modal quét QR code
    */
@@ -86,7 +86,7 @@ function MyNavbar({ collapsed }) {
   };
 
   // === Các hàm xử lý user dropdown ===
-  
+
   /**
    * Toggle trạng thái mở/đóng dropdown user
    */
@@ -122,7 +122,7 @@ function MyNavbar({ collapsed }) {
 
     // Thêm event listener khi component mount
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     // Cleanup: Xóa event listener khi component unmount
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -142,12 +142,12 @@ function MyNavbar({ collapsed }) {
             <BsQrCodeScan className="nav-icon" />
             <span className="btn-label">Quét mã</span>
           </div>
-          
+
           {/* Icon thông báo */}
           <div className="icon-item" title="Thông báo">
             <FaRegBell className="nav-icon" />
           </div>
-          
+
           {/* Icon tin nhắn */}
           <div className="icon-item" title="Tin nhắn">
             <FaRegEnvelope className="nav-icon" />
@@ -157,7 +157,6 @@ function MyNavbar({ collapsed }) {
         {/* Phần bên phải - Thông tin user */}
         <div className="navbar-right">
           <div className="line"></div> {/* Đường phân cách */}
-          
           {/* Profile user với dropdown */}
           <div
             className="user-profile"
@@ -165,7 +164,7 @@ function MyNavbar({ collapsed }) {
             ref={dropdownRef}
           >
             <span className="user-name">{userName}</span>
-            
+
             {/* Avatar hiển thị chữ cái đầu của tên */}
             <div className="user-avatar">
               {userName.charAt(0).toUpperCase()}
@@ -179,16 +178,16 @@ function MyNavbar({ collapsed }) {
                   <TbUser size={18} />
                   <span>Tài khoản</span>
                 </div>
-                
+
                 {/* Menu item: Cài đặt */}
                 <div className="dropdown-item">
                   <TbSettings size={18} />
                   <span>Cài đặt</span>
                 </div>
-                
+
                 {/* Đường phân cách */}
                 <div className="dropdown-divider"></div>
-                
+
                 {/* Menu item: Đăng xuất (có trạng thái loading) */}
                 <div
                   className={`dropdown-item ${loading ? "loading" : ""}`}

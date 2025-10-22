@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
+import { LoadingSpinner } from "../common";
 
 /**
  * Root Redirect Component
@@ -15,17 +16,14 @@ const RootRedirect = () => {
   // Hiển thị loading trong khi kiểm tra authentication
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-          fontSize: "18px",
-          color: "#666",
-        }}
-      >
-        Đang tải...
+      <div style={{ height: "100vh" }}>
+        <LoadingSpinner 
+          type="pulse"
+          size="large"
+          color="primary"
+          text="Đang khởi tạo ứng dụng..."
+          fullHeight={true}
+        />
       </div>
     );
   }

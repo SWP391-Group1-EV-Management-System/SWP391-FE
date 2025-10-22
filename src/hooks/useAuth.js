@@ -29,29 +29,32 @@ export const useAuth = () => {
     }
   }, []);
 
-  // Chỉ auto-fetch user nếu KHÔNG ở trang login/register
+  // Chỉ auto-fetch user một lần khi khởi tạo ứng dụng
   useEffect(() => {
     let mounted = true;
 
     // Skip auto-fetch ở các trang public
-    const publicPaths = ["/login", "/register", "/forgot-password"];
+    const publicPaths = ["/login", "/register", "/forgot-password", "/welcome", "/about"];
     if (publicPaths.some((path) => location.pathname.startsWith(path))) {
       return;
     }
 
-    (async () => {
-      try {
-        if (!mounted) return;
-        await fetchUserProfile();
-      } catch (e) {
-        // ignore - not logged in
-      }
-    })();
+    // Chỉ fetch nếu chưa có user và chưa từng loading
+    if (!user && !loading) {
+      (async () => {
+        try {
+          if (!mounted) return;
+          await fetchUserProfile();
+        } catch (e) {
+          // ignore - not logged in
+        }
+      })();
+    }
 
     return () => {
       mounted = false;
     };
-  }, [location.pathname, fetchUserProfile]);
+  }, []); // Bỏ dependency để chỉ chạy một lần khi mount
 
   const login = useCallback(
     async (email, password, redirectTo = "/app/home") => {

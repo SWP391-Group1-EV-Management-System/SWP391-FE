@@ -25,6 +25,7 @@ import { useChargingStations } from "../hooks/useChargingStations.js";
 import StationModal from "../components/station/StationModal.jsx";
 import GGMap from "../components/map/Map.jsx";
 import PageHeader from "../components/PageHeader";
+import { LoadingSpinner } from "../components/common";
 
 // Icons
 import {
@@ -209,8 +210,12 @@ function MapPage() {
                 <div className="stations-list">
                   {loading ? (
                     <div className="stations-loading-state">
-                      <div className="loading-spinner">⚡</div>
-                      <div>Đang tải danh sách trạm sạc...</div>
+                      <LoadingSpinner 
+                        type="pulse"
+                        size="medium"
+                        color="primary"
+                        text="Đang tải danh sách trạm sạc..."
+                      />
                     </div>
                   ) : error ? (
                     <div className="stations-error-state">
