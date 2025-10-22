@@ -6,7 +6,7 @@ import "../../assets/styles/QRResultModal.css";
 import ElasticSlider from "./ElasticSlider";
 import { BsBattery, BsLightning } from "react-icons/bs";
 import { energySessionService } from "../../services/energySessionService";
-import { getUserProfile } from "../../services/userService";
+import { getUserProfile } from "../../services/authService";
 
 function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
   const navigate = useNavigate();
