@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
+import { LoadingSpinner } from "../common";
 
 /**
  * Protected Route Component
@@ -18,20 +19,39 @@ const ProtectedRoute = ({
   children,
   requiredRoles = null,
   redirectTo = "/login",
-  fallback = <div>Đang kiểm tra xác thực...</div>,
+  fallback = (
+    <LoadingSpinner 
+      type="pulse"
+      size="medium"
+      color="primary"
+      text="Đang xác thực..."
+      fullHeight={true}
+    />
+  ),
 }) => {
   const { user, loading, fetchUserProfile } = useAuth();
   const location = useLocation();
   const [isInitialized, setIsInitialized] = useState(false);
+  const [shouldShowLoading, setShouldShowLoading] = useState(false);
 
-  // Kiểm tra xác thự khi component mount
+  // Kiểm tra xác thực khi component mount
   useEffect(() => {
     const initAuth = async () => {
-      if (!user && !loading) {
+      // Nếu đã có user, không cần loading
+      if (user) {
+        setIsInitialized(true);
+        return;
+      }
+
+      // Chỉ hiển thị loading nếu thực sự cần fetch user
+      if (!loading) {
+        setShouldShowLoading(true);
         try {
           await fetchUserProfile();
         } catch (error) {
           console.warn("[ProtectedRoute] Failed to fetch user profile:", error);
+        } finally {
+          setShouldShowLoading(false);
         }
       }
       setIsInitialized(true);
@@ -40,8 +60,8 @@ const ProtectedRoute = ({
     initAuth();
   }, [user, loading, fetchUserProfile]);
 
-  // Hiển thị loading khi đang khởi tạo hoặc đang load user
-  if (!isInitialized || loading) {
+  // Chỉ hiển thị loading khi thực sự cần thiết
+  if (!isInitialized || shouldShowLoading) {
     return fallback;
   }
 
