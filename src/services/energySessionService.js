@@ -5,28 +5,16 @@
  * Bao gồm tạo phiên sạc, lấy thông tin phiên sạc hiện tại, cập nhật trạng thái
  */
 
-import axios from "axios";
-// enable sending cookies for all axios requests
-axios.defaults.withCredentials = true;
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
-
-// Create configured axios instance
-const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+import api from '../utils/axios';
 
 export const energySessionService = {
   /**
    * Lấy thông tin phiên sạc hiện tại của user
    */
-  async getCurrentSession(userId) {
+  async getCurrentSession(userID) {
     try {
-      const response = await apiClient.get(`/charging/session/current/${userId}`);
-      
+      const response = await api.get(`/api/charging/session/current/${userID}`);
+
       if (response.data && response.data.success) {
         return {
           success: true,
@@ -45,7 +33,7 @@ export const energySessionService = {
       return {
         success: false,
         data: null,
-        message: "Không thể lấy thông tin phiên sạc"
+        message: error.response?.data?.message || "Không thể lấy thông tin phiên sạc"
       };
     }
   },
@@ -55,7 +43,7 @@ export const energySessionService = {
    */
   async createSession(bookingData) {
     try {
-      const response = await apiClient.post("/charging/session/create", bookingData);
+      const response = await api.post("/api/charging/session/create", bookingData);
       
       if (response.data && response.data.success) {
         return {
@@ -75,7 +63,7 @@ export const energySessionService = {
       return {
         success: false,
         data: null,
-        message: "Lỗi khi tạo phiên sạc"
+        message: error.response?.data?.message || "Lỗi khi tạo phiên sạc"
       };
     }
   },
@@ -85,7 +73,7 @@ export const energySessionService = {
    */
   async updateSessionStatus(sessionId, status) {
     try {
-      const response = await apiClient.put(`/charging/session/${sessionId}/status`, {
+      const response = await api.put(`/api/charging/session/${sessionId}/status`, {
         status: status
       });
       
@@ -105,7 +93,7 @@ export const energySessionService = {
       console.error("Error updating session status:", error);
       return {
         success: false,
-        message: "Lỗi khi cập nhật trạng thái"
+        message: error.response?.data?.message || "Lỗi khi cập nhật trạng thái"
       };
     }
   },
@@ -113,10 +101,10 @@ export const energySessionService = {
   /**
    * Lấy lịch sử phiên sạc
    */
-  async getSessionHistory(userId, options = {}) {
+  async getSessionHistory(userID, options = {}) {
     try {
       const { page = 1, limit = 10 } = options;
-      const response = await apiClient.get(`/charging/session/history/${userId}`, {
+      const response = await api.get(`/api/charging/session/history/${userID}`, {
         params: { page, limit }
       });
       
@@ -139,7 +127,7 @@ export const energySessionService = {
       return {
         success: false,
         data: [],
-        message: "Lỗi khi lấy lịch sử phiên sạc"
+        message: error.response?.data?.message || "Lỗi khi lấy lịch sử phiên sạc"
       };
     }
   },
