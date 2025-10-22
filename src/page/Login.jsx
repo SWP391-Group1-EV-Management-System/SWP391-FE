@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router"; // Thay react-router-dom bằng react-router
+import { useNavigate } from "react-router"; // Thay react-router-dom bằng react-router
 import "../assets/styles/Login.css";
 import { CgMail } from "react-icons/cg";
 import { TbLock } from "react-icons/tb"; // Sửa từ TbLockPassword
@@ -13,10 +13,6 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const { login, loading, error } = useLogin();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Lấy intended destination từ protected route redirect
-  const from = location.state?.from || "/app/home";
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -31,13 +27,13 @@ function Login() {
     const email = e.target.username.value;
     const password = e.target.password.value;
     try {
-      const success = await login(email, password, from);
+      const success = await login(email, password);
       if (!success) {
         // login hook exposes error which will be displayed; nothing else needed here
-        console.warn("Login failed");
+        console.warn('Login failed');
       }
     } catch (err) {
-      console.error("Login error", err);
+      console.error('Login error', err);
     }
   };
 
@@ -117,9 +113,7 @@ function Login() {
                   gap: "8px",
                 }}
               >
-                {loading ? (
-                  "Đang đăng nhập..."
-                ) : (
+                {loading ? 'Đang đăng nhập...' : (
                   <>
                     Đăng nhập <IoIosArrowForward size={24} />
                   </>
@@ -127,11 +121,7 @@ function Login() {
               </button>
 
               {error && (
-                <div
-                  className="form-error"
-                  role="alert"
-                  style={{ color: "red", marginTop: 12 }}
-                >
+                <div className="form-error" role="alert" style={{ color: 'red', marginTop: 12 }}>
                   {error.message || String(error)}
                 </div>
               )}
