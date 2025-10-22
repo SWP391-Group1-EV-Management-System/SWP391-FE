@@ -1,14 +1,14 @@
 /**
  * LOADING SPINNER COMPONENT
- * 
+ *
  * Component loading có thể tái sử dụng cho toàn bộ ứng dụng
- * 
+ *
  * Features:
  * - Nhiều kích thước khác nhau (small, medium, large)
  * - Nhiều kiểu hiển thị (spinner, dots, pulse)
  * - Có thể tùy chỉnh text và màu sắc
  * - Responsive design
- * 
+ *
  * @component
  */
 
@@ -17,7 +17,7 @@ import "./LoadingSpinner.css";
 
 /**
  * LoadingSpinner Component
- * 
+ *
  * @param {string} size - Kích thước: 'small', 'medium', 'large' (default: 'medium')
  * @param {string} type - Kiểu hiển thị: 'spinner', 'dots', 'pulse' (default: 'spinner')
  * @param {string} text - Text hiển thị bên dưới spinner (optional)
@@ -31,7 +31,7 @@ const LoadingSpinner = ({
   text = "",
   color = "primary",
   fullHeight = false,
-  className = ""
+  className = "",
 }) => {
   // Tạo class names dựa trên props
   const containerClasses = [
@@ -39,8 +39,10 @@ const LoadingSpinner = ({
     `loading-${size}`,
     `loading-${color}`,
     fullHeight ? "loading-full-height" : "",
-    className
-  ].filter(Boolean).join(" ");
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   // Render các loại spinner khác nhau
   const renderSpinner = () => {
@@ -53,14 +55,10 @@ const LoadingSpinner = ({
             <div className="dot"></div>
           </div>
         );
-      
+
       case "pulse":
-        return (
-          <div className="loading-pulse">
-            ⚡
-          </div>
-        );
-      
+        return <div className="loading-pulse">⚡</div>;
+
       case "spinner":
       default:
         return (

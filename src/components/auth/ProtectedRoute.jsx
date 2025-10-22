@@ -20,7 +20,7 @@ const ProtectedRoute = ({
   requiredRoles = null,
   redirectTo = "/login",
   fallback = (
-    <LoadingSpinner 
+    <LoadingSpinner
       type="pulse"
       size="medium"
       color="primary"
