@@ -1,9 +1,4 @@
-/**
- * StationModal Component
- * Modal displaying detailed charging station information and booking interface
- */
-
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "react-bootstrap";
 import {
@@ -25,19 +20,102 @@ import {
   IoCardOutline,
 } from "react-icons/io5";
 import { useStationPosts } from "../../hooks/useStationPosts";
+import useBooking from "../../services/bookingService";
+import useCar from "../../services/carService";
+import { useAuth } from "../../hooks/useAuth";
 import "../../assets/styles/StationModal.css";
 
 const StationModal = ({ isOpen, onClose, station }) => {
-  // Hook để lấy danh sách trụ sạc với mock data
   const { posts, loading, error, statistics } = useStationPosts(station?.id);
+  const { createBooking: createBookingApi, loading: bookingLoading } = useBooking();
+  const { getCarsByUser, loading: carLoading } = useCar();
+  const { user: currentUser } = useAuth();
+  
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [userCars, setUserCars] = useState([]);
+
+  useEffect(() => {
+    if (isOpen && currentUser) {
+      const loadUserCars = async () => {
+        try {
+          const userId = currentUser.id || currentUser.userID;
+          const result = await getCarsByUser(userId);
+          
+          // Xử lý response
+          let cars = [];
+          
+          if (Array.isArray(result)) {
+            cars = result;
+          } else if (result?.success && Array.isArray(result.data)) {
+            cars = result.data;
+          } else if (result?.data && Array.isArray(result.data)) {
+            cars = result.data;
+          } else if (result && typeof result === 'object' && !Array.isArray(result)) {
+            cars = [result];
+          }
+          
+          setUserCars(cars);
+          
+          if (cars.length > 0) {
+            const firstCar = cars[0];
+            const carId = firstCar.carID || firstCar.carId || firstCar.id;
+            setSelectedCar(carId);
+          }
+        } catch (err) {
+          console.error("Error loading user cars:", err);
+        }
+      };
+      
+      loadUserCars();
+    }
+    
+    // Reset khi đóng modal
+    if (!isOpen) {
+      setUserCars([]);
+      setSelectedCar(null);
+    }
+  }, [isOpen, currentUser]);
 
   if (!isOpen || !station) return null;
 
-  const handleBookCharger = (postId) => {
-    alert(`Đã đặt chỗ trụ sạc ${postId} tại ${station.name}!`);
+  const handleBookCharger = async (postId) => {
+    try {
+      if (!currentUser) {
+        alert('Vui lòng đăng nhập trước khi đặt chỗ.');
+        return;
+      }
+
+      if (!selectedCar) {
+        alert('Bạn chưa có xe. Vui lòng thêm xe để đặt chỗ.');
+        return;
+      }
+
+      const payload = {
+        user: currentUser.id || currentUser.userID,
+        chargingPost: postId,
+        car: selectedCar,
+      };
+
+      const res = await createBookingApi(payload);
+
+      if (res?.success) {
+        const resultCode = res.data;
+        if (resultCode === -1) {
+          alert(`Trụ ${postId} đang đầy. Bạn đã được thêm vào danh sách chờ.`);
+        } else {
+          alert(`Đặt chỗ thành công cho trụ ${postId}!`);
+        }
+        onClose();
+      } else {
+        const msg = res?.error || 'Không thành công';
+        alert(`Đặt chỗ thất bại: ${msg}`);
+      }
+    } catch (err) {
+      console.error('Booking error:', err);
+      alert('Lỗi khi đặt chỗ, vui lòng thử lại sau.');
+    }
   };
 
-  // Enhanced amenity icons mapping
   const getAmenityIcon = (amenity) => {
     const amenityLower = amenity.toLowerCase();
     if (amenityLower.includes("wifi")) return IoWifiOutline;
@@ -48,13 +126,12 @@ const StationModal = ({ isOpen, onClose, station }) => {
     if (amenityLower.includes("parking") || amenityLower.includes("car"))
       return IoCarOutline;
     if (amenityLower.includes("security")) return IoShieldCheckmarkOutline;
-    return IoStorefrontOutline; // Default
+    return IoStorefrontOutline;
   };
 
   const modalContent = (
     <div className="station-modal-backdrop" onClick={onClose}>
       <div className="station-modal" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
         <div className="station-modal__header">
           <h4 className="station-modal__title">{station.name}</h4>
           <button onClick={onClose} className="station-modal__close-btn">
@@ -62,7 +139,28 @@ const StationModal = ({ isOpen, onClose, station }) => {
           </button>
         </div>
 
-        {/* Station Info */}
+        {carLoading && (
+          <div className="car-loading-info">
+            <p>Đang tải thông tin xe...</p>
+          </div>
+        )}
+
+        {!carLoading && userCars && userCars.length > 0 && (
+          <div className="car-info">
+            <IoCarOutline className="car-info-icon" />
+            <span>
+              Xe: {userCars[0].typeCar || userCars[0].carName || 'Xe của bạn'} 
+              {userCars[0].licensePlate ? ` - ${userCars[0].licensePlate}` : ''}
+            </span>
+          </div>
+        )}
+
+        {!carLoading && (!userCars || userCars.length === 0) && currentUser && (
+          <div className="car-warning">
+            <p>⚠️ Bạn chưa có xe. Vui lòng thêm xe để đặt chỗ.</p>
+          </div>
+        )}
+
         <div className="station-info">
           <div className="station-info__item">
             <IoLocationOutline className="station-info__icon" />
@@ -86,9 +184,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
           )}
         </div>
 
-        {/* Station Details */}
         <div className="station-details">
-          {/* Realtime Statistics */}
           {posts.length > 0 && (
             <div className="station-details__section">
               <div className="station-details__section-title">
@@ -131,14 +227,12 @@ const StationModal = ({ isOpen, onClose, station }) => {
             </div>
           )}
 
-          {/* Amenities */}
           {station.amenities && station.amenities.length > 0 && (
             <div className="station-details__section--with-top-margin">
               <div className="station-details__section-title">Tiện ích</div>
               <div className="amenities-list">
                 {station.amenities.map((amenity, index) => {
                   const IconComponent = getAmenityIcon(amenity);
-
                   return (
                     <span key={index} className="amenity-tag">
                       <IconComponent className="amenity-icon" />
@@ -151,7 +245,6 @@ const StationModal = ({ isOpen, onClose, station }) => {
           )}
         </div>
 
-        {/* Chargers List */}
         <div>
           <h5 className="chargers-section__title">
             Danh sách trụ sạc (
@@ -171,7 +264,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                     <div className="charger-item__title">
                       <IoPowerOutline
                         className={`charger-item__icon ${
-                          post.isActive
+                          post.active
                             ? "charger-item__icon--active"
                             : "charger-item__icon--inactive"
                         }`}
@@ -179,7 +272,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                       <strong>Trụ {post.id}</strong>
                     </div>
                     <div className="charger-item__status-area">
-                      {post.isActive ? (
+                      {post.active ? (
                         <IoCheckmarkCircle className="charger-status-icon charger-status-icon--active" />
                       ) : (
                         <IoCloseCircle className="charger-status-icon charger-status-icon--inactive" />
@@ -188,14 +281,14 @@ const StationModal = ({ isOpen, onClose, station }) => {
                         className={`charger-status-badge ${
                           post.isAvailable
                             ? "charger-status-badge--available"
-                            : post.isActive
+                            : post.active
                             ? "charger-status-badge--busy"
                             : "charger-status-badge--inactive"
                         }`}
                       >
                         {post.isAvailable
                           ? "Sẵn sàng"
-                          : post.isActive
+                          : post.active
                           ? "Đang sử dụng"
                           : "Không hoạt động"}
                       </span>
@@ -228,18 +321,23 @@ const StationModal = ({ isOpen, onClose, station }) => {
                       <Button
                         variant={post.isAvailable ? "success" : "secondary"}
                         size="sm"
-                        disabled={!post.isAvailable}
+                        disabled={!post.isAvailable || bookingLoading || !selectedCar}
                         onClick={() => handleBookCharger(post.id)}
                         className="charger-book-btn"
                       >
-                        {post.isAvailable ? "Đặt chỗ" : "Không khả dụng"}
+                        {bookingLoading
+                          ? "Đang xử lý..."
+                          : !selectedCar
+                          ? "Chưa có xe"
+                          : post.isAvailable
+                          ? "Đặt chỗ"
+                          : "Không khả dụng"}
                       </Button>
                     </div>
                   </div>
                 </div>
               ))
             ) : loading ? (
-              // Loading state
               <div className="charger-empty-state">
                 <div>
                   <IoPowerOutline className="charger-empty-state__icon charger-empty-state__icon--loading" />
@@ -247,7 +345,6 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 <div>Đang tải danh sách trụ sạc...</div>
               </div>
             ) : (
-              // Empty state - không có trụ sạc
               <div className="charger-empty-state">
                 <div>
                   <IoPowerOutline className="charger-empty-state__icon" />
@@ -265,7 +362,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                   variant={
                     station.status === "available" ? "success" : "secondary"
                   }
-                  disabled={station.status !== "available"}
+                  disabled={station.status !== "available" || !selectedCar}
                   onClick={() => handleBookCharger("general")}
                   className="charger-empty-state__btn"
                 >
@@ -283,7 +380,6 @@ const StationModal = ({ isOpen, onClose, station }) => {
     </div>
   );
 
-  // Render modal bằng createPortal để đặt nó ở root level
   return createPortal(modalContent, document.body);
 };
 
