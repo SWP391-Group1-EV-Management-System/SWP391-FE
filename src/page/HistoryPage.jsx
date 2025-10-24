@@ -1,29 +1,50 @@
 import React from 'react';
-import { Row, Col, Spin, Alert, ConfigProvider } from 'antd';
+import { Row, Col, Spin, Alert, ConfigProvider, Empty } from 'antd';
 import { LoadingOutlined, HistoryOutlined } from '@ant-design/icons';
 import PageHeader from '../components/PageHeader';
 import HistoryFilters from '../components/history/HistoryFilters';
 import HistorySummary from '../components/history/HistorySummary';
 import HistoryList from '../components/history/HistoryList';
 import NoDataMessage from '../components/history/NoDataMessage';
-import { useHistoryData } from '../hooks/useHistoryData';
 
 const HistoryPage = () => {
-  const {
-    filteredData,
-    searchTerm,
-    setSearchTerm,
-    sortOrder,
-    setSortOrder,
-    summary,
-    expandedSession,
-    setExpandedSession,
-    loading,
-    error
-  } = useHistoryData();
+  // Hard-coded data replacing useHistoryData
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [sortOrder, setSortOrder] = React.useState('desc');
+  const [expandedSession, setExpandedSession] = React.useState(null);
+  const loading = false;
+  const error = null;
+
+  const filteredData = [
+    {
+      charging_session_id: 'CS-001',
+      startTime: '2025-10-01T08:30:00Z',
+      endTime: '2025-10-01T09:15:00Z',
+      kWh: '12.50',
+      price: 75.0,
+      charging_post_name: 'Cổng A1',
+      is_paid: true
+    },
+    {
+      charging_session_id: 'CS-002',
+      startTime: '2025-09-28T14:00:00Z',
+      endTime: '2025-09-28T15:20:00Z',
+      kWh: '18.30',
+      price: 109.8,
+      charging_post_name: 'Cổng B2',
+      is_paid: false
+    }
+  ];
+
+  const summary = {
+    totalSessions: filteredData.length,
+    totalKWh: filteredData.reduce((acc, s) => acc + parseFloat(s.kWh || 0), 0),
+    totalCost: filteredData.reduce((acc, s) => acc + (parseFloat(s.price) || 0), 0),
+  };
 
   const handleRowClick = (session) => {
-    setExpandedSession(expandedSession === session.charging_session_id ? null : session.charging_session_id);
+    const id = session?.charging_session_id || session?.chargingSessionId || null;
+    setExpandedSession(expandedSession === id ? null : id);
   };
 
   const handleClearFilter = () => {
@@ -31,9 +52,9 @@ const HistoryPage = () => {
     setSortOrder('desc');
   };
 
-  // Custom loading icon
   const loadingIcon = <LoadingOutlined style={{ fontSize: 48, color: '#28a745' }} spin />;
 
+  // Loading state
   if (loading) {
     return (
       <ConfigProvider
@@ -49,7 +70,7 @@ const HistoryPage = () => {
           background: '#ffffff',
           minHeight: '100vh',
           padding: '2rem 1rem',
-          paddingTop: '5rem',
+          paddingTop: '8rem',
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center'
@@ -62,10 +83,10 @@ const HistoryPage = () => {
             />
             <div style={{ 
               color: '#155724', 
-              fontSize: '1.5rem',
-              fontWeight: 500
+              fontSize: '1.6rem',
+              fontWeight: 600
             }}>
-              Đang tải dữ liệu...
+              Đang tải lịch sử sạc xe...
             </div>
           </div>
         </div>
@@ -73,6 +94,7 @@ const HistoryPage = () => {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <ConfigProvider
@@ -98,7 +120,7 @@ const HistoryPage = () => {
                 type="error"
                 showIcon
                 style={{
-                  fontSize: '1.4rem',
+                  fontSize: '1.5rem',
                   borderRadius: '10px',
                   border: '1px solid #f5c6cb',
                   background: '#f8d7da'
@@ -111,6 +133,7 @@ const HistoryPage = () => {
     );
   }
 
+  // Main content
   return (
     <ConfigProvider
       theme={{
@@ -148,10 +171,11 @@ const HistoryPage = () => {
         background: '#ffffff',
         minHeight: '100vh',
         padding: '2rem 1rem',
-        paddingTop: '5rem',
+        paddingTop: '8rem',
         fontSize: '1.5rem'
       }}>
         <Row gutter={[0, 24]}>
+          {/* Page Header */}
           <Col span={24}>
             <PageHeader
               title="Lịch sử sạc xe điện"
@@ -159,6 +183,7 @@ const HistoryPage = () => {
             />
           </Col>
           
+          {/* Filters */}
           <Col span={24}>
             <HistoryFilters
               searchTerm={searchTerm}
@@ -168,12 +193,14 @@ const HistoryPage = () => {
             />
           </Col>
           
+          {/* Summary */}
           <Col span={24}>
             <HistorySummary summary={summary} />
           </Col>
           
+          {/* List or No Data */}
           <Col span={24}>
-            {filteredData.length > 0 ? (
+            {filteredData && filteredData.length > 0 ? (
               <HistoryList
                 sessions={filteredData}
                 expandedSession={expandedSession}

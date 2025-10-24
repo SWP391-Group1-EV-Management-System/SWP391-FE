@@ -21,7 +21,7 @@ import {
 } from "react-icons/io5";
 import { useStationPosts } from "../../hooks/useStationPosts";
 import useBooking from "../../services/bookingService";
-import useCar from "../../services/carService";
+import useCar from "../../hooks/useCar";
 import { useAuth } from "../../hooks/useAuth";
 import "../../assets/styles/StationModal.css";
 

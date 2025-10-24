@@ -25,24 +25,26 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Root redirect to app */}
-        <Route path="/" element={<Navigate to="/app/home" replace />} />
+        {/* Root redirect to welcome page */}
+        <Route path="/" element={<Navigate to="/welcome" replace />} />
 
-        {/* Welcome & Auth Routes */}
+        {/* Welcome & About Routes with Navbar */}
         <Route element={<NavbarWelcome />}>
           <Route path="/welcome" element={<WelcomePage />} />
           <Route path="/about" element={<AboutPage />} />
         </Route>
+
+        {/* Auth Routes (no navbar) */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="otp-verification" element={<OTPVerification />} />
-        <Route path="forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/otp-verification" element={<OTPVerification />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         {/* Protected Main App Routes */}
         <Route path="/app" element={<Layout />}>
-          {/* Default route for /app */}
-
-          <Route path="evadmindashboard" element={<EVAdminDashboard />} />
+          {/* Redirect /app to /app/home */}
+          <Route index element={<Navigate to="/app/home" replace />} />
+          
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
           <Route path="energy" element={<EnergyPage />} />
@@ -51,10 +53,12 @@ function App() {
           <Route path="setting" element={<SettingPage />} />
           <Route path="sessionstaff" element={<SessionStaffPage />} />
           <Route path="waitingstaff" element={<WaitingStaffPage />} />
+          <Route path="evadmindashboard" element={<EVAdminDashboard />} />
           <Route path="usermanagement" element={<UserManagementPage />} />
         </Route>
 
-        <Route path="virtualstation/:postId" element={<VirtualStationPage />} />
+        {/* Virtual Station (outside Layout) */}
+        <Route path="/virtualstation/:postId" element={<VirtualStationPage />} />
 
         {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />
