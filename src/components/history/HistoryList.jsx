@@ -6,60 +6,27 @@ import HistorySessionDetail from './HistorySessionDetail';
 
 const { Title, Text } = Typography;
 
-const HistoryList = () => {
-  // Hard-coded sessions data
+const HistoryList = ({ history, onViewDetail, filterComponent }) => {
   const [expandedSession, setExpandedSession] = React.useState(null);
 
-  const sessions = [
-    {
-      charging_session_id: 'CS-001',
-      startTime: '2025-10-01T08:30:00Z',
-      endTime: '2025-10-01T09:15:00Z',
-      kWh: '12.50',
-      price: 75.0,
-      charging_post_name: 'Cổng A1',
-      is_paid: true,
-      max_power: 22,
-      avgPower: 18.5,
-      batteryStart: 20,
-      batteryEnd: 85
-    },
-    {
-      charging_session_id: 'CS-002',
-      startTime: '2025-09-28T14:00:00Z',
-      endTime: '2025-09-28T15:20:00Z',
-      kWh: '18.30',
-      price: 109.8,
-      charging_post_name: 'Cổng B2',
-      is_paid: false,
-      max_power: 50,
-      avgPower: 32.1,
-      batteryStart: 10,
-      batteryEnd: 78
-    },
-    {
-      charging_session_id: 'CS-003',
-      startTime: '2025-09-20T10:10:00Z',
-      endTime: '2025-09-20T11:00:00Z',
-      kWh: '9.75',
-      price: 58.5,
-      charging_post_name: 'Cổng C3',
-      is_paid: true,
-      max_power: 11,
-      avgPower: 9.8,
-      batteryStart: 45,
-      batteryEnd: 88
-    }
-  ];
-
   // Tìm session đang được expand
-  const currentExpandedSession = sessions.find(
-    s => s.charging_session_id === expandedSession
+  const currentExpandedSession = history?.find(
+    s => s.sessionId === expandedSession
   );
 
-  const onRowClick = (session) => {
-    setExpandedSession(prev => prev === session.charging_session_id ? null : session.charging_session_id);
+  const handleToggleExpand = (session) => {
+    setExpandedSession(prev => prev === session.sessionId ? null : session.sessionId);
   };
+
+  const handleViewDetail = (session) => {
+    if (onViewDetail) {
+      onViewDetail(session);
+    }
+  };
+
+  if (!history || history.length === 0) {
+    return null;
+  }
 
   return (
     <>
@@ -87,7 +54,7 @@ const HistoryList = () => {
             <Title 
               level={4} 
               style={{ 
-                color: '#000',  // chữ đen
+                color: '#000',
                 fontWeight: 700,
                 fontSize: '2rem',
                 margin: 0
@@ -107,29 +74,42 @@ const HistoryList = () => {
               fontWeight: 700
             }}
           >
-            {sessions.length} phiên
+            {history.length} phiên
           </Text>
         </Space>
-        <Divider style={{ margin: '1.5rem 0 0 0', borderColor: 'rgba(40,167,69,0.08)', borderWidth: '2px' }} />
+        {/* Divider removed */}
       </div>
+
+      {/* Render filter component directly under the header if provided */}
+      {filterComponent && (
+        <div style={{ marginBottom: '1.5rem' }}>
+          {filterComponent}
+        </div>
+      )}
 
       {/* Session Cards */}
       <Row>
         <Col span={24}>
-          {sessions.map((session) => (
+          {history.map((session) => (
             <HistorySessionCard
-              key={session.charging_session_id}
+              key={session.sessionId}
               session={session}
-              isExpanded={expandedSession === session.charging_session_id}
-              onToggleExpand={() => onRowClick(session)}
+              isExpanded={expandedSession === session.sessionId}
+              onToggleExpand={() => handleToggleExpand(session)}
+              onViewDetail={handleViewDetail}
             />
           ))}
         </Col>
       </Row>
 
-      {/* Expanded Session Detail */}
+      {/* Expanded Session Detail (inline) */}
       {currentExpandedSession && (
-        <HistorySessionDetail />
+        <div style={{ marginTop: '2rem' }}>
+          <HistorySessionDetail 
+            session={currentExpandedSession}
+            onBack={() => setExpandedSession(null)}
+          />
+        </div>
       )}
     </>
   );

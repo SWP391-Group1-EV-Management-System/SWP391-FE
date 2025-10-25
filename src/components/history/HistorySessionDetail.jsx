@@ -1,146 +1,206 @@
 import React from 'react';
-import { Row, Col, Card, Typography, Space } from 'antd';
-import { BarChartOutlined } from '@ant-design/icons';
+import { Row, Col, Card, Typography, Space, Button, Tag, Descriptions } from 'antd';
+import { 
+  BarChartOutlined, 
+  ArrowLeftOutlined,
+  EnvironmentOutlined,
+  ThunderboltOutlined,
+  ClockCircleOutlined,
+  DollarOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  CreditCardOutlined
+} from '@ant-design/icons';
 
 const { Title, Text } = Typography;
 
-const HistorySessionDetail = () => {
-  // Hard-coded session values
-  const session = {
-    charging_session_id: 'CS-001',
-    startTime: '2025-10-01T08:30:00Z',
-    endTime: '2025-10-01T09:15:00Z',
-    max_power: 22,
-    avgPower: 18.5,
-    batteryStart: 20,
-    batteryEnd: 85,
-    kWh: '12.50',
-    price: 75.0,
-    charging_post_name: 'Cổng A1'
-  };
+const formatDateTime = (dateString) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
 
-  const detailItemStyle = {
-    padding: '1.5rem',
-    border: '1px solid rgba(40,167,69,0.12)',
-    background: 'linear-gradient(135deg, #ffffff, #f8fffe)',
-    borderRadius: '10px',
-    transition: 'all 0.3s ease',
-    position: 'relative',
-    overflow: 'hidden'
-  };
+const formatCurrency = (amount) => {
+  if (!amount && amount !== 0) return '0 VND';
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(amount);
+};
+
+const HistorySessionDetail = ({ session, onBack }) => {
+  if (!session) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }}>
+        <Text style={{ fontSize: '1.5rem', color: '#666' }}>
+          Không có thông tin phiên sạc
+        </Text>
+      </div>
+    );
+  }
+
+  const isPaid = session.payment?.paid || false;
+  const isDone = session.done || false;
+
+  const rightCell = (content, extraStyle = {}) => (
+    <div style={{ textAlign: 'right', fontWeight: 600, ...extraStyle }}>{content}</div>
+  );
 
   return (
     <div style={{ 
-      background: 'linear-gradient(135deg, #f8fffe, #f0f9f0)',
-      padding: '2rem'
+      background: 'white',
+      padding: '2rem',
+      minHeight: '100vh'
     }}>
+      {onBack && (
+        <Button 
+          icon={<ArrowLeftOutlined />}
+          size="large"
+          onClick={onBack}
+          style={{ 
+            marginBottom: '2rem',
+            fontSize: '1.3rem',
+            height: 'auto',
+            padding: '0.75rem 1.5rem',
+            borderRadius: '8px'
+          }}
+        >
+          Quay lại danh sách
+        </Button>
+      )}
+
       <Row gutter={[24, 24]}>
         <Col span={24}>
           <Card
             style={{
-              background: '#ffffff',
+              background: 'white',
               borderRadius: '12px',
               border: '1px solid rgba(33, 78, 43, 0.12)',
-              boxShadow: '0 6px 20px rgba(40,167,69,0.08)',
-              height: '100%'
+              boxShadow: '0 6px 20px rgba(40,167,69,0.08)'
             }}
             styles={{ body: { padding: '2rem' } }}
           >
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <Title 
-                level={4} 
-                style={{ 
-                  color: '#000',     // chữ đen
-                  fontWeight: 700,
-                  marginBottom: '2rem',
-                  borderBottom: '3px solid rgba(40,167,69,0.18)',
-                  paddingBottom: '1rem',
-                  fontSize: '1.8rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  background: '#fff',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
-                }}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                borderBottom: '3px solid rgba(40,167,69,0.18)',
+                paddingBottom: '1rem'
+              }}>
+                <Title 
+                  level={3} 
+                  style={{ 
+                    color: '#000',
+                    fontWeight: 700,
+                    margin: 0,
+                    fontSize: '2rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '1rem'
+                  }}
+                >
+                  <BarChartOutlined style={{ 
+                    fontSize: '2.6rem',
+                    background: 'linear-gradient(135deg, #28a745, #34ce57)',
+                    borderRadius: '50%',
+                    width: '3.6rem',
+                    height: '3.6rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    boxShadow: '0 0 0 6px rgba(32, 90, 46, 0.06)'
+                  }} />
+                  Chi tiết phiên sạc
+                </Title>
+                
+                <Space>
+                  <Tag 
+                    icon={isDone ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                    color={isDone ? 'success' : 'warning'}
+                    style={{ 
+                      fontSize: '1.3rem', 
+                      padding: '0.75rem 1.5rem',
+                      borderRadius: '20px',
+                      fontWeight: 600
+                    }}
+                  >
+                    {isDone ? 'Đã hoàn tất' : 'Đang sạc'}
+                  </Tag>
+                  <Tag 
+                    icon={isPaid ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
+                    color={isPaid ? 'success' : 'error'}
+                    style={{ 
+                      fontSize: '1.3rem', 
+                      padding: '0.75rem 1.5rem',
+                      borderRadius: '20px',
+                      fontWeight: 600
+                    }}
+                  >
+                    {isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                  </Tag>
+                </Space>
+              </div>
+
+              {/* Thay bảng HTML bằng Ant Design Descriptions */}
+              <Descriptions
+                bordered
+                column={1}
+                size="middle"
+                style={{ background: '#fff', fontSize: '1.4rem' }}
               >
-                <BarChartOutlined style={{ 
-                  fontSize: '2.6rem',
-                  background: 'linear-gradient(135deg, #28a745, #34ce57)',
-                  borderRadius: '50%',
-                  width: '3.6rem',
-                  height: '3.6rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  boxShadow: '0 0 0 6px rgba(32, 90, 46, 0.06)'
-                }} />
-                Thông tin chi tiết
-              </Title>
-              
-              <table
-                style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  background: '#fff',
-                  boxShadow: 'none',
-                  border: 'none',
-                  margin: 0,
-                  borderRadius: 0,
-                  fontSize: '1.7rem'
-                }}
-              >
-                <tbody>
-                  {[
-                    { label: 'Mã phiên sạc:', value: session.charging_session_id },
-                    { label: 'Công suất tối đa:', value: `${session.max_power || session.maxPower || 'N/A'} kW` },
-                    { label: 'Công suất trung bình:', value: `${session.avgPower || 'N/A'} kW` },
-                    { label: 'Pin đầu:', value: `${session.batteryStart || 'N/A'}%` },
-                    { label: 'Pin cuối:', value: `${session.batteryEnd || 'N/A'}%` }
-                  ].map((item, index) => (
-                    <tr
-                      key={index}
-                      style={{
-                        transition: 'background 0.3s',
-                        cursor: 'pointer'
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(40,167,69,0.04)'}
-                      onMouseLeave={e => e.currentTarget.style.background = index % 2 === 0 ? '#f8fffe' : '#fff'}
-                    >
-                      <td
-                        style={{
-                          padding: '1.5rem 2.5rem',
-                          color: '#000', // chữ đen
-                          fontWeight: 700,
-                          fontSize: '1.35rem',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.3px',
-                          width: '50%',
-                          background: index % 2 === 0 ? '#f8fffe' : '#fff',
-                          borderLeft: 'none'
-                        }}
-                      >
-                        {item.label}
-                      </td>
-                      <td
-                        style={{
-                          padding: '1.5rem 2.5rem',
-                          color: '#000', // chữ đen
-                          fontWeight: 700,
-                          fontSize: '1.45rem',
-                          textAlign: 'right',
-                          background: index % 2 === 0 ? '#fff' : '#eafaf1',
-                          borderRight: 'none'
-                        }}
-                      >
-                        {item.value}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                <Descriptions.Item label="Mã phiên sạc:">
+                  {rightCell(session.sessionId)}
+                </Descriptions.Item>
+
+                <Descriptions.Item label={<span><EnvironmentOutlined style={{ marginRight: 8, color: '#28a745' }} />Trạm sạc:</span>}>
+                  {rightCell(session.station?.name || 'N/A')}
+                </Descriptions.Item>
+
+                <Descriptions.Item label="Địa chỉ:">
+                  {rightCell(session.station?.address || 'N/A')}
+                </Descriptions.Item>
+
+                <Descriptions.Item label="Cổng sạc:">
+                  {rightCell(session.post?.id || 'N/A')}
+                </Descriptions.Item>
+
+                <Descriptions.Item label="Công suất tối đa:">
+                  {rightCell(`${session.post?.maxPower || 'N/A'} kW`)}
+                </Descriptions.Item>
+
+                <Descriptions.Item label={<span><ClockCircleOutlined style={{ marginRight: 8, color: '#28a745' }} />Thời gian bắt đầu:</span>}>
+                  {rightCell(formatDateTime(session.startTime))}
+                </Descriptions.Item>
+
+                <Descriptions.Item label={<span><ClockCircleOutlined style={{ marginRight: 8, color: '#28a745' }} />Thời gian kết thúc:</span>}>
+                  {rightCell(isDone ? formatDateTime(session.endTime) : 'Đang sạc...', { color: isDone ? '#000' : '#ff9800' })}
+                </Descriptions.Item>
+
+                <Descriptions.Item label={<span><ThunderboltOutlined style={{ marginRight: 8, color: '#28a745' }} />Năng lượng tiêu thụ:</span>}>
+                  {rightCell(`${parseFloat(session.kwh || 0).toFixed(2)} kWh`, { fontSize: '1.6rem' })}
+                </Descriptions.Item>
+
+                <Descriptions.Item label={<span><DollarOutlined style={{ marginRight: 8, color: '#28a745' }} />Tổng chi phí:</span>}>
+                  {rightCell(formatCurrency(session.totalAmount), { color: '#28a745', fontWeight: 700, fontSize: '1.8rem' })}
+                </Descriptions.Item>
+
+                <Descriptions.Item label={<span><CreditCardOutlined style={{ marginRight: 8, color: '#28a745' }} />Phương thức thanh toán:</span>}>
+                  {rightCell(session.payment?.methodName || 'N/A')}
+                </Descriptions.Item>
+
+                {session.payment?.paidAt && (
+                  <Descriptions.Item label="Thời gian thanh toán:">
+                    {rightCell(formatDateTime(session.payment.paidAt))}
+                  </Descriptions.Item>
+                )}
+              </Descriptions>
             </Space>
           </Card>
         </Col>

@@ -1,218 +1,175 @@
-import React from 'react';
-import { Row, Col, Spin, Alert, ConfigProvider, Empty } from 'antd';
-import { LoadingOutlined, HistoryOutlined } from '@ant-design/icons';
-import PageHeader from '../components/PageHeader';
-import HistoryFilters from '../components/history/HistoryFilters';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Spin, Typography, Space } from 'antd';
+import { useAuth } from '../hooks/useAuth';
+import { useHistory } from '../hooks/useHistory';
 import HistorySummary from '../components/history/HistorySummary';
 import HistoryList from '../components/history/HistoryList';
+import HistorySessionDetail from '../components/history/HistorySessionDetail';
 import NoDataMessage from '../components/history/NoDataMessage';
+import HistoryFilters from '../components/history/HistoryFilters';
+
+const { Title, Text } = Typography;
 
 const HistoryPage = () => {
-  // Hard-coded data replacing useHistoryData
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [sortOrder, setSortOrder] = React.useState('desc');
-  const [expandedSession, setExpandedSession] = React.useState(null);
-  const loading = false;
-  const error = null;
+  const { user } = useAuth();
+  const { history, loading, error, fetchHistory } = useHistory();
+  const [selectedSession, setSelectedSession] = useState(null);
 
-  const filteredData = [
-    {
-      charging_session_id: 'CS-001',
-      startTime: '2025-10-01T08:30:00Z',
-      endTime: '2025-10-01T09:15:00Z',
-      kWh: '12.50',
-      price: 75.0,
-      charging_post_name: 'Cổng A1',
-      is_paid: true
-    },
-    {
-      charging_session_id: 'CS-002',
-      startTime: '2025-09-28T14:00:00Z',
-      endTime: '2025-09-28T15:20:00Z',
-      kWh: '18.30',
-      price: 109.8,
-      charging_post_name: 'Cổng B2',
-      is_paid: false
+  // filter state
+  const [query, setQuery] = useState('');
+  const [sort, setSort] = useState('desc');
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchHistory(user.id);
     }
-  ];
+  }, [user?.id, fetchHistory]);
 
-  const summary = {
-    totalSessions: filteredData.length,
-    totalKWh: filteredData.reduce((acc, s) => acc + parseFloat(s.kWh || 0), 0),
-    totalCost: filteredData.reduce((acc, s) => acc + (parseFloat(s.price) || 0), 0),
+  const filteredHistory = useMemo(() => {
+    if (!history || history.length === 0) return [];
+
+    let filtered = [...history];
+
+    // 1. Filter theo query (tìm theo sessionId, tên trạm, địa chỉ)
+    if (query.trim()) {
+      const searchLower = query.toLowerCase().trim();
+      filtered = filtered.filter(item => 
+        item.sessionId?.toLowerCase().includes(searchLower) ||
+        item.station?.name?.toLowerCase().includes(searchLower) ||
+        item.station?.address?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // 2. Sort theo thời gian
+    filtered.sort((a, b) => {
+      const timeA = new Date(a.startTime).getTime();
+      const timeB = new Date(b.startTime).getTime();
+      return sort === 'desc' ? timeB - timeA : timeA - timeB;
+    });
+
+    return filtered;
+  }, [history, query, sort]);
+
+  const handleViewDetail = (session) => {
+    setSelectedSession(session);
+    // Scroll to top khi xem chi tiết
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleRowClick = (session) => {
-    const id = session?.charging_session_id || session?.chargingSessionId || null;
-    setExpandedSession(expandedSession === id ? null : id);
+  const handleBackToList = () => {
+    setSelectedSession(null);
   };
 
-  const handleClearFilter = () => {
-    setSearchTerm('');
-    setSortOrder('desc');
+  const handleRefresh = () => {
+    if (user?.id) {
+      fetchHistory(user.id);
+    }
   };
 
-  const loadingIcon = <LoadingOutlined style={{ fontSize: 48, color: '#28a745' }} spin />;
+  // Nếu đang xem chi tiết
+  if (selectedSession) {
+    return (
+      <HistorySessionDetail 
+        session={selectedSession} 
+        onBack={handleBackToList} 
+      />
+    );
+  }
 
   // Loading state
   if (loading) {
     return (
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: '#28a745',
-            colorBorder: '#d4edda',
-            colorBgContainer: '#ffffff',
-          },
-        }}
-      >
-        <div style={{
-          background: '#ffffff',
-          minHeight: '100vh',
-          padding: '2rem 1rem',
-          paddingTop: '8rem',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <Spin 
-              indicator={loadingIcon} 
-              size="large"
-              style={{ marginBottom: '1.5rem' }}
-            />
-            <div style={{ 
-              color: '#155724', 
-              fontSize: '1.6rem',
-              fontWeight: 600
-            }}>
-              Đang tải lịch sử sạc xe...
-            </div>
-          </div>
-        </div>
-      </ConfigProvider>
+      <div style={{ 
+        padding: '4rem', 
+        textAlign: 'center',
+        minHeight: '60vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'white'
+      }}>
+        <Space direction="vertical" size="large" align="center">
+          <Spin size="large" />
+          <Text style={{ fontSize: '1.4rem', color: '#666' }}>
+            Đang tải lịch sử sạc...
+          </Text>
+        </Space>
+      </div>
     );
   }
 
   // Error state
   if (error) {
     return (
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: '#28a745',
-            colorBorder: '#d4edda',
-            colorBgContainer: '#ffffff',
-          },
-        }}
-      >
+      <div style={{ 
+        padding: '4rem', 
+        background: 'white',
+        minHeight: '60vh'
+      }}>
+        <Title level={2} style={{ marginBottom: '2rem', color: '#000' }}>
+          Lịch sử sạc
+        </Title>
         <div style={{
-          background: '#ffffff',
-          minHeight: '100vh',
-          padding: '2rem 1rem',
-          paddingTop: '8rem'
+          background: 'white',
+          padding: '3rem',
+          borderRadius: '12px',
+          border: '1px solid rgba(255,77,79,0.2)',
+          textAlign: 'center'
         }}>
-          <Row justify="center">
-            <Col xs={24} md={16} lg={12}>
-              <Alert
-                message="Có lỗi xảy ra"
-                description={error}
-                type="error"
-                showIcon
-                style={{
-                  fontSize: '1.5rem',
-                  borderRadius: '10px',
-                  border: '1px solid #f5c6cb',
-                  background: '#f8d7da'
-                }}
-              />
-            </Col>
-          </Row>
+          <Text style={{ fontSize: '1.4rem', color: '#ff4d4f', display: 'block', marginBottom: '1rem' }}>
+            Không thể tải lịch sử sạc
+          </Text>
+          <Text style={{ fontSize: '1.2rem', color: '#666', display: 'block' }}>
+            {error.message || 'Đã xảy ra lỗi'}
+          </Text>
         </div>
-      </ConfigProvider>
+      </div>
     );
   }
 
-  // Main content
+  // Main view
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#28a745',
-          colorBorder: '#d4edda',
-          colorBgContainer: '#ffffff',
-          fontSize: 14,
-          borderRadius: 6,
-        },
-        components: {
-          Input: {
-            colorBorder: '#d4edda',
-            colorBorderHover: '#a3d2a8',
-            colorPrimaryHover: '#34ce57',
-          },
-          Select: {
-            colorBorder: '#d4edda',
-            colorBorderHover: '#a3d2a8',
-            colorPrimaryHover: '#34ce57',
-          },
-          Button: {
-            colorPrimary: '#28a745',
-            colorPrimaryHover: '#34ce57',
-            colorPrimaryActive: '#1e7e34',
-          },
-          Card: {
-            colorBorderSecondary: '#d4edda',
-            boxShadowTertiary: '0 2px 8px rgba(40, 167, 69, 0.08)',
-          }
-        }
-      }}
-    >
-      <div style={{
-        background: '#ffffff',
-        minHeight: '100vh',
-        padding: '2rem 1rem',
-        paddingTop: '8rem',
-        fontSize: '1.5rem'
-      }}>
-        <Row gutter={[0, 24]}>
-          {/* Page Header */}
-          <Col span={24}>
-            <PageHeader
-              title="Lịch sử sạc xe điện"
-              icon={<HistoryOutlined />}
-            />
-          </Col>
-          
-          {/* Filters */}
-          <Col span={24}>
+    <div style={{ 
+      padding: '2rem', 
+      background: 'white', 
+      minHeight: '100vh' 
+    }}>
+      <Title 
+        level={2} 
+        style={{ 
+          marginBottom: '2rem', 
+          color: '#000',
+          fontSize: '2.4rem',
+          fontWeight: 700
+        }}
+      >
+        Lịch sử sạc
+      </Title>
+      
+      {/* Summary Cards */}
+      {history && history.length > 0 && (
+        <HistorySummary history={history} />
+      )}
+      
+      {/* History List hoặc No Data */}
+      {history && history.length > 0 ? (
+        <HistoryList 
+          history={filteredHistory} // Dùng data đã filter
+          onViewDetail={handleViewDetail}
+          filterComponent={
             <HistoryFilters
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              sortOrder={sortOrder}
-              setSortOrder={setSortOrder}
+              query={query}
+              sort={sort}
+              onChangeQuery={setQuery}
+              onChangeSort={setSort}
+              // onApply removed — filtering is applied automatically
             />
-          </Col>
-          
-          {/* Summary */}
-          <Col span={24}>
-            <HistorySummary summary={summary} />
-          </Col>
-          
-          {/* List or No Data */}
-          <Col span={24}>
-            {filteredData && filteredData.length > 0 ? (
-              <HistoryList
-                sessions={filteredData}
-                expandedSession={expandedSession}
-                onRowClick={handleRowClick}
-              />
-            ) : (
-              <NoDataMessage onClearFilter={handleClearFilter} />
-            )}
-          </Col>
-        </Row>
-      </div>
-    </ConfigProvider>
+          }
+        />
+      ) : (
+        <NoDataMessage onRefresh={handleRefresh} />
+      )}
+    </div>
   );
 };
 

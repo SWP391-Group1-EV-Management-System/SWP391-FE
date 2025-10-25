@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-
+const baseURL = import.meta.env.VITE_API_BASE_URL;
 const api = axios.create({
   baseURL,
   withCredentials: true,
@@ -105,10 +104,7 @@ api.interceptors.response.use(
         // 🚨 Redirect về login nếu refresh token hết hạn
         if (refreshError.response?.status === 401) {
           console.warn('🚨 Refresh token hết hạn → Redirect về login');
-          
-          // Clear user state nếu có
-          localStorage.removeItem('user'); // Nếu bạn lưu user info
-          
+         
           // Redirect về login
           window.location.href = '/login';
         }

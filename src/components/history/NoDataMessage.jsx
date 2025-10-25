@@ -4,7 +4,7 @@ import { ReloadOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
-const NoDataMessage = () => {
+const NoDataMessage = ({ onRefresh }) => {
   return (
     <div style={{
       background: '#ffffff',
@@ -17,17 +17,20 @@ const NoDataMessage = () => {
       <Text strong style={{ display: 'block', fontSize: '1.6rem', marginTop: '1rem', color: '#08321a' }}>
         Không có dữ liệu lịch sử sạc
       </Text>
-      <Text type="secondary" style={{ display: 'block', marginTop: '0.5rem' }}>
-        Hiện tại không có phiên sạc nào khớp với bộ lọc.
+      <Text type="secondary" style={{ display: 'block', marginTop: '0.5rem', fontSize: '1.2rem' }}>
+        Bạn chưa có phiên sạc nào hoặc dữ liệu chưa được cập nhật.
       </Text>
-      <Space style={{ marginTop: '1.5rem' }}>
-        <Button type="primary" icon={<ReloadOutlined />} disabled>
-          Xóa bộ lọc
-        </Button>
-        <Button disabled>
-          Liên hệ hỗ trợ
-        </Button>
-      </Space>
+      {onRefresh && (
+        <Space style={{ marginTop: '1.5rem' }}>
+          <Button 
+            type="primary" 
+            icon={<ReloadOutlined />}
+            onClick={onRefresh}
+          >
+            Tải lại
+          </Button>
+        </Space>
+      )}
     </div>
   );
 };

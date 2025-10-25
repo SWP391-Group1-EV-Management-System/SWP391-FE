@@ -1,18 +1,64 @@
 import React from 'react';
 import { Row, Col, Card, Typography, Space } from 'antd';
 import { CalendarOutlined, ThunderboltOutlined, DollarOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import { formatCurrency, formatDuration } from '../../utils/historyHelpers';
 
 const { Title, Text } = Typography;
 
-const HistorySummary = () => {
-  // Hard-coded summary values
-  const summary = {
-    totalSessions: 24,
-    totalEnergy: 456.7, // kWh
-    totalCost: 1234.56, // currency
-    totalTime: 7520 // minutes (or unit expected by formatDuration)
-  };
+const formatCurrency = (amount) => {
+  if (!amount && amount !== 0) return '0 ₫';
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(amount);
+};
+
+const formatDuration = (minutes) => {
+  if (!minutes) return '0 phút';
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours > 0) {
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+  return `${mins}m`;
+};
+
+const HistorySummary = ({ history }) => {
+  // Tính toán summary từ data thật
+  const summary = React.useMemo(() => {
+    if (!history || history.length === 0) {
+      return {
+        totalSessions: 0,
+        totalEnergy: 0,
+        totalCost: 0,
+        totalTime: 0
+      };
+    }
+
+    let totalEnergy = 0;
+    let totalCost = 0;
+    let totalMinutes = 0;
+
+    history.forEach(session => {
+      totalEnergy += session.kwh || 0;
+      totalCost += session.totalAmount || 0;
+      
+      // Tính thời gian (phút)
+      if (session.startTime && session.endTime) {
+        const start = new Date(session.startTime);
+        const end = new Date(session.endTime);
+        const diffMs = end - start;
+        const diffMins = Math.floor(diffMs / 1000 / 60);
+        totalMinutes += diffMins;
+      }
+    });
+
+    return {
+      totalSessions: history.length,
+      totalEnergy: totalEnergy,
+      totalCost: totalCost,
+      totalTime: totalMinutes
+    };
+  }, [history]);
 
   const summaryCards = [
     {
@@ -95,7 +141,7 @@ const HistorySummary = () => {
                   style={{
                     fontSize: '2.5rem',
                     fontWeight: 700,
-                    color: '#000',           // chữ đen
+                    color: '#000',
                     margin: 0,
                     lineHeight: 1.2,
                     wordBreak: 'break-word'
@@ -107,7 +153,7 @@ const HistorySummary = () => {
                 <Text 
                   style={{
                     fontSize: '1.3rem',
-                    color: '#0b2a18',       // dark green tint but still dark
+                    color: '#0b2a18',
                     fontWeight: 600,
                     margin: 0,
                     display: 'block'

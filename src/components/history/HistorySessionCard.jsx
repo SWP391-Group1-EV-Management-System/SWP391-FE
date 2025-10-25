@@ -7,39 +7,54 @@ import {
   DollarOutlined,
   CheckCircleOutlined,
   SyncOutlined,
-  CarOutlined
+  CarOutlined,
+  EyeOutlined
 } from '@ant-design/icons';
-import { formatCurrency, formatDateTime } from '../../utils/historyHelpers';
 
 const { Text } = Typography;
 
-const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
-  const isPaid = session.is_paid || session.payment?.isPaid || session.isDone;
-  const cost = session.price || session.totalAmount || session.payment?.price || 0;
+const formatDateTime = (dateString) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
+
+const formatCurrency = (amount) => {
+  if (!amount && amount !== 0) return '0 VND';
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND'
+  }).format(amount);
+};
+
+const HistorySessionCard = ({ session, onViewDetail }) => {
+  const isPaid = session.payment?.paid || false;
+  const isDone = session.done || false;
 
   return (
     <Card
       style={{
         marginBottom: '1.5rem',
-        border: isExpanded ? '2px solid rgba(40,167,69,0.38)' : '1px solid rgba(40,167,69,0.18)',
+        border: '1px solid rgba(40,167,69,0.18)',
         borderRadius: '12px',
-        boxShadow: isExpanded 
-          ? '0 10px 34px rgba(40,167,69,0.18)' 
-          : '0 0 10px rgba(40,167,69,0.06), 0 2px 8px rgba(0,0,0,0.06)',
+        boxShadow: '0 0 10px rgba(40,167,69,0.06), 0 2px 8px rgba(0,0,0,0.06)',
         transition: 'all 0.25s ease',
-        cursor: 'pointer',
         background: '#ffffff'
       }}
       hoverable
-      onClick={onToggleExpand}
       styles={{ body: { padding: '2rem' } }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = isExpanded ? '0 12px 40px rgba(28, 66, 37, 0.22)' : '0 8px 24px rgba(40,167,69,0.12)';
-        e.currentTarget.style.borderColor = isExpanded ? 'rgba(31, 74, 41, 0.45)' : 'rgba(40,167,69,0.28)';
+        e.currentTarget.style.boxShadow = '0 8px 24px rgba(40,167,69,0.12)';
+        e.currentTarget.style.borderColor = 'rgba(40,167,69,0.28)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = isExpanded ? '0 10px 34px rgba(30, 69, 39, 0.18)' : '0 0 10px rgba(40,167,69,0.06), 0 2px 8px rgba(0,0,0,0.06)';
-        e.currentTarget.style.borderColor = isExpanded ? 'rgba(39, 87, 50, 0.38)' : 'rgba(40,167,69,0.18)';
+        e.currentTarget.style.boxShadow = '0 0 10px rgba(40,167,69,0.06), 0 2px 8px rgba(0,0,0,0.06)';
+        e.currentTarget.style.borderColor = 'rgba(40,167,69,0.18)';
       }}
     >
       <Row gutter={[24, 16]} align="middle">
@@ -50,24 +65,24 @@ const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
               strong 
               style={{ 
                 fontSize: '1.6rem', 
-                color: '#000',        // chữ đen
+                color: '#000',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem'
               }}
             >
               <EnvironmentOutlined style={{ fontSize: '1.8rem', color: '#28a745' }} />
-              Trạm Sạc Trung Tâm
+              {session.station?.name || 'N/A'}
             </Text>
             <Text 
               type="secondary" 
               style={{ 
                 fontSize: '1.25rem',
                 paddingLeft: '2.5rem',
-                color: '#222'         // darker secondary
+                color: '#222'
               }}
             >
-              123 Đường Lớn, Quận 1, TP.HCM
+              {session.station?.address || 'N/A'}
             </Text>
             <Divider style={{ margin: '0.75rem 0', borderColor: 'rgba(40,167,69,0.06)' }} />
             <Text 
@@ -81,9 +96,9 @@ const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
               }}
             >
               <CarOutlined style={{ color: '#28a745' }} />
-              Mã: <strong>{session.charging_session_id}</strong>
+              Mã: <strong>{session.sessionId}</strong>
             </Text>
-            {session.charging_post_name && (
+            {session.post?.id && (
               <Text 
                 style={{ 
                   fontSize: '1.2rem',
@@ -91,7 +106,7 @@ const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
                   paddingLeft: '2.5rem'
                 }}
               >
-                Cổng: <strong>{session.charging_post_name}</strong>
+                Cổng: <strong>{session.post.id}</strong>
               </Text>
             )}
           </Space>
@@ -118,7 +133,7 @@ const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '0.5rem',
-                  color: '#000'       // chữ đen
+                  color: '#000'
                 }}
               >
                 <ClockCircleOutlined style={{ color: '#28a745' }} />
@@ -126,33 +141,31 @@ const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
               </Text>
             </div>
             
-            {session.endTime && (
-              <div>
-                <Text 
-                  style={{ 
-                    fontSize: '1.15rem', 
-                    color: '#666',
-                    display: 'block',
-                    marginBottom: '0.25rem'
-                  }}
-                >
-                  Kết thúc
-                </Text>
-                <Text 
-                  strong
-                  style={{ 
-                    fontSize: '1.35rem', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    gap: '0.5rem',
-                    color: '#000'      // chữ đen
-                  }}
-                >
-                  <ClockCircleOutlined style={{ color: '#28a745' }} />
-                  {formatDateTime(session.endTime)}
-                </Text>
-              </div>
-            )}
+            <div>
+              <Text 
+                style={{ 
+                  fontSize: '1.15rem', 
+                  color: '#666',
+                  display: 'block',
+                  marginBottom: '0.25rem'
+                }}
+              >
+                Kết thúc
+              </Text>
+              <Text 
+                strong
+                style={{ 
+                  fontSize: '1.35rem', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.5rem',
+                  color: isDone ? '#000' : '#ff9800'
+                }}
+              >
+                <ClockCircleOutlined style={{ color: isDone ? '#28a745' : '#ff9800' }} />
+                {isDone ? formatDateTime(session.endTime) : 'Đang sạc...'}
+              </Text>
+            </div>
             
             <Divider style={{ margin: '0.5rem 0', borderColor: 'rgba(40,167,69,0.06)' }} />
             
@@ -160,14 +173,14 @@ const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
               strong 
               style={{ 
                 fontSize: '1.6rem', 
-                color: '#000',       // chữ đen
+                color: '#000',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.75rem'
               }}
             >
               <ThunderboltOutlined style={{ fontSize: '1.8rem', color: '#28a745' }} />
-              {parseFloat(session.kWh || 0).toFixed(2)} kWh
+              {parseFloat(session.kwh || 0).toFixed(2)} kWh
             </Text>
           </Space>
         </Col>
@@ -196,7 +209,7 @@ const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
                 strong
                 style={{ 
                   fontSize: '2.2rem',
-                  color: '#000',      // chữ đen
+                  color: '#000',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'flex-end',
@@ -205,25 +218,59 @@ const HistorySessionCard = ({ session, isExpanded, onToggleExpand }) => {
                 }}
               >
                 <DollarOutlined style={{ color: '#28a745' }} />
-                {formatCurrency(cost)}
+                {formatCurrency(session.totalAmount)}
               </Text>
+              {session.payment?.methodName && (
+                <Text 
+                  style={{ 
+                    fontSize: '1.1rem',
+                    color: '#666',
+                    display: 'block',
+                    marginTop: '0.5rem'
+                  }}
+                >
+                  {session.payment.methodName}
+                </Text>
+              )}
             </div>
             
-            <Tag 
-              icon={isPaid ? <CheckCircleOutlined /> : <SyncOutlined spin />}
-              color={isPaid ? 'success' : 'processing'}
-              style={{ 
-                fontSize: '1.3rem', 
-                padding: '0.75rem 1.5rem',
-                borderRadius: '20px',
-                fontWeight: 600,
-                border: 'none',
-                background: isPaid ? 'linear-gradient(90deg, rgba(40,167,69,0.12), rgba(40,167,69,0.06))' : undefined,
-                color: '#08321a'
-              }}
-            >
-              {isPaid ? 'Đã thanh toán' : 'Đang xử lý'}
-            </Tag>
+            <Space direction="vertical" size="small" style={{ width: '100%', alignItems: 'flex-end' }}>
+              <Tag
+                color={isPaid ? 'success' : 'processing'}
+                style={{ 
+                  fontSize: '1.3rem', 
+                  padding: '0.75rem 1.5rem',
+                  borderRadius: '20px',
+                  fontWeight: 600,
+                  border: 'none',
+                  background: isPaid ? 'linear-gradient(90deg, rgba(40,167,69,0.12), rgba(40,167,69,0.06))' : undefined,
+                  color: '#08321a'
+                }}
+              >
+                {isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
+              </Tag>
+              
+              {onViewDetail && (
+                <Tag 
+                  icon={<EyeOutlined />}
+                  color="blue"
+                  style={{ 
+                    fontSize: '1.2rem', 
+                    padding: '0.75rem 1.5rem',
+                    borderRadius: '20px',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    border: 'none'
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onViewDetail(session);
+                  }}
+                >
+                  Xem chi tiết
+                </Tag>
+              )}
+            </Space>
           </div>
         </Col>
       </Row>

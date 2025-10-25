@@ -1,6 +1,5 @@
 import api from '../utils/axios';
 
-// Process payment with payment method
 export const processPayment = async (paymentData) => {
   try {
     const response = await api.post('/api/payment/paymentMethod', paymentData);
