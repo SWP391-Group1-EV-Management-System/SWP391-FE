@@ -21,12 +21,17 @@ import ForgotPasswordPage from "./page/ForgotPasswordPage.jsx";
 import AboutPage from "./page/AboutPage.jsx";
 import NavbarWelcome from "./components/welcome/NavbarWelcome.jsx";
 
+// Protected Route Components
+import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
+import { AdminRoute, StaffRoute } from "./components/auth/AdminRoute.jsx";
+import RootRedirect from "./components/auth/RootRedirect.jsx";
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Root redirect to welcome page */}
-        <Route path="/" element={<Navigate to="/welcome" replace />} />
+        {/* Smart root redirect based on authentication */}
+        <Route path="/" element={<RootRedirect />} />
 
         {/* Welcome & About Routes with Navbar */}
         <Route element={<NavbarWelcome />}>
@@ -41,24 +46,68 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
         {/* Protected Main App Routes */}
-        <Route path="/app" element={<Layout />}>
-          {/* Redirect /app to /app/home */}
-          <Route index element={<Navigate to="/app/home" replace />} />
-          
+        <Route
+          path="/app"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          {/* User Routes - Accessible to all authenticated users */}
           <Route path="home" element={<HomePage />} />
           <Route path="map" element={<MapPage />} />
           <Route path="energy" element={<EnergyPage />} />
           <Route path="history" element={<HistoryPage />} />
           <Route path="servicepackage" element={<ServicePackage />} />
           <Route path="setting" element={<SettingPage />} />
-          <Route path="sessionstaff" element={<SessionStaffPage />} />
-          <Route path="waitingstaff" element={<WaitingStaffPage />} />
-          <Route path="evadmindashboard" element={<EVAdminDashboard />} />
-          <Route path="usermanagement" element={<UserManagementPage />} />
+
+          {/* Admin Only Routes */}
+          <Route
+            path="evadmindashboard"
+            element={
+              <AdminRoute>
+                <EVAdminDashboard />
+              </AdminRoute>
+            }
+          />
+          <Route
+            path="usermanagement"
+            element={
+              <AdminRoute>
+                <UserManagementPage />
+              </AdminRoute>
+            }
+          />
+
+          {/* Staff Routes - Accessible to Staff and Admin */}
+          <Route
+            path="sessionstaff"
+            element={
+              <StaffRoute>
+                <SessionStaffPage />
+              </StaffRoute>
+            }
+          />
+          <Route
+            path="waitingstaff"
+            element={
+              <StaffRoute>
+                <WaitingStaffPage />
+              </StaffRoute>
+            }
+          />
         </Route>
 
-        {/* Virtual Station (outside Layout) */}
-        <Route path="/virtualstation/:postId" element={<VirtualStationPage />} />
+        {/* Virtual Station - Protected but accessible to all authenticated users */}
+        <Route
+          path="virtualstation/:postId"
+          element={
+            <ProtectedRoute>
+              <VirtualStationPage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />

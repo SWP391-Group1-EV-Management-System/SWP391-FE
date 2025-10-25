@@ -1,12 +1,12 @@
-import axios from 'axios';
+import axios from "axios";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 const api = axios.create({
   baseURL,
   withCredentials: true,
   headers: {
-    Accept: 'application/json, text/plain, */*',
-    'Content-Type': 'application/json',
+    Accept: "application/json, text/plain, */*",
+    "Content-Type": "application/json",
   },
 });
 
@@ -26,12 +26,12 @@ const processQueue = (error, token = null) => {
 
 const refreshAccessToken = async () => {
   try {
-    const res = await api.post('/users/re-login');
+    const res = await api.post("/users/re-login");
     // Backend trả về string "Tạo mới token thành công"
-    console.log('✅ Refresh token thành công:', res.data);
+    console.log("Refresh token thành công:", res.data);
     return res.data;
   } catch (error) {
-    console.error('❌ Refresh token thất bại:', error.response?.status);
+    console.error("Refresh token thất bại:", error.response?.status);
     throw error;
   }
 };
@@ -41,43 +41,51 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // ❌ KHÔNG retry cho các endpoint public (login, re-login)
-    const publicEndpoints = ['/users/login', '/users/re-login'];
-    if (publicEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))) {
+    // KHÔNG retry cho các endpoint public (login, re-login)
+    const publicEndpoints = ["/users/login", "/users/re-login"];
+    if (
+      publicEndpoints.some((endpoint) =>
+        originalRequest.url?.includes(endpoint)
+      )
+    ) {
       return Promise.reject(error);
     }
 
-    // ✅ Chỉ xử lý 401 hoặc 403 và chưa retry
-    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
-      
-      // 🔍 Check xem có phải token expired không
+    // Chỉ xử lý 401 hoặc 403 và chưa retry
+    if (
+      (error.response?.status === 401 || error.response?.status === 403) &&
+      !originalRequest._retry
+    ) {
+      // Check xem có phải token expired không
       const errorData = error.response.data;
-      const isTokenExpired = 
-        typeof errorData === 'string' && (errorData.includes('Token expired') || errorData.includes('Invalid token')) ||
-        errorData?.error === 'Token expired' ||
-        errorData?.error === 'Invalid token';
+      const isTokenExpired =
+        (typeof errorData === "string" &&
+          (errorData.includes("Token expired") ||
+            errorData.includes("Invalid token"))) ||
+        errorData?.error === "Token expired" ||
+        errorData?.error === "Invalid token";
 
-      // ⚠️ Nếu là 403, có thể do token hết hạn → Thử refresh
+      // Nếu là 403, có thể do token hết hạn → Thử refresh
       if (error.response?.status === 403 || isTokenExpired) {
-        console.log('⚠️ Token có thể hết hạn (401/403), thử refresh...');
+        console.log("Token có thể hết hạn (401/403), thử refresh...");
       } else {
-        // ❌ Không phải token expired → Có thể là unauthorized khác
-        console.warn('⚠️ Unauthorized nhưng không phải token expired:', errorData);
+        // Không phải token expired → Có thể là unauthorized khác
+        console.warn("Unauthorized nhưng không phải token expired:", errorData);
         return Promise.reject(error);
       }
 
-      // 🔄 Nếu đang refresh, thêm vào queue
+      // Nếu đang refresh, thêm vào queue
       if (isRefreshing) {
-        console.log('⏳ Đang refresh token, thêm request vào queue...');
+        console.log("Đang refresh token, thêm request vào queue...");
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then(() => {
-            console.log('🔄 Retry request sau khi refresh:', originalRequest.url);
+            console.log("Retry request sau khi refresh:", originalRequest.url);
             return api(originalRequest);
           })
           .catch((err) => {
-            console.error('❌ Retry thất bại:', err);
+            console.error("Retry thất bại:", err);
             return Promise.reject(err);
           });
       }
@@ -86,31 +94,32 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        console.log('🔄 Bắt đầu refresh token...');
+        console.log("Bắt đầu refresh token...");
         await refreshAccessToken();
-        
-        // ✅ Refresh thành công → Retry tất cả requests
+
+        // Refresh thành công → Retry tất cả requests
         processQueue(null);
-        
-        console.log('✅ Refresh thành công, retry request gốc:', originalRequest.url);
+
+        console.log(
+          "Refresh thành công, retry request gốc:",
+          originalRequest.url
+        );
         return api(originalRequest);
-        
       } catch (refreshError) {
-        console.error('❌ Refresh token thất bại:', refreshError.response?.status);
-        
-        // ❌ Refresh thất bại → Clear queue và logout
+        console.error("Refresh token thất bại:", refreshError.response?.status);
+
+        // Refresh thất bại → Clear queue và logout
         processQueue(refreshError);
-        
-        // 🚨 Redirect về login nếu refresh token hết hạn
+
+        // Redirect về login nếu refresh token hết hạn
         if (refreshError.response?.status === 401) {
           console.warn('🚨 Refresh token hết hạn → Redirect về login');
          
           // Redirect về login
-          window.location.href = '/login';
+          window.location.href = "/login";
         }
-        
+
         return Promise.reject(refreshError);
-        
       } finally {
         isRefreshing = false;
       }

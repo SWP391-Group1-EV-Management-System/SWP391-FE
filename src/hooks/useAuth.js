@@ -1,6 +1,10 @@
-import { useCallback, useState, useMemo, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router';
-import { login as loginService, logoutApi, getUserProfile } from '../services/authService';
+import { useCallback, useState, useMemo, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
+import {
+  login as loginService,
+  logoutApi,
+  getUserProfile,
+} from "../services/authService";
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -17,7 +21,7 @@ export const useAuth = () => {
       if (me) setUser(me);
       return me;
     } catch (e) {
-      console.error('[useAuth] fetchUserProfile error', e);
+      console.error("[useAuth] fetchUserProfile error", e);
       setUser(null);
       return null;
     } finally {
@@ -25,53 +29,67 @@ export const useAuth = () => {
     }
   }, []);
 
-  // Chỉ auto-fetch user nếu KHÔNG ở trang login/register
+  // Chỉ auto-fetch user một lần khi khởi tạo ứng dụng
   useEffect(() => {
     let mounted = true;
 
     // Skip auto-fetch ở các trang public
-    const publicPaths = ['/login', '/register', '/forgot-password'];
-    if (publicPaths.some(path => location.pathname.startsWith(path))) {
+    const publicPaths = [
+      "/login",
+      "/register",
+      "/forgot-password",
+      "/welcome",
+      "/about",
+    ];
+    if (publicPaths.some((path) => location.pathname.startsWith(path))) {
       return;
     }
 
-    (async () => {
-      try {
-        if (!mounted) return;
-        await fetchUserProfile();
-      } catch (e) {
-        // ignore - not logged in
-      }
-    })();
-
-    return () => { mounted = false; };
-  }, [location.pathname, fetchUserProfile]);
-
-  const login = useCallback(async (email, password) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await loginService(email, password);
-      if (result?.success) {
+    // Chỉ fetch nếu chưa có user và chưa từng loading
+    if (!user && !loading) {
+      (async () => {
         try {
+          if (!mounted) return;
           await fetchUserProfile();
         } catch (e) {
-          console.error('[useAuth] fetchUserProfile after login failed', e);
+          // ignore - not logged in
         }
-
-        navigate('/app/home');
-        return true;
-      }
-      setError(new Error(result?.message || 'Đăng nhập thất bại.'));
-      return false;
-    } catch (e) {
-      console.error('[useAuth] login error', e);
-      setError(e);
-      return false;
-    } finally {
-      setLoading(false);
+      })();
     }
-  }, [navigate, fetchUserProfile]);
+
+    return () => {
+      mounted = false;
+    };
+  }, []); // Bỏ dependency để chỉ chạy một lần khi mount
+
+  const login = useCallback(
+    async (email, password, redirectTo = "/app/home") => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await loginService(email, password);
+        if (result?.success) {
+          try {
+            await fetchUserProfile();
+          } catch (e) {
+            console.error("[useAuth] fetchUserProfile after login failed", e);
+          }
+
+          navigate(redirectTo);
+          return true;
+        }
+        setError(new Error(result?.message || "Đăng nhập thất bại."));
+        return false;
+      } catch (e) {
+        console.error("[useAuth] login error", e);
+        setError(e);
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [navigate, fetchUserProfile]
+  );
 
   const logout = useCallback(async () => {
     setLoading(true);
@@ -79,12 +97,12 @@ export const useAuth = () => {
     try {
       await logoutApi();
     } catch (e) {
-      console.error('[useAuth] logout API error', e);
+      console.error("[useAuth] logout API error", e);
       setError(e);
     } finally {
       setUser(null);
       setLoading(false);
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   }, []);
 
@@ -106,19 +124,23 @@ export const useRole = () => {
     if (!user) return false;
     const userRoles = user.role;
     if (!userRoles) return false;
-    if (Array.isArray(userRoles)) return roles.some(r => userRoles.includes(r));
-    return roles.some(r => userRoles === r);
+    if (Array.isArray(userRoles))
+      return roles.some((r) => userRoles.includes(r));
+    return roles.some((r) => userRoles === r);
   };
 
-  return useMemo(() => ({
-    userRole: Array.isArray(user?.role) ? user.role : user?.role,
-    hasRole,
-    hasAnyRole,
-    isAdmin: hasRole('ADMIN'),
-    isManager: hasRole('MANAGER'),
-    isDriver: hasRole('DRIVER'),
-    isStaff: hasRole('STAFF'),
-  }), [user]);
+  return useMemo(
+    () => ({
+      userRole: Array.isArray(user?.role) ? user.role : user?.role,
+      hasRole,
+      hasAnyRole,
+      isAdmin: hasRole("ADMIN"),
+      isManager: hasRole("MANAGER"),
+      isDriver: hasRole("DRIVER"),
+      isStaff: hasRole("STAFF"),
+    }),
+    [user]
+  );
 };
 
 // Convenience wrappers so existing code that uses useLogin / useLogout can keep the same hook names
