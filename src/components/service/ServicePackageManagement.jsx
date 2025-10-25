@@ -1,53 +1,102 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ServicePackageTable from "./ServicePackageTable";
 import ServicePackageForm from "./ServicePackageForm";
 import { message } from 'antd';
+import usePackage from '../../hooks/usePackage';
 
 const ServicePackageManagement = () => {
-  const [packages, setPackages] = useState([
-    { packageId: 1, packageName: "Basic Plan", description: "Gói cơ bản cho người dùng mới, phù hợp sử dụng hàng ngày với mức giá tiết kiệm", billingCycle: 1, price: 100000, unit: "MONTH", quota: 50 },
-    { packageId: 2, packageName: "Premium Plan", description: "Gói cao cấp cho người dùng thường xuyên, nhiều ưu đãi và dịch vụ hỗ trợ tốt nhất", billingCycle: 3, price: 300000, unit: "MONTH", quota: 200 },
-    { packageId: 3, packageName: "Enterprise Plan", description: "Gói dành cho doanh nghiệp với quota lớn và chính sách thanh toán linh hoạt", billingCycle: 12, price: 1000000, unit: "MONTH", quota: 5000 }
-  ]);
+  // Use hook for data and actions
+  const { packages, loading, fetchAll, create, update, remove } = usePackage();
+
+  // Global ref to store latest packages synchronously
+  const latestPackagesRef = useRef([]);
+
+  useEffect(() => {
+    fetchAll().catch(() => {
+      message.error('Không thể tải danh sách gói dịch vụ');
+    });
+  }, [fetchAll]);
+
+  // Keep ref in sync whenever packages state changes
+  useEffect(() => {
+    if (Array.isArray(packages)) latestPackagesRef.current = packages;
+  }, [packages]);
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState(null);
   const [formMode, setFormMode] = useState('add');
-  const [loading, setLoading] = useState(false);
 
   const handleAddPackage = () => {
     setFormMode('add');
     setEditingPackage(null);
     setIsFormOpen(true);
   };
-  const handleEditPackage = (packageData) => {
+  const handleEditPackage = async (packageData) => {
     setFormMode('edit');
+    setIsFormOpen(true);
+
+    if (!packageData) {
+      setEditingPackage(null);
+      return;
+    }
+
+    // Try to get the freshest data from the ref first
+    const id = packageData.packageId || packageData.id || packageData._id;
+    if (id && Array.isArray(latestPackagesRef.current)) {
+      const found = latestPackagesRef.current.find(p => p.packageId === id || p.id === id || p._id === id);
+      if (found) {
+        setEditingPackage(found);
+        return;
+      }
+    }
+
+    // Fallback: refresh the list and use returned data if available
+    try {
+      const data = await fetchAll();
+      if (Array.isArray(data)) latestPackagesRef.current = data;
+      const latest = (Array.isArray(latestPackagesRef.current) ? latestPackagesRef.current : []).find(p => p.packageId === id || p.id === id || p._id === id);
+      setEditingPackage(latest || packageData);
+    } catch (err) {
+      setEditingPackage(packageData);
+    }
+  };
+  const handleViewPackage = (packageData) => {
+    setFormMode('view');
     setEditingPackage(packageData);
     setIsFormOpen(true);
   };
-  const handleDeletePackage = (packageId) => {
-    const packageToDelete = packages.find(pkg => pkg.packageId === packageId);
-    setPackages(prev => prev.filter(pkg => pkg.packageId !== packageId));
-    message.success(`Đã xóa gói "${packageToDelete?.packageName}" thành công!`);
+  const handleDeletePackage = async (packageId) => {
+    if (!packageId) {
+      message.error('Không tìm thấy ID gói, thao tác bị hủy');
+      return;
+    }
+
+    try {
+      await remove(packageId);
+      // Refresh list after delete so UI updates immediately
+      try { const data = await fetchAll(); if (Array.isArray(data)) latestPackagesRef.current = data; } catch (_) { /* ignore refresh errors */ }
+      message.success('Xóa gói thành công!');
+    } catch (err) {
+      message.error('Xóa gói thất bại');
+    }
   };
   const handleFormSubmit = async (formData) => {
-    setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
       if (formMode === 'edit') {
-        setPackages(prev => prev.map(pkg => pkg.packageId === formData.packageId ? { ...pkg, ...formData } : pkg));
+        await update(formData.packageId, formData);
+        // Refresh list after update so changes appear immediately
+        try { const data = await fetchAll(); if (Array.isArray(data)) latestPackagesRef.current = data; } catch (_) { /* ignore refresh errors */ }
         message.success(`Cập nhật gói "${formData.packageName}" thành công!`);
       } else {
-        const newId = Math.max(0, ...packages.map(p => p.packageId)) + 1;
-        const newPackage = { ...formData, packageId: formData.packageId || newId };
-        setPackages(prev => [...prev, newPackage]);
+        await create(formData);
+        // Refresh list after create so new package appears immediately
+        try { const data = await fetchAll(); if (Array.isArray(data)) latestPackagesRef.current = data; } catch (_) { /* ignore refresh errors */ }
         message.success(`Thêm gói "${formData.packageName}" thành công!`);
       }
       setIsFormOpen(false);
       setEditingPackage(null);
     } catch (err) {
       message.error('Có lỗi xảy ra, vui lòng thử lại!');
-    } finally {
-      setLoading(false);
     }
   };
   const handleFormCancel = () => {
@@ -58,10 +107,11 @@ const ServicePackageManagement = () => {
   return (
     <div style={{ padding: '20px 0' }}>
       <ServicePackageTable
-        packages={packages}
+        packages={packages || []}
         loading={loading}
         onAdd={handleAddPackage}
         onEdit={handleEditPackage}
+        onView={handleViewPackage}
         onDelete={handleDeletePackage}
       />
       <ServicePackageForm

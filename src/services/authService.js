@@ -1,5 +1,4 @@
 import api from '../utils/axios';
-
 /**
  * Đăng nhập
  */
@@ -55,7 +54,7 @@ export const logoutApi = async () => {
  */
 export const getUserProfile = async () => {
   try {
-    console.log('📡 Đang gọi API /api/users/me...');
+    console.log('Đang gọi API /api/users/me...');
     const response = await api.get('/api/users/me');
     
     console.log('✅ Lấy thông tin user thành công:', response.data);

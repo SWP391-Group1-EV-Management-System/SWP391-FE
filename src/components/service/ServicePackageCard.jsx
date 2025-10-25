@@ -1,9 +1,6 @@
 import React from 'react';
 import { Card, Button, Tag, Typography, Space, Divider } from 'antd';
-import { 
-  CrownOutlined, 
-  ThunderboltOutlined, 
-  SafetyOutlined,
+import {
   CalendarOutlined,
   DollarOutlined,
   PoweroffOutlined
@@ -28,47 +25,12 @@ const ServicePackageCard = ({
   onSubscribe 
 }) => {
   
-  /**
-   * Xử lý icon và màu sắc theo loại gói
-   */
-  const getPackageConfig = (packageType) => {
-    switch (packageType) {
-      case 'VIP':
-        return {
-          icon: <CrownOutlined />,
-          color: '#0b875b', // subtle green
-          tagColor: 'gold',
-          buttonType: 'primary'
-        };
-      case 'Prepaid':
-        return {
-          icon: <ThunderboltOutlined />,
-          color: '#0b875b',
-          tagColor: 'blue',
-          buttonType: 'primary'
-        };
-      case 'Postpaid':
-        return {
-          icon: <SafetyOutlined />,
-          color: '#0b875b',
-          tagColor: 'green',
-          buttonType: 'primary'
-        };
-      default:
-        return {
-          icon: <PoweroffOutlined style={{ color: '#52c41a' }} />,
-          color: '#0b875b',
-          tagColor: 'default',
-          buttonType: 'default'
-        };
-    }
-  };
+  // default colors and icon (remove per-package config)
+  const greenColor = '#0bb46b';
+  const neutralColor = '#595959';
+  const icon = <PoweroffOutlined style={{ color: greenColor }} />;
+  const buttonType = 'default';
 
-  const config = getPackageConfig(type);
-
-  /**
-   * Xử lý sự kiện đăng ký gói
-   */
   const handleSubscribe = () => {
     if (onSubscribe) {
       onSubscribe({ packageId, packageName, price, billingCycle, unit, quota, type });
@@ -81,18 +43,7 @@ const ServicePackageCard = ({
 
   const durationText = (() => {
     if (!billingCycle) return 'Không xác định';
-    if (!unit) return `Hiệu lực ${billingCycle}`;
-    // map unit
-    switch ((unit || '').toUpperCase()) {
-      case 'MONTH':
-        return `Hiệu lực ${billingCycle} tháng`;
-      case 'DAY':
-        return `Hiệu lực ${billingCycle} ngày`;
-      case 'YEAR':
-        return `Hiệu lực ${billingCycle} năm`;
-      default:
-        return `Hiệu lực ${billingCycle} ${unit}`;
-    }
+    return `Hiệu lực ${billingCycle} tháng`;
   })();
 
   return (
@@ -102,7 +53,7 @@ const ServicePackageCard = ({
       style={{
         background: '#ffffff',
         borderRadius: '10px',
-        border: `1.5px solid #000000`,
+        border: `2px solid #e5e7eb`,
         height: '100%',
         transition: 'transform 0.12s ease, box-shadow 0.12s ease'
       }}
@@ -111,7 +62,7 @@ const ServicePackageCard = ({
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0 8px' }}>
           <Button 
             key="subscribe"
-            type={config.buttonType}
+            type={buttonType}
             size="middle"
             block
             onClick={handleSubscribe}
@@ -121,10 +72,10 @@ const ServicePackageCard = ({
               fontSize: '14px',
               fontWeight: 600,
               borderRadius: '20px',
-              background: isActive ? '#f0f0f0' : config.color,
-              borderColor: isActive ? '#d9d9d9' : config.color,
+              background: isActive ? '#f0f0f0' : greenColor,
+              borderColor: isActive ? '#d9d9d9' : greenColor,
               color: isActive ? '#000' : '#fff',
-              boxShadow: isActive ? 'none' : `0 6px 18px ${config.color}22`,
+              boxShadow: 'none',
               width: '100%',
               margin: 0,
             }}
@@ -138,8 +89,8 @@ const ServicePackageCard = ({
       {/* Header với icon và tag */}
       <div style={{ textAlign: 'center', marginBottom: '12px' }}>
         <Space direction="vertical" size="small">
-          <div style={{ fontSize: '30px', color: config.color }}>
-            {config.icon}
+          <div style={{ fontSize: '30px', color: neutralColor }}>
+            {icon}
           </div>
           <Title level={4} style={{ margin: 0, color: '#000' }}>
             {packageName}
@@ -174,7 +125,7 @@ const ServicePackageCard = ({
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
-            <DollarOutlined style={{ color: config.color }} />
+            <DollarOutlined style={{ color: neutralColor }} />
             <Text strong>Giá:</Text>
           </Space>
           <Text strong style={{ color: '#000', fontSize: 16 }}>{formattedPrice}</Text>
@@ -182,7 +133,7 @@ const ServicePackageCard = ({
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
-            <CalendarOutlined style={{ color: config.color }} />
+            <CalendarOutlined style={{ color: neutralColor }} />
             <Text strong>Hạn dùng:</Text>
           </Space>
           <Text style={{ fontSize: '14px', fontWeight: 500 }}>{durationText}</Text>
@@ -190,8 +141,8 @@ const ServicePackageCard = ({
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
-            <PoweroffOutlined style={{ color: '#52c41a' }} />
-            <Text strong>Số lượng:</Text>
+            <PoweroffOutlined style={{ color: neutralColor }} />
+            <Text strong>Hạn mức sử dụng gói:</Text>
           </Space>
           <Text style={{ fontSize: '14px', fontWeight: 500 }}>{quota ?? 'Không giới hạn'}</Text>
         </div>
@@ -199,9 +150,7 @@ const ServicePackageCard = ({
 
       <style>{`
         .custom-package-btn {
-          background: ${config.color} !important;
-          border-color: ${config.color} !important;
-          color: #fff !important;
+          box-shadow: none !important;
         }
         .custom-package-btn:hover, .custom-package-btn:focus {
           filter: brightness(0.94);

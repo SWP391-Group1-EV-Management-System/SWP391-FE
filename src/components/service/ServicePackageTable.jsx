@@ -22,14 +22,26 @@ const { Title, Text } = Typography;
 
 const truncate = (text = '', length = 120) => text.length > length ? text.slice(0, length) + '...' : text;
 
+const getId = (r) => r?.packageId ?? r?.id ?? r?._id ?? `${r?.packageName || 'pkg'}-${r?.price ?? 0}-${r?.billingCycle ?? 0}`;
+
 const ServicePackageTable = ({
   packages = [],
   loading = false,
   onEdit,
+  onAdd,
   onDelete,
-  onAdd
+  onView
 }) => {
   const [hovered, setHovered] = useState(false);
+
+  const handleDelete = async (packageId) => {
+    // delegate deletion to parent
+    try {
+      await onDelete?.(packageId);
+    } catch (err) {
+      // parent handles notifications; nothing else here
+    }
+  };
 
   const columns = [
     {
@@ -90,7 +102,7 @@ const ServicePackageTable = ({
               type="text"
               icon={<EyeOutlined />}
               size="small"
-              onClick={() => console.log('View:', record)}
+              onClick={() => onView?.(record)}
             />
           </Tooltip>
 
@@ -106,7 +118,7 @@ const ServicePackageTable = ({
           <Popconfirm
             title="Xác nhận xóa"
             description={`Bạn có chắc chắn muốn xóa gói "${record.packageName}"?`}
-            onConfirm={() => onDelete?.(record.packageId)}
+            onConfirm={() => handleDelete(record.packageId)}
             okText="Xóa"
             cancelText="Hủy"
             okType="danger"
@@ -151,8 +163,8 @@ const ServicePackageTable = ({
 
         <Table
           columns={columns}
-          dataSource={packages}
-          rowKey={(record) => record.packageId}
+          dataSource={Array.isArray(packages) ? packages.map(p => ({ ...p, packageId: getId(p) })) : []}
+          rowKey={(record) => getId(record)}
           loading={loading}
           pagination={{
             pageSize: 10,
