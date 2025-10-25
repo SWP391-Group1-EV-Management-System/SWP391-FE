@@ -53,7 +53,10 @@
   --z-debug: 720; /* Debug tools (dev only) */
 
   /* ===== LAYER 8: QR SCANNER (800-899) ===== */
-  --z-qr-scanner: 800; /* QR Scanner overlay */
+  --z-qr-scanner: 9999; /* QR Scanner overlay - cao nhất để hiển thị trên tất cả */
+
+  /* ===== LAYER 9: NOTIFICATIONS ON MODALS (10000+) ===== */
+  --z-message-on-modal: 10010; /* Message/notification trên modal */
 }
 
 /* ===== UTILITY CLASSES ===== */

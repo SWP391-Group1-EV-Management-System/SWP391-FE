@@ -1,4 +1,19 @@
 /* QR Result Modal Styles */
+@import "./z-index-system.css";
+
+/* Override Antd components z-index để hiển thị trên modal */
+.ant-message {
+  z-index: var(--z-message-on-modal) !important;
+}
+
+.ant-notification {
+  z-index: var(--z-message-on-modal) !important;
+}
+
+.ant-modal {
+  z-index: var(--z-message-on-modal) !important;
+}
+
 .qr-result-modal-overlay {
   position: fixed;
   top: 0;
@@ -9,9 +24,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: var(--z-modal);
+  z-index: calc(var(--z-qr-scanner) + 1);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .qr-result-modal {
@@ -21,6 +38,8 @@
   width: 90%;
   max-width: 700px;
   max-height: 80vh;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   animation: modalSlideIn 0.3s ease-out;
 }
@@ -76,6 +95,29 @@
   padding: 24px;
   min-height: 200px;
   color: #333;
+  flex: 1;
+  overflow-y: auto;
+  /* Custom scrollbar for webkit browsers */
+  scrollbar-width: thin;
+  scrollbar-color: #0b9459 #f1f1f1;
+}
+
+.qr-result-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.qr-result-modal-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.qr-result-modal-content::-webkit-scrollbar-thumb {
+  background: #0b9459;
+  border-radius: 3px;
+}
+
+.qr-result-modal-content::-webkit-scrollbar-thumb:hover {
+  background: #0a7c4a;
 }
 
 .qr-result-modal-content p {
@@ -133,6 +175,7 @@
   padding: 20px 24px;
   border-top: 1px solid #e0e0e0;
   background: #f8f9fa;
+  flex-shrink: 0;
 }
 
 .qr-result-btn {
@@ -175,7 +218,8 @@
   .qr-result-modal {
     width: 95%;
     max-width: 500px;
-    margin: 20px;
+    max-height: 90vh;
+    margin: 10px;
   }
 
   .qr-result-modal-header,
@@ -190,5 +234,23 @@
 
   .qr-result-btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .qr-result-modal {
+    width: 98%;
+    max-height: 95vh;
+    margin: 5px;
+  }
+
+  .qr-result-modal-header,
+  .qr-result-modal-content,
+  .qr-result-modal-footer {
+    padding: 12px 16px;
+  }
+
+  .qr-result-modal-content {
+    min-height: 150px;
   }
 }

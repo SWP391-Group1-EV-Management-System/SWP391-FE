@@ -56,14 +56,10 @@ export const chargingStationService = {
   async getStationById(stationId) {
     try {
       const response = await api.get(`/api/charging/station/${stationId}`);
-      // Debug: in ra dữ liệu thô từ API (giữ để thuận tiện khi dev)
-      console.log("API trả về trạm:", response.data);
 
       // Map dữ liệu API sang cấu trúc mà UI mong đợi
       const mappedStation = stationDataMapper.mapStationFromApi(response.data);
 
-      // Debug: in kết quả đã map
-      console.log("Mapped trạm:", mappedStation);
       return mappedStation;
     } catch (error) {
       throw this.handleError(error, "Không tìm thấy trạm sạc");
@@ -77,24 +73,36 @@ export const chargingStationService = {
    */
   async getStationPosts(stationId) {
     try {
-      const response = await api.get(`/api/charging/station/posts/${stationId}`);
-      // Debug: log dữ liệu thô
-      console.log("API trả về trụ:", response.data);
+      const response = await api.get(
+        `/api/charging/station/posts/${stationId}`
+      );
 
       // Map danh sách trụ (posts) sang dạng UI-friendly
       const mappedPosts = stationDataMapper.mapPostsFromApi(response.data);
 
-      // Debug: log kết quả sau khi map
-      console.log("Mapped trụ:", mappedPosts);
       return mappedPosts;
     } catch (error) {
-      // Log debug information before throwing error
-      console.error("Error details:", error);
       if (error.response) {
         console.error("Response status:", error.response.status);
         console.error("Response data:", error.response.data);
       }
       throw this.handleError(error, "Không thể tải danh sách trụ sạc");
+    }
+  },
+
+  /**
+   * Lấy thông tin chi tiết cho 1 trụ sạc cụ thể từ QR code
+   *
+   * @param {string} postId - ID của trụ sạc (thường lấy từ QR code)
+   * @throws {Error} Khi không tìm thấy trụ hoặc yêu cầu API lỗi
+   */
+  async getPostById(postId) {
+    try {
+      const response = await api.get(`/api/charging/post/${postId}`);
+      return stationDataMapper.mapPostFromApi(response.data);
+    } catch (error) {
+      console.error("Lỗi khi lấy thông tin trụ:", error);
+      throw this.handleError(error, "Không tìm thấy thông tin trụ sạc");
     }
   },
 
@@ -105,7 +113,10 @@ export const chargingStationService = {
    */
   async createChargingSession(bookingData) {
     try {
-      const response = await api.post("/api/charging/session/create", bookingData);
+      const response = await api.post(
+        "/api/charging/session/create",
+        bookingData
+      );
       // Kiểm tra cấu trúc response từ API.
       // Nhiều API trả cấu trúc: { success: boolean, data: ..., message: '...'}
       if (response.data && response.data.success) {
@@ -302,25 +313,32 @@ export const stationDataMapper = {
    */
   mapPostFromApi(apiPost) {
     return {
-      // Core post data
+      // Dữ liệu cốt lõi của trụ sạc
       id: apiPost.idChargingPost,
       name:
         apiPost.nameChargingPost ||
         apiPost.name ||
         `Trụ ${apiPost.idChargingPost}`,
-      active: apiPost.active,
+      active: apiPost.active || apiPost.is_active,
       maxPower: apiPost.maxPower || 0,
-      chargingFeePerKWh: apiPost.chargingFeePerKWh || 0,
+      chargingFeePerKWh:
+        apiPost.chargingFeePerKWh || apiPost.charging_fee_per_kwh || 0,
       chargingSessions: apiPost.chargingSessions || [],
       chargingTypes: apiPost.chargingType || [],
+      chargingStationId:
+        apiPost.chargingStationId ||
+        apiPost.id_charging_station ||
+        apiPost.chargingStation,
 
-      // Trường hiển thị cho UI
+      // Display fields for UI
       powerDisplay: `${apiPost.maxPower || 0} kW`,
-      feeDisplay: `${apiPost.chargingFeePerKWh || 0} VNĐ/kWh`,
-      status: apiPost.active ? "available" : "maintenance",
-      // isAvailable = trụ active và không có session đang chạy
-      isAvailable: apiPost.active && !this.isPostBusy(apiPost.chargingSessions),
-      // supportedTypes: chuyển mảng đối tượng type sang chuỗi tên
+      feeDisplay: `${
+        apiPost.chargingFeePerKWh || apiPost.charging_fee_per_kwh || 0
+      } VNĐ/kWh`,
+      status: apiPost.active || apiPost.is_active ? "available" : "maintenance",
+      isAvailable:
+        (apiPost.active || apiPost.is_active) &&
+        !this.isPostBusy(apiPost.chargingSessions),
       supportedTypes: apiPost.chargingType?.map(
         (type) => type.typeName || type.name || "AC"
       ) || ["AC"],
