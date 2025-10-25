@@ -1,58 +1,36 @@
 import React from 'react';
-import { Card, Button, Typography, Space } from 'antd';
-import { ReloadOutlined, FileSearchOutlined } from '@ant-design/icons';
+import { Empty, Button, Typography, Space } from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
-const NoDataMessage = ({ onClearFilter }) => {
+const NoDataMessage = ({ onRefresh }) => {
   return (
-    <div style={{ 
-      margin: '2rem 0',
-      display: 'flex',
-      justifyContent: 'center'
+    <div style={{
+      background: '#ffffff',
+      padding: '3rem',
+      borderRadius: '12px',
+      border: '1px dashed rgba(40,167,69,0.08)',
+      textAlign: 'center'
     }}>
-      <Card
-        style={{
-          background: '#ffffff',
-          borderRadius: '10px',
-          boxShadow: '0 4px 12px rgba(40, 167, 69, 0.08)',
-          border: '1px solid #d4edda',
-          maxWidth: '500px',
-          width: '100%'
-        }}
-      >
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <FileSearchOutlined 
-            style={{ 
-              fontSize: '4rem',
-              color: '#28a745',
-              marginBottom: '1rem'
-            }} 
-          />
-          
-          <Title 
-            level={4} 
-            style={{ 
-              color: '#155724',
-              marginBottom: '1rem',
-              fontSize: '2rem'
-            }}
+      <Empty description={false} />
+      <Text strong style={{ display: 'block', fontSize: '1.6rem', marginTop: '1rem', color: '#08321a' }}>
+        Không có dữ liệu lịch sử sạc
+      </Text>
+      <Text type="secondary" style={{ display: 'block', marginTop: '0.5rem', fontSize: '1.2rem' }}>
+        Bạn chưa có phiên sạc nào hoặc dữ liệu chưa được cập nhật.
+      </Text>
+      {onRefresh && (
+        <Space style={{ marginTop: '1.5rem' }}>
+          <Button 
+            type="primary" 
+            icon={<ReloadOutlined />}
+            onClick={onRefresh}
           >
-            Không có dữ liệu
-          </Title>
-          
-          <Text 
-            style={{ 
-              color: '#28a745',
-              marginBottom: '2rem',
-              fontSize: '1.5rem',
-              display: 'block'
-            }}
-          >
-            Không tìm thấy phiên sạc nào phù hợp với bộ lọc hiện tại.
-          </Text>
+            Tải lại
+          </Button>
         </Space>
-      </Card>
+      )}
     </div>
   );
 };

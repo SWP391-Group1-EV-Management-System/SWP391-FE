@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Typography, Space, Row, Col, Select } from 'antd';
-import { EditOutlined, PlusOutlined, GiftOutlined, DollarOutlined, ClockCircleOutlined, TagOutlined } from '@ant-design/icons';
+import { EditOutlined, PlusOutlined, GiftOutlined, DollarOutlined, ClockCircleOutlined, TagOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
 const { Option } = Select;
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
-// Yup validation schema
+// Yup validation schema for new package model
 const ServicePackageSchema = Yup.object().shape({
-  name: Yup.string()
+  packageName: Yup.string()
     .required('Vui lòng nhập tên gói dịch vụ')
     .min(3, 'Tên gói phải có ít nhất 3 ký tự')
     .max(100, 'Tên gói không được quá 100 ký tự'),
@@ -20,10 +20,15 @@ const ServicePackageSchema = Yup.object().shape({
     .typeError('Giá phải là số')
     .required('Vui lòng nhập giá')
     .min(0, 'Giá phải là số dương'),
-  duration: Yup.string()
-    .required('Vui lòng nhập thời hạn'),
-  type: Yup.string()
-    .required('Vui lòng chọn loại gói'),
+  billingCycle: Yup.number()
+    .typeError('Chu kỳ phải là số (tháng)')
+    .required('Vui lòng nhập chu kỳ thanh toán')
+    .min(0, 'Chu kỳ phải >= 0'),
+  unit: Yup.string().required('Vui lòng chọn đơn vị'),
+  quota: Yup.number()
+    .typeError('Quota phải là số')
+    .required('Vui lòng nhập quota')
+    .min(0, 'Quota phải >= 0'),
 });
 
 const ServicePackageForm = ({
@@ -35,8 +40,20 @@ const ServicePackageForm = ({
   loading = false
 }) => {
   const initialValues = initialData && mode === 'edit'
-    ? initialData
-    : { name: '', description: '', price: '', duration: '', type: 'Prepaid' };
+    ? ({
+        packageId: initialData.packageId,
+        packageName: initialData.packageName || '',
+        description: initialData.description || '',
+        billingCycle: initialData.billingCycle ?? 0,
+        price: initialData.price ?? 0,
+        unit: initialData.unit || 'MONTH',
+        quota: initialData.quota ?? 0,
+      })
+    : { packageId: null, packageName: '', description: '', billingCycle: 0, price: 0, unit: 'MONTH', quota: 0 };
+
+  const resetFormRef = useRef(null);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmValues, setConfirmValues] = useState(null);
 
   return (
     <Modal
@@ -51,7 +68,7 @@ const ServicePackageForm = ({
       open={isOpen}
       onCancel={onCancel}
       footer={null}
-      width={600}
+      width={640}
       destroyOnHidden={true}
       maskClosable={false}
     >
@@ -60,36 +77,33 @@ const ServicePackageForm = ({
         validationSchema={ServicePackageSchema}
         enableReinitialize
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          const submitData = {
-            ...values,
-            id: initialData?.id || Date.now()
-          };
-          await onSubmit?.(submitData);
+          // Show confirmation modal first
+          setConfirmValues(values);
+          resetFormRef.current = resetForm;
+          setConfirmVisible(true);
           setSubmitting(false);
-          resetForm();
         }}
       >
-        {({ isSubmitting, handleSubmit, setFieldValue, values }) => (
-          <Form style={{ marginTop: '20px' }}>
+        {({ isSubmitting, handleSubmit, setFieldValue, values, resetForm }) => (
+          <Form style={{ marginTop: '12px' }}>
             {/* Tên gói */}
-            <div style={{ marginBottom: 16 }}>
-              <label htmlFor="name">Tên gói dịch vụ</label>
-              <Field name="name">
+            <div style={{ marginBottom: 12 }}>
+              <label htmlFor="packageName">Tên gói dịch vụ</label>
+              <Field name="packageName">
                 {({ field }) => (
                   <input
                     {...field}
                     placeholder="VD: Gói Premium, Gói Standard..."
-                    prefix={<GiftOutlined style={{ color: '#1890ff' }} />}
                     size="large"
-                    style={{ borderRadius: '6px', width: '100%', padding: '8px' }}
+                    style={{ borderRadius: '6px', width: '100%', padding: '8px', marginTop: 6 }}
                   />
                 )}
               </Field>
-              <ErrorMessage name="name" component="div" style={{ color: 'red' }} />
+              <ErrorMessage name="packageName" component="div" style={{ color: 'red' }} />
             </div>
 
             {/* Mô tả */}
-            <div style={{ marginBottom: 16 }}>
+            <div style={{ marginBottom: 12 }}>
               <label htmlFor="description">Mô tả chi tiết</label>
               <Field name="description">
                 {({ field }) => (
@@ -98,17 +112,34 @@ const ServicePackageForm = ({
                     rows={4}
                     placeholder="Nhập mô tả chi tiết về gói dịch vụ..."
                     maxLength={500}
-                    style={{ borderRadius: '6px', width: '100%', padding: '8px' }}
+                    style={{ borderRadius: '6px', width: '100%', padding: '8px', marginTop: 6 }}
                   />
                 )}
               </Field>
               <ErrorMessage name="description" component="div" style={{ color: 'red' }} />
             </div>
 
-            {/* Giá và Loại gói */}
-            <Row gutter={16}>
-              <Col span={12}>
-                <div style={{ marginBottom: 16 }}>
+            <Row gutter={12}>
+              <Col span={8}>
+                <div style={{ marginBottom: 12 }}>
+                  <label htmlFor="billingCycle">Chu kỳ (tháng)</label>
+                  <Field name="billingCycle">
+                    {({ field }) => (
+                      <input
+                        {...field}
+                        type="number"
+                        min={0}
+                        placeholder="0"
+                        style={{ borderRadius: '6px', width: '100%', padding: '8px', marginTop: 6 }}
+                      />
+                    )}
+                  </Field>
+                  <ErrorMessage name="billingCycle" component="div" style={{ color: 'red' }} />
+                </div>
+              </Col>
+
+              <Col span={8}>
+                <div style={{ marginBottom: 12 }}>
                   <label htmlFor="price">Giá (VNĐ)</label>
                   <Field name="price">
                     {({ field }) => (
@@ -117,53 +148,55 @@ const ServicePackageForm = ({
                         type="number"
                         min={0}
                         placeholder="Nhập giá"
-                        style={{ borderRadius: '6px', width: '100%', padding: '8px' }}
+                        style={{ borderRadius: '6px', width: '100%', padding: '8px', marginTop: 6 }}
                       />
                     )}
                   </Field>
                   <ErrorMessage name="price" component="div" style={{ color: 'red' }} />
                 </div>
               </Col>
-              <Col span={12}>
-                <div style={{ marginBottom: 16 }}>
-                  <label htmlFor="type">Loại gói</label>
+
+              <Col span={8}>
+                <div style={{ marginBottom: 12 }}>
+                  <label htmlFor="unit">Đơn vị</label>
                   <Select
-                    value={values.type}
-                    onChange={value => setFieldValue('type', value)}
+                    value={values.unit}
+                    onChange={value => setFieldValue('unit', value)}
                     size="large"
-                    style={{ borderRadius: '6px', width: '100%' }}
-                    suffixIcon={<TagOutlined />}
+                    style={{ borderRadius: '6px', width: '100%', marginTop: 6 }}
                   >
-                    <Option value="Prepaid">🔵 Prepaid</Option>
-                    <Option value="VIP">👑 VIP</Option>
-                    <Option value="Postpaid">🔒 Postpaid</Option>
+                    <Option value="MONTH">Tháng</Option>
+                    <Option value="HOUR">Giờ</Option>
+                    <Option value="SESSION">Phiên sạc</Option>
                   </Select>
-                  <ErrorMessage name="type" component="div" style={{ color: 'red' }} />
+                  <ErrorMessage name="unit" component="div" style={{ color: 'red' }} />
                 </div>
               </Col>
             </Row>
 
-            {/* Thời hạn */}
-            <div style={{ marginBottom: 16 }}>
-              <label htmlFor="duration">Thời hạn sử dụng</label>
-              <Field name="duration">
+            <div style={{ marginBottom: 12 }}>
+              <label htmlFor="quota">Quota (kWh hoặc số lần)</label>
+              <Field name="quota">
                 {({ field }) => (
                   <input
                     {...field}
-                    placeholder="VD: 30 ngày, 90 ngày, 1 năm..."
-                    prefix={<ClockCircleOutlined style={{ color: '#1890ff' }} />}
-                    size="large"
-                    style={{ borderRadius: '6px', width: '100%', padding: '8px' }}
+                    type="number"
+                    min={0}
+                    placeholder="Nhập quota"
+                    style={{ borderRadius: '6px', width: '100%', padding: '8px', marginTop: 6 }}
                   />
                 )}
               </Field>
-              <ErrorMessage name="duration" component="div" style={{ color: 'red' }} />
+              <ErrorMessage name="quota" component="div" style={{ color: 'red' }} />
             </div>
 
-            <div style={{ textAlign: 'right', marginTop: 24 }}>
+            <div style={{ textAlign: 'right', marginTop: 18 }}>
               <button
                 type="button"
-                onClick={onCancel}
+                onClick={() => {
+                  resetForm();
+                  onCancel?.();
+                }}
                 disabled={isSubmitting || loading}
                 style={{ marginRight: 8, borderRadius: '6px', padding: '8px 16px' }}
               >
@@ -172,11 +205,75 @@ const ServicePackageForm = ({
               <button
                 type="submit"
                 disabled={isSubmitting || loading}
-                style={{ borderRadius: '6px', padding: '8px 16px', background: '#1890ff', color: '#fff' }}
+                style={{ borderRadius: '6px', padding: '8px 16px', background: '#0b6b3d', color: '#fff' }}
               >
-                {mode === 'edit' ? 'Cập nhật' : 'Thêm mới'}
+                Đăng ký
               </button>
             </div>
+
+            {/* Xác nhận thanh toán Modal */}
+            <Modal
+              title={<Space><ThunderboltOutlined /> Xác nhận thanh toán</Space>}
+              open={confirmVisible}
+              onCancel={() => setConfirmVisible(false)}
+              footer={null}
+            >
+              {confirmValues && (
+                <div>
+                  <Text strong>{confirmValues.packageName}</Text>
+                  <div style={{ marginTop: 12 }}>
+                    <Text>Giá: </Text><Text strong style={{ color: '#0b6b3d' }}>{Number(confirmValues.price).toLocaleString('vi-VN')} VNĐ</Text>
+                  </div>
+                  <div style={{ marginTop: 8 }}>
+                    <Text>Chu kỳ: </Text><Text>{confirmValues.billingCycle} tháng</Text>
+                  </div>
+                  <div style={{ marginTop: 8 }}>
+                    <Text>Đơn vị: </Text><Text>{confirmValues.unit}</Text>
+                  </div>
+                  <div style={{ marginTop: 8 }}>
+                    <Text>Quota: </Text><Text>{confirmValues.quota}</Text>
+                  </div>
+                  <div style={{ marginTop: 12 }}>
+                    <Text type="secondary">{confirmValues.description}</Text>
+                  </div>
+
+                  <div style={{ textAlign: 'right', marginTop: 18 }}>
+                    <button
+                      onClick={() => setConfirmVisible(false)}
+                      style={{ marginRight: 8, borderRadius: '6px', padding: '8px 16px' }}
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          // Call parent onSubmit with structured package object
+                          const submitData = {
+                            packageId: initialData?.packageId || Date.now(),
+                            packageName: confirmValues.packageName,
+                            description: confirmValues.description,
+                            billingCycle: Number(confirmValues.billingCycle),
+                            price: Number(confirmValues.price),
+                            unit: confirmValues.unit,
+                            quota: Number(confirmValues.quota),
+                          };
+                          await onSubmit?.(submitData);
+                          // reset form if provided
+                          resetFormRef.current?.();
+                          setConfirmVisible(false);
+                          onCancel?.();
+                        } catch (e) {
+                          // ignore, parent handles errors
+                        }
+                      }}
+                      style={{ borderRadius: '6px', padding: '8px 16px', background: '#0b6b3d', color: '#fff' }}
+                    >
+                      Xác nhận thanh toán
+                    </button>
+                  </div>
+                </div>
+              )}
+            </Modal>
           </Form>
         )}
       </Formik>
