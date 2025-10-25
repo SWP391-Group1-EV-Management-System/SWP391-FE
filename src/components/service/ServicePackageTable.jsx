@@ -1,130 +1,81 @@
-import React from 'react';
-import { 
-  Table, 
-  Button, 
-  Tag, 
-  Space, 
-  Popconfirm, 
+import React, { useState } from 'react';
+import {
+  Table,
+  Button,
+  Tag,
+  Space,
+  Popconfirm,
   Typography,
   Card,
   Tooltip
 } from 'antd';
-import { 
-  EditOutlined, 
-  DeleteOutlined, 
+import {
+  EditOutlined,
+  DeleteOutlined,
   PlusOutlined,
-  EyeOutlined 
+  EyeOutlined,
+  ThunderboltOutlined
 } from '@ant-design/icons';
 import PageHeader from '../PageHeader';
 
 const { Title, Text } = Typography;
 
-/**
- * Component hiển thị bảng quản lý gói dịch vụ cho Admin
- * Sử dụng Ant Design Table component
- */
-const ServicePackageTable = ({ 
-  packages = [], 
+const truncate = (text = '', length = 120) => text.length > length ? text.slice(0, length) + '...' : text;
+
+const ServicePackageTable = ({
+  packages = [],
   loading = false,
-  onEdit, 
-  onDelete, 
-  onAdd 
+  onEdit,
+  onDelete,
+  onAdd
 }) => {
+  const [hovered, setHovered] = useState(false);
 
-  /**
-   * Xử lý màu sắc cho loại gói
-   */
-  const getTypeTagColor = (type) => {
-    switch (type) {
-      case 'VIP':
-        return 'gold';
-      case 'Prepaid':
-        return 'blue';
-      case 'Postpaid':
-        return 'green';
-      default:
-        return 'default';
-    }
-  };
-
-  /**
-   * Định nghĩa các cột cho bảng
-   */
   const columns = [
     {
-      title: 'ID',
-      dataIndex: 'id',
-      key: 'id',
-      width: 70,
-      render: (id) => (
-        <Text code style={{ fontSize: '12px' }}>
-          #{id}
-        </Text>
-      )
-    },
-    {
       title: 'Tên gói',
-      dataIndex: 'name',
-      key: 'name',
-      width: 180,
+      dataIndex: 'packageName',
+      key: 'packageName',
       render: (name) => (
-        <Text strong style={{ color: '#262626' }}>
-          {name}
-        </Text>
-      )
-    },
-    {
-      title: 'Mô tả',
-      dataIndex: 'description',
-      key: 'description',
-      ellipsis: {
-        showTitle: false,
-      },
-      render: (description) => (
-        <Tooltip placement="topLeft" title={description}>
-          <Text type="secondary">
-            {description}
-          </Text>
-        </Tooltip>
-      )
-    },
-    {
-      title: 'Loại gói',
-      dataIndex: 'type',
-      key: 'type',
-      width: 120,
-      render: (type) => (
-        <Tag color={getTypeTagColor(type)} style={{ fontWeight: 600 }}>
-          {type}
-        </Tag>
+        <Text strong style={{ color: '#061b12' }}>{name}</Text>
       ),
-      filters: [
-        { text: 'VIP', value: 'VIP' },
-        { text: 'Prepaid', value: 'Prepaid' },
-        { text: 'Postpaid', value: 'Postpaid' },
-      ],
-      onFilter: (value, record) => record.type === value,
+    },
+    {
+      title: 'Chu kỳ (tháng)',
+      dataIndex: 'billingCycle',
+      key: 'billingCycle',
+      width: 120,
+      render: (c) => <Text>{c} tháng</Text>,
+      sorter: (a, b) => (a.billingCycle || 0) - (b.billingCycle || 0),
     },
     {
       title: 'Giá (VNĐ)',
       dataIndex: 'price',
       key: 'price',
-      width: 130,
+      width: 140,
       align: 'right',
       render: (price) => (
-        <Text strong style={{ color: '#1890ff' }}>
-          {price.toLocaleString('vi-VN')}
-        </Text>
+        <Text strong style={{ color: '#0b6b3d' }}>{Number(price || 0).toLocaleString('vi-VN')}</Text>
       ),
-      sorter: (a, b) => a.price - b.price,
+      sorter: (a, b) => (a.price || 0) - (b.price || 0),
     },
     {
-      title: 'Thời hạn',
-      dataIndex: 'duration',
-      key: 'duration',
-      width: 100,
-      render: (duration) => (
-        <Text>{duration}</Text>
+      title: 'Quota',
+      dataIndex: 'quota',
+      key: 'quota',
+      width: 120,
+      align: 'center',
+      render: (q) => <Text>{q}</Text>
+    },
+    {
+      title: 'Mô tả ngắn',
+      dataIndex: 'description',
+      key: 'description',
+      ellipsis: true,
+      render: (d) => (
+        <Tooltip title={d} placement="topLeft">
+          <Text type="secondary">{truncate(d, 120)}</Text>
+        </Tooltip>
       )
     },
     {
@@ -135,34 +86,34 @@ const ServicePackageTable = ({
       render: (_, record) => (
         <Space size="small">
           <Tooltip title="Xem chi tiết">
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               icon={<EyeOutlined />}
               size="small"
               onClick={() => console.log('View:', record)}
             />
           </Tooltip>
-          
+
           <Tooltip title="Chỉnh sửa">
-            <Button 
-              type="text" 
+            <Button
+              type="text"
               icon={<EditOutlined />}
               size="small"
               onClick={() => onEdit?.(record)}
             />
           </Tooltip>
-          
+
           <Popconfirm
             title="Xác nhận xóa"
-            description={`Bạn có chắc chắn muốn xóa gói "${record.name}"?`}
-            onConfirm={() => onDelete?.(record.id)}
+            description={`Bạn có chắc chắn muốn xóa gói "${record.packageName}"?`}
+            onConfirm={() => onDelete?.(record.packageId)}
             okText="Xóa"
             cancelText="Hủy"
             okType="danger"
           >
             <Tooltip title="Xóa">
-              <Button 
-                type="text" 
+              <Button
+                type="text"
                 icon={<DeleteOutlined />}
                 size="small"
                 danger
@@ -175,54 +126,64 @@ const ServicePackageTable = ({
   ];
 
   return (
-    <Card>
-      {/* Header */}
-      <PageHeader
-        title="Quản lý gói dịch vụ"
-        subtitle={`Tổng số: ${packages.length} gói dịch vụ`}
-        actionButton={{
-          icon: <PlusOutlined />,
-          text: 'Thêm gói mới',
-          onClick: onAdd
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ transition: 'box-shadow 0.2s ease, transform 0.12s ease' }}
+    >
+      <Card
+        style={{
+          borderRadius: 10,
+          background: '#ffffff',
+          boxShadow: hovered ? '0 6px 18px rgba(6, 27, 18, 0.12)' : '0 2px 6px rgba(6, 27, 18, 0.06)'
         }}
-      />
+        styles={{ body: { padding: 16 } }}
+      >
+        <PageHeader
+          title={<span style={{ display: 'flex', alignItems: 'center', gap: 8 }}><ThunderboltOutlined style={{ color: '#0b6b3d' }} /> Quản lý gói dịch vụ</span>}
+          subtitle={`Tổng số: ${packages.length} gói`}
+          actionButton={{
+            icon: <PlusOutlined />,
+            text: 'Thêm gói mới',
+            onClick: onAdd
+          }}
+        />
 
-      {/* Bảng */}
-      <Table
-        columns={columns}
-        dataSource={packages}
-        rowKey="id"
-        loading={loading}
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (total, range) => 
-            `${range[0]}-${range[1]} của ${total} gói`,
-          pageSizeOptions: ['5', '10', '20', '50'],
-        }}
-        scroll={{ x: 800 }}
-        locale={{
-          emptyText: (
-            <div style={{ padding: '40px', textAlign: 'center' }}>
-              <div style={{ fontSize: '48px', marginBottom: '16px' }}>📦</div>
-              <Title level={4} type="secondary">
-                Chưa có gói dịch vụ nào
-              </Title>
-              <Text type="secondary">
-                Nhấn "Thêm gói mới" để tạo gói dịch vụ đầu tiên
-              </Text>
-            </div>
-          )
-        }}
-        size="middle"
-        bordered={false}
-        style={{ 
-          backgroundColor: '#fafafa',
-          borderRadius: '8px'
-        }}
-      />
-    </Card>
+        <Table
+          columns={columns}
+          dataSource={packages}
+          rowKey={(record) => record.packageId}
+          loading={loading}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            showQuickJumper: true,
+            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} gói`,
+            pageSizeOptions: ['5', '10', '20', '50'],
+          }}
+          scroll={{ x: 800 }}
+          locale={{
+            emptyText: (
+              <div style={{ padding: '40px', textAlign: 'center' }}>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔋</div>
+                <Title level={4} type="secondary">
+                  Chưa có gói dịch vụ nào
+                </Title>
+                <Text type="secondary">
+                  Nhấn "Thêm gói mới" để tạo gói dịch vụ đầu tiên
+                </Text>
+              </div>
+            )
+          }}
+          size="middle"
+          bordered={false}
+          style={{
+            backgroundColor: '#fbfdfb',
+            borderRadius: '8px'
+          }}
+        />
+      </Card>
+    </div>
   );
 };
 

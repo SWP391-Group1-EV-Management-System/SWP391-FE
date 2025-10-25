@@ -5,9 +5,9 @@ import { message } from 'antd';
 
 const ServicePackageManagement = () => {
   const [packages, setPackages] = useState([
-    { id: 1, name: "Basic Plan", description: "Gói cơ bản cho người dùng mới, phù hợp sử dụng hàng ngày với mức giá tiết kiệm", price: 100000, duration: "30 ngày", type: "Prepaid" },
-    { id: 2, name: "Premium Plan", description: "Gói cao cấp cho người dùng thường xuyên, nhiều ưu đãi và dịch vụ hỗ trợ tốt nhất", price: 300000, duration: "90 ngày", type: "VIP" },
-    { id: 3, name: "Enterprise Plan", description: "Gói dành cho doanh nghiệp với quota lớn và chính sách thanh toán linh hoạt", price: 1000000, duration: "365 ngày", type: "Postpaid" }
+    { packageId: 1, packageName: "Basic Plan", description: "Gói cơ bản cho người dùng mới, phù hợp sử dụng hàng ngày với mức giá tiết kiệm", billingCycle: 1, price: 100000, unit: "MONTH", quota: 50 },
+    { packageId: 2, packageName: "Premium Plan", description: "Gói cao cấp cho người dùng thường xuyên, nhiều ưu đãi và dịch vụ hỗ trợ tốt nhất", billingCycle: 3, price: 300000, unit: "MONTH", quota: 200 },
+    { packageId: 3, packageName: "Enterprise Plan", description: "Gói dành cho doanh nghiệp với quota lớn và chính sách thanh toán linh hoạt", billingCycle: 12, price: 1000000, unit: "MONTH", quota: 5000 }
   ]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState(null);
@@ -25,25 +25,26 @@ const ServicePackageManagement = () => {
     setIsFormOpen(true);
   };
   const handleDeletePackage = (packageId) => {
-    const packageToDelete = packages.find(pkg => pkg.id === packageId);
-    setPackages(prev => prev.filter(pkg => pkg.id !== packageId));
-    message.success(`Đã xóa gói "${packageToDelete?.name}" thành công!`);
+    const packageToDelete = packages.find(pkg => pkg.packageId === packageId);
+    setPackages(prev => prev.filter(pkg => pkg.packageId !== packageId));
+    message.success(`Đã xóa gói "${packageToDelete?.packageName}" thành công!`);
   };
   const handleFormSubmit = async (formData) => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 700));
+      await new Promise(resolve => setTimeout(resolve, 500));
       if (formMode === 'edit') {
-        setPackages(prev => prev.map(pkg => pkg.id === editingPackage.id ? { ...pkg, ...formData } : pkg));
-        message.success(`Cập nhật gói "${formData.name}" thành công!`);
+        setPackages(prev => prev.map(pkg => pkg.packageId === formData.packageId ? { ...pkg, ...formData } : pkg));
+        message.success(`Cập nhật gói "${formData.packageName}" thành công!`);
       } else {
-        const newPackage = { ...formData, id: Math.max(...packages.map(p => p.id), 0) + 1 };
+        const newId = Math.max(0, ...packages.map(p => p.packageId)) + 1;
+        const newPackage = { ...formData, packageId: formData.packageId || newId };
         setPackages(prev => [...prev, newPackage]);
-        message.success(`Thêm gói "${formData.name}" thành công!`);
+        message.success(`Thêm gói "${formData.packageName}" thành công!`);
       }
       setIsFormOpen(false);
       setEditingPackage(null);
-    } catch {
+    } catch (err) {
       message.error('Có lỗi xảy ra, vui lòng thử lại!');
     } finally {
       setLoading(false);

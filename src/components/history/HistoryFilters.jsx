@@ -1,51 +1,32 @@
-import React from "react";
-import { Row, Col, Input, Select, Form } from "antd";
-import "../../assets/styles/HistoryFilters.css";
+import React from 'react';
+import { Input, Select, Button, DatePicker, Space } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 
-const { Option } = Select;
+const { RangePicker } = DatePicker;
 
 const HistoryFilters = ({
-  searchTerm,
-  setSearchTerm,
-  sortOrder,
-  setSortOrder,
+  query,
+  sort,
+  onChangeQuery = () => {},
+  onChangeSort = () => {}
 }) => {
   return (
-    <div className="history-filters-container">
-      <Row gutter={16} align="bottom">
-        <Col flex="auto">
-          <Form.Item
-            label="Tìm kiếm"
-            className="history-filters-form-item"
-            labelCol={{ className: "history-filters-label" }}
-          >
-            <Input
-              placeholder="Tên trạm, mã giao dịch..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              size="large"
-              className="history-search-input"
-            />
-          </Form.Item>
-        </Col>
-        <Col className="history-sort-column">
-          <Form.Item
-            label="Sắp xếp theo thời gian"
-            className="history-filters-form-item"
-            labelCol={{ className: "history-filters-label" }}
-          >
-            <Select
-              value={sortOrder}
-              onChange={setSortOrder}
-              size="large"
-              className="history-sort-select"
-            >
-              <Option value="desc">Mới nhất</Option>
-              <Option value="asc">Cũ nhất</Option>
-            </Select>
-          </Form.Item>
-        </Col>
-      </Row>
+    <div style={{ background: '#ffffff', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(40,167,69,0.08)' }}>
+      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+        <Input
+          placeholder="Tìm kiếm mã phiên/trạm/địa chỉ"
+          prefix={<SearchOutlined />}
+          style={{ width: 360 }}
+          value={query}
+          onChange={(e) => onChangeQuery(e.target.value)}
+          allowClear // Thêm nút X để xóa nhanh
+        />
+
+        <Select value={sort} style={{ width: 160 }} onChange={onChangeSort}>
+          <Select.Option value="desc">Mới nhất</Select.Option>
+          <Select.Option value="asc">Cũ nhất</Select.Option>
+        </Select>
+      </Space>
     </div>
   );
 };

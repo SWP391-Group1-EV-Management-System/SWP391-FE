@@ -1,101 +1,90 @@
-import api from '../utils/axios';
+import { useState, useCallback } from 'react';
+import * as bookingService from '../services/bookingService';
 
-export const createBooking = async (bookingData) => {
-  try {
-    const response = await api.post('/api/booking/create', bookingData);
-    return response.data;
-  } catch (error) {
-    console.error('Error creating booking:', error);
-    throw error;
-  }
-};
+// Hook to manage booking-related operations and local state
+export default function useBooking() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [bookings, setBookings] = useState(null);
+  const [booking, setBooking] = useState(null);
 
-export const completeBooking = async (bookingId) => {
-  try {
-    const response = await api.post(`/api/booking/complete/${bookingId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error completing booking:', error);
-    throw error;
-  }
-};
+  const wrap = useCallback(async (fn, setResult) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fn();
+      if (typeof setResult === 'function') setResult(res);
+      setLoading(false);
+      return res;
+    } catch (err) {
+      setError(err);
+      setLoading(false);
+      throw err;
+    }
+  }, []);
 
-export const cancelBooking = async (bookingId) => {
-  try {
-    const response = await api.post(`/api/booking/cancel/${bookingId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error canceling booking:', error);
-    throw error;
-  }
-};
+  const createBooking = useCallback(async (bookingData) => {
+    return wrap(() => bookingService.createBooking(bookingData));
+  }, [wrap]);
 
-export const getBookingsByPost = async (postId) => {
-  try {
-    const response = await api.get(`/api/booking/getByPost/${postId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching bookings by post:', error);
-    throw error;
-  }
-};
+  const completeBooking = useCallback(async (bookingId) => {
+    return wrap(() => bookingService.completeBooking(bookingId));
+  }, [wrap]);
 
-export const getBookingsByStation = async (stationId) => {
-  try {
-    const response = await api.get(`/api/booking/getByStation/${stationId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching bookings by station:', error);
-    throw error;
-  }
-};
+  const cancelBooking = useCallback(async (bookingId) => {
+    return wrap(() => bookingService.cancelBooking(bookingId));
+  }, [wrap]);
 
-export const getBookingsByUser = async (userId) => {
-  try {
-    const response = await api.get(`/api/booking/getByUser/${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching bookings by user:', error);
-    throw error;
-  }
-};
+  const fetchBookingsByPost = useCallback(async (postId) => {
+    return wrap(() => bookingService.getBookingsByPost(postId), setBookings);
+  }, [wrap]);
 
-export const getBookingsByDate = async (date) => {
-  try {
-    const response = await api.get(`/api/booking/getByCreatedDate?date=${date}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching bookings by date:', error);
-    throw error;
-  }
-};
+  const fetchBookingsByStation = useCallback(async (stationId) => {
+    return wrap(() => bookingService.getBookingsByStation(stationId), setBookings);
+  }, [wrap]);
 
-export const getBookingByWaitingListId = async (waitingListId) => {
-  try {
-    const response = await api.get(`/api/booking/getByWaitingListId/${waitingListId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching booking by waiting list ID:', error);
-    throw error;
-  }
-};
+  const fetchBookingsByUser = useCallback(async (userId) => {
+    return wrap(() => bookingService.getBookingsByUser(userId), setBookings);
+  }, [wrap]);
 
-export const getBookingById = async (bookingId) => {
-  try {
-    const response = await api.get(`/api/booking/getByBookingId/${bookingId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching booking by ID:', error);
-    throw error;
-  }
-};
+  const fetchBookingsByDate = useCallback(async (date) => {
+    return wrap(() => bookingService.getBookingsByDate(date), setBookings);
+  }, [wrap]);
 
-export const getBookingsByStatus = async (statusList) => {
-  try {
-    const response = await api.get(`/api/booking/getByStatus/${statusList}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching bookings by status:', error);
-    throw error;
-  }
-};
+  const fetchBookingByWaitingListId = useCallback(async (waitingListId) => {
+    return wrap(() => bookingService.getBookingByWaitingListId(waitingListId), setBooking);
+  }, [wrap]);
+
+  const fetchBookingById = useCallback(async (bookingId) => {
+    return wrap(() => bookingService.getBookingById(bookingId), setBooking);
+  }, [wrap]);
+
+  const fetchBookingsByStatus = useCallback(async (statusList) => {
+    return wrap(() => bookingService.getBookingsByStatus(statusList), setBookings);
+  }, [wrap]);
+
+  const clear = useCallback(() => {
+    setLoading(false);
+    setError(null);
+    setBookings(null);
+    setBooking(null);
+  }, []);
+
+  return {
+    loading,
+    error,
+    bookings,
+    booking,
+    createBooking,
+    completeBooking,
+    cancelBooking,
+    fetchBookingsByPost,
+    fetchBookingsByStation,
+    fetchBookingsByUser,
+    fetchBookingsByDate,
+    fetchBookingByWaitingListId,
+    fetchBookingById,
+    fetchBookingsByStatus,
+    clear,
+  };
+}

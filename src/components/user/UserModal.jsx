@@ -1,10 +1,12 @@
 import React from 'react';
-import { Modal, Form, Input, Select, Button } from 'antd';
+import { Modal, Form, Input, Select, Button, message } from 'antd';
+import { createUser, updateUser } from '../../services/userService';
 
 const { Option } = Select;
 
-const UserModal = ({ visible, mode = 'view', user = {}, onClose, onSave }) => {
+const UserModal = ({ visible, mode = 'view', user = {}, onClose, onSave, onSubmit }) => {
   const [form] = Form.useForm();
+  const [saving, setSaving] = React.useState(false);
 
   React.useEffect(() => {
     if (visible) {
@@ -23,10 +25,39 @@ const UserModal = ({ visible, mode = 'view', user = {}, onClose, onSave }) => {
 
   const isView = mode === 'view';
 
-  const handleSave = () => {
-    form.validateFields().then(values => {
-      if (onSave) onSave({ ...user, ...values });
-    });
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields();
+      // map status/gender to backend expected types
+      const payload = {
+        ...values,
+        active: values.status === 'Active',
+        gender: values.gender === 'Male',
+      };
+
+      setSaving(true);
+      if (typeof onSubmit === 'function') {
+        // parent will handle API and notifications
+        await onSubmit(values.id, payload);
+      } else {
+        if (values.id) {
+          await updateUser(values.id, payload);
+        } else {
+          await createUser(payload);
+        }
+      }
+
+      setSaving(false);
+      onSave?.(payload);
+      onClose?.();
+    } catch (err) {
+      setSaving(false);
+      if (err && err.response && err.response.data && err.response.data.message) {
+        message.error(err.response.data.message);
+      } else if (err && err.message) {
+        message.error(err.message);
+      }
+    }
   };
 
   return (
@@ -82,7 +113,7 @@ const UserModal = ({ visible, mode = 'view', user = {}, onClose, onSave }) => {
         </Form.Item>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           {!isView && (
-            <Button type="primary" style={{ background: '#166534', borderRadius: 8 }} onClick={handleSave}>
+            <Button type="primary" style={{ background: '#166534', borderRadius: 8 }} onClick={handleSave} loading={saving}>
               Save Changes
             </Button>
           )}

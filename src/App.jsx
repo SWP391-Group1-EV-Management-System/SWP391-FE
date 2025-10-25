@@ -35,11 +35,13 @@ function App() {
           {/* Smart root redirect based on authentication */}
           <Route path="/" element={<RootRedirect />} />
 
-          {/* Welcome & Auth Routes */}
+          {/* Welcome & About Routes with Navbar */}
           <Route element={<NavbarWelcome />}>
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/about" element={<AboutPage />} />
           </Route>
+          
+          {/* Auth Routes (no navbar) */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="otp-verification" element={<OTPVerification />} />
