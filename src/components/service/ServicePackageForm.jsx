@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Modal, Typography, Space, Row, Col, Select } from 'antd';
-import { EditOutlined, PlusOutlined, GiftOutlined, DollarOutlined, ClockCircleOutlined, TagOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import React, { useRef, useState } from 'react';
+import { Modal, Typography, Space, Row, Col, Select, message } from 'antd';
+import { EditOutlined, PlusOutlined, ThunderboltOutlined, EyeOutlined } from '@ant-design/icons';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 
@@ -15,7 +15,7 @@ const ServicePackageSchema = Yup.object().shape({
     .max(100, 'Tên gói không được quá 100 ký tự'),
   description: Yup.string()
     .required('Vui lòng nhập mô tả')
-    .min(10, 'Mô tả phải có ít nhất 10 ký tự'),
+    .min(5, 'Mô tả phải có ít nhất 5 ký tự'),
   price: Yup.number()
     .typeError('Giá phải là số')
     .required('Vui lòng nhập giá')
@@ -37,23 +37,70 @@ const ServicePackageForm = ({
   onSubmit,
   onCancel,
   mode = 'add',
-  loading = false
 }) => {
   const initialValues = initialData && mode === 'edit'
     ? ({
-        packageId: initialData.packageId,
+        packageId: initialData.packageId != null ? String(initialData.packageId) : '',
         packageName: initialData.packageName || '',
         description: initialData.description || '',
         billingCycle: initialData.billingCycle ?? 0,
         price: initialData.price ?? 0,
-        unit: initialData.unit || 'MONTH',
+        unit: initialData.unit ?? 'Package',
         quota: initialData.quota ?? 0,
       })
-    : { packageId: null, packageName: '', description: '', billingCycle: 0, price: 0, unit: 'MONTH', quota: 0 };
+    : { packageId: '', packageName: '', description: '', billingCycle: 0, price: 0, unit: 'Package', quota: 0 };
 
   const resetFormRef = useRef(null);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmValues, setConfirmValues] = useState(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  // Read-only view mode: show details and only a cancel button
+  if (mode === 'view') {
+    const data = initialData || initialValues;
+    return (
+      <Modal
+        title={<Space>{<EyeOutlined />}<Title level={4} style={{ margin: 0 }}>Xem chi tiết gói</Title></Space>}
+        open={isOpen}
+        onCancel={onCancel}
+        footer={(
+          <div style={{ textAlign: 'right' }}>
+            <button onClick={onCancel} style={{ borderRadius: '6px', padding: '8px 16px' }}>Hủy</button>
+          </div>
+        )}
+        width={640}
+        destroyOnHidden={true}
+        maskClosable={false}
+      >
+        <div style={{ marginBottom: 12 }}>
+          <Text strong>Tên gói</Text>
+          <div style={{ marginTop: 6 }}>{String(data.packageName || '')}</div>
+        </div>
+        <div style={{ marginBottom: 12 }}>
+          <Text strong>Mô tả</Text>
+          <div style={{ marginTop: 6 }}>{String(data.description || '')}</div>
+        </div>
+        <Row gutter={12}>
+          <Col span={8}>
+            <Text strong>Chu kỳ (tháng)</Text>
+            <div style={{ marginTop: 6 }}>{Number(data.billingCycle || 0)} tháng</div>
+          </Col>
+          <Col span={8}>
+            <Text strong>Giá (VNĐ)</Text>
+            <div style={{ marginTop: 6 }}>{Number(data.price || 0).toLocaleString('vi-VN')} VNĐ</div>
+          </Col>
+          <Col span={8}>
+            <Text strong>Quota</Text>
+            <div style={{ marginTop: 6 }}>{Number(data.quota || 0)}</div>
+          </Col>
+        </Row>
+        <div style={{ marginTop: 12 }}>
+          <Text strong>Đơn vị</Text>
+          <div style={{ marginTop: 6 }}>{String(data.unit || '')}</div>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal
@@ -84,7 +131,7 @@ const ServicePackageForm = ({
           setSubmitting(false);
         }}
       >
-        {({ isSubmitting, handleSubmit, setFieldValue, values, resetForm }) => (
+        {({ isSubmitting, resetForm }) => (
           <Form style={{ marginTop: '12px' }}>
             {/* Tên gói */}
             <div style={{ marginBottom: 12 }}>
@@ -146,7 +193,6 @@ const ServicePackageForm = ({
                       <input
                         {...field}
                         type="number"
-                        min={0}
                         placeholder="Nhập giá"
                         style={{ borderRadius: '6px', width: '100%', padding: '8px', marginTop: 6 }}
                       />
@@ -157,54 +203,38 @@ const ServicePackageForm = ({
               </Col>
 
               <Col span={8}>
-                <div style={{ marginBottom: 12 }}>
-                  <label htmlFor="unit">Đơn vị</label>
-                  <Select
-                    value={values.unit}
-                    onChange={value => setFieldValue('unit', value)}
-                    size="large"
-                    style={{ borderRadius: '6px', width: '100%', marginTop: 6 }}
-                  >
-                    <Option value="MONTH">Tháng</Option>
-                    <Option value="HOUR">Giờ</Option>
-                    <Option value="SESSION">Phiên sạc</Option>
-                  </Select>
-                  <ErrorMessage name="unit" component="div" style={{ color: 'red' }} />
-                </div>
-              </Col>
-            </Row>
-
-            <div style={{ marginBottom: 12 }}>
-              <label htmlFor="quota">Quota (kWh hoặc số lần)</label>
+              <div style={{ marginBottom: 12 }}>
+              <label htmlFor="quota">Quota</label>
               <Field name="quota">
                 {({ field }) => (
                   <input
                     {...field}
                     type="number"
-                    min={0}
                     placeholder="Nhập quota"
                     style={{ borderRadius: '6px', width: '100%', padding: '8px', marginTop: 6 }}
                   />
                 )}
               </Field>
               <ErrorMessage name="quota" component="div" style={{ color: 'red' }} />
-            </div>
-
+              </div>
+              </Col>
+            </Row>
             <div style={{ textAlign: 'right', marginTop: 18 }}>
               <button
                 type="button"
                 onClick={() => {
                   resetForm();
+                  setSubmitLoading(false);
                   onCancel?.();
                 }}
-                disabled={isSubmitting || loading}
+                disabled={isSubmitting || submitLoading}
                 style={{ marginRight: 8, borderRadius: '6px', padding: '8px 16px' }}
               >
                 Hủy
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || loading}
+                disabled={isSubmitting || submitLoading}
                 style={{ borderRadius: '6px', padding: '8px 16px', background: '#0b6b3d', color: '#fff' }}
               >
                 Đăng ký
@@ -213,7 +243,7 @@ const ServicePackageForm = ({
 
             {/* Xác nhận thanh toán Modal */}
             <Modal
-              title={<Space><ThunderboltOutlined /> Xác nhận thanh toán</Space>}
+              title={<Space><ThunderboltOutlined /> Xác nhận</Space>}
               open={confirmVisible}
               onCancel={() => setConfirmVisible(false)}
               footer={null}
@@ -246,29 +276,36 @@ const ServicePackageForm = ({
                     </button>
                     <button
                       onClick={async () => {
+                        setSubmitLoading(true);
                         try {
-                          // Call parent onSubmit with structured package object
+                          // Build submit data
                           const submitData = {
-                            packageId: initialData?.packageId || Date.now(),
-                            packageName: confirmValues.packageName,
-                            description: confirmValues.description,
-                            billingCycle: Number(confirmValues.billingCycle),
-                            price: Number(confirmValues.price),
-                            unit: confirmValues.unit,
-                            quota: Number(confirmValues.quota),
+                            packageId: initialData?.packageId != null ? String(initialData.packageId) : String(Date.now()),
+                            packageName: String(confirmValues.packageName || ''),
+                            description: String(confirmValues.description || ''),
+                            billingCycle: Number(confirmValues.billingCycle || 0),
+                            price: Number(confirmValues.price || 0),
+                            unit: String(confirmValues.unit || 'MONTH'),
+                            quota: Number(confirmValues.quota || 0),
                           };
+
+                          // Delegate to parent handler
                           await onSubmit?.(submitData);
-                          // reset form if provided
+
+                          // reset form, close modal and notify parent
                           resetFormRef.current?.();
                           setConfirmVisible(false);
                           onCancel?.();
                         } catch (e) {
-                          // ignore, parent handles errors
+                          message.error('Có lỗi xảy ra, vui lòng thử lại!');
+                        } finally {
+                          setSubmitLoading(false);
                         }
                       }}
                       style={{ borderRadius: '6px', padding: '8px 16px', background: '#0b6b3d', color: '#fff' }}
+                      disabled={submitLoading}
                     >
-                      Xác nhận thanh toán
+                      Xác nhận
                     </button>
                   </div>
                 </div>
