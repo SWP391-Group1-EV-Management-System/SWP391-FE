@@ -237,19 +237,19 @@
 
 /* Primary Color */
 .loading-primary .spinner-ring div {
-  border-top-color: #007bff;
+  border-top-color: #0b9459;
 }
 
 .loading-primary .loading-dots .dot {
-  background-color: #007bff;
+  background-color: #0b9459;
 }
 
 .loading-primary .loading-pulse {
-  color: #007bff;
+  color: #0b9459;
 }
 
 .loading-primary .loading-text {
-  color: #007bff;
+  color: #0b9459;
 }
 
 /* Secondary Color */

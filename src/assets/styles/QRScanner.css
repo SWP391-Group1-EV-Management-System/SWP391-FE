@@ -1,6 +1,19 @@
 /* QR Scanner Styles */
 @import "./z-index-system.css";
 
+/* Override Antd components z-index để hiển thị trên QR Scanner */
+.ant-message {
+  z-index: var(--z-message-on-modal) !important;
+}
+
+.ant-notification {
+  z-index: var(--z-message-on-modal) !important;
+}
+
+.ant-modal {
+  z-index: var(--z-message-on-modal) !important;
+}
+
 .qr-scanner-overlay {
   position: fixed;
   top: 0;

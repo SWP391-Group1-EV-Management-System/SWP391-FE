@@ -44,7 +44,9 @@ export default function ChargingTimeSlider({
   return (
     <div className={`slider-container charging-time-slider ${className}`}>
       {loading ? (
-        <div className="loading-placeholder">Đang tải thông tin thời gian sạc...</div>
+        <div className="loading-placeholder">
+          Đang tải thông tin thời gian sạc...
+        </div>
       ) : (
         <Slider
           defaultValue={defaultValue}
@@ -80,6 +82,9 @@ function Slider({
   // State lưu giá trị hiện tại của slider
   const [value, setValue] = useState(defaultValue);
 
+  // Ref để lưu callback mới nhất (tránh stale closure)
+  const onValueChangeRef = useRef(onValueChange);
+
   // Ref để truy cập DOM element của slider track
   const sliderRef = useRef(null);
 
@@ -91,11 +96,16 @@ function Slider({
   const overflow = useMotionValue(0); // Lượng overflow khi kéo ra ngoài
   const scale = useMotionValue(1); // Scale factor cho hover effect
 
-  // Effect để cập nhật giá trị khi prop defaultValue thay đổi
+  // Update ref mỗi khi onValueChange prop thay đổi
+  useEffect(() => {
+    onValueChangeRef.current = onValueChange;
+  }, [onValueChange]);
+
+  // Effect để set giá trị ban đầu CHỈ 1 LẦN khi component mount
   useEffect(() => {
     setValue(defaultValue);
-    onValueChange(defaultValue);
-  }, [defaultValue, onValueChange]);
+    onValueChangeRef.current(defaultValue);
+  }, []); // Empty deps = chỉ chạy 1 lần khi mount
 
   // Event listener để theo dõi vị trí cursor và tính toán overflow
   useMotionValueEvent(clientX, "change", (latest) => {
@@ -141,9 +151,9 @@ function Slider({
       // Giới hạn giá trị trong khoảng [startingValue, maxValue]
       newValue = Math.min(Math.max(newValue, startingValue), maxValue);
 
-      // Cập nhật state và gọi callback
+      // Cập nhật state và gọi callback từ ref (luôn là callback mới nhất)
       setValue(newValue);
-      onValueChange(newValue);
+      onValueChangeRef.current(newValue);
 
       // Cập nhật vị trí cursor cho overflow calculation
       clientX.jump(e.clientX);
@@ -291,9 +301,7 @@ function Slider({
         <p className="time-value">
           {isTimeSlider ? formatTime(Math.round(value)) : Math.round(value)}
         </p>
-        {isTimeSlider && (
-          <p className="time-label">Thời gian sạc</p>
-        )}
+        {isTimeSlider && <p className="time-label">Thời gian sạc</p>}
       </div>
     </>
   );
