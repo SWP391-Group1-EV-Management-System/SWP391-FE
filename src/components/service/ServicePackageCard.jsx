@@ -22,17 +22,19 @@ const ServicePackageCard = ({
   quota,
   type,
   isActive = false,
+  isDisabled = false, // ← THÊM PROP MỚI
   onSubscribe 
 }) => {
   
-  // default colors and icon (remove per-package config)
+  // default colors and icon
   const greenColor = '#0bb46b';
   const neutralColor = '#595959';
-  const icon = <PoweroffOutlined style={{ color: greenColor }} />;
+  const disabledColor = '#999';
+  const icon = <PoweroffOutlined style={{ color: isDisabled ? disabledColor : greenColor }} />;
   const buttonType = 'default';
 
   const handleSubscribe = () => {
-    if (onSubscribe) {
+    if (onSubscribe && !isDisabled && !isActive) {
       onSubscribe({ packageId, packageName, price, billingCycle, unit, quota, type });
     }
   };
@@ -48,14 +50,16 @@ const ServicePackageCard = ({
 
   return (
     <Card
-      hoverable
+      hoverable={!isDisabled} // ← Disable hover khi disabled
       className="service-package-card"
       style={{
         background: '#ffffff',
         borderRadius: '10px',
-        border: `2px solid #e5e7eb`,
+        border: isActive ? `2px solid ${greenColor}` : `2px solid #e5e7eb`,
         height: '100%',
-        transition: 'transform 0.12s ease, box-shadow 0.12s ease'
+        opacity: isDisabled ? 0.6 : 1, // ← Làm mờ khi disabled
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        transition: 'transform 0.12s ease, box-shadow 0.12s ease, opacity 0.2s ease'
       }}
       styles={{ body: { padding: '18px' } }}
       actions={[
@@ -66,22 +70,23 @@ const ServicePackageCard = ({
             size="middle"
             block
             onClick={handleSubscribe}
-            disabled={!!isActive}
+            disabled={isActive || isDisabled} // ← Disable khi active hoặc disabled
             style={{
               height: '44px',
               fontSize: '14px',
               fontWeight: 600,
               borderRadius: '20px',
-              background: isActive ? '#f0f0f0' : greenColor,
-              borderColor: isActive ? '#d9d9d9' : greenColor,
-              color: isActive ? '#000' : '#fff',
+              background: isActive ? '#f0f0f0' : isDisabled ? '#e8e8e8' : greenColor,
+              borderColor: isActive ? '#d9d9d9' : isDisabled ? '#d9d9d9' : greenColor,
+              color: isActive || isDisabled ? '#999' : '#fff',
               boxShadow: 'none',
               width: '100%',
               margin: 0,
+              cursor: isActive || isDisabled ? 'not-allowed' : 'pointer'
             }}
             className="custom-package-btn"
           >
-            {isActive ? 'Đang sử dụng' : 'Đăng ký ngay'}
+            {isActive ? 'Đang sử dụng' : isDisabled ? 'Không khả dụng' : 'Đăng ký ngay'}
           </Button>
         </div>
       ]}
@@ -89,18 +94,30 @@ const ServicePackageCard = ({
       {/* Header với icon và tag */}
       <div style={{ textAlign: 'center', marginBottom: '12px' }}>
         <Space direction="vertical" size="small">
-          <div style={{ fontSize: '30px', color: neutralColor }}>
+          <div style={{ fontSize: '30px', color: isDisabled ? disabledColor : neutralColor }}>
             {icon}
           </div>
-          <Title level={4} style={{ margin: 0, color: '#000' }}>
+          <Title level={4} style={{ margin: 0, color: isDisabled ? disabledColor : '#000' }}>
             {packageName}
           </Title>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 8, alignItems: 'center' }}>
-            <Tag color={isActive ? 'green' : 'default'} style={{ fontSize: '12px', fontWeight: 600 }}>
-              {isActive ? 'Đang sử dụng' : (type || 'Gói')}
-            </Tag>
             {isActive && (
-              <Tag color="success" style={{ fontSize: 12 }}>Kích hoạt</Tag>
+              <>
+                <Tag color="green" style={{ fontSize: '12px', fontWeight: 600 }}>
+                  Đang sử dụng
+                </Tag>
+                <Tag color="success" style={{ fontSize: 12 }}>Kích hoạt</Tag>
+              </>
+            )}
+            {isDisabled && !isActive && (
+              <Tag color="default" style={{ fontSize: '12px', fontWeight: 600 }}>
+                Không khả dụng
+              </Tag>
+            )}
+            {!isActive && !isDisabled && (
+              <Tag color="default" style={{ fontSize: '12px', fontWeight: 600 }}>
+                {type || 'Gói'}
+              </Tag>
             )}
           </div>
         </Space>
@@ -110,7 +127,7 @@ const ServicePackageCard = ({
       <Paragraph 
         style={{ 
           textAlign: 'left',
-          color: '#333',
+          color: isDisabled ? disabledColor : '#333',
           marginBottom: '14px',
           minHeight: '48px'
         }}
@@ -125,26 +142,32 @@ const ServicePackageCard = ({
       <Space direction="vertical" size="middle" style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
-            <DollarOutlined style={{ color: neutralColor }} />
-            <Text strong>Giá:</Text>
+            <DollarOutlined style={{ color: isDisabled ? disabledColor : neutralColor }} />
+            <Text strong style={{ color: isDisabled ? disabledColor : '#000' }}>Giá:</Text>
           </Space>
-          <Text strong style={{ color: '#000', fontSize: 16 }}>{formattedPrice}</Text>
+          <Text strong style={{ color: isDisabled ? disabledColor : '#000', fontSize: 16 }}>
+            {formattedPrice}
+          </Text>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
-            <CalendarOutlined style={{ color: neutralColor }} />
-            <Text strong>Hạn dùng:</Text>
+            <CalendarOutlined style={{ color: isDisabled ? disabledColor : neutralColor }} />
+            <Text strong style={{ color: isDisabled ? disabledColor : '#000' }}>Hạn dùng:</Text>
           </Space>
-          <Text style={{ fontSize: '14px', fontWeight: 500 }}>{durationText}</Text>
+          <Text style={{ fontSize: '14px', fontWeight: 500, color: isDisabled ? disabledColor : '#000' }}>
+            {durationText}
+          </Text>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space>
-            <PoweroffOutlined style={{ color: neutralColor }} />
-            <Text strong>Hạn mức sử dụng gói:</Text>
+            <PoweroffOutlined style={{ color: isDisabled ? disabledColor : neutralColor }} />
+            <Text strong style={{ color: isDisabled ? disabledColor : '#000' }}>Hạn mức:</Text>
           </Space>
-          <Text style={{ fontSize: '14px', fontWeight: 500 }}>{quota ?? 'Không giới hạn'}</Text>
+          <Text style={{ fontSize: '14px', fontWeight: 500, color: isDisabled ? disabledColor : '#000' }}>
+            {quota ?? 'Không giới hạn'}
+          </Text>
         </div>
       </Space>
 
@@ -152,10 +175,10 @@ const ServicePackageCard = ({
         .custom-package-btn {
           box-shadow: none !important;
         }
-        .custom-package-btn:hover, .custom-package-btn:focus {
+        .custom-package-btn:hover:not(:disabled), .custom-package-btn:focus:not(:disabled) {
           filter: brightness(0.94);
         }
-        .service-package-card:hover {
+        .service-package-card:not([style*="cursor: not-allowed"]):hover {
           transform: translateY(-6px);
           box-shadow: 0 10px 30px rgba(11,135,91,0.12);
         }

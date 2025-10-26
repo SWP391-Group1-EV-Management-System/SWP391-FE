@@ -21,6 +21,7 @@ import VirtualStationPage from "./page/VirtualStationPage.jsx";
 import ForgotPasswordPage from "./page/ForgotPasswordPage.jsx";
 import AboutPage from "./page/AboutPage.jsx";
 import NavbarWelcome from "./components/welcome/NavbarWelcome.jsx";
+import PaymentReturn from './page/PaymentReturn.jsx';
 
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
@@ -63,6 +64,7 @@ function App() {
             <Route path="history" element={<HistoryPage />} />
             <Route path="servicepackage" element={<ServicePackage />} />
             <Route path="setting" element={<SettingPage />} />
+            <Route path="/app/payment-return" element={<PaymentReturn />} />
 
             {/* Admin Only Routes */}
             <Route
