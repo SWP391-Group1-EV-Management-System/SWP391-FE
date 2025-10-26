@@ -158,12 +158,29 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
       if (response.success) {
         message.success("Bắt đầu phiên sạc thành công!");
 
-        if (response.data?.sessionId) {
-          localStorage.setItem("currentSessionId", response.data.sessionId);
-        }
+        // Lưu sessionId từ response của BE
+        // BE trả về sessionId trong response.data (có thể là string hoặc object)
+        const sessionId =
+          response.data?.chargingSessionId || response.data?.sessionId;
 
-        onClose();
-        navigate("/app/energy");
+        if (sessionId) {
+          console.log("✅ Lưu sessionId vào localStorage:", sessionId);
+          localStorage.setItem("currentSessionId", sessionId);
+
+          // Navigate đến trang energy
+          onClose();
+          navigate("/app/energy");
+        } else {
+          console.warn("⚠️ Không nhận được sessionId từ BE");
+          console.warn("⚠️ Response data:", response.data);
+
+          // Vẫn cho phép navigate, nhưng cảnh báo
+          message.warning(
+            "Phiên sạc đã được tạo nhưng không nhận được ID. Vui lòng kiểm tra lại."
+          );
+          onClose();
+          navigate("/app/home"); // Navigate về home thay vì energy
+        }
       } else {
         // Hiển thị error message chi tiết
         const errorMsg = response.message || "Không thể bắt đầu phiên sạc";

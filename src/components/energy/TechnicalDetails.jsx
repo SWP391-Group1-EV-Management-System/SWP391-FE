@@ -8,24 +8,14 @@ const TechnicalDetails = ({ sessionData }) => {
   const techSpecs = [
     {
       label: "Loại cổng sạc",
-      value: sessionData.socketType,
+      value:
+        sessionData.typeCharging && sessionData.typeCharging.length
+          ? sessionData.typeCharging.join(", ")
+          : "-",
     },
     {
       label: "Công suất tối đa",
-      value: sessionData.power,
-    },
-    {
-      label: "Công suất hiện tại",
-      value: `${sessionData.chargingPower} kW`,
-      highlight: true,
-    },
-    {
-      label: "Điện áp",
-      value: sessionData.voltage,
-    },
-    {
-      label: "Dòng điện",
-      value: sessionData.current,
+      value: `${sessionData.maxPower} Kwh`,
     },
   ];
 
