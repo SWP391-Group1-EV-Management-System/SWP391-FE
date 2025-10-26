@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import paymentService from '../services/paymentService';
+import { createMomoPayment as createMomoPaymentService} from '../services/paymentService';
 
 // Hook for payment operations
 export const usePayment = () => {
@@ -29,7 +29,7 @@ export const usePayment = () => {
     setError(null);
     try {
       const momoRequestData = { orderId, amount, orderInfo };
-      const res = await paymentService.createMomoPayment(momoRequestData);
+      const res = await createMomoPaymentService(momoRequestData);
       return res;
     } catch (err) {
       setError(err.response?.data || err.message);

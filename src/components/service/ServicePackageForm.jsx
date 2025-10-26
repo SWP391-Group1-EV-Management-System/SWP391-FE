@@ -285,7 +285,7 @@ const ServicePackageForm = ({
                             description: String(confirmValues.description || ''),
                             billingCycle: Number(confirmValues.billingCycle || 0),
                             price: Number(confirmValues.price || 0),
-                            unit: String(confirmValues.unit || 'MONTH'),
+                            unit: String(confirmValues.unit || 'Package'),
                             quota: Number(confirmValues.quota || 0),
                           };
 

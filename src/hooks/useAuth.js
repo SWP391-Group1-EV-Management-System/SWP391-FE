@@ -1,4 +1,4 @@
-import { useCallback, useState, useMemo, useEffect } from "react";
+import { useCallback, useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router";
 import {
   login as loginService,
@@ -12,6 +12,7 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
+  const hasFetchedRef = useRef(false); // ← THÊM: Đánh dấu đã fetch chưa
 
   // Fetch user profile helper
   const fetchUserProfile = useCallback(async () => {
@@ -31,7 +32,10 @@ export const useAuth = () => {
 
   // Chỉ auto-fetch user một lần khi khởi tạo ứng dụng
   useEffect(() => {
-    let mounted = true;
+    console.log('🔍 useAuth useEffect triggered');
+    console.log('- Current user:', user);
+    console.log('- Current path:', location.pathname);
+    console.log('- Has fetched:', hasFetchedRef.current);
 
     // Skip auto-fetch ở các trang public
     const publicPaths = [
@@ -45,22 +49,12 @@ export const useAuth = () => {
       return;
     }
 
-    // Chỉ fetch nếu chưa có user và chưa từng loading
-    if (!user && !loading) {
-      (async () => {
-        try {
-          if (!mounted) return;
-          await fetchUserProfile();
-        } catch (e) {
-          // ignore - not logged in
-        }
-      })();
+    // Chỉ fetch nếu chưa có user VÀ chưa từng fetch
+    if (!user && !hasFetchedRef.current) {
+      hasFetchedRef.current = true; // ← Đánh dấu đã fetch
+      fetchUserProfile();
     }
-
-    return () => {
-      mounted = false;
-    };
-  }, []); // Bỏ dependency để chỉ chạy một lần khi mount
+  }, [location.pathname]); // ← CHỈ GIỮ location.pathname
 
   const login = useCallback(
     async (email, password, redirectTo = "/app/home") => {
@@ -101,6 +95,7 @@ export const useAuth = () => {
       setError(e);
     } finally {
       setUser(null);
+      hasFetchedRef.current = false; // ← Reset flag khi logout
       setLoading(false);
       window.location.href = "/login";
     }
@@ -143,7 +138,7 @@ export const useRole = () => {
   );
 };
 
-// Convenience wrappers so existing code that uses useLogin / useLogout can keep the same hook names
+// Convenience wrappers
 export const useLogin = () => {
   const { login, loading, error } = useAuth();
   return { login, loading, error };
