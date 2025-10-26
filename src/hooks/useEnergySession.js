@@ -6,29 +6,77 @@ export const useEnergySession = (userID = null) => {
   const [sessionData, setSessionData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [errorCode, setErrorCode] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Fetch session data từ API
   useEffect(() => {
     const fetchSessionData = async () => {
-      if (!userID) {
-        setIsLoading(false);
-        setError("Vui lòng đăng nhập để xem phiên sạc");
-        console.warn("useEnergySession: userID is null or undefined");
-        return;
-      }
-
       try {
         setIsLoading(true);
         setError(null);
-        
+        setErrorCode(null);
+
+        // Ưu tiên lấy session từ sessionId trong localStorage
+        const storedSessionId = localStorage.getItem("currentSessionId");
+
+        if (storedSessionId) {
+          console.log("🔍 Lấy session từ sessionId:", storedSessionId);
+          const response = await energySessionService.getSessionById(
+            storedSessionId
+          );
+
+          if (response.success && response.data) {
+            console.log("✅ Đã lấy session từ sessionId");
+            setSessionData(response.data);
+            setIsLoading(false);
+            return;
+          } else {
+            console.warn("⚠️ Không tìm thấy session với ID:", storedSessionId);
+
+            // Xử lý các error code đặc biệt
+            if (response.errorCode === 403) {
+              setError("Bạn không có quyền truy cập phiên sạc này");
+              setErrorCode(403);
+              setIsLoading(false);
+              return;
+            } else if (response.errorCode === 404) {
+              console.log("Session không tồn tại, xóa khỏi localStorage");
+              localStorage.removeItem("currentSessionId");
+            } else if (response.errorCode) {
+              setError(response.message || "Không thể lấy thông tin phiên sạc");
+              setErrorCode(response.errorCode);
+              setIsLoading(false);
+              return;
+            }
+          }
+        }
+
+        // Nếu không có sessionId hoặc không tìm thấy, thử lấy theo userID
+        if (!userID) {
+          setIsLoading(false);
+          setError("Vui lòng đăng nhập để xem phiên sạc");
+          console.warn("useEnergySession: userID is null or undefined");
+          return;
+        }
+
+        console.log("🔍 Lấy session theo userID:", userID);
         const response = await energySessionService.getCurrentSession(userID);
-        
+
         if (response.success && response.data) {
+          console.log("✅ Đã lấy session theo userID:", response.data);
           setSessionData(response.data);
         } else {
           setSessionData(null);
-          setError(response.message || "Không có phiên sạc đang hoạt động");
+
+          // Xử lý error code
+          if (response.errorCode === 403) {
+            setError("Bạn không có quyền truy cập phiên sạc");
+            setErrorCode(403);
+          } else {
+            setError(response.message || "Không có phiên sạc đang hoạt động");
+            setErrorCode(response.errorCode);
+          }
         }
       } catch (err) {
         console.error("Error fetching session data:", err);
@@ -52,13 +100,30 @@ export const useEnergySession = (userID = null) => {
 
   // Real-time update session data (polling mỗi 30 giây)
   useEffect(() => {
-    if (!userID || !sessionData?.sessionId) return;
+    if (!sessionData?.sessionId) return;
 
     const updateInterval = setInterval(async () => {
       try {
-        const response = await energySessionService.getCurrentSession(userID);
-        if (response.success && response.data) {
-          setSessionData(response.data);
+        // Ưu tiên update bằng sessionId
+        const storedSessionId = localStorage.getItem("currentSessionId");
+        const sessionIdToUse = storedSessionId || sessionData.sessionId;
+
+        if (sessionIdToUse) {
+          console.log("🔄 Polling update session:", sessionIdToUse);
+          const response = await energySessionService.getSessionById(
+            sessionIdToUse
+          );
+
+          if (response.success && response.data) {
+            setSessionData(response.data);
+          }
+        } else if (userID) {
+          // Fallback: update theo userID
+          const response = await energySessionService.getCurrentSession(userID);
+
+          if (response.success && response.data) {
+            setSessionData(response.data);
+          }
         }
       } catch (err) {
         console.error("Error updating session data:", err);
@@ -76,7 +141,7 @@ export const useEnergySession = (userID = null) => {
       setIsLoading(true);
       setError(null);
       const response = await energySessionService.createSession(bookingData);
-      
+
       if (response.success) {
         setSessionData(response.data);
         return response;
@@ -101,8 +166,11 @@ export const useEnergySession = (userID = null) => {
     }
 
     try {
-      const response = await energySessionService.updateSessionStatus(sessionData.sessionId, status);
-      
+      const response = await energySessionService.updateSessionStatus(
+        sessionData.sessionId,
+        status
+      );
+
       if (response.success) {
         setSessionData(response.data);
         return response;
@@ -118,13 +186,38 @@ export const useEnergySession = (userID = null) => {
   };
 
   const refetch = async () => {
-    if (!userID) return;
-    
     try {
       setIsLoading(true);
       setError(null);
+
+      // Ưu tiên refetch bằng sessionId
+      const storedSessionId = localStorage.getItem("currentSessionId");
+
+      if (storedSessionId) {
+        console.log("🔄 Refetch session từ sessionId:", storedSessionId);
+        const response = await energySessionService.getSessionById(
+          storedSessionId
+        );
+
+        if (response.success && response.data) {
+          setSessionData(response.data);
+          setIsLoading(false);
+          return;
+        } else {
+          console.warn("⚠️ Không tìm thấy session khi refetch");
+          localStorage.removeItem("currentSessionId");
+        }
+      }
+
+      // Fallback: refetch theo userID
+      if (!userID) {
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("🔄 Refetch session theo userID:", userID);
       const response = await energySessionService.getCurrentSession(userID);
-      
+
       if (response.success && response.data) {
         setSessionData(response.data);
       } else {
@@ -146,8 +239,9 @@ export const useEnergySession = (userID = null) => {
     statusConfig,
     isLoading,
     error,
+    errorCode,
     createSession,
     updateSessionStatus,
-    refetch
+    refetch,
   };
 };

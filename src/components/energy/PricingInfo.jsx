@@ -1,18 +1,15 @@
 import React from "react";
-import { Card, Typography, Space, Row, Col, Divider } from "antd";
+import { Card, Typography, Space, Row, Col, Button, message } from "antd";
+import "./PricingInfo.css";
 import { DollarOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
-const PricingInfo = ({ sessionData }) => {
+const PricingInfo = ({ sessionData, onPay }) => {
   const pricingItems = [
     {
       label: "Giá theo kWh",
       value: `${sessionData.pricePerKwh}đ`,
-    },
-    {
-      label: "Giá theo phút",
-      value: `${sessionData.pricePerMin}đ`,
     },
     {
       label: "Tổng thời gian",
@@ -99,38 +96,19 @@ const PricingInfo = ({ sessionData }) => {
       </Space>
 
       {/* Cost Summary */}
-      <div
-        style={{
-          background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
-          padding: "19px",
-          borderRadius: "12px",
-          border: "2px solid #10b981",
-          textAlign: "center",
-        }}
-      >
-        <Text
-          style={{
-            color: "#065f46",
-            fontSize: "14px",
-            fontWeight: 600,
-            display: "block",
-            marginBottom: "8px",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
+      <div className="controls-container-pay">
+        <Button
+          className="pay-button"
+          type="success"
+          onClick={() => {
+            if (onPay) return onPay();
+            message.info(
+              "Tính năng thanh toán chưa được cấu hình trong môi trường dev."
+            );
           }}
         >
-          Tổng chi phí dự kiến
-        </Text>
-        <div
-          style={{
-            color: "#047857",
-            fontSize: "32px",
-            fontWeight: 800,
-            fontFamily: "monospace",
-          }}
-        >
-          {sessionData.estimatedCost}đ
-        </div>
+          THANH TOÁN
+        </Button>
       </div>
     </Card>
   );
