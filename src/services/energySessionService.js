@@ -2,65 +2,12 @@
  * ENERGY SESSION SERVICE
  *
  * Service để xử lý các API liên quan đến phiên sạc năng lượng
- * Bao gồm tạo phiên sạc, lấy thông tin phiên sạc hiện tại, cập nhật trạng thái
+ * Bao gồm tạo phiên sạc, lấy thông tin phiên sạc hiện tại, cập nhật trạng thái, hoàn thành phiên sạc
  */
 
 import api from "../utils/axios";
 
 export const energySessionService = {
-  /**
-   * Lấy thông tin phiên sạc hiện tại của user
-   * Mục đích: Kiểm tra xem user có đang trong phiên sạc nào không
-   * API endpoint: GET /api/charging/session/current/{userID}
-   */
-  async getCurrentSession(userID) {
-    try {
-      // Gọi API để lấy thông tin phiên sạc hiện tại
-      const response = await api.get(`/api/charging/session/current/${userID}`);
-
-      // Kiểm tra response có data và success = true
-      if (response.data && response.data.success) {
-        return {
-          success: true,
-          // Map dữ liệu từ API sang format chuẩn của UI
-          data: this.mapSessionDataFromApi(response.data.data),
-          message: "Lấy thông tin phiên sạc thành công",
-        };
-      } else {
-        // Trường hợp không có phiên sạc đang hoạt động
-        return {
-          success: false,
-          data: null,
-          message:
-            response.data?.message || "Không có phiên sạc đang hoạt động",
-        };
-      }
-    } catch (error) {
-      console.error("Error getting current session:", error);
-
-      const statusCode = error.response?.status;
-
-      // Xử lý lỗi 403: Không có quyền truy cập
-      if (statusCode === 403) {
-        return {
-          success: false,
-          data: null,
-          message: "Bạn không có quyền truy cập phiên sạc",
-          errorCode: 403,
-        };
-      }
-
-      // Xử lý các lỗi khác
-      return {
-        success: false,
-        data: null,
-        message:
-          error.response?.data?.message || "Không thể lấy thông tin phiên sạc",
-        errorCode: statusCode,
-      };
-    }
-  },
-
   /**
    * Lấy thông tin phiên sạc theo ID cụ thể
    * API: GET /api/charging/session/show/{sessionId}
@@ -372,11 +319,23 @@ export const energySessionService = {
    */
   async updateSessionStatus(sessionId, status) {
     try {
+      // Normalize status to backend expected values
+      // FE may use values like "STOPPED" or "PAUSED"; BE expects "stop" | "completed" | "paused"
+      const normalizedStatus = (() => {
+        if (!status && status !== 0) return status;
+        const s = String(status).toLowerCase();
+        if (s === "stopped" || s === "stop") return "stop";
+        if (s === "paused" || s === "pause") return "paused";
+        if (s === "completed" || s === "complete") return "completed";
+        return s;
+      })();
+
+      console.debug("Updating session status", { sessionId, status, normalizedStatus });
       // Gọi API cập nhật trạng thái
       const response = await api.put(
         `/api/charging/session/${sessionId}/status`,
         {
-          status: status,
+          status: normalizedStatus,
         }
       );
 
@@ -392,13 +351,160 @@ export const energySessionService = {
         return {
           success: false,
           message: response.data?.message || "Không thể cập nhật trạng thái",
+          errorCode: response.status,
         };
       }
     } catch (error) {
-      console.error("Error updating session status:", error);
+      // Log detailed info to assist debugging 403 cases
+      console.error("Error updating session status:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        headers: error.response?.headers,
+        request: {
+          url: error.config?.url,
+          method: error.config?.method,
+          headers: error.config?.headers,
+          data: error.config?.data,
+        },
+      });
+
+      const statusCode = error.response?.status;
+
+      if (statusCode === 403) {
+        return {
+          success: false,
+          message:
+            error.response?.data?.message ||
+            (typeof error.response?.data === "string"
+              ? error.response.data
+              : "Bạn không có quyền cập nhật trạng thái phiên sạc này"),
+          errorCode: 403,
+        };
+      }
+
+      if (statusCode === 404) {
+        return {
+          success: false,
+          message:
+            error.response?.data?.message ||
+            (typeof error.response?.data === "string"
+              ? error.response.data
+              : "Không tìm thấy phiên sạc"),
+          errorCode: 404,
+        };
+      }
+
       return {
         success: false,
-        message: error.response?.data?.message || "Lỗi khi cập nhật trạng thái",
+        message:
+          error.response?.data?.message ||
+          error.response?.data ||
+          error.message ||
+          "Lỗi khi cập nhật trạng thái",
+        errorCode: statusCode,
+      };
+    }
+  },
+
+  /**
+   * Hoàn thành phiên sạc (MỚI)
+   * API: POST /api/charging/session/finish/{sessionId}
+   * Body: BigDecimal kWh (số thực - tổng năng lượng đã sạc)
+   *
+   * Backend xử lý:
+   * - Set kWh cho session
+   * - End session (set endTime, status)
+   * - Complete booking nếu có
+   * - Xử lý penalty nếu user rút sớm (userReputationService.handleEarlyUnplugPenalty)
+   * - Process booking tiếp theo trong queue (bookingService.processBooking)
+   * - Set user status = STATUS_PAYMENT
+   *
+   * @param {string} sessionId - ID của phiên sạc cần hoàn thành
+   * @param {number} totalEnergy - Tổng năng lượng đã sạc (kWh), ví dụ: 12.34
+   * @returns {Promise<Object>} - {success, message, data}
+   */
+  async finishSession(sessionId, totalEnergy) {
+    try {
+      console.log("🏁 Hoàn thành phiên sạc:", {
+        sessionId,
+        totalEnergy: `${totalEnergy} kWh`,
+      });
+
+      // Gọi API finish session
+      // Backend nhận BigDecimal trực tiếp trong body (không wrap trong object)
+      const response = await api.post(
+        `/api/charging/session/finish/${sessionId}`,
+        totalEnergy, // Gửi số trực tiếp
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("✅ Response từ finish session:", response);
+
+      // Backend trả về String message (không phải JSON object)
+      // Ví dụ: "Charging Session finish completed successfully"
+      if (response.status === 200) {
+        const resultMessage =
+          response.data || "Hoàn thành phiên sạc thành công";
+
+        return {
+          success: true,
+          message: resultMessage,
+          data: {
+            sessionId: sessionId,
+            totalEnergy: totalEnergy,
+          },
+        };
+      } else {
+        // Trường hợp status code không phải 200
+        return {
+          success: false,
+          message: "Không thể hoàn thành phiên sạc",
+          errorCode: response.status,
+        };
+      }
+    } catch (error) {
+      console.error("❌ Error finishing session:", error);
+
+      const statusCode = error.response?.status;
+
+      // Xử lý các HTTP error codes
+      if (statusCode === 404) {
+        return {
+          success: false,
+          message: "Không tìm thấy phiên sạc",
+          errorCode: 404,
+        };
+      }
+
+      if (statusCode === 403) {
+        return {
+          success: false,
+          message: "Bạn không có quyền hoàn thành phiên sạc này",
+          errorCode: 403,
+        };
+      }
+
+      if (statusCode === 400) {
+        return {
+          success: false,
+          message: error.response?.data || "Dữ liệu không hợp lệ",
+          errorCode: 400,
+        };
+      }
+
+      // Lỗi chung
+      return {
+        success: false,
+        message:
+          error.response?.data ||
+          error.message ||
+          "Lỗi khi hoàn thành phiên sạc",
+        errorCode: statusCode,
       };
     }
   },
@@ -496,7 +602,10 @@ export const energySessionService = {
       chargingPower: "0",
 
       // ===== Time info =====
-      timeElapsed: this.calculateElapsedTime(apiData.startTime, apiData.endTime),
+      timeElapsed: this.calculateElapsedTime(
+        apiData.startTime,
+        apiData.endTime
+      ),
       estimatedTimeLeft: this.calculateRemainingTime(apiData.expectedEndTime),
       endTime: apiData.endTime,
 
@@ -508,7 +617,9 @@ export const energySessionService = {
 
       // ===== Technical defaults =====
       socketType: apiData.chargingPost?.connectorType || "Type 2",
-      power: apiData.chargingPost?.power ? `${apiData.chargingPost.power}kW` : "0kW",
+      power: apiData.chargingPost?.power
+        ? `${apiData.chargingPost.power}kW`
+        : "0kW",
       voltage: apiData.voltage || "0V",
       current: apiData.current || "0A",
 
