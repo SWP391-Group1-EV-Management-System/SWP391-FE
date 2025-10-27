@@ -11,6 +11,8 @@ import {
 } from "@ant-design/icons";
 import PageHeader from "../components/PageHeader";
 import { Area } from '@ant-design/plots';
+import Map from '../components/map/Map';
+
 
 const { Title, Text } = Typography;
 
@@ -24,12 +26,7 @@ const revenueData = [
   { day: 'CN', revenue: 1050 }
 ];
 
-const activities = [
-  { time: '10:30', user: 'john.doe@gmail.com', station: 'Vincom Thao Dien', action: 'Bắt đầu phiên sạc (DC-01)' },
-  { time: '10:25', user: 'jane.smith@gmail.com', station: 'Gigamall Thu Duc', action: 'Thanh toán thành công (300.000đ)' },
-  { time: '10:15', user: 'staff_member_1', station: 'Vincom Thao Dien', action: 'Báo cáo sự cố (AC-03)' },
-  { time: '09:55', user: 'peter.jones@gmail.com', station: 'Landmark 81', action: 'Hoàn thành phiên sạc (DC-02)' }
-];
+
 
 function DashboardContent() {
   // Cấu hình cho biểu đồ AreaChart của Ant Design Plots
@@ -109,19 +106,8 @@ function DashboardContent() {
               title={<span style={{ fontWeight: 600 }}>Tổng quan trạm</span>}
               style={{ borderRadius: 8, minHeight: 320 }}
             >
-              <div style={{
-                background: '#fafafa',
-                borderRadius: '8px',
-                height: '320px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: '1px dashed #d9d9d9'
-              }}>
-                <div style={{ textAlign: 'center' }}>
-                  <EnvironmentOutlined style={{ fontSize: 64, color: '#bfbfbf', marginBottom: 16 }} />
-                  <Text type="secondary" style={{ fontSize: 20, fontWeight: 500 }}>Map Placeholder</Text>
-                </div>
+              <div style={{ height: '300px', width: '100%' }}>  {/* Thêm wrapper với height cố định để bản đồ render đúng */}
+                <Map />
               </div>
             </Card>
           </Col>
@@ -134,24 +120,6 @@ function DashboardContent() {
             </Card>
           </Col>
         </Row>
-
-        {/* Recent Activities */}
-        <Card
-          title={<span style={{ fontWeight: 600 }}>Hoạt động gần đây</span>}
-          style={{ borderRadius: 8, marginBottom: 24 }}
-        >
-          <Table
-            dataSource={activities}
-            pagination={false}
-            rowKey={(record) => record.time + record.user} // Sửa lại, không dùng index
-            columns={[
-              { title: 'Thời gian', dataIndex: 'time', key: 'time', width: 120 },
-              { title: 'Người dùng', dataIndex: 'user', key: 'user', width: 220 },
-              { title: 'Trạm', dataIndex: 'station', key: 'station', width: 200 },
-              { title: 'Hoạt động', dataIndex: 'action', key: 'action', render: (text) => <Tag color="blue">{text}</Tag> }
-            ]}
-          />
-        </Card>
       </div>
     </div>
   );
