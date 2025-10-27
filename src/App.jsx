@@ -25,7 +25,7 @@ import PaymentReturn from './page/PaymentReturn.jsx';
 
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
-import { AdminRoute, StaffRoute } from "./components/auth/AdminRoute.jsx";
+import { AdminRoute, StaffRoute, ManagerRoute } from "./components/auth/AdminRoute.jsx";
 import RootRedirect from "./components/auth/RootRedirect.jsx";
 
 function App() {

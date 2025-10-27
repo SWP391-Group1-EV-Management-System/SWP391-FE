@@ -166,6 +166,12 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         if (sessionId) {
           console.log("✅ Lưu sessionId vào localStorage:", sessionId);
           localStorage.setItem("currentSessionId", sessionId);
+          try {
+            // Clear any finished marker when a new session is created
+            localStorage.removeItem("currentSessionFinished");
+          } catch (e) {
+            console.warn("Failed to remove currentSessionFinished:", e);
+          }
 
           // Navigate đến trang energy
           onClose();

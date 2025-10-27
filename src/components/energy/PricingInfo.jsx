@@ -10,15 +10,7 @@ const PricingInfo = ({ sessionData, onPay }) => {
     {
       label: "Giá theo kWh",
       value: `${sessionData.pricePerKwh}đ`,
-    },
-    {
-      label: "Tổng thời gian",
-      value: sessionData.timeElapsed,
-    },
-    {
-      label: "Tổng năng lượng",
-      value: `${sessionData.energyCharged} kWh`,
-    },
+    }
   ];
 
   return (
