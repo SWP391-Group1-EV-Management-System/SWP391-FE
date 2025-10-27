@@ -45,14 +45,27 @@ export const completePayment = async (requestData) => {
 
 // Get payment by payment ID
 export const getPaymentById = async (paymentId) => {
-  try {
-    const response = await api.get(`/api/payment/${paymentId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error getting payment:', error);
-    throw error;
-  }
+//   try {
+//     const response = await api.get(`/api/payment/${paymentId}`);
+//     return response.data;
+//   } catch (error) {
+//     console.error('Error getting payment:', error);
+//     throw error;
+//   }
+// };
+try {
+  // Dùng paymentId hard-code để test
+  const testPaymentId = 'YMTL8982';
+  const response = await api.get(`/api/payment/${testPaymentId}`);
+  console.log('📦 API Response:', response.data); // Log để xem data trả về
+  return response.data;
+} catch (error) {
+  console.error('❌ Error getting payment:', error);
+  console.error('❌ Error details:', error.response?.data); // Log chi tiết lỗi
+  throw error;
+}
 };
+
 
 // Get all payments by user ID
 export const getPaymentsByUserId = async (userId) => {
@@ -64,6 +77,7 @@ export const getPaymentsByUserId = async (userId) => {
     throw error;
   }
 };
+
 
 // Get unpaid payments by user ID
 export const getUnpaidPaymentsByUserId = async (userId) => {

@@ -9,7 +9,7 @@
 export { default as ProtectedRoute } from "./ProtectedRoute.jsx";
 
 // Role-based route components
-export { AdminRoute, StaffRoute, ManagerRoute } from "./AdminRoute.jsx";
+export { AdminRoute, StaffRoute, ManagerRoute, DriverRoute } from "./AdminRoute.jsx";
 export { default as AdminRoute } from "./AdminRoute.jsx";
 
 // Root redirect component

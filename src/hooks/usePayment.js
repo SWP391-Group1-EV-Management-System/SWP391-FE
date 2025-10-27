@@ -1,5 +1,14 @@
 import { useState, useCallback } from 'react';
-import { createMomoPayment as createMomoPaymentService} from '../services/paymentService';
+import { 
+  createMomoPayment as createMomoPaymentService,
+  processPayment as processPaymentService,
+  completePayment as completePaymentService,
+  getPaymentById,
+  getPaymentsByUserId,
+  getUnpaidPaymentsByUserId,
+  getPaidPaymentsByUserId,
+  getAllPayments as getAllPaymentsService
+} from '../services/paymentService';
 
 // Hook for payment operations
 export const usePayment = () => {
@@ -14,7 +23,7 @@ export const usePayment = () => {
         paymentId,
         paymentMethod: { idPaymentMethod: paymentMethodId }
       };
-      const res = await paymentService.processPayment(paymentData);
+      const res = await processPaymentService(paymentData);
       return res;
     } catch (err) {
       setError(err.response?.data || err.message);
@@ -43,7 +52,7 @@ export const usePayment = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await paymentService.completePayment({ orderId });
+      const res = await completePaymentService({ orderId });
       return res;
     } catch (err) {
       setError(err.response?.data || err.message);
@@ -73,7 +82,7 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await paymentService.getPaymentById(paymentId);
+      const res = await getPaymentById(paymentId);
       setPayment(res);
       return res;
     } catch (err) {
@@ -88,7 +97,7 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await paymentService.getPaymentsByUserId(userId);
+      const res = await getPaymentsByUserId(userId);
       setPayments(res);
       return res;
     } catch (err) {
@@ -103,7 +112,7 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await paymentService.getUnpaidPaymentsByUserId(userId);
+      const res = await getUnpaidPaymentsByUserId(userId);
       setPayments(res);
       return res;
     } catch (err) {
@@ -118,7 +127,7 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await paymentService.getPaidPaymentsByUserId(userId);
+      const res = await getPaidPaymentsByUserId(userId);
       setPayments(res);
       return res;
     } catch (err) {
@@ -133,7 +142,7 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await paymentService.getAllPayments();
+      const res = await getAllPaymentsService();
       setPayments(res);
       return res;
     } catch (err) {

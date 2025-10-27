@@ -42,7 +42,7 @@ const PaymentReturn = () => {
   };
 
   const handleViewHistory = () => {
-    window.location.href = '/app/payment-history';
+    window.location.href = '/app/history';
   };
 
   if (loading) {
@@ -103,7 +103,7 @@ const PaymentReturn = () => {
                 </Button>
               ) : (
                 <Button key="history" onClick={handleViewHistory}>
-                  Lịch sử thanh toán
+                  Lịch sử
                 </Button>
               )
             ]}

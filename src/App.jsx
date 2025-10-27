@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
-import { App as AntdApp } from "antd"; // Import App component từ antd
+import { App as AntdApp } from "antd";
 import Layout from "./components/layout/Layout.jsx";
 import HomePage from "./page/HomePage.jsx";
 import MapPage from "./page/MapPage.jsx";
@@ -21,11 +21,17 @@ import VirtualStationPage from "./page/VirtualStationPage.jsx";
 import ForgotPasswordPage from "./page/ForgotPasswordPage.jsx";
 import AboutPage from "./page/AboutPage.jsx";
 import NavbarWelcome from "./components/welcome/NavbarWelcome.jsx";
-import PaymentReturn from './page/PaymentReturn.jsx';
+import PaymentReturn from "./page/PaymentReturn.jsx";
+import PaymentPage from "./page/PaymentPage.jsx";
 
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
-import { AdminRoute, StaffRoute } from "./components/auth/AdminRoute.jsx";
+import {
+  AdminRoute,
+  StaffRoute,
+  ManagerRoute,
+  DriverRoute,
+} from "./components/auth/AdminRoute.jsx";
 import RootRedirect from "./components/auth/RootRedirect.jsx";
 
 function App() {
@@ -41,7 +47,7 @@ function App() {
             <Route path="/welcome" element={<WelcomePage />} />
             <Route path="/about" element={<AboutPage />} />
           </Route>
-          
+
           {/* Auth Routes (no navbar) */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
@@ -57,14 +63,70 @@ function App() {
               </ProtectedRoute>
             }
           >
+            <Route
+              path="home"
+              element={
+                  <HomePage />
+              }
+            />
             {/* User Routes - Accessible to all authenticated users */}
-            <Route path="home" element={<HomePage />} />
-            <Route path="map" element={<MapPage />} />
-            <Route path="energy" element={<EnergyPage />} />
-            <Route path="history" element={<HistoryPage />} />
-            <Route path="servicepackage" element={<ServicePackage />} />
-            <Route path="setting" element={<SettingPage />} />
-            <Route path="/app/payment-return" element={<PaymentReturn />} />
+            
+            <Route
+              path="map"
+              element={
+                <DriverRoute>
+                  <MapPage />
+                </DriverRoute>
+              }
+            />
+            <Route
+              path="energy"
+              element={
+                <DriverRoute>
+                  <EnergyPage />
+                </DriverRoute>
+              }
+            />
+            <Route
+              path="history"
+              element={
+                <DriverRoute>
+                  <HistoryPage />
+                </DriverRoute>
+              }
+            />
+            <Route
+              path="servicepackage"
+              element={
+                <DriverRoute>
+                  <ServicePackage />
+                </DriverRoute>
+              }
+            />
+            <Route
+              path="setting"
+              element={
+                <DriverRoute>
+                  <SettingPage />
+                </DriverRoute>
+              }
+            />
+            <Route
+              path="payment/:paymentId"
+              element={
+                <DriverRoute>
+                  <PaymentPage />
+                </DriverRoute>
+              }
+            />
+            <Route
+              path="payment-return"
+              element={
+                <DriverRoute>
+                  <PaymentReturn />
+                </DriverRoute>
+              }
+            />
 
             {/* Admin Only Routes */}
             <Route
@@ -99,6 +161,22 @@ function App() {
                 <StaffRoute>
                   <WaitingStaffPage />
                 </StaffRoute>
+              }
+            />
+            <Route
+              path="evadmindashboard"
+              element={
+                <ManagerRoute>
+                  <EVAdminDashboard />
+                </ManagerRoute>
+              }
+            />
+            <Route
+              path="usermanagement"
+              element={
+                <ManagerRoute>
+                  <UserManagementPage />
+                </ManagerRoute>
               }
             />
           </Route>
