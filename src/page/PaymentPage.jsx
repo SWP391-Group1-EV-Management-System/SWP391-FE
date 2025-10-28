@@ -69,10 +69,20 @@ function PaymentPage() {
 
   // Xử lý thanh toán MoMo
   const handleMomoPayment = async () => {
+    // Bước 1: Set payment method vào database TRƯỚC
+    const paymentMethodId = 'PMT_MOMO';
+    const processResult = await processPayment(paymentId, paymentMethodId);
+    
+    if (!processResult) {
+      throw new Error('Không thể cập nhật phương thức thanh toán');
+    }
+
+    // Bước 2: Tạo link thanh toán MoMo
     const orderId = `${paymentId}`;
     const amount = paymentData.totalAmount;
     const orderInfo = `Thanh toán phiên sạc - ${sessionData?.sessionId || paymentId}`;
     const momoResponse = await createMomoPayment(orderId, amount, orderInfo);
+    
     if (momoResponse?.payUrl) {
       notification.success({ message: 'Đang chuyển đến MoMo...', duration: 2 });
       localStorage.setItem(

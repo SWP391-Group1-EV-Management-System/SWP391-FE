@@ -20,6 +20,13 @@ const ConfirmPaymentModal = ({
       onCancel={onCancel}
       okText="Thanh toán ngay"
       cancelText="Quay lại"
+      okButtonProps={{
+        style: {
+          backgroundColor: '#0b9459',
+          borderColor: '#0b9459',
+          color: '#ffffff'
+        }
+      }}
     >
       <div style={{ textAlign: 'center', padding: '20px 0' }}>
         <Title level={4}>{messageText}</Title>

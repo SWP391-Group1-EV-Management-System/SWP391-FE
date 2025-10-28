@@ -106,8 +106,13 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
           <Button onClick={onClose} size="large">
             Hủy
           </Button>
-          <Button type="primary" onClick={handleConfirm} size="large">
-            Xác nhận thanh toán
+          <Button
+            type="primary"
+            onClick={handleConfirm}
+            size="large"
+            style={{ backgroundColor: "#0b9459", color: "#fff" }}
+          >
+            Thanh toán
           </Button>
         </Space>
       </Card>
