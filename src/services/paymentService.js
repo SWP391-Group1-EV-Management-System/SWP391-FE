@@ -3,9 +3,23 @@ import api from '../utils/axios';
 export const processPayment = async (paymentData) => {
   try {
     const response = await api.post('/api/payment/paymentMethod', paymentData);
-    return response.data;
+    if (response.status === 200) {
+      // Nếu backend trả về message, không phụ thuộc vào chuỗi — status 200 coi là thành công
+      return true;
+    }
+    return false;
   } catch (error) {
-    console.error('Error processing payment:', error);
+    // Nếu backend explicit trả lỗi quota / choose payment method => trả về false để frontend xử lý
+    if (error.response?.status === 500) {
+      const errorMessage = error.response?.data || '';
+      if (
+        errorMessage.includes('Failed to choose') ||
+        errorMessage.includes('quota') ||
+        errorMessage.includes('không đủ')
+      ) {
+        return false;
+      }
+    }
     throw error;
   }
 };
@@ -16,7 +30,6 @@ export const createMomoPayment = async (momoRequestData) => {
     const response = await api.post('/api/payment/createPayment', momoRequestData);
     return response.data;
   } catch (error) {
-    console.error('Error creating MoMo payment:', error);
     throw error;
   }
 };
@@ -27,7 +40,6 @@ export const handleIPN = async (ipnData) => {
     const response = await api.post('/api/payment/ipn-handler', ipnData);
     return response.data;
   } catch (error) {
-    console.error('Error handling IPN:', error);
     throw error;
   }
 };
@@ -38,34 +50,19 @@ export const completePayment = async (requestData) => {
     const response = await api.post('/api/payment/completedPayment', requestData);
     return response.data;
   } catch (error) {
-    console.error('Error completing payment:', error);
     throw error;
   }
 };
 
 // Get payment by payment ID
 export const getPaymentById = async (paymentId) => {
-//   try {
-//     const response = await api.get(`/api/payment/${paymentId}`);
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error getting payment:', error);
-//     throw error;
-//   }
-// };
-try {
-  // Dùng paymentId hard-code để test
-  const testPaymentId = 'YMTL8982';
-  const response = await api.get(`/api/payment/${testPaymentId}`);
-  console.log('📦 API Response:', response.data); // Log để xem data trả về
-  return response.data;
-} catch (error) {
-  console.error('❌ Error getting payment:', error);
-  console.error('❌ Error details:', error.response?.data); // Log chi tiết lỗi
-  throw error;
-}
+  try {
+    const response = await api.get(`/api/payment/${paymentId}`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
-
 
 // Get all payments by user ID
 export const getPaymentsByUserId = async (userId) => {
@@ -73,11 +70,9 @@ export const getPaymentsByUserId = async (userId) => {
     const response = await api.get(`/api/payment/paymentByUser/${userId}`);
     return response.data;
   } catch (error) {
-    console.error('Error getting user payments:', error);
     throw error;
   }
 };
-
 
 // Get unpaid payments by user ID
 export const getUnpaidPaymentsByUserId = async (userId) => {
@@ -85,7 +80,6 @@ export const getUnpaidPaymentsByUserId = async (userId) => {
     const response = await api.get(`/api/payment/paymentByUser/UnPaid/${userId}`);
     return response.data;
   } catch (error) {
-    console.error('Error getting unpaid payments:', error);
     throw error;
   }
 };
@@ -96,7 +90,6 @@ export const getPaidPaymentsByUserId = async (userId) => {
     const response = await api.get(`/api/payment/paymentByUser/Paid/${userId}`);
     return response.data;
   } catch (error) {
-    console.error('Error getting paid payments:', error);
     throw error;
   }
 };
@@ -107,7 +100,6 @@ export const getAllPayments = async () => {
     const response = await api.get('/api/payment/all');
     return response.data;
   } catch (error) {
-    console.error('Error getting all payments:', error);
     throw error;
   }
 };

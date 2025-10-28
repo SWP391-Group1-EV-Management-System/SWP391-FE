@@ -1,17 +1,22 @@
 import React from "react";
-import { Card, Typography, Space, Row, Col, Button, message } from "antd";
+import { Card, Typography, Space, Row, Col, Button } from "antd";
 import "./PricingInfo.css";
 import { DollarOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
-const PricingInfo = ({ sessionData, onPay }) => {
+const PricingInfo = ({ sessionData = {}, onPay }) => {
+  const pricePerKwh = sessionData.pricePerKwh ?? '-';
   const pricingItems = [
     {
-      label: "Giá theo kWh",
-      value: `${sessionData.pricePerKwh}đ`,
-    }
+      label: 'Giá theo kWh',
+      value: typeof pricePerKwh === 'number' ? `${pricePerKwh}đ` : pricePerKwh,
+    },
   ];
+
+  const handlePayClick = () => {
+    if (onPay) onPay();
+  };
 
   return (
     <Card
@@ -87,18 +92,9 @@ const PricingInfo = ({ sessionData, onPay }) => {
         ))}
       </Space>
 
-      {/* Cost Summary */}
+      {/* Payment Button */}
       <div className="controls-container-pay">
-        <Button
-          className="pay-button"
-          type="success"
-          onClick={() => {
-            if (onPay) return onPay();
-            message.info(
-              "Tính năng thanh toán chưa được cấu hình trong môi trường dev."
-            );
-          }}
-        >
+        <Button className="pay-button" type="success" onClick={handlePayClick} size="large" disabled={!onPay}>
           THANH TOÁN
         </Button>
       </div>

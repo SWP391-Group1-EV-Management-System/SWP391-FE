@@ -20,12 +20,13 @@ export const usePayment = () => {
     setError(null);
     try {
       const paymentData = {
-        paymentId,
-        paymentMethod: { idPaymentMethod: paymentMethodId }
+        paymentId: paymentId,
+        paymentMethodId: paymentMethodId
       };
       const res = await processPaymentService(paymentData);
       return res;
     } catch (err) {
+      setError(err.response?.data || err.message);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -37,7 +38,7 @@ export const usePayment = () => {
     setLoading(true);
     setError(null);
     try {
-      const momoRequestData = { orderId, amount, orderInfo };
+      const momoRequestData = { orderId, amount, orderInfo, extraData: "" };
       const res = await createMomoPaymentService(momoRequestData);
       return res;
     } catch (err) {
@@ -52,9 +53,12 @@ export const usePayment = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔄 [usePayment] Completing payment for order:', orderId);
       const res = await completePaymentService({ orderId });
+      console.log('✅ [usePayment] Complete payment response:', res);
       return res;
     } catch (err) {
+      console.error('❌ [usePayment] Complete payment error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -82,10 +86,13 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔍 [usePaymentData] Fetching payment by ID:', paymentId);
       const res = await getPaymentById(paymentId);
+      console.log('✅ [usePaymentData] Payment fetched:', res);
       setPayment(res);
       return res;
     } catch (err) {
+      console.error('❌ [usePaymentData] Fetch payment error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -97,10 +104,13 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔍 [usePaymentData] Fetching payments for user:', userId);
       const res = await getPaymentsByUserId(userId);
+      console.log('✅ [usePaymentData] Payments fetched:', res?.length, 'items');
       setPayments(res);
       return res;
     } catch (err) {
+      console.error('❌ [usePaymentData] Fetch payments error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -112,10 +122,13 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔍 [usePaymentData] Fetching unpaid payments for user:', userId);
       const res = await getUnpaidPaymentsByUserId(userId);
+      console.log('✅ [usePaymentData] Unpaid payments fetched:', res?.length, 'items');
       setPayments(res);
       return res;
     } catch (err) {
+      console.error('❌ [usePaymentData] Fetch unpaid payments error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -127,10 +140,13 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔍 [usePaymentData] Fetching paid payments for user:', userId);
       const res = await getPaidPaymentsByUserId(userId);
+      console.log('✅ [usePaymentData] Paid payments fetched:', res?.length, 'items');
       setPayments(res);
       return res;
     } catch (err) {
+      console.error('❌ [usePaymentData] Fetch paid payments error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -142,10 +158,13 @@ export const usePaymentData = () => {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔍 [usePaymentData] Fetching all payments');
       const res = await getAllPaymentsService();
+      console.log('✅ [usePaymentData] All payments fetched:', res?.length, 'items');
       setPayments(res);
       return res;
     } catch (err) {
+      console.error('❌ [usePaymentData] Fetch all payments error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {

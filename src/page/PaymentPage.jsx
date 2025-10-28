@@ -12,8 +12,8 @@ function PaymentPage() {
   const { paymentId } = useParams();
   
   // Hooks
-  const { payment, fetchPaymentById, loading: fetchLoading } = usePaymentData();
-  const { createMomoPayment, loading: actionLoading } = usePayment();
+  const { fetchPaymentById, loading: fetchLoading } = usePaymentData();
+  const { createMomoPayment, processPayment, loading: actionLoading } = usePayment();
 
   // States
   const [paymentVisible, setPaymentVisible] = useState(true);
@@ -23,119 +23,85 @@ function PaymentPage() {
 
   // Fetch payment data khi component mount
   useEffect(() => {
-    if (paymentId) {
-      console.log('🔍 PaymentPage: Fetching payment data for ID:', paymentId);
-      fetchPaymentById(paymentId)
-        .then(data => {
-          console.log('✅ Payment data fetched:', data);
-          
-          // Map data từ API sang format sessionData
-          const mappedSessionData = {
-            stationName: data.chargingStationName || 'Trạm sạc',
-            sessionId: data.sessionId || 'N/A',
-            duration: 'N/A', // API không trả về startTime/endTime
-            energyConsumed: data.kwh || 0,
-            basePrice: data.price || 0,
-            paymentId: data.paymentId
-          };
-          
-          setSessionData(mappedSessionData);
-        })
-        .catch(err => {
-          console.error('❌ Error fetching payment:', err);
-          notification.error({
-            message: 'Lỗi tải dữ liệu',
-            description: 'Không thể tải thông tin thanh toán. Vui lòng thử lại.',
-          });
-          // Quay về trang setting nếu lỗi
-          setTimeout(() => navigate('/app/setting'), 2000);
+    if (!paymentId) return;
+    fetchPaymentById(paymentId)
+      .then((data) => {
+        const mappedSessionData = {
+          stationName: data.chargingStationName || 'Trạm sạc',
+          sessionId: data.sessionId || 'N/A',
+          duration: 'N/A',
+          energyConsumed: data.kwh || 0,
+          basePrice: data.price || 0,
+          paymentId: data.paymentId || paymentId,
+        };
+        setSessionData(mappedSessionData);
+      })
+      .catch((err) => {
+        notification.error({
+          message: 'Lỗi tải dữ liệu',
+          description: 'Không thể tải thông tin thanh toán. Vui lòng thử lại.',
         });
-    }
+        setTimeout(() => navigate('/app/energy'), 2000);
+      });
   }, [paymentId, fetchPaymentById, navigate]);
 
   // Xử lý xác nhận từ PaymentCard
   const handlePaymentConfirm = (data) => {
-    console.log('💳 Payment data from PaymentCard:', data);
-    
-    // Kiểm tra phương thức thanh toán
-    if (data.paymentMethod === 'momo') {
-      setPaymentData(data);
-      setPaymentVisible(false);
-      setConfirmVisible(true);
-    } else if (data.paymentMethod === 'package') {
-      // TODO: Xử lý thanh toán bằng gói dịch vụ sau
-      notification.info({
-        message: 'Thanh toán bằng gói dịch vụ',
-        description: 'Tính năng này đang được phát triển.',
+    setPaymentData(data);
+    setPaymentVisible(false);
+    setConfirmVisible(true);
+  };
+
+  // Xử lý xác nhận thanh toán
+  const handleConfirmPayment = async () => {
+    setConfirmVisible(false);
+    try {
+      if (paymentData?.paymentMethod === 'momo') await handleMomoPayment();
+      else if (paymentData?.paymentMethod === 'package') await handlePackagePayment();
+    } catch (err) {
+      notification.error({
+        message: 'Lỗi thanh toán',
+        description: err.response?.data?.message || err.message || 'Không thể xử lý thanh toán.',
       });
+      setPaymentVisible(true);
     }
   };
 
-  // Xử lý xác nhận thanh toán MoMo
-  const handleConfirmPayment = async () => {
-    setConfirmVisible(false);
+  // Xử lý thanh toán MoMo
+  const handleMomoPayment = async () => {
+    const orderId = `${paymentId}`;
+    const amount = paymentData.totalAmount;
+    const orderInfo = `Thanh toán phiên sạc - ${sessionData?.sessionId || paymentId}`;
+    const momoResponse = await createMomoPayment(orderId, amount, orderInfo);
+    if (momoResponse?.payUrl) {
+      notification.success({ message: 'Đang chuyển đến MoMo...', duration: 2 });
+      localStorage.setItem(
+        'pendingPayment',
+        JSON.stringify({ paymentId: orderId, amount, sessionId: sessionData?.sessionId, timestamp: Date.now() })
+      );
+      setTimeout(() => (window.location.href = momoResponse.payUrl), 800);
+    } else {
+      throw new Error('Không nhận được URL thanh toán từ MoMo');
+    }
+  };
 
-    try {
-      // QUAN TRỌNG: Thứ tự tham số phải giống ServicePackage
-      // createMomoPayment(orderId, amount, orderInfo)
-      
-      const orderId = `${paymentId}`;
-      const amount = paymentData.totalAmount; // PHẢI LÀ SỐ, không phải string
-      const orderInfo = `Thanh toán phiên sạc - ${sessionData?.sessionId || paymentId}`;
-
-      console.log('📤 Creating MoMo payment with data:', {
-        orderId,
-        amount,
-        orderInfo
-      });
-
-      // Gọi API với đúng thứ tự tham số: orderId, amount, orderInfo
-      const momoResponse = await createMomoPayment(orderId, amount, orderInfo);
-      
-      console.log('✅ MoMo payment response:', momoResponse);
-
-      // Kiểm tra response - chỉ cần có payUrl là OK
-      if (momoResponse && momoResponse.payUrl) {
-        notification.success({
-          message: 'Tạo thanh toán MoMo thành công',
-          description: 'Đang chuyển đến trang thanh toán MoMo...',
-          duration: 2,
-        });
-
-        // Lưu pending payment (optional - để xử lý callback)
-        localStorage.setItem('pendingPayment', JSON.stringify({
-          paymentId: orderId,
-          amount: amount,
-          sessionId: sessionData?.sessionId,
-          timestamp: Date.now()
-        }));
-
-        // Redirect đến MoMo payment URL sau 1 giây
-        setTimeout(() => {
-          console.log('🔗 Redirecting to MoMo payUrl:', momoResponse.payUrl);
-          window.location.href = momoResponse.payUrl;
-        }, 1000);
-      } else {
-        // Có lỗi từ MoMo hoặc không có payUrl
-        console.error('❌ Invalid MoMo response:', momoResponse);
-        throw new Error(momoResponse?.message || 'Không nhận được URL thanh toán từ MoMo');
-      }
-
-    } catch (error) {
-      console.error('❌ Payment error:', error);
-      notification.error({
-        message: 'Lỗi thanh toán',
-        description: error.response?.data?.message || error.message || 'Không thể xử lý thanh toán. Vui lòng thử lại.',
-      });
-      // Show payment card lại
+  // Xử lý thanh toán bằng gói dịch vụ
+  const handlePackagePayment = async () => {
+    const paymentMethodId = 'PMT_PACKAGE';
+    const response = await processPayment(paymentId, paymentMethodId);
+    if (response === false) {
+      notification.warning({ message: 'Gói dịch vụ không đủ', duration: 5 });
       setPaymentVisible(true);
+    } else {
+      notification.success({ message: 'Thanh toán bằng gói thành công', duration: 2 });
+      setTimeout(() => navigate('/app/energy'), 1000);
     }
   };
 
   // Xử lý đóng PaymentCard
   const handleClosePaymentCard = () => {
     setPaymentVisible(false);
-    navigate('/app/setting');
+    navigate('/app/energy');
   };
 
   // Loading state
