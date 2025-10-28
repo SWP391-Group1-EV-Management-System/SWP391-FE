@@ -35,14 +35,17 @@ import "../../assets/styles/Menu.css";
 // Định nghĩa menu items cho từng role
 const menuItemsByRole = {
   ADMIN: [
+    { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
     { id: "evadmindashboard", label: "Dashboard", icon: MdDashboard, path: "/app/evadmindashboard" },
     { id: "usermanagement", label: "User Management", icon: BsPeopleFill, path: "/app/usermanagement" },
   ],
   STAFF: [
+    { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
     { id: "sessionstaff", label: "Session Staff", icon: BsClipboardData, path: "/app/sessionstaff" },
     { id: "waitingstaff", label: "Waiting Staff", icon: BsHourglassSplit, path: "/app/waitingstaff" },
   ],
   MANAGER: [
+    { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
     { id: "usermanagement", label: "User Manager", icon: BsPeopleFill, path: "/app/usermanagement" },
     { id: "evadmindashboard", label: "Dashboard", icon: MdDashboard, path: "/app/evadmindashboard" },
   ],

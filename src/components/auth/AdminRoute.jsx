@@ -26,7 +26,7 @@ const AdminRoute = ({ children, fallback }) => {
  */
 const StaffRoute = ({ children, fallback }) => {
   return (
-    <ProtectedRoute requiredRoles={["STAFF", "ADMIN"]} fallback={fallback}>
+    <ProtectedRoute requiredRoles="STAFF" fallback={fallback}>
       {children}
     </ProtectedRoute>
   );
@@ -39,11 +39,19 @@ const StaffRoute = ({ children, fallback }) => {
  */
 const ManagerRoute = ({ children, fallback }) => {
   return (
-    <ProtectedRoute requiredRoles={["MANAGER", "ADMIN"]} fallback={fallback}>
+    <ProtectedRoute requiredRoles="MANAGER" fallback={fallback}>
       {children}
     </ProtectedRoute>
   );
 };
 
-export { AdminRoute, StaffRoute, ManagerRoute };
+const DriverRoute = ({ children, fallback }) => {
+  return (
+    <ProtectedRoute requiredRoles="DRIVER" fallback={fallback}>
+      {children}
+    </ProtectedRoute>
+  );
+};
+
+export { AdminRoute, StaffRoute, ManagerRoute, DriverRoute };
 export default AdminRoute;
