@@ -43,9 +43,6 @@ const EnergyPage = ({ userID }) => {
 
   // ✅ Handler thanh toán - Lấy payment và navigate
   const handlePayment = async () => {
-    console.log('💰 [EnergyPage] Payment button clicked');
-    console.log('💰 [EnergyPage] Session data:', sessionData);
-    console.log('💰 [EnergyPage] User ID:', user?.id);
 
     if (!user?.id) {
       notification.error({
