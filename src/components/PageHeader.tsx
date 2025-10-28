@@ -122,7 +122,11 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                     gap: "8px",
                   }}
                 >
-                  <span style={{ fontSize: "16px" }}>{statusTag.icon}</span>
+                  <span style={{ fontSize: "16px", display: "flex", alignItems: "center" }}>
+                    {typeof statusTag.icon === 'function' 
+                      ? React.createElement(statusTag.icon) 
+                      : statusTag.icon}
+                  </span>
                   {statusTag.text}
                 </Tag>
               )}
