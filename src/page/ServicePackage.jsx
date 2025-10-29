@@ -193,9 +193,6 @@ const ServicePackage = () => {
                   <p style={{ marginBottom: 4 }}>
                     Hạn mức còn lại: <strong>{activeTransaction.remainingQuota} {packages.find(p => p.packageId === activeTransaction.servicePackageId)?.unit || 'kWh'}</strong>
                   </p>
-                  <p style={{ marginBottom: 0 }}>
-                    Hết hạn: <strong>{new Date(activeTransaction.expirePackageAt).toLocaleDateString('vi-VN')}</strong>
-                  </p>
                 </div>
               }
               type="success"

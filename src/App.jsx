@@ -128,21 +128,21 @@ function App() {
               }
             />
 
-            {/* Admin Only Routes */}
+            {/* Admin / Manager Routes (chỉ khai báo 1 route cho mỗi path) */}
             <Route
               path="evadmindashboard"
               element={
-                <AdminRoute>
+                <ManagerRoute>
                   <EVAdminDashboard />
-                </AdminRoute>
+                </ManagerRoute>
               }
             />
             <Route
               path="usermanagement"
               element={
-                <AdminRoute>
+                <ManagerRoute>
                   <UserManagementPage />
-                </AdminRoute>
+                </ManagerRoute>
               }
             />
 
@@ -161,22 +161,6 @@ function App() {
                 <StaffRoute>
                   <WaitingStaffPage />
                 </StaffRoute>
-              }
-            />
-            <Route
-              path="evadmindashboard"
-              element={
-                <ManagerRoute>
-                  <EVAdminDashboard />
-                </ManagerRoute>
-              }
-            />
-            <Route
-              path="usermanagement"
-              element={
-                <ManagerRoute>
-                  <UserManagementPage />
-                </ManagerRoute>
               }
             />
           </Route>
