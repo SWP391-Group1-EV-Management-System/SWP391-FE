@@ -32,8 +32,6 @@ const EnergyPage = ({ userID }) => {
     error,
     errorCode,
     finishSession,
-    pauseTimer,
-    resumeTimer,
     refetch,
   } = useEnergySession(userID);
 
@@ -305,8 +303,6 @@ const EnergyPage = ({ userID }) => {
                 sessionData={sessionData}
                 finishSession={finishSession}
                 isFinishing={isFinishing}
-                pauseTimer={pauseTimer}
-                resumeTimer={resumeTimer}
               />
             </Col>
           </Row>

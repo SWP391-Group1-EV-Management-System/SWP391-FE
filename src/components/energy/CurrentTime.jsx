@@ -30,20 +30,15 @@ const CurrentTime = ({
   sessionData,
   finishSession, // Từ hook
   isFinishing, // Loading state từ hook
-  pauseTimer,
-  resumeTimer,
 }) => {
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [progressPercent, setProgressPercent] = useState(0);
-
-  // Local frozen snapshot used while confirmation modal is open. This
-  // holds a Date (or ISO) representing the moment we paused.
-  const [localFrozenAt, setLocalFrozenAt] = useState(null);
 
   /**
    * Tính thời gian còn lại và phần trăm tiến độ
    */
   // When user clicks "Dừng sạc", freeze realtime calculations until they confirm/cancel
+  const [pausedAt, setPausedAt] = useState(null); // Date object or null
   useEffect(() => {
     if (!sessionData?.expectedEndTime || !sessionData?.startTime) {
       setTimeRemaining(null);
@@ -52,8 +47,8 @@ const CurrentTime = ({
     }
 
     const calculateTimeInfo = () => {
-      // Respect localFrozenAt to freeze the displayed remaining time when confirming stop
-      const now = localFrozenAt ? new Date(localFrozenAt) : new Date(currentTime);
+      // Respect pausedAt to freeze the displayed remaining time when confirming stop
+      const now = pausedAt ? new Date(pausedAt) : new Date();
       const start = new Date(sessionData.startTime);
       const end = new Date(sessionData.expectedEndTime);
 
@@ -120,8 +115,8 @@ const CurrentTime = ({
         return 0;
       }
 
-  // Use current time (or localFrozenAt if present) to compute energy
-  const now = localFrozenAt ? new Date(localFrozenAt) : new Date(currentTime);
+      // Use current time (or pausedAt if present) to compute energy
+      const now = pausedAt ? new Date(pausedAt) : new Date();
       const diffSeconds = Math.max(
         0,
         Math.floor((now.getTime() - startTime.getTime()) / 1000)
@@ -207,14 +202,17 @@ const CurrentTime = ({
     // the user confirms. We take a synchronous snapshot using a freezeTime so
     // modal shows stable values immediately (state updates are async).
     const freezeTime = new Date();
-    // Local UI snapshot
-    setLocalFrozenAt(freezeTime);
-
-    // Persist pause and inform hook to stop ticking
+    setPausedAt(freezeTime);
     try {
-      if (typeof pauseTimer === "function") pauseTimer(freezeTime.toISOString());
+      localStorage.setItem(
+        "currentSessionPausedAt",
+        JSON.stringify({
+          sessionId: sessionData?.chargingSessionId,
+          time: freezeTime.toISOString(),
+        })
+      );
     } catch (e) {
-      console.warn("pauseTimer failed:", e);
+      console.warn("Failed to write currentSessionPausedAt:", e);
     }
 
     const totalEnergy = calculateEnergyChargedAt(freezeTime);
@@ -256,30 +254,23 @@ const CurrentTime = ({
       okType: "danger",
       cancelText: "Hủy",
       onOk: async () => {
+        await handleFinishSession(totalEnergy);
+        // clear pausedAt so UI state flows from hook's finished state
+        setPausedAt(null);
         try {
-          const resp = await finishSession(
-            sessionData.chargingSessionId,
-            totalEnergy,
-            freezeTime.toISOString()
-          );
-
-          if (resp && resp.success) {
-            if (typeof resumeTimer === "function") resumeTimer();
-            setLocalFrozenAt(null);
-          }
+          localStorage.removeItem("currentSessionPausedAt");
         } catch (e) {
-          console.error("Error finishing session:", e);
+          console.warn("Failed to remove currentSessionPausedAt:", e);
         }
       },
       onCancel: () => {
         // User cancelled -> resume realtime calculations
+        setPausedAt(null);
         try {
-          if (typeof resumeTimer === "function") resumeTimer();
+          localStorage.removeItem("currentSessionPausedAt");
         } catch (e) {
-          console.warn("resumeTimer failed:", e);
+          console.warn("Failed to remove currentSessionPausedAt:", e);
         }
-
-        setLocalFrozenAt(null);
       },
     });
   };
@@ -287,7 +278,7 @@ const CurrentTime = ({
   /**
    * Gọi finishSession từ hook
    */
-  const handleFinishSession = async (totalEnergy, endTimeIso = null) => {
+  const handleFinishSession = async (totalEnergy) => {
     if (!finishSession) {
       message.error("Chức năng không khả dụng");
       return;
@@ -296,8 +287,7 @@ const CurrentTime = ({
     try {
       const response = await finishSession(
         sessionData.chargingSessionId,
-        totalEnergy,
-        endTimeIso
+        totalEnergy
       );
 
       if (response.success) {
@@ -360,7 +350,7 @@ const CurrentTime = ({
           marginBottom: "8px",
         }}
       >
-        {(localFrozenAt ? new Date(localFrozenAt) : currentTime).toLocaleTimeString("vi-VN", {
+        {currentTime.toLocaleTimeString("vi-VN", {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
@@ -377,7 +367,7 @@ const CurrentTime = ({
           marginBottom: "16px",
         }}
       >
-        {(localFrozenAt ? new Date(localFrozenAt) : currentTime).toLocaleDateString("vi-VN", {
+        {currentTime.toLocaleDateString("vi-VN", {
           weekday: "long",
           year: "numeric",
           month: "long",
