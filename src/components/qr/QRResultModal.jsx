@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { message as staticMessage, ConfigProvider, App } from "antd";
 import "../../assets/styles/QRResultModal.css";
 import ElasticSlider from "./ElasticSlider";
@@ -185,9 +185,24 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
 
           message.success("Bắt đầu phiên sạc thành công!");
 
-          // Navigate đến session page
+          // Dispatch a global event so the session page (if mounted) can refresh
+          try {
+            window.dispatchEvent(
+              new CustomEvent("sessionCreated", { detail: { sessionId } })
+            );
+          } catch (e) {
+            console.warn("Failed to dispatch sessionCreated event:", e);
+          }
+
+          // Close modal
           onClose();
-          navigate("/app/session");
+
+          // If not already on session page, navigate there. If already on
+          // /app/session the page will receive the event and call refetch().
+          const locPath = window.location.pathname || location.pathname;
+          if (locPath !== "/app/session") {
+            navigate("/app/session");
+          }
         } else {
           console.warn("⚠️ Không nhận được sessionId từ BE");
           console.warn("⚠️ Response:", response);

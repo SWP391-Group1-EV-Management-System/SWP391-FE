@@ -56,7 +56,9 @@ const PricingInfo = ({
       return;
     }
 
-    const start = sessionData.startTime ? new Date(sessionData.startTime) : null;
+    const start = sessionData.startTime
+      ? new Date(sessionData.startTime)
+      : null;
     if (!start) {
       setStopLocked(false);
       setLockRemaining(0);
@@ -99,7 +101,8 @@ const PricingInfo = ({
   ];
 
   const isCompleted = sessionData?.isDone || false;
-  const isDisabled = isFinishing || !sessionData?.chargingSessionId || stopLocked;
+  const isDisabled =
+    isFinishing || !sessionData?.chargingSessionId || stopLocked;
 
   /**
    * Tính tổng năng lượng đã sạc tại một thời điểm
