@@ -118,10 +118,18 @@ const getDriverMenuItems = (status) => {
   }
 
   const endItems = [
-    { id: "energy", label: "Phiên sạc", icon: BsLightning, path: "/app/energy" },
-    { id: "payment-history", label: "Thanh toán", icon: BsCreditCard, path: "/app/payment-history" },
+    {
+      id: "payment-history",
+      label: "Thanh toán",
+      icon: BsCreditCard,
+      path: "/app/payment-history",
+    },
     { id: "history", label: "Lịch sử", icon: BsClock, path: "/app/history" },
-    { id: "servicepackage", label: "Gói dịch vụ", icon: BsBookmarkStar, path: "/app/servicepackage",
+    {
+      id: "servicepackage",
+      label: "Gói dịch vụ",
+      icon: BsBookmarkStar,
+      path: "/app/servicepackage",
     },
     { id: "setting", label: "Cài đặt", icon: BsGear, path: "/app/setting" },
   ];
