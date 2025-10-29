@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "react-bootstrap";
+import { useNavigate } from "react-router";
 import {
   IoClose,
   IoLocationOutline,
@@ -27,12 +28,14 @@ import "../../assets/styles/StationModal.css";
 
 const StationModal = ({ isOpen, onClose, station }) => {
   const { posts, loading, error, statistics } = useStationPosts(station?.id);
-  const { createBooking: createBookingApi, loading: bookingLoading } = useBooking();
+  const { createBooking: createBookingApi, loading: bookingLoading } =
+    useBooking();
   const { getCarsByUser, loading: carLoading } = useCar();
   const { user: currentUser } = useAuth();
-  
+
   const [selectedCar, setSelectedCar] = useState(null);
   const [userCars, setUserCars] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen && currentUser) {
@@ -40,22 +43,26 @@ const StationModal = ({ isOpen, onClose, station }) => {
         try {
           const userId = currentUser.id || currentUser.userID;
           const result = await getCarsByUser(userId);
-          
+
           // Xử lý response
           let cars = [];
-          
+
           if (Array.isArray(result)) {
             cars = result;
           } else if (result?.success && Array.isArray(result.data)) {
             cars = result.data;
           } else if (result?.data && Array.isArray(result.data)) {
             cars = result.data;
-          } else if (result && typeof result === 'object' && !Array.isArray(result)) {
+          } else if (
+            result &&
+            typeof result === "object" &&
+            !Array.isArray(result)
+          ) {
             cars = [result];
           }
-          
+
           setUserCars(cars);
-          
+
           if (cars.length > 0) {
             const firstCar = cars[0];
             const carId = firstCar.carID || firstCar.carId || firstCar.id;
@@ -65,10 +72,10 @@ const StationModal = ({ isOpen, onClose, station }) => {
           console.error("Error loading user cars:", err);
         }
       };
-      
+
       loadUserCars();
     }
-    
+
     // Reset khi đóng modal
     if (!isOpen) {
       setUserCars([]);
@@ -78,15 +85,17 @@ const StationModal = ({ isOpen, onClose, station }) => {
 
   if (!isOpen || !station) return null;
 
+  // Chỉ cần update hàm handleBookCharger trong StationModal.jsx
+
   const handleBookCharger = async (postId) => {
     try {
       if (!currentUser) {
-        alert('Vui lòng đăng nhập trước khi đặt chỗ.');
+        alert("Vui lòng đăng nhập trước khi đặt chỗ.");
         return;
       }
 
       if (!selectedCar) {
-        alert('Bạn chưa có xe. Vui lòng thêm xe để đặt chỗ.');
+        alert("Bạn chưa có xe. Vui lòng thêm xe để đặt chỗ.");
         return;
       }
 
@@ -96,23 +105,35 @@ const StationModal = ({ isOpen, onClose, station }) => {
         car: selectedCar,
       };
 
+      // ✅ createBooking sẽ tự động lưu status vào localStorage
       const res = await createBookingApi(payload);
 
-      if (res?.success) {
-        const resultCode = res.data;
-        if (resultCode === -1) {
+      if (res?.success || res?.status) {
+        // ✅ Kiểm tra status từ response
+        const status = res.status?.toLowerCase();
+
+        if (status === "waiting") {
           alert(`Trụ ${postId} đang đầy. Bạn đã được thêm vào danh sách chờ.`);
-        } else {
+          // Navigate to booking page so user can see their waiting booking
+          onClose();
+          navigate("/app/waiting");
+        } else if (status === "booking") {
           alert(`Đặt chỗ thành công cho trụ ${postId}!`);
+          // Navigate to booking page to show booking details
+          onClose();
+          navigate("/app/booking");
+        } else {
+          alert(`Đặt chỗ thành công!`);
+          onClose();
+          navigate("/app/booking");
         }
-        onClose();
       } else {
-        const msg = res?.error || 'Không thành công';
+        const msg = res?.error || "Không thành công";
         alert(`Đặt chỗ thất bại: ${msg}`);
       }
     } catch (err) {
-      console.error('Booking error:', err);
-      alert('Lỗi khi đặt chỗ, vui lòng thử lại sau.');
+      console.error("Booking error:", err);
+      alert("Lỗi khi đặt chỗ, vui lòng thử lại sau.");
     }
   };
 
@@ -149,8 +170,8 @@ const StationModal = ({ isOpen, onClose, station }) => {
           <div className="car-info">
             <IoCarOutline className="car-info-icon" />
             <span>
-              Xe: {userCars[0].typeCar || userCars[0].carName || 'Xe của bạn'} 
-              {userCars[0].licensePlate ? ` - ${userCars[0].licensePlate}` : ''}
+              Xe: {userCars[0].typeCar || userCars[0].carName || "Xe của bạn"}
+              {userCars[0].licensePlate ? ` - ${userCars[0].licensePlate}` : ""}
             </span>
           </div>
         )}
@@ -321,7 +342,9 @@ const StationModal = ({ isOpen, onClose, station }) => {
                       <Button
                         variant={post.isAvailable ? "success" : "secondary"}
                         size="sm"
-                        disabled={!post.isAvailable || bookingLoading || !selectedCar}
+                        disabled={
+                          !post.isAvailable || bookingLoading || !selectedCar
+                        }
                         onClick={() => handleBookCharger(post.id)}
                         className="charger-book-btn"
                       >

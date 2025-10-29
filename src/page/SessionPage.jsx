@@ -32,6 +32,8 @@ const EnergyPage = ({ userID }) => {
     error,
     errorCode,
     finishSession,
+    pauseTimer,
+    resumeTimer,
     refetch,
   } = useEnergySession(userID);
 
@@ -43,11 +45,10 @@ const EnergyPage = ({ userID }) => {
 
   // ✅ Handler thanh toán - Lấy payment và navigate
   const handlePayment = async () => {
-
     if (!user?.id) {
       notification.error({
-        message: 'Lỗi xác thực',
-        description: 'Không tìm thấy thông tin người dùng.',
+        message: "Lỗi xác thực",
+        description: "Không tìm thấy thông tin người dùng.",
       });
       return;
     }
@@ -55,40 +56,43 @@ const EnergyPage = ({ userID }) => {
     try {
       // ✅ Gọi API lấy danh sách payment chưa thanh toán
       const unpaidPayments = await fetchUnpaidPaymentsByUserId(user.id);
-      
-      console.log('✅ [EnergyPage] Unpaid payments:', unpaidPayments);
+
+      console.log("✅ [EnergyPage] Unpaid payments:", unpaidPayments);
 
       if (unpaidPayments && unpaidPayments.length > 0) {
         // ✅ Tìm payment tương ứng với session hiện tại
         let targetPayment = unpaidPayments.find(
-          p => p.sessionId === sessionData?.chargingSessionId || 
-               p.chargingSessionId === sessionData?.chargingSessionId ||
-               p.session?.chargingSessionId === sessionData?.chargingSessionId
+          (p) =>
+            p.sessionId === sessionData?.chargingSessionId ||
+            p.chargingSessionId === sessionData?.chargingSessionId ||
+            p.session?.chargingSessionId === sessionData?.chargingSessionId
         );
 
         // Nếu không tìm thấy, lấy payment đầu tiên
         if (!targetPayment) {
           targetPayment = unpaidPayments[0];
-          console.log('⚠️ [EnergyPage] Session payment not found, using first unpaid payment');
+          console.log(
+            "⚠️ [EnergyPage] Session payment not found, using first unpaid payment"
+          );
         }
 
         // Lấy paymentId (có thể là paymentId hoặc id)
         const paymentId = targetPayment.paymentId || targetPayment.id;
-        
-        console.log('✅ [EnergyPage] Navigating to payment:', paymentId);
+
+        console.log("✅ [EnergyPage] Navigating to payment:", paymentId);
         navigate(`/app/payment/${paymentId}`);
       } else {
-        console.warn('⚠️ [EnergyPage] No unpaid payments found');
+        console.warn("⚠️ [EnergyPage] No unpaid payments found");
         notification.info({
-          message: 'Không có thanh toán',
-          description: 'Bạn không có thanh toán nào cần hoàn thành.',
+          message: "Không có thanh toán",
+          description: "Bạn không có thanh toán nào cần hoàn thành.",
         });
       }
     } catch (error) {
-      console.error('❌ [EnergyPage] Error fetching payments:', error);
+      console.error("❌ [EnergyPage] Error fetching payments:", error);
       notification.error({
-        message: 'Lỗi tải dữ liệu',
-        description: 'Không thể tải thông tin thanh toán. Vui lòng thử lại.',
+        message: "Lỗi tải dữ liệu",
+        description: "Không thể tải thông tin thanh toán. Vui lòng thử lại.",
       });
     }
   };
@@ -281,28 +285,6 @@ const EnergyPage = ({ userID }) => {
             }
           />
 
-          {/* Quick Summary */}
-          <Row>
-            <Col>
-              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                <div style={{ color: "#6b7280", fontSize: 14 }}>
-                  Tổng năng lượng
-                </div>
-                <div
-                  style={{ color: "#0f766e", fontSize: 18, fontWeight: 700 }}
-                >
-                  {sessionData.energyCharged
-                    ? isNaN(Number(sessionData.energyCharged))
-                      ? sessionData.energyCharged
-                      : `${Number(sessionData.energyCharged).toLocaleString(
-                          "vi-VN"
-                        )} kWh`
-                    : "-"}
-                </div>
-              </div>
-            </Col>
-          </Row>
-
           {/* Row 1: Battery & Current Time */}
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
@@ -323,6 +305,8 @@ const EnergyPage = ({ userID }) => {
                 sessionData={sessionData}
                 finishSession={finishSession}
                 isFinishing={isFinishing}
+                pauseTimer={pauseTimer}
+                resumeTimer={resumeTimer}
               />
             </Col>
           </Row>
@@ -338,10 +322,7 @@ const EnergyPage = ({ userID }) => {
 
             <Col xs={24} lg={12}>
               {/* ✅ Truyền handler thanh toán vào PricingInfo */}
-              <PricingInfo 
-                sessionData={sessionData} 
-                onPay={handlePayment}
-              />
+              <PricingInfo sessionData={sessionData} onPay={handlePayment} />
             </Col>
           </Row>
         </Space>

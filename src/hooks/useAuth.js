@@ -12,7 +12,7 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
-  const hasFetchedRef = useRef(false); // ← THÊM: Đánh dấu đã fetch chưa
+  const hasFetchedRef = useRef(false);
 
   // Fetch user profile helper
   const fetchUserProfile = useCallback(async () => {
@@ -32,10 +32,10 @@ export const useAuth = () => {
 
   // Chỉ auto-fetch user một lần khi khởi tạo ứng dụng
   useEffect(() => {
-    console.log('🔍 useAuth useEffect triggered');
-    console.log('- Current user:', user);
-    console.log('- Current path:', location.pathname);
-    console.log('- Has fetched:', hasFetchedRef.current);
+    console.log("🔍 useAuth useEffect triggered");
+    console.log("- Current user:", user);
+    console.log("- Current path:", location.pathname);
+    console.log("- Has fetched:", hasFetchedRef.current);
 
     // Skip auto-fetch ở các trang public
     const publicPaths = [
@@ -51,10 +51,10 @@ export const useAuth = () => {
 
     // Chỉ fetch nếu chưa có user VÀ chưa từng fetch
     if (!user && !hasFetchedRef.current) {
-      hasFetchedRef.current = true; // ← Đánh dấu đã fetch
+      hasFetchedRef.current = true;
       fetchUserProfile();
     }
-  }, [location.pathname]); // ← CHỈ GIỮ location.pathname
+  }, [location.pathname]);
 
   const login = useCallback(
     async (email, password, redirectTo = "/app/home") => {
@@ -95,7 +95,7 @@ export const useAuth = () => {
       setError(e);
     } finally {
       setUser(null);
-      hasFetchedRef.current = false; // ← Reset flag khi logout
+      hasFetchedRef.current = false;
       setLoading(false);
       window.location.href = "/login";
     }
@@ -127,6 +127,7 @@ export const useRole = () => {
   return useMemo(
     () => ({
       userRole: Array.isArray(user?.role) ? user.role : user?.role,
+      userId: user?.id || user?.userId || null, // ← THÊM DÒNG NÀY
       hasRole,
       hasAnyRole,
       isAdmin: hasRole("ADMIN"),

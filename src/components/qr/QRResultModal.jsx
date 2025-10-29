@@ -4,32 +4,30 @@ import { useNavigate } from "react-router";
 import { message as staticMessage, ConfigProvider, App } from "antd";
 import "../../assets/styles/QRResultModal.css";
 import ElasticSlider from "./ElasticSlider";
-import { BsBattery, BsLightning } from "react-icons/bs";
 import { energySessionService } from "../../services/energySessionService";
 import { useAuth } from "../../hooks/useAuth";
 import { chargingStationService } from "../../services/chargingStationService";
 import LoadingSpinner from "../common/LoadingSpinner";
+import { setDriverStatus } from "../../utils/statusUtils"; // ← IMPORT HELPER
 
 function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
   const navigate = useNavigate();
   const { user, fetchUserProfile } = useAuth();
-  const { message } = App.useApp(); // Dùng message hook từ App context
-  const [selectedChargingTime, setSelectedChargingTime] = useState(60); // Thời gian sạc (phút)
+  const { message } = App.useApp();
+  const [selectedChargingTime, setSelectedChargingTime] = useState(60);
   const [isLoading, setIsLoading] = useState(false);
   const [postData, setPostData] = useState(null);
   const [stationInfo, setStationInfo] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
-  const [expectedEndTime, setExpectedEndTime] = useState(null); // Thời gian kết thúc dự kiến
+  const [expectedEndTime, setExpectedEndTime] = useState(null);
 
-  // Cấu hình mặc định cho slider thời gian sạc
   const chargingConfig = {
-    minChargingTime: 15, // 15 phút
-    maxChargingTime: 240, // 4 giờ
-    defaultChargingTime: 60, // 1 giờ
-    stepSize: 15, // Bước nhảy 15 phút
+    minChargingTime: 15,
+    maxChargingTime: 240,
+    defaultChargingTime: 60,
+    stepSize: 15,
   };
 
-  // Utility function to format date to local datetime string
   const formatLocalDateTime = useCallback((date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -40,28 +38,19 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
   }, []);
 
-  // Handler khi slider thay đổi - MUST use useCallback for stable reference
   const handleChargingTimeChange = useCallback((chargingMinutes) => {
-    // Update charging time state
     setSelectedChargingTime(chargingMinutes);
-
-    // Tính toán expectedEndTime: Current Time + Charging Duration
     const now = new Date();
     const endTime = new Date(now.getTime() + chargingMinutes * 60 * 1000);
-
     setExpectedEndTime(endTime);
   }, []);
 
-  // Hàm lấy thông tin trụ sạc từ API (memoized)
   const fetchPostData = useCallback(async () => {
     try {
       setDataLoading(true);
-
-      // Lấy thông tin trụ sạc từ QR code
       const postInfo = await chargingStationService.getPostById(qrResult);
       setPostData(postInfo);
 
-      // Lấy thông tin trạm sạc dựa vào ID trạm
       const stationId =
         postInfo.chargingStationId ||
         postInfo.chargingStation ||
@@ -81,8 +70,6 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     } catch (error) {
       console.error("Lỗi khi lấy thông tin trụ sạc:", error);
       message.error("Không thể lấy thông tin trụ sạc. Vui lòng thử lại!");
-
-      // Đặt dữ liệu mặc định khi có lỗi
       setPostData({
         id: qrResult,
         name: "Trụ không xác định",
@@ -97,23 +84,21 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     } finally {
       setDataLoading(false);
     }
-  }, [qrResult]);
+  }, [qrResult, message]);
 
-  // Lấy thông tin trụ sạc từ API khi mở modal
   useEffect(() => {
     if (isOpen && qrResult) {
       fetchPostData();
     }
   }, [isOpen, qrResult, fetchPostData]);
 
-  // Tính toán expectedEndTime lần đầu khi modal mở
   useEffect(() => {
     if (isOpen && selectedChargingTime) {
       handleChargingTimeChange(selectedChargingTime);
     }
-  }, [isOpen]); // Chỉ chạy khi modal mở
+  }, [isOpen]);
 
-  // Xử lý khi người dùng click nút "Bắt đầu sạc" (memoized)
+  // ✅ UPDATED: Xử lý response có status và sessionId
   const handleStartCharging = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -135,7 +120,6 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         return;
       }
 
-      // Sử dụng expectedEndTime đã tính toán từ slider
       if (!expectedEndTime) {
         message.error("Không thể tính toán thời gian sạc. Vui lòng thử lại!");
         return;
@@ -156,39 +140,65 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
       const response = await energySessionService.createSession(sessionData);
 
       if (response.success) {
-        message.success("Bắt đầu phiên sạc thành công!");
+        console.log("✅ Create session response:", response);
 
-        // Lưu sessionId từ response của BE
-        // BE trả về sessionId trong response.data (có thể là string hoặc object)
-        const sessionId =
-          response.data?.chargingSessionId || response.data?.sessionId;
+        // ✅ Lấy status và sessionId từ response
+        // Hỗ trợ nhiều dạng BE có thể trả: top-level fields hoặc nằm trong data.message
+        const status =
+          response.data?.status ||
+          response.data?.message?.status ||
+          response.message?.status ||
+          response.status;
 
+        let sessionId =
+          response.data?.sessionId ||
+          response.data?.chargingSessionId ||
+          response.data?.message?.sessionId ||
+          response.message?.sessionId ||
+          response.sessionId ||
+          null;
+
+        // Nếu data.message là string và chưa có sessionId, thử lấy string nếu nó trông giống id
+        if (!sessionId && typeof response?.data?.message === "string") {
+          const maybe = response.data.message.trim();
+          if (maybe && !maybe.includes(" ") && maybe.length > 3)
+            sessionId = maybe;
+        }
+
+        // ✅ Lưu status vào localStorage (sử dụng helper)
+        if (status) {
+          setDriverStatus(status);
+          console.log("✅ Saved status to localStorage:", status);
+        }
+
+        // ✅ Lưu sessionId vào localStorage
         if (sessionId) {
-          console.log("✅ Lưu sessionId vào localStorage:", sessionId);
           localStorage.setItem("currentSessionId", sessionId);
+          console.log("✅ Saved sessionId to localStorage:", sessionId);
+
+          // Clear finished marker
           try {
-            // Clear any finished marker when a new session is created
             localStorage.removeItem("currentSessionFinished");
           } catch (e) {
             console.warn("Failed to remove currentSessionFinished:", e);
           }
 
-          // Navigate đến trang energy
+          message.success("Bắt đầu phiên sạc thành công!");
+
+          // Navigate đến session page
           onClose();
-          navigate("/app/energy");
+          navigate("/app/session");
         } else {
           console.warn("⚠️ Không nhận được sessionId từ BE");
-          console.warn("⚠️ Response data:", response.data);
+          console.warn("⚠️ Response:", response);
 
-          // Vẫn cho phép navigate, nhưng cảnh báo
           message.warning(
             "Phiên sạc đã được tạo nhưng không nhận được ID. Vui lòng kiểm tra lại."
           );
           onClose();
-          navigate("/app/home"); // Navigate về home thay vì energy
+          navigate("/app/home");
         }
       } else {
-        // Hiển thị error message chi tiết
         const errorMsg = response.message || "Không thể bắt đầu phiên sạc";
         const errorStatus = response.errorDetails?.status;
 
@@ -198,7 +208,6 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           details: response.errorDetails,
         });
 
-        // Hiển thị error message với status code nếu có
         if (errorStatus) {
           message.error(`${errorMsg} (Status: ${errorStatus})`);
         } else {
@@ -206,11 +215,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         }
       }
     } catch (error) {
-      console.group("❌ Unexpected Error in handleStartCharging");
-      console.error("Error:", error);
-      console.error("Stack:", error.stack);
-      console.groupEnd();
-
+      console.error("❌ Unexpected Error in handleStartCharging:", error);
       message.error("Lỗi không xác định. Vui lòng thử lại!");
     } finally {
       setIsLoading(false);
@@ -219,7 +224,6 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     postData,
     user,
     fetchUserProfile,
-    selectedChargingTime,
     expectedEndTime,
     formatLocalDateTime,
     onClose,
@@ -233,7 +237,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     <ConfigProvider
       theme={{
         token: {
-          zIndexPopupBase: 10010, // Đảm bảo popup Antd có z-index cao
+          zIndexPopupBase: 10010,
         },
       }}
     >
@@ -247,7 +251,6 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           </div>
 
           <div className="qr-result-modal-content">
-            {/* Hiển thị loading spinner khi đang tải dữ liệu */}
             {dataLoading ? (
               <LoadingSpinner
                 size="medium"
@@ -321,7 +324,6 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                       onTimeChange={handleChargingTimeChange}
                     />
 
-                    {/* Hiển thị thời gian kết thúc dự kiến */}
                     {expectedEndTime && (
                       <div
                         style={{
