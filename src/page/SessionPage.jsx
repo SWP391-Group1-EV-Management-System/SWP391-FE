@@ -41,6 +41,23 @@ const EnergyPage = ({ userID }) => {
     }
   }, [sessionData, isLoading, error]);
 
+  // Listen for sessionCreated events to refetch if the session was created
+  // elsewhere in the app (e.g. QR modal). This ensures the page refreshes
+  // its data when a new session is started.
+  useEffect(() => {
+    const handleSessionCreated = (e) => {
+      console.log("sessionCreated event received:", e?.detail);
+      try {
+        refetch();
+      } catch (err) {
+        console.warn("Error refetching after sessionCreated:", err);
+      }
+    };
+
+    window.addEventListener("sessionCreated", handleSessionCreated);
+    return () => window.removeEventListener("sessionCreated", handleSessionCreated);
+  }, [refetch]);
+
   // ✅ Handler thanh toán - Lấy payment và navigate
   const handlePayment = async () => {
     if (!user?.id) {
