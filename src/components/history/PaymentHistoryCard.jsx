@@ -5,7 +5,7 @@ import { ThunderboltOutlined, CreditCardOutlined, CheckCircleOutlined, ClockCirc
 const { Text } = Typography;
 
 const PaymentHistoryCard = ({ payment, onPayment }) => {
-  // Dùng field 'paid' thay vì kiểm tra paymentId
+
   const isPaid = payment.paid === true;
 
   return (
@@ -17,7 +17,7 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
         boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
         overflow: 'hidden'
       }}
-      bodyStyle={{ padding: 0 }}
+      styles={{ body: { padding: 0 } }}
     >
       {/* Header */}
       <div style={{

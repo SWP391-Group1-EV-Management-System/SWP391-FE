@@ -12,6 +12,22 @@ import { useAuth } from "../../hooks/useAuth";
 
 const { Text, Title } = Typography;
 
+// Define package information (no discounts applied)
+const packageInfo = {
+  basic: {
+    name: "Gói cơ bản",
+  },
+  standard: {
+    name: "Gói tiêu chuẩn",
+  },
+  premium: {
+    name: "Gói cao cấp",
+  },
+  vip: {
+    name: "Gói VIP",
+  },
+};
+
 const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
   const { user } = useAuth(); // Lấy user để biết gói đã đăng ký
   // Chọn 1 trong 2 phương thức: 'momo' hoặc 'package'
@@ -21,15 +37,9 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
   const registeredPackage =
     user?.servicePackage || user?.package || user?.registeredPackage || "basic";
 
-  // Tính tổng tiền sau khi áp dụng gói (nếu bật usePackage)
+  // Tính tổng tiền (luôn bằng giá gốc, không giảm)
   const calculateTotal = () => {
-    let total = sessionData.basePrice;
-    const usePackage = paymentMethod === "package";
-    if (usePackage && registeredPackage && packageDiscounts[registeredPackage]) {
-      const discount = packageDiscounts[registeredPackage].discount;
-      total = total * (1 - discount);
-    }
-    return Math.round(total);
+    return Math.round(sessionData.basePrice);
   };
 
   // Xử lý xác nhận thanh toán
@@ -40,7 +50,7 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
       usePackage,
       // Không cho user chọn gói ở UI => hệ thống tự lấy gói đăng ký
       selectedPackage: usePackage ? registeredPackage : null,
-      packageInfo: usePackage ? packageDiscounts[registeredPackage] : null,
+      packageInfo: usePackage ? packageInfo[registeredPackage] : null,
       totalAmount: calculateTotal(),
     };
     onConfirm(paymentData);
@@ -63,7 +73,7 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
           <Descriptions.Item label="Điện năng tiêu thụ">
             {sessionData.energyConsumed} kWh
           </Descriptions.Item>
-          {/* Không hiển thị tên gói/chi tiết giảm giá theo yêu cầu */}
+          {/* Không hiển thị chi tiết giảm giá */}
           <Descriptions.Item label="Tổng tiền thanh toán">
             <Text strong style={{ fontSize: "18px", color: "#ff4d4f" }}>
               {calculateTotal().toLocaleString("vi-VN")} VNĐ

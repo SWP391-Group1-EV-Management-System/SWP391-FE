@@ -106,14 +106,14 @@ function PaymentPage() {
       setPaymentVisible(true);
     } else {
       notification.success({ message: 'Thanh toán bằng gói thành công', duration: 2 });
-      setTimeout(() => navigate('/app/energy'), 1000);
+      setTimeout(() => navigate('/app/payment-history'), 1000);
     }
   };
 
   // Xử lý đóng PaymentCard
   const handleClosePaymentCard = () => {
     setPaymentVisible(false);
-    navigate('/app/energy');
+    navigate('/app/payment-history');
   };
 
   // Loading state
@@ -121,7 +121,12 @@ function PaymentPage() {
     return (
       <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
         <Content style={{ padding: '24px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Spin size="large" tip="Đang tải thông tin thanh toán..." />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Spin size="large" />
+            <div style={{ marginTop: 12, color: '#555', fontSize: 14 }}>
+              Đang tải thông tin thanh toán...
+            </div>
+          </div>
         </Content>
       </Layout>
     );
