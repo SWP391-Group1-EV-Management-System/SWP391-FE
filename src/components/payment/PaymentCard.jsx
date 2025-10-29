@@ -17,13 +17,6 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
   // Chọn 1 trong 2 phương thức: 'momo' hoặc 'package'
   const [paymentMethod, setPaymentMethod] = useState("momo");
 
-  // Gói dịch vụ - trong production fetch từ API / backend
-  const packageDiscounts = {
-    basic: { name: "Gói cơ bản (Basic)", discount: 0 },
-    member: { name: "Gói thành viên (Member)", discount: 0.05 },
-    business: { name: "Gói doanh nghiệp (Business)", discount: 0.1 },
-  };
-
   // Lấy gói đăng ký của user (fallback 'basic' nếu không có)
   const registeredPackage =
     user?.servicePackage || user?.package || user?.registeredPackage || "basic";

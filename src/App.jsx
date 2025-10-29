@@ -28,6 +28,7 @@ import PaymentPage from "./page/PaymentPage.jsx";
 import WaitingPage from "./page/WaitingListPage.jsx";
 import BookingPage from "./page/BookingPage.jsx";
 
+import PaymentHistory from "./page/PaymentHistoryPage.jsx";
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
 import {
@@ -70,6 +71,17 @@ function App() {
             <Route path="home" element={<HomePage />} />
 
             {/* Driver Routes - Accessible to Driver role */}
+            <Route
+              path="home"
+              element={
+                  <HomePage />
+              }
+            />
+            {/* User Routes - Accessible to all authenticated users */}
+            <Route
+              path="payment-history"
+              element={<DriverRoute><PaymentHistory /></DriverRoute>}
+            /> 
             <Route
               path="map"
               element={
