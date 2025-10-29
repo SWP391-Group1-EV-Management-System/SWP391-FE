@@ -301,8 +301,6 @@ const EnergyPage = ({ userID }) => {
                     : currentTime
                 }
                 sessionData={sessionData}
-                finishSession={finishSession}
-                isFinishing={isFinishing}
               />
             </Col>
           </Row>
@@ -318,7 +316,12 @@ const EnergyPage = ({ userID }) => {
 
             <Col xs={24} lg={12}>
               {/* ✅ Truyền handler thanh toán vào PricingInfo */}
-              <PricingInfo sessionData={sessionData} onPay={handlePayment} />
+              <PricingInfo
+                finishSession={finishSession}
+                isFinishing={isFinishing}
+                sessionData={sessionData}
+                onPay={handlePayment}
+              />
             </Col>
           </Row>
         </Space>
