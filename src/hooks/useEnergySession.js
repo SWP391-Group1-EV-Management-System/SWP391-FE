@@ -28,7 +28,6 @@ export const useEnergySession = (userID = null) => {
   const [error, setError] = useState(null);
   const [errorCode, setErrorCode] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [pausedAt, setPausedAt] = useState(null); // ISO string or Date
   const [isFinishing, setIsFinishing] = useState(false); // Đang finish session
 
   // Ref để tránh gọi finish nhiều lần
@@ -110,54 +109,12 @@ export const useEnergySession = (userID = null) => {
   };
 
   // ==================== EFFECT: UPDATE CURRENT TIME ====================
-  // currentTime normally increments every second. When `pausedAt` is set
-  // we stop advancing the clock so the UI can freeze and later resume
-  // from the paused moment (without counting the paused duration).
   useEffect(() => {
-    if (pausedAt) {
-      // Ensure currentTime shows the paused moment
-      try {
-        const d = typeof pausedAt === "string" ? new Date(pausedAt) : pausedAt;
-        if (!isNaN(d)) setCurrentTime(new Date(d));
-      } catch (e) {
-        console.warn("Invalid pausedAt value:", pausedAt, e);
-      }
-
-      // Do not start the ticking interval while paused
-      return;
-    }
-
-    // If not paused, tick by incrementing previous time by 1s so that
-    // resuming continues from the paused moment instead of jumping.
-    // Initialize to now if currentTime is not set.
-    setCurrentTime((prev) => (prev instanceof Date ? prev : new Date()));
-
     const timer = setInterval(() => {
-      setCurrentTime((prev) => {
-        try {
-          return new Date(prev.getTime() + 1000);
-        } catch (e) {
-          return new Date();
-        }
-      });
+      setCurrentTime(new Date());
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [pausedAt]);
-
-  // Restore paused state from localStorage on mount (if any)
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem("currentSessionPausedAt");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.time) {
-          setPausedAt(parsed.time);
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
   }, []);
 
   // ==================== EFFECT: AUTO FINISH KHI ĐẾN EXPECTED END TIME ====================
@@ -327,38 +284,6 @@ export const useEnergySession = (userID = null) => {
   };
 
   // ==================== PUBLIC METHODS ====================
-
-  /**
-   * Pause the internal clock at a specific ISO timestamp so the UI freezes.
-   * This will also persist `currentSessionPausedAt` to localStorage for
-   * cross-component visibility.
-   */
-  const pauseTimer = (pausedAtIso) => {
-    try {
-      const iso = pausedAtIso || new Date().toISOString();
-      setPausedAt(iso);
-      localStorage.setItem(
-        "currentSessionPausedAt",
-        JSON.stringify({ sessionId: localStorage.getItem("currentSessionId"), time: iso })
-      );
-    } catch (e) {
-      console.warn("Failed to persist currentSessionPausedAt:", e);
-      setPausedAt(pausedAtIso || new Date().toISOString());
-    }
-  };
-
-  /**
-   * Resume the internal clock (remove paused state) and clear persisted marker.
-   */
-  const resumeTimer = () => {
-    try {
-      setPausedAt(null);
-      localStorage.removeItem("currentSessionPausedAt");
-    } catch (e) {
-      console.warn("Failed to remove currentSessionPausedAt:", e);
-      setPausedAt(null);
-    }
-  };
 
   /**
    * Kết thúc phiên sạc
@@ -664,7 +589,6 @@ export const useEnergySession = (userID = null) => {
     sessionData,
     setSessionData,
     currentTime,
-    pausedAt,
     statusConfig,
     isLoading,
     isFinishing, // Thêm flag đang finish
@@ -673,8 +597,6 @@ export const useEnergySession = (userID = null) => {
 
     // Methods
     finishSession, // Kết thúc phiên sạc (gọi API BE)
-    pauseTimer,
-    resumeTimer,
     refetch, // Reload dữ liệu
   };
 };
