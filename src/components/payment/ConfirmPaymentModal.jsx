@@ -37,12 +37,6 @@ const ConfirmPaymentModal = ({
             {totalAmount.toLocaleString('vi-VN')} VNĐ
           </Text>
         </div>
-
-        {/* Nếu là thanh toán gói, hiển thị tên gói ngắn */}
-          <div style={{ marginTop: 12 }}>
-            <Text>Gói sử dụng: </Text>
-            <Text strong>{paymentData.packageInfo.name}</Text>
-          </div>
       </div>
     </Modal>
   );
