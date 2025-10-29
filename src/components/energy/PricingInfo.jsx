@@ -6,7 +6,7 @@
  * Logic: Hiển thị nút "Dừng sạc" trước, sau khi dừng sạc mới hiển thị nút "Thanh toán"
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   Typography,
@@ -34,6 +34,61 @@ const PricingInfo = ({
   isFinishing, // Loading state từ hook
 }) => {
   const [pausedAt, setPausedAt] = useState(null);
+  // Lock the stop button for the first 60 seconds from session start
+  const [stopLocked, setStopLocked] = useState(false);
+  const [lockRemaining, setLockRemaining] = useState(0);
+
+  const formatMsToMMSS = (seconds) => {
+    const mm = Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+    const ss = Math.floor(seconds % 60)
+      .toString()
+      .padStart(2, "0");
+    return `${mm}:${ss}`;
+  };
+
+  useEffect(() => {
+    // If no session or already completed, ensure unlocked
+    if (!sessionData || sessionData?.isDone) {
+      setStopLocked(false);
+      setLockRemaining(0);
+      return;
+    }
+
+    const start = sessionData.startTime ? new Date(sessionData.startTime) : null;
+    if (!start) {
+      setStopLocked(false);
+      setLockRemaining(0);
+      return;
+    }
+
+    const now = new Date();
+    const elapsed = Math.floor((now.getTime() - start.getTime()) / 1000);
+
+    if (elapsed < 60) {
+      const remaining = 60 - elapsed;
+      setStopLocked(true);
+      setLockRemaining(remaining);
+
+      const t = setInterval(() => {
+        setLockRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(t);
+            setStopLocked(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(t);
+    }
+
+    // already past lock period
+    setStopLocked(false);
+    setLockRemaining(0);
+  }, [sessionData?.startTime, sessionData?.isDone]);
 
   const pricePerKwh = sessionData.pricePerKwh ?? "-";
   const pricingItems = [
@@ -44,7 +99,7 @@ const PricingInfo = ({
   ];
 
   const isCompleted = sessionData?.isDone || false;
-  const isDisabled = isFinishing || !sessionData?.chargingSessionId;
+  const isDisabled = isFinishing || !sessionData?.chargingSessionId || stopLocked;
 
   /**
    * Tính tổng năng lượng đã sạc tại một thời điểm
@@ -311,12 +366,19 @@ const PricingInfo = ({
               height: "56px",
               fontSize: "18px",
               fontWeight: "600",
+              opacity: stopLocked ? 0.6 : 1,
             }}
           >
             {isFinishing ? "Đang xử lý..." : "Dừng sạc"}
           </Button>
         )}
 
+        {/* show small helper text when locked */}
+        {!isCompleted && stopLocked && (
+          <div style={{ marginTop: 8, textAlign: "center", color: "#6b7280" }}>
+            Bạn có thể dừng sạc sau {formatMsToMMSS(lockRemaining)}
+          </div>
+        )}
         {/* Hiển thị nút Thanh toán sau khi đã hoàn thành */}
         {isCompleted && (
           <Button
