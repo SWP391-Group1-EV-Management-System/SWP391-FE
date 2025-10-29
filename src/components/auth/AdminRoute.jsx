@@ -25,8 +25,9 @@ const AdminRoute = ({ children, fallback }) => {
  * Kiểm tra xác thực và role STAFF hoặc ADMIN trước khi cho phép truy cập.
  */
 const StaffRoute = ({ children, fallback }) => {
+  // Cho phép STAFF hoặc ADMIN
   return (
-    <ProtectedRoute requiredRoles="STAFF" fallback={fallback}>
+    <ProtectedRoute requiredRoles={["STAFF"]} fallback={fallback}>
       {children}
     </ProtectedRoute>
   );
@@ -38,8 +39,9 @@ const StaffRoute = ({ children, fallback }) => {
  * Wrapper cho các route dành cho Manager và Admin.
  */
 const ManagerRoute = ({ children, fallback }) => {
+  // Cho phép MANAGER hoặc ADMIN
   return (
-    <ProtectedRoute requiredRoles="MANAGER" fallback={fallback}>
+    <ProtectedRoute requiredRoles={["MANAGER", "ADMIN"]} fallback={fallback}>
       {children}
     </ProtectedRoute>
   );
