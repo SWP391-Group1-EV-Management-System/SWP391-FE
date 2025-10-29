@@ -15,10 +15,7 @@ const NoDataMessage = ({ onRefresh }) => {
     }}>
       <Empty description={false} />
       <Text strong style={{ display: 'block', fontSize: '1.6rem', marginTop: '1rem', color: '#08321a' }}>
-        Không có dữ liệu lịch sử sạc
-      </Text>
-      <Text type="secondary" style={{ display: 'block', marginTop: '0.5rem', fontSize: '1.2rem' }}>
-        Bạn chưa có phiên sạc nào hoặc dữ liệu chưa được cập nhật.
+        Không có dữ liệu lịch sử
       </Text>
       {onRefresh && (
         <Space style={{ marginTop: '1.5rem' }}>

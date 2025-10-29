@@ -23,7 +23,7 @@ import AboutPage from "./page/AboutPage.jsx";
 import NavbarWelcome from "./components/welcome/NavbarWelcome.jsx";
 import PaymentReturn from "./page/PaymentReturn.jsx";
 import PaymentPage from "./page/PaymentPage.jsx";
-
+import PaymentHistory from "./page/PaymentHistoryPage.jsx";
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
 import {
@@ -70,7 +70,10 @@ function App() {
               }
             />
             {/* User Routes - Accessible to all authenticated users */}
-            
+            <Route
+              path="payment-history"
+              element={<DriverRoute><PaymentHistory /></DriverRoute>}
+            /> 
             <Route
               path="map"
               element={

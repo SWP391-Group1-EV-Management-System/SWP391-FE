@@ -24,24 +24,26 @@ function PaymentPage() {
   // Fetch payment data khi component mount
   useEffect(() => {
     if (!paymentId) return;
+    
+    // GỌI API MỚI: GET /api/payment/{paymentId}
     fetchPaymentById(paymentId)
       .then((data) => {
         const mappedSessionData = {
           stationName: data.chargingStationName || 'Trạm sạc',
           sessionId: data.sessionId || 'N/A',
-          duration: 'N/A',
           energyConsumed: data.kwh || 0,
           basePrice: data.price || 0,
           paymentId: data.paymentId || paymentId,
+          paid: data.paid || false, // ← Thêm field paid
         };
         setSessionData(mappedSessionData);
       })
       .catch((err) => {
         notification.error({
           message: 'Lỗi tải dữ liệu',
-          description: 'Không thể tải thông tin thanh toán. Vui lòng thử lại.',
+          description: 'Không thể tải thông tin thanh toán.',
         });
-        setTimeout(() => navigate('/app/energy'), 2000);
+        setTimeout(() => navigate('/app/payment-history'), 2000);
       });
   }, [paymentId, fetchPaymentById, navigate]);
 
