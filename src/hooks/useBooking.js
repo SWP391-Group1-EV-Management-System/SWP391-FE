@@ -1,7 +1,13 @@
-import { useState, useCallback } from 'react';
-import * as bookingService from '../services/bookingService';
+import { useState, useCallback } from "react";
+import * as bookingService from "../services/bookingService";
 
-// Hook to manage booking-related operations and local state
+/**
+ * Hook quản lý booking với localStorage status
+ *
+ * THAY ĐỔI:
+ * - Sau khi createBooking thành công, lưu status vào localStorage
+ * - Menu sẽ tự động cập nhật khi localStorage thay đổi
+ */
 export default function useBooking() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -13,7 +19,7 @@ export default function useBooking() {
     setError(null);
     try {
       const res = await fn();
-      if (typeof setResult === 'function') setResult(res);
+      if (typeof setResult === "function") setResult(res);
       setLoading(false);
       return res;
     } catch (err) {
@@ -23,45 +29,147 @@ export default function useBooking() {
     }
   }, []);
 
-  const createBooking = useCallback(async (bookingData) => {
-    return wrap(() => bookingService.createBooking(bookingData));
-  }, [wrap]);
+  /**
+   * Tạo booking mới
+   * BE response: { status: "booking" } hoặc { status: "waiting" }
+   */
+  const createBooking = useCallback(
+    async (bookingData) => {
+      const result = await wrap(() =>
+        bookingService.createBooking(bookingData)
+      );
 
-  const completeBooking = useCallback(async (bookingId) => {
-    return wrap(() => bookingService.completeBooking(bookingId));
-  }, [wrap]);
+      // ✅ Lưu status vào localStorage nếu có trong response
+      if (result?.status) {
+        try {
+          localStorage.setItem("driverStatus", result.status);
+          console.log("✅ Saved status to localStorage:", result.status);
 
-  const cancelBooking = useCallback(async (bookingId) => {
-    return wrap(() => bookingService.cancelBooking(bookingId));
-  }, [wrap]);
+          // ✅ Dispatch custom event để Menu update ngay (cùng tab)
+          window.dispatchEvent(
+            new CustomEvent("driverStatusChanged", {
+              detail: { status: result.status },
+            })
+          );
+        } catch (error) {
+          console.error("Error saving status to localStorage:", error);
+        }
+      }
 
-  const fetchBookingsByPost = useCallback(async (postId) => {
-    return wrap(() => bookingService.getBookingsByPost(postId), setBookings);
-  }, [wrap]);
+      return result;
+    },
+    [wrap]
+  );
 
-  const fetchBookingsByStation = useCallback(async (stationId) => {
-    return wrap(() => bookingService.getBookingsByStation(stationId), setBookings);
-  }, [wrap]);
+  const completeBooking = useCallback(
+    async (bookingId) => {
+      const result = await wrap(() =>
+        bookingService.completeBooking(bookingId)
+      );
 
-  const fetchBookingsByUser = useCallback(async (userId) => {
-    return wrap(() => bookingService.getBookingsByUser(userId), setBookings);
-  }, [wrap]);
+      // ✅ Xóa status khi complete booking
+      if (result?.success) {
+        try {
+          localStorage.removeItem("driverStatus");
+          console.log("✅ Removed status from localStorage");
 
-  const fetchBookingsByDate = useCallback(async (date) => {
-    return wrap(() => bookingService.getBookingsByDate(date), setBookings);
-  }, [wrap]);
+          window.dispatchEvent(
+            new CustomEvent("driverStatusChanged", {
+              detail: { status: null },
+            })
+          );
+        } catch (error) {
+          console.error("Error removing status from localStorage:", error);
+        }
+      }
 
-  const fetchBookingByWaitingListId = useCallback(async (waitingListId) => {
-    return wrap(() => bookingService.getBookingByWaitingListId(waitingListId), setBooking);
-  }, [wrap]);
+      return result;
+    },
+    [wrap]
+  );
 
-  const fetchBookingById = useCallback(async (bookingId) => {
-    return wrap(() => bookingService.getBookingById(bookingId), setBooking);
-  }, [wrap]);
+  const cancelBooking = useCallback(
+    async (bookingId) => {
+      const result = await wrap(() => bookingService.cancelBooking(bookingId));
 
-  const fetchBookingsByStatus = useCallback(async (statusList) => {
-    return wrap(() => bookingService.getBookingsByStatus(statusList), setBookings);
-  }, [wrap]);
+      // ✅ Xóa status khi cancel booking
+      if (result?.success) {
+        try {
+          localStorage.removeItem("driverStatus");
+          console.log("✅ Removed status from localStorage");
+
+          window.dispatchEvent(
+            new CustomEvent("driverStatusChanged", {
+              detail: { status: null },
+            })
+          );
+        } catch (error) {
+          console.error("Error removing status from localStorage:", error);
+        }
+      }
+
+      return result;
+    },
+    [wrap]
+  );
+
+  const fetchBookingsByPost = useCallback(
+    async (postId) => {
+      return wrap(() => bookingService.getBookingsByPost(postId), setBookings);
+    },
+    [wrap]
+  );
+
+  const fetchBookingsByStation = useCallback(
+    async (stationId) => {
+      return wrap(
+        () => bookingService.getBookingsByStation(stationId),
+        setBookings
+      );
+    },
+    [wrap]
+  );
+
+  const fetchBookingsByUser = useCallback(
+    async (userId) => {
+      return wrap(() => bookingService.getBookingsByUser(userId), setBookings);
+    },
+    [wrap]
+  );
+
+  const fetchBookingsByDate = useCallback(
+    async (date) => {
+      return wrap(() => bookingService.getBookingsByDate(date), setBookings);
+    },
+    [wrap]
+  );
+
+  const fetchBookingByWaitingListId = useCallback(
+    async (waitingListId) => {
+      return wrap(
+        () => bookingService.getBookingByWaitingListId(waitingListId),
+        setBooking
+      );
+    },
+    [wrap]
+  );
+
+  const fetchBookingById = useCallback(
+    async (bookingId) => {
+      return wrap(() => bookingService.getBookingById(bookingId), setBooking);
+    },
+    [wrap]
+  );
+
+  const fetchBookingsByStatus = useCallback(
+    async (statusList) => {
+      return wrap(
+        () => bookingService.getBookingsByStatus(statusList),
+        setBookings
+      );
+    },
+    [wrap]
+  );
 
   const clear = useCallback(() => {
     setLoading(false);

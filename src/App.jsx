@@ -4,7 +4,7 @@ import { App as AntdApp } from "antd";
 import Layout from "./components/layout/Layout.jsx";
 import HomePage from "./page/HomePage.jsx";
 import MapPage from "./page/MapPage.jsx";
-import EnergyPage from "./page/EnergyPage.jsx";
+import EnergyPage from "./page/SessionPage.jsx";
 import HistoryPage from "./page/HistoryPage.jsx";
 import ServicePackage from "./page/ServicePackage.jsx";
 import SettingPage from "./page/SettingPage.jsx";
@@ -23,6 +23,10 @@ import AboutPage from "./page/AboutPage.jsx";
 import NavbarWelcome from "./components/welcome/NavbarWelcome.jsx";
 import PaymentReturn from "./page/PaymentReturn.jsx";
 import PaymentPage from "./page/PaymentPage.jsx";
+
+// Driver Status Pages
+import WaitingPage from "./page/WaitingListPage.jsx";
+import BookingPage from "./page/BookingPage.jsx";
 
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
@@ -63,14 +67,9 @@ function App() {
               </ProtectedRoute>
             }
           >
-            <Route
-              path="home"
-              element={
-                  <HomePage />
-              }
-            />
-            {/* User Routes - Accessible to all authenticated users */}
-            
+            <Route path="home" element={<HomePage />} />
+
+            {/* Driver Routes - Accessible to Driver role */}
             <Route
               path="map"
               element={
@@ -79,14 +78,40 @@ function App() {
                 </DriverRoute>
               }
             />
+
+            {/* Driver Status-Based Routes */}
+            {/* Session Page (EnergyPage được dùng cho trạng thái session) */}
             <Route
-              path="energy"
+              path="session"
               element={
                 <DriverRoute>
                   <EnergyPage />
                 </DriverRoute>
               }
             />
+            <Route
+              path="waiting"
+              element={
+                <DriverRoute>
+                  <WaitingPage />
+                </DriverRoute>
+              }
+            />
+            <Route
+              path="booking"
+              element={
+                <DriverRoute>
+                  <BookingPage />
+                </DriverRoute>
+              }
+            />
+
+            {/* Legacy Energy Page - Redirect to session for backward compatibility */}
+            <Route
+              path="energy"
+              element={<Navigate to="/app/session" replace />}
+            />
+
             <Route
               path="history"
               element={
@@ -128,7 +153,7 @@ function App() {
               }
             />
 
-            {/* Admin / Manager Routes (chỉ khai báo 1 route cho mỗi path) */}
+            {/* Admin / Manager Routes */}
             <Route
               path="evadmindashboard"
               element={
