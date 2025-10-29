@@ -39,12 +39,10 @@ const ConfirmPaymentModal = ({
         </div>
 
         {/* Nếu là thanh toán gói, hiển thị tên gói ngắn */}
-        {paymentData?.usePackage && paymentData?.packageInfo && (
           <div style={{ marginTop: 12 }}>
             <Text>Gói sử dụng: </Text>
             <Text strong>{paymentData.packageInfo.name}</Text>
           </div>
-        )}
       </div>
     </Modal>
   );
