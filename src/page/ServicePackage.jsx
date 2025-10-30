@@ -191,7 +191,7 @@ const ServicePackage = () => {
                     Bạn đang sử dụng gói <strong>{packages.find(p => p.packageId === activeTransaction.servicePackageId)?.packageName || 'Không xác định'}</strong>
                   </p>
                   <p style={{ marginBottom: 4 }}>
-                    Hạn mức còn lại: <strong>{activeTransaction.remainingQuota} {packages.find(p => p.packageId === activeTransaction.servicePackageId)?.unit || 'kWh'}</strong>
+                    Hạn mức còn lại: <strong>{activeTransaction.remainingQuota} kWh</strong>
                   </p>
                 </div>
               }

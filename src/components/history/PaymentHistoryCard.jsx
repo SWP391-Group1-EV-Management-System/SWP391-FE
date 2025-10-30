@@ -8,6 +8,18 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
 
   const isPaid = payment.paid === true;
 
+  // Map payment method to display text and color
+  const getPaymentMethodDisplay = (method) => {
+    const methodMap = {
+      'PMT_MOMO': { text: 'MoMo', color: '#d82d8b' },
+      'PMT_PACKAGE': { text: 'Gói dịch vụ', color: '#1890ff' },
+      'PMT_CASH': { text: 'Tiền mặt', color: '#52c41a' },
+    };
+    return methodMap[method] || { text: method || 'N/A', color: '#999' };
+  };
+
+  const paymentMethodInfo = getPaymentMethodDisplay(payment.paymentMethod);
+
   return (
     <Card
       style={{
@@ -68,50 +80,64 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
       {/* Content */}
       <div style={{ padding: '2rem' }}>
         <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12}>
+          <Col flex="1">
             <div style={{ marginBottom: '1.2rem' }}>
-              <Text style={{ fontSize: '1.2rem', color: '#999', display: 'block', marginBottom: '0.4rem' }}>
-                Mã thanh toán
+              <Text style={{ fontSize: '1.7rem', color: '#999', display: 'block', marginBottom: '0.4rem' }}>
+                Mã thanh toán:
               </Text>
               {payment.paymentId ? (
-                <Text style={{ fontSize: '1.4rem', fontWeight: 600, color: '#1f7a1f' }}>
+                <Text style={{ fontSize: '1.5rem', fontWeight: 600, color: '#1f7a1f' }}>
                   {payment.paymentId}
                 </Text>
               ) : (
-                <Text style={{ fontSize: '1.4rem', color: '#ff9800', fontStyle: 'italic' }}>
+                <Text style={{ fontSize: '1.5rem', color: '#ff9800', fontStyle: 'italic' }}>
                   Chưa có
                 </Text>
               )}
             </div>
           </Col>
           
-          <Col xs={24} sm={12}>
+          <Col flex="1">
             <div style={{ marginBottom: '1.2rem' }}>
-              <Text style={{ fontSize: '1.2rem', color: '#999', display: 'block', marginBottom: '0.4rem' }}>
-                Trạm sạc
+              <Text style={{ fontSize: '1.7rem', color: '#999', display: 'block', marginBottom: '0.4rem' }}>
+                Điện năng tiêu thụ:
               </Text>
-              <Text style={{ fontSize: '1.4rem', fontWeight: 500, color: '#000' }}>
-                {payment.chargingStationName}
-              </Text>
-            </div>
-          </Col>
-          
-          <Col xs={24} sm={12}>
-            <div>
-              <Text style={{ fontSize: '1.2rem', color: '#999', display: 'block', marginBottom: '0.4rem' }}>
-                Điện năng tiêu thụ
-              </Text>
-              <Text style={{ fontSize: '1.6rem', fontWeight: 600, color: '#2d8f2d' }}>
+              <Text style={{ fontSize: '1.5rem', fontWeight: 600, color: '#2d8f2d' }}>
                 <ThunderboltOutlined style={{ marginRight: '6px' }} />
                 {payment.kwh} kWh
               </Text>
             </div>
           </Col>
+
+          <Col flex="1">
+            <div style={{ marginBottom: '1.2rem' }}>
+              <Text style={{ fontSize: '1.7rem', color: '#999', display: 'block', marginBottom: '0.4rem' }}>
+                Trạm sạc:
+              </Text>
+              <Text style={{ fontSize: '1.5rem', fontWeight: 500, color: '#000' }}>
+                {payment.chargingStationName}
+              </Text>
+            </div>
+          </Col>
+
+          {/* Payment Method - Hiển thị khi đã thanh toán */}
+          {isPaid && payment.paymentMethod && (
+            <Col flex="1">
+              <div style={{ marginBottom: '1.2rem' }}>
+                <Text style={{ fontSize: '1.7rem', color: '#999', display: 'block', marginBottom: '0.4rem' }}>
+                  Phương thức:
+                </Text>
+                <Text style={{ fontSize: '1.5rem', fontWeight: 500, color: '#000' }}>
+                  {paymentMethodInfo.text}
+                </Text>
+              </div>
+            </Col>
+          )}
           
-          <Col xs={24} sm={12}>
-            <div>
-              <Text style={{ fontSize: '1.2rem', color: '#999', display: 'block', marginBottom: '0.4rem' }}>
-                Số tiền
+          <Col flex="1">
+            <div style={{ marginBottom: '1.2rem' }}>
+              <Text style={{ fontSize: '1.7rem', color: '#999', display: 'block', marginBottom: '0.4rem' }}>
+                Số tiền:
               </Text>
               <Text style={{ fontSize: '2rem', fontWeight: 700, color: '#1f7a1f' }}>
                 {payment.price.toLocaleString('vi-VN')} VNĐ
@@ -131,7 +157,7 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
                 backgroundColor: '#2d8f2d',
                 borderColor: '#2d8f2d',
                 fontWeight: 600,
-                fontSize: '1.4rem',
+                fontSize: '1.6rem',
                 height: '4.4rem',
                 borderRadius: '8px',
                 padding: '0 3rem'
