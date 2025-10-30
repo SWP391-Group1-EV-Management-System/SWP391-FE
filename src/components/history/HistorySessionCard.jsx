@@ -5,12 +5,11 @@ import {
   ThunderboltOutlined, 
   ClockCircleOutlined,
   DollarOutlined,
-  CheckCircleOutlined,
-  SyncOutlined,
+  FileOutlined, 
   CarOutlined,
   EyeOutlined
 } from '@ant-design/icons';
-
+import { PiPlugChargingLight } from "react-icons/pi";
 const { Text } = Typography;
 
 const formatDateTime = (dateString) => {
@@ -57,221 +56,252 @@ const HistorySessionCard = ({ session, onViewDetail }) => {
         e.currentTarget.style.borderColor = 'rgba(40,167,69,0.18)';
       }}
     >
-      <Row gutter={[24, 16]} align="middle">
-        {/* Cột 1: Thông tin trạm */}
-        <Col xs={24} sm={12} md={8}>
-          <Space direction="vertical" size="small" style={{ width: '100%' }}>
-            <Text 
-              strong 
+      {/* Hàng 1 - Trạng thái và Nút */}
+      <Row gutter={[24, 16]} style={{ marginBottom: '1rem' }}>
+        <Col xs={24} style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+          <Tag
+            color={isPaid ? 'success' : 'processing'}
+            style={{ 
+              fontSize: '1.4rem', 
+              padding: '0.75rem 1.5rem',
+              borderRadius: '20px',
+              fontWeight: 600,
+              border: 'none',
+              background: isPaid ? 'linear-gradient(90deg, rgba(40,167,69,0.12), rgba(40,167,69,0.06))' : undefined,
+              color: '#08321a'
+            }}
+          >
+            {isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
+          </Tag>
+          
+          {onViewDetail && (
+            <Tag 
+              icon={<EyeOutlined />}
+              color="blue"
               style={{ 
-                fontSize: '1.6rem', 
-                color: '#000',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem'
+                fontSize: '1.3rem', 
+                padding: '0.75rem 1.5rem',
+                borderRadius: '20px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                border: 'none'
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetail(session);
               }}
             >
-              <EnvironmentOutlined style={{ fontSize: '1.8rem', color: '#28a745' }} />
-              {session.station?.name || 'N/A'}
-            </Text>
-            <Text 
-              type="secondary" 
-              style={{ 
-                fontSize: '1.25rem',
-                paddingLeft: '2.5rem',
-                color: '#222'
-              }}
-            >
-              {session.station?.address || 'N/A'}
-            </Text>
-            <Divider style={{ margin: '0.75rem 0', borderColor: 'rgba(40,167,69,0.06)' }} />
-            <Text 
-              style={{ 
-                fontSize: '1.2rem',
-                color: '#222',
-                paddingLeft: '2.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              <CarOutlined style={{ color: '#28a745' }} />
-              Mã: <strong>{session.sessionId}</strong>
-            </Text>
-            {session.post?.id && (
-              <Text 
-                style={{ 
-                  fontSize: '1.2rem',
-                  color: '#222',
-                  paddingLeft: '2.5rem'
-                }}
-              >
-                Cổng: <strong>{session.post.id}</strong>
-              </Text>
-            )}
-          </Space>
+              Xem chi tiết
+            </Tag>
+          )}
+        </Col>
+      </Row>
+
+      <Row gutter={[24, 16]}>
+        {/* Hàng 2 - Trạm, Mã, Cổng, PTTT */}
+        <Col xs={12} sm={6} md={6}>
+          <Text 
+            strong 
+            style={{ 
+              fontSize: '1.5rem', 
+              color: '#000',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '0.25rem'
+            }}
+          >
+            <EnvironmentOutlined style={{ fontSize: '1.7rem', color: '#28a745' }} />
+            Trạm sạc
+          </Text>
+          <Text 
+            style={{ 
+              fontSize: '1.4rem', 
+              color: '#666',
+              display: 'block'
+            }}
+          >
+            {session.station?.name || 'N/A'}
+          </Text>
         </Col>
 
-        {/* Cột 2: Thời gian & Năng lượng */}
-        <Col xs={24} sm={12} md={8}>
-          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-            <div>
-              <Text 
-                style={{ 
-                  fontSize: '1.15rem', 
-                  color: '#666',
-                  display: 'block',
-                  marginBottom: '0.25rem'
-                }}
-              >
-                Bắt đầu
-              </Text>
-              <Text 
-                strong
-                style={{ 
-                  fontSize: '1.35rem', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.5rem',
-                  color: '#000'
-                }}
-              >
-                <ClockCircleOutlined style={{ color: '#28a745' }} />
-                {formatDateTime(session.startTime)}
-              </Text>
-            </div>
-            
-            <div>
-              <Text 
-                style={{ 
-                  fontSize: '1.15rem', 
-                  color: '#666',
-                  display: 'block',
-                  marginBottom: '0.25rem'
-                }}
-              >
-                Kết thúc
-              </Text>
-              <Text 
-                strong
-                style={{ 
-                  fontSize: '1.35rem', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '0.5rem',
-                  color: isDone ? '#000' : '#ff9800'
-                }}
-              >
-                <ClockCircleOutlined style={{ color: isDone ? '#28a745' : '#ff9800' }} />
-                {isDone ? formatDateTime(session.endTime) : 'Đang sạc...'}
-              </Text>
-            </div>
-            
-            <Divider style={{ margin: '0.5rem 0', borderColor: 'rgba(40,167,69,0.06)' }} />
-            
-            <Text 
-              strong 
-              style={{ 
-                fontSize: '1.6rem', 
-                color: '#000',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.75rem'
-              }}
-            >
-              <ThunderboltOutlined style={{ fontSize: '1.8rem', color: '#28a745' }} />
-              {parseFloat(session.kwh || 0).toFixed(2)} kWh
-            </Text>
-          </Space>
+        <Col xs={12} sm={6} md={6}>
+          <Text 
+            strong
+            style={{ 
+              fontSize: '1.5rem', 
+              color: '#000',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '0.25rem'
+            }}
+          >
+            <CarOutlined style={{ color: '#28a745' }} />
+            Mã phiên
+          </Text>
+          <Text 
+            style={{ 
+              fontSize: '1.4rem', 
+              color: '#666',
+              display: 'block'
+            }}
+          >
+            {session.sessionId}
+          </Text>
         </Col>
 
-        {/* Cột 3: Giá & Trạng thái */}
-        <Col xs={24} sm={24} md={8}>
-          <div style={{ 
-            textAlign: 'right',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'flex-end',
-            gap: '1.5rem'
-          }}>
-            <div style={{ width: '100%' }}>
-              <Text 
-                style={{ 
-                  fontSize: '1.15rem', 
-                  color: '#666',
-                  display: 'block',
-                  marginBottom: '0.5rem'
-                }}
-              >
-                Tổng chi phí
-              </Text>
-              <Text
-                strong
-                style={{ 
-                  fontSize: '2.2rem',
-                  color: '#000',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'flex-end',
-                  gap: '0.5rem',
-                  fontWeight: 700
-                }}
-              >
-                <DollarOutlined style={{ color: '#28a745' }} />
-                {formatCurrency(session.totalAmount)}
-              </Text>
-              {session.payment?.methodName && (
-                <Text 
-                  style={{ 
-                    fontSize: '1.1rem',
-                    color: '#666',
-                    display: 'block',
-                    marginTop: '0.5rem'
-                  }}
-                >
-                  {session.payment.methodName}
-                </Text>
-              )}
-            </div>
-            
-            <Space direction="vertical" size="small" style={{ width: '100%', alignItems: 'flex-end' }}>
-              <Tag
-                color={isPaid ? 'success' : 'processing'}
-                style={{ 
-                  fontSize: '1.3rem', 
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '20px',
-                  fontWeight: 600,
-                  border: 'none',
-                  background: isPaid ? 'linear-gradient(90deg, rgba(40,167,69,0.12), rgba(40,167,69,0.06))' : undefined,
-                  color: '#08321a'
-                }}
-              >
-                {isPaid ? 'Đã thanh toán' : 'Chưa thanh toán'}
-              </Tag>
-              
-              {onViewDetail && (
-                <Tag 
-                  icon={<EyeOutlined />}
-                  color="blue"
-                  style={{ 
-                    fontSize: '1.2rem', 
-                    padding: '0.75rem 1.5rem',
-                    borderRadius: '20px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    border: 'none'
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onViewDetail(session);
-                  }}
-                >
-                  Xem chi tiết
-                </Tag>
-              )}
-            </Space>
-          </div>
+        <Col xs={12} sm={6} md={6}>
+          <Text 
+            strong
+            style={{ 
+              fontSize: '1.5rem', 
+              color: '#000',
+              display: 'block',
+              marginBottom: '0.25rem'
+            }}
+          >
+            <FileOutlined style={{ color: '#28a745' }} /> Phương thức
+          </Text>
+          <Text 
+            style={{ 
+              fontSize: '1.4rem', 
+              color: '#666',
+              display: 'block'
+            }}
+          >
+            {session.payment?.methodName || 'N/A'}
+          </Text>
+        </Col>
+
+        <Col xs={12} sm={6} md={6}>
+          <Text 
+            strong
+            style={{ 
+              fontSize: '1.5rem', 
+              color: '#000',
+              display: 'block',
+              marginBottom: '0.25rem'
+            }}
+          >
+            <PiPlugChargingLight style={{ color: '#28a745' }} />
+            Cổng sạc
+          </Text>
+          <Text 
+            style={{ 
+              fontSize: '1.4rem', 
+              color: '#666',
+              display: 'block'
+            }}
+          >
+            {session.post?.id || 'N/A'}
+          </Text>
+        </Col>
+
+        {/* Hàng 2 - Bắt đầu, Kết thúc, kWh, Giá */}
+        <Col xs={12} sm={6} md={6}>
+          <Text 
+            strong
+            style={{ 
+              fontSize: '1.5rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              color: '#000',
+              marginBottom: '0.25rem'
+            }}
+          >
+            <ClockCircleOutlined style={{ color: '#28a745' }} />
+            Bắt đầu
+          </Text>
+          <Text 
+            style={{ 
+              fontSize: '1.4rem', 
+              color: '#666',
+              display: 'block'
+            }}
+          >
+            {formatDateTime(session.startTime)}
+          </Text>
+        </Col>
+
+        <Col xs={12} sm={6} md={6}>
+          <Text 
+            strong
+            style={{ 
+              fontSize: '1.5rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem',
+              color: '#000',
+              marginBottom: '0.25rem'
+            }}
+          >
+            <ClockCircleOutlined style={{ color: '#28a745' }} />
+            Kết thúc
+          </Text>
+          <Text 
+            style={{ 
+              fontSize: '1.4rem', 
+              color: isDone ? '#666' : '#ff9800',
+              display: 'block'
+            }}
+          >
+            {isDone ? formatDateTime(session.endTime) : 'Đang sạc...'}
+          </Text>
+        </Col>
+
+        <Col xs={12} sm={6} md={6}>
+          <Text 
+            strong 
+            style={{ 
+              fontSize: '1.5rem', 
+              color: '#000',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '0.25rem'
+            }}
+          >
+            <ThunderboltOutlined style={{ fontSize: '1.9rem', color: '#28a745' }} />
+            Điện năng
+          </Text>
+          <Text 
+            style={{ 
+              fontSize: '1.4rem', 
+              color: '#666',
+              display: 'block'
+            }}
+          >
+            {parseFloat(session.kwh || 0).toFixed(2)} kWh
+          </Text>
+        </Col>
+
+        <Col xs={12} sm={6} md={6}>
+          <Text
+            strong
+            style={{ 
+              fontSize: '1.5rem',
+              color: '#000',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              fontWeight: 700,
+              marginBottom: '0.25rem'
+            }}
+          >
+            <DollarOutlined style={{ color: '#28a745' }} />
+            Tổng chi phí
+          </Text>
+          <Text 
+            style={{ 
+              fontSize: '1.4rem', 
+              color: '#666',
+              display: 'block'
+            }}
+          >
+            {formatCurrency(session.totalAmount)}
+          </Text>
         </Col>
       </Row>
     </Card>

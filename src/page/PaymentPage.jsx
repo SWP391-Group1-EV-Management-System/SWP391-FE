@@ -34,7 +34,8 @@ function PaymentPage() {
           energyConsumed: data.kwh || 0,
           basePrice: data.price || 0,
           paymentId: data.paymentId || paymentId,
-          paid: data.paid || false, // ← Thêm field paid
+          paid: data.paid || false, 
+          paymentMethod: data.paymentMethod || null,
         };
         setSessionData(mappedSessionData);
       })
