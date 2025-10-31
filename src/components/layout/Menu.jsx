@@ -131,7 +131,7 @@ const getDriverMenuItems = (status) => {
       icon: BsBookmarkStar,
       path: "/app/servicepackage",
     },
-    { id: "setting", label: "Cài đặt", icon: BsGear, path: "/app/setting" },
+    { id: "vehicleregistration", label: "Đăng ký xe", icon: BsGear, path: "/app/vehicleregistration" },
   ];
 
   // Chỉ thêm statusMenuItem nếu có status

@@ -1,4 +1,3 @@
-// File: src/hooks/carApi.js (hoặc src/services/carApi.js)
 import { useState, useCallback } from 'react';
 import * as carService from '../services/carService';
 
@@ -8,6 +7,7 @@ const useCar = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Lấy tất cả xe
   const fetchAllCars = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -23,13 +23,21 @@ const useCar = () => {
     }
   }, []);
 
+  // Lấy danh sách xe theo user
   const fetchCarsByUser = useCallback(async (userId) => {
     setLoading(true);
     setError(null);
     try {
       const data = await carService.getCarsByUser(userId);
-      setCars(data);
-      return data;
+      
+      // Đảm bảo mỗi xe có carID để làm key
+      const carsWithIds = data.map((car, index) => ({
+        ...car,
+        carID: car.carID || car.id || `temp-${index}`,
+      }));
+      
+      setCars(carsWithIds);
+      return carsWithIds;
     } catch (err) {
       setError(err);
       throw err;
@@ -38,6 +46,7 @@ const useCar = () => {
     }
   }, []);
 
+  // Lấy chi tiết 1 xe
   const fetchCar = useCallback(async (carId) => {
     setLoading(true);
     setError(null);
@@ -53,12 +62,12 @@ const useCar = () => {
     }
   }, []);
 
+  // Tạo xe mới
   const createCar = useCallback(async (carData) => {
     setLoading(true);
     setError(null);
     try {
       const created = await carService.addCar(carData);
-      setCars((prev) => (prev ? [created, ...prev] : [created]));
       return created;
     } catch (err) {
       setError(err);
@@ -68,13 +77,12 @@ const useCar = () => {
     }
   }, []);
 
+  // Cập nhật xe
   const modifyCar = useCallback(async (carId, carData) => {
     setLoading(true);
     setError(null);
     try {
       const updated = await carService.updateCar(carId, carData);
-      setCars((prev) => prev.map((c) => (c.id === carId || c._id === carId ? updated : c)));
-      setCar((prev) => (prev && (prev.id === carId || prev._id === carId) ? updated : prev));
       return updated;
     } catch (err) {
       setError(err);
@@ -84,13 +92,12 @@ const useCar = () => {
     }
   }, []);
 
+  // Xóa xe
   const removeCar = useCallback(async (carId) => {
     setLoading(true);
     setError(null);
     try {
       const res = await carService.deleteCar(carId);
-      setCars((prev) => prev.filter((c) => !(c.id === carId || c._id === carId)));
-      if (car && (car.id === carId || car._id === carId)) setCar(null);
       return res;
     } catch (err) {
       setError(err);
@@ -98,7 +105,7 @@ const useCar = () => {
     } finally {
       setLoading(false);
     }
-  }, [car]);
+  }, []);
 
   return {
     cars,

@@ -136,7 +136,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                   icon={actionButton.icon}
                   size="large"
                   onClick={actionButton.onClick}
-                  style={{ borderRadius: '8px' }}
+                  style={{ borderRadius: '8px', backgroundColor: "#0b9459", color: "#fff"  }}
                 >
                   {actionButton.text}
                 </Button>

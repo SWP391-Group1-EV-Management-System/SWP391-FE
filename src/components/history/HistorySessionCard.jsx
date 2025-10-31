@@ -96,7 +96,7 @@ const HistorySessionCard = ({ session, onViewDetail }) => {
           )}
         </Col>
       </Row>
-
+      <Divider style={{ margin: '0 0 1rem 0'}} />
       <Row gutter={[24, 16]}>
         {/* Hàng 2 - Trạm, Mã, Cổng, PTTT */}
         <Col xs={12} sm={6} md={6}>
