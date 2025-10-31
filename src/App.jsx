@@ -7,7 +7,7 @@ import MapPage from "./page/MapPage.jsx";
 import EnergyPage from "./page/SessionPage.jsx";
 import HistoryPage from "./page/HistoryPage.jsx";
 import ServicePackage from "./page/ServicePackage.jsx";
-import SettingPage from "./page/SettingPage.jsx";
+import VehicleRegistration from "./page/VehicleRegistrationPage.jsx";
 import NotFoundPage from "./page/NotFoundPage.jsx";
 import Login from "./page/Login.jsx";
 import Register from "./page/Register.jsx";
@@ -141,10 +141,10 @@ function App() {
               }
             />
             <Route
-              path="setting"
+              path="vehicleregistration"
               element={
                 <DriverRoute>
-                  <SettingPage />
+                  <VehicleRegistration />
                 </DriverRoute>
               }
             />

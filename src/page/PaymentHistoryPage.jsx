@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Typography, Space, Spin, notification } from 'antd';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../hooks/useAuth';
@@ -6,7 +6,8 @@ import { usePaymentData } from '../hooks/usePayment';
 import PaymentHistorySummary from '../components/history/PaymentHistorySummary';
 import PaymentHistoryList from '../components/history/PaymentHistoryList';
 import PaymentHistoryNoData from '../components/history/NoDataMessage';
-
+import { ThunderboltOutlined, ReloadOutlined } from '@ant-design/icons';
+import PageHeader from '../components/PageHeader';
 const { Title, Text } = Typography;
 
 const PaymentHistoryPage = () => {
@@ -89,7 +90,7 @@ const PaymentHistoryPage = () => {
     }
   };
 
-  // Loading state
+  // Loading state (kèm PageHeader)
   if (loading) {
     return (
       <div style={{ 
@@ -97,11 +98,14 @@ const PaymentHistoryPage = () => {
         textAlign: 'center',
         minHeight: '60vh',
         display: 'flex',
+        flexDirection: 'column',
+        gap: '2rem',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         background: 'white'
       }}>
-        <Space direction="vertical" size="large" align="center">
+
+        <Space direction="vertical" size="large" align="center" style={{ marginTop: '1rem' }}>
           <Spin size="large" />
           <Text style={{ fontSize: '1.4rem', color: '#666' }}>
             Đang tải lịch sử thanh toán...
@@ -119,9 +123,6 @@ const PaymentHistoryPage = () => {
         background: 'white',
         minHeight: '60vh'
       }}>
-        <Title level={2} style={{ marginBottom: '2rem', color: '#000' }}>
-          Lịch sử thanh toán
-        </Title>
         <div style={{
           background: 'white',
           padding: '3rem',
@@ -161,18 +162,12 @@ const PaymentHistoryPage = () => {
       background: 'white', 
       minHeight: '100vh' 
     }}>
-      <Title 
-        level={2} 
-        style={{ 
-          marginBottom: '2rem', 
-          color: '#000',
-          fontSize: '2.4rem',
-          fontWeight: 700
-        }}
-      >
-        Lịch sử thanh toán
-      </Title>
-      
+      <PageHeader
+        title="Lịch sử thanh toán"
+        icon={<ThunderboltOutlined style={{ fontSize: 24 }} />}
+
+      />
+
       {/* Summary Cards */}
       {payments && payments.length > 0 && (
         <PaymentHistorySummary payments={payments} />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Spin, Typography, Space } from 'antd';
+import { ThunderboltOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useHistory } from '../hooks/useHistory';
 import HistorySummary from '../components/history/HistorySummary';
@@ -7,6 +8,7 @@ import HistoryList from '../components/history/HistoryList';
 import HistorySessionDetail from '../components/history/HistorySessionDetail';
 import NoDataMessage from '../components/history/NoDataMessage';
 import HistoryFilters from '../components/history/HistoryFilters';
+import PageHeader from '../components/PageHeader';
 
 const { Title, Text } = Typography;
 
@@ -134,18 +136,11 @@ const HistoryPage = () => {
       background: 'white', 
       minHeight: '100vh' 
     }}>
-      <Title 
-        level={2} 
-        style={{ 
-          marginBottom: '2rem', 
-          color: '#000',
-          fontSize: '2.4rem',
-          fontWeight: 700
-        }}
-      >
-        Lịch sử sạc
-      </Title>
-      
+      <PageHeader
+        title="Lịch sử sạc"
+        icon={<ThunderboltOutlined style={{ fontSize: 24 }} />}
+      />
+
       {/* Summary Cards */}
       {history && history.length > 0 && (
         <HistorySummary history={history} />
