@@ -7,7 +7,7 @@ import ElasticSlider from "./ElasticSlider";
 import { energySessionService } from "../../services/energySessionService";
 import { useAuth } from "../../hooks/useAuth";
 import { chargingStationService } from "../../services/chargingStationService";
-import LoadingSpinner from "../common/LoadingSpinner";
+import { LoadingSpinner } from "../../components/common";
 import { setDriverStatus } from "../../utils/statusUtils"; // ← IMPORT HELPER
 
 function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
@@ -268,9 +268,10 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           <div className="qr-result-modal-content">
             {dataLoading ? (
               <LoadingSpinner
+                type="pulse"
                 size="medium"
+                color="primary"
                 text="Đang tải thông tin trụ sạc..."
-                fullHeight={false}
               />
             ) : (
               <>

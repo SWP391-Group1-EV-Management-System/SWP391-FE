@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Row, Col, Space, Spin, Alert, Button, notification } from "antd";
 import { useNavigate } from "react-router";
 import PageHeader from "../components/PageHeader";
@@ -35,6 +35,118 @@ const EnergyPage = ({ userID }) => {
     refetch,
   } = useEnergySession(userID);
 
+  // ✅ State để lưu dữ liệu realtime từ SSE
+  const [realtimeProgress, setRealtimeProgress] = useState(null);
+
+  // ✅ Kết nối SSE để nhận dữ liệu realtime
+  useEffect(() => {
+    const sessionId = sessionData?.chargingSessionId || sessionData?.sessionId;
+
+    if (!sessionId || !sessionData) {
+      console.log("⚠️ No sessionId or sessionData, skipping SSE connection");
+      return;
+    }
+
+    let eventSource = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 3;
+
+    const connectSSE = () => {
+      try {
+        // ✅ Cookie-based auth: EventSource tự động gửi cookies (jwt) nếu cùng origin
+        // Không cần token từ localStorage vì backend đọc JWT từ cookie
+        const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
+        eventSource = new EventSource(
+          `${apiUrl}/api/charging/session/progress/${sessionId}`,
+          { withCredentials: true } // ✅ Quan trọng: cho phép gửi cookies cross-origin
+        );
+
+        console.log("🔌 [SessionPage] SSE connected for session:", sessionId);
+
+        // Lắng nghe sự kiện "chargingProgress"
+        eventSource.addEventListener("chargingProgress", (event) => {
+          try {
+            const progress = JSON.parse(event.data);
+
+            // Reset reconnect attempts on successful message
+            reconnectAttempts = 0;
+
+            // ✅ Backend trả về: chargedEnergy_kWh (string với dấu phấy) và elapsedSeconds (string)
+            // Parse và chuyển đổi sang format FE cần
+            const energyStr = progress.chargedEnergy_kWh || "0";
+            const energyCharged = parseFloat(energyStr.replace(",", ".")) || 0;
+
+            const elapsedSec = parseInt(progress.elapsedSeconds || "0", 10);
+
+            // Chuyển seconds thành HH:MM:SS hoặc MM:SS
+            const hours = Math.floor(elapsedSec / 3600);
+            const minutes = Math.floor((elapsedSec % 3600) / 60);
+            const seconds = elapsedSec % 60;
+
+            const timeElapsed =
+              hours > 0
+                ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+                    2,
+                    "0"
+                  )}:${String(seconds).padStart(2, "0")}`
+                : `${String(minutes).padStart(2, "0")}:${String(
+                    seconds
+                  ).padStart(2, "0")}`;
+
+            setRealtimeProgress({
+              energyCharged,
+              timeElapsed,
+            });
+          } catch (error) {
+            console.error("❌ Error parsing SSE progress data:", error);
+          }
+        });
+
+        // Xử lý lỗi
+        eventSource.onerror = (error) => {
+          console.error("❌ SSE connection error:", error);
+
+          // Đóng connection hiện tại
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
+
+          // Retry nếu chưa quá số lần thử
+          if (reconnectAttempts < maxReconnectAttempts) {
+            reconnectAttempts++;
+            console.log(
+              `🔄 Reconnecting SSE (attempt ${reconnectAttempts}/${maxReconnectAttempts})...`
+            );
+            setTimeout(() => {
+              connectSSE();
+            }, 2000 * reconnectAttempts); // Exponential backoff: 2s, 4s, 6s
+          } else {
+            console.warn(
+              "⚠️ Max SSE reconnect attempts reached. Stopping reconnection."
+            );
+          }
+        };
+      } catch (error) {
+        console.error("❌ Failed to create SSE connection:", error);
+      }
+    };
+
+    // Khởi tạo connection
+    connectSSE();
+
+    // Cleanup: đóng kết nối khi component unmount hoặc sessionId thay đổi
+    return () => {
+      console.log(
+        "🔌 [SessionPage] Closing SSE connection for session:",
+        sessionId
+      );
+      if (eventSource) {
+        eventSource.close();
+      }
+    };
+  }, [sessionData?.chargingSessionId, sessionData?.sessionId, sessionData]);
+
   useEffect(() => {
     if (!isLoading && !sessionData && !error) {
       console.log("Session đã kết thúc");
@@ -55,7 +167,8 @@ const EnergyPage = ({ userID }) => {
     };
 
     window.addEventListener("sessionCreated", handleSessionCreated);
-    return () => window.removeEventListener("sessionCreated", handleSessionCreated);
+    return () =>
+      window.removeEventListener("sessionCreated", handleSessionCreated);
   }, [refetch]);
 
   // ✅ Handler thanh toán - Lấy payment và navigate
@@ -323,7 +436,10 @@ const EnergyPage = ({ userID }) => {
           </Row>
 
           {/* Energy Stats */}
-          <EnergyStats sessionData={sessionData} />
+          <EnergyStats
+            sessionData={sessionData}
+            realtimeProgress={realtimeProgress}
+          />
 
           {/* Row 2: Technical Details & Pricing */}
           <Row gutter={[16, 16]}>
