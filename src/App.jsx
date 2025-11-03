@@ -31,18 +31,16 @@ import BookingPage from "./page/BookingPage.jsx";
 import PaymentHistory from "./page/PaymentHistoryPage.jsx";
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
-import {
-  AdminRoute,
-  StaffRoute,
-  ManagerRoute,
-  DriverRoute,
-} from "./components/auth/AdminRoute.jsx";
+import { AdminRoute, StaffRoute, ManagerRoute, DriverRoute } from "./components/auth/AdminRoute.jsx";
 import RootRedirect from "./components/auth/RootRedirect.jsx";
+import ChatBox from "./components/chat/ChatBox.jsx";
 
 function App() {
   return (
     <AntdApp>
       <BrowserRouter>
+        {/* ChatBox component - hiển thị trên tất cả các trang */}
+        <ChatBox />
         <Routes>
           {/* Smart root redirect based on authentication */}
           <Route path="/" element={<RootRedirect />} />
@@ -71,17 +69,16 @@ function App() {
             <Route path="home" element={<HomePage />} />
 
             {/* Driver Routes - Accessible to Driver role */}
-            <Route
-              path="home"
-              element={
-                  <HomePage />
-              }
-            />
+            <Route path="home" element={<HomePage />} />
             {/* User Routes - Accessible to all authenticated users */}
             <Route
               path="payment-history"
-              element={<DriverRoute><PaymentHistory /></DriverRoute>}
-            /> 
+              element={
+                <DriverRoute>
+                  <PaymentHistory />
+                </DriverRoute>
+              }
+            />
             <Route
               path="map"
               element={
@@ -119,10 +116,7 @@ function App() {
             />
 
             {/* Legacy Energy Page - Redirect to session for backward compatibility */}
-            <Route
-              path="energy"
-              element={<Navigate to="/app/session" replace />}
-            />
+            <Route path="energy" element={<Navigate to="/app/session" replace />} />
 
             <Route
               path="history"
