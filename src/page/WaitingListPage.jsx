@@ -27,6 +27,7 @@ const WaitingListPage = () => {
   const [waitingData, setWaitingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
   const [queueRank, setQueueRank] = useState(null);
+  const [chargingPostId, setChargingPostId] = useState(null); // ✅ Thêm state cho postId
 
   // ✅ Sử dụng useWaitingList hook
   const {
@@ -40,7 +41,7 @@ const WaitingListPage = () => {
   // ✅ WebSocket integration for real-time updates
   const { connected, messages, position, clearMessages } = useWebSocket(
     user?.id,
-    waitingData?.chargingPostId || waitingData?.post?.idChargingPost
+    chargingPostId // ← Dùng state riêng thay vì từ waitingData
   );
 
   console.log("🔌 [WaitingListPage] WebSocket connected:", connected);
@@ -103,12 +104,17 @@ const WaitingListPage = () => {
       console.log("🔧 [WaitingListPage] Mapped waiting:", mappedWaiting);
       setWaitingData(mappedWaiting);
 
-      // Calculate queue rank based on position in array
-      const rank =
-        waitingLists.findIndex(
-          (w) => w.waitingListId === activeWaiting.waitingListId
-        ) + 1;
-      setQueueRank(rank);
+      // ✅ Set chargingPostId để WebSocket kết nối
+      const postId =
+        activeWaiting.chargingPostId || activeWaiting.post?.idChargingPost;
+      console.log(
+        "🔌 [WaitingListPage] Setting charging post ID for WebSocket:",
+        postId
+      );
+      setChargingPostId(postId);
+
+      // ✅ KHÔNG tính rank từ mảng nữa - chỉ lấy từ WebSocket
+      // Queue rank sẽ được cập nhật từ WebSocket useEffect bên dưới
 
       // Set status config
       const config = {
@@ -124,21 +130,28 @@ const WaitingListPage = () => {
       setWaitingData(null);
       setStatusConfig(null);
       setQueueRank(null);
+      setChargingPostId(null); // ✅ Reset postId khi không có waiting list
     }
   }, [waitingLists]);
 
-  // ✅ Update queue rank when WebSocket position changes
+  // ✅ Update queue rank ONLY from WebSocket
   useEffect(() => {
-    if (position !== null && position !== queueRank) {
-      console.log("🎯 [WaitingListPage] Updating queue rank from WebSocket:", position);
+    if (position !== null && position !== undefined) {
+      console.log(
+        "🎯 [WaitingListPage] Updating queue rank from WebSocket:",
+        position
+      );
       setQueueRank(position);
-      
-      notification.info({
-        message: "Cập nhật vị trí",
-        description: `Vị trí của bạn trong hàng đợi: #${position}`,
-        placement: "topRight",
-        duration: 3,
-      });
+
+      // Show notification when position changes
+      if (queueRank !== null && position !== queueRank) {
+        notification.info({
+          message: "Cập nhật vị trí",
+          description: `Vị trí của bạn trong hàng đợi: #${position}`,
+          placement: "topRight",
+          duration: 3,
+        });
+      }
     }
   }, [position]);
 
@@ -147,7 +160,7 @@ const WaitingListPage = () => {
     if (messages.length > 0) {
       const latestMessage = messages[messages.length - 1];
       console.log("📩 [WaitingListPage] New WebSocket message:", latestMessage);
-      
+
       notification.info({
         message: "Thông báo hàng đợi",
         description: latestMessage.text,
@@ -395,8 +408,8 @@ const WaitingListPage = () => {
                 <Space>
                   <WifiOutlined style={{ fontSize: "16px" }} />
                   <span>
-                    {connected 
-                      ? "Kết nối thời gian thực đang hoạt động" 
+                    {connected
+                      ? "Kết nối thời gian thực đang hoạt động"
                       : "Đang kết nối lại WebSocket..."}
                   </span>
                 </Space>
