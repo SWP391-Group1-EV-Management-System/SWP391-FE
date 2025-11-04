@@ -1,5 +1,4 @@
 import axios from "axios";
-import { Cookie } from "lucide-react";
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 const api = axios.create({

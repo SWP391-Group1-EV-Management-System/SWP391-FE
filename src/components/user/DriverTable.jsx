@@ -3,11 +3,12 @@ import { Table, Button, Space, Popconfirm, message } from 'antd';
 import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import UserModal from './UserModal';
 import useUser from '../../hooks/useUser';
-import { deleteUser } from '../../services/userService';
+import { getUserById } from '../../services/userService';
 
 const DriverTable = ({ search }) => {
   const [modal, setModal] = useState({ visible: false, mode: 'view', user: null });
-  const { users, loading, error, refresh } = useUser('Driver');
+  const [loadingUser, setLoadingUser] = useState(false);
+  const { users, loading, error, refresh, update, remove } = useUser('Driver');
 
   const data = (users || []).filter(
     u =>
@@ -17,12 +18,43 @@ const DriverTable = ({ search }) => {
 
   const handleDelete = async (id, name) => {
     try {
-      await deleteUser(id);
+      await remove(id);
       message.success(`Đã xóa người dùng "${name}"`);
       refresh();
     } catch (err) {
       console.error(err);
       message.error('Xóa người dùng thất bại');
+    }
+  };
+
+  const handleViewEdit = async (record, mode) => {
+    try {
+      setLoadingUser(true);
+      
+      // Gọi API để lấy full user data kèm birthDate
+      const fullUserData = await getUserById(record.id);
+      
+      // Map lại user data đúng format
+      const mappedUser = {
+        id: fullUserData.id || record.id,
+        firstName: fullUserData.firstName || record.firstName,
+        lastName: fullUserData.lastName || record.lastName,
+        email: fullUserData.email || record.email,
+        gender: fullUserData.gender === true ? 'Male' : fullUserData.gender === false ? 'Female' : record.gender,
+        phone: fullUserData.phone || fullUserData.phoneNumber || record.phone,
+        role: (fullUserData.role || record.role || '').toLowerCase(),
+        status: fullUserData.active === true || fullUserData.status === true ? 'Active' : 'Inactive',
+        birthDate: fullUserData.birthDate || null,
+        password: fullUserData.password || record.password || '',
+        createdAt: fullUserData.createdAt || record.createdAt || '',
+      };
+      
+      setModal({ visible: true, mode, user: mappedUser });
+    } catch (err) {
+      console.error('Error fetching user details:', err);
+      message.error('Không thể tải thông tin người dùng');
+    } finally {
+      setLoadingUser(false);
     }
   };
 
@@ -37,8 +69,22 @@ const DriverTable = ({ search }) => {
       width: 200,
       render: (_, record) => (
         <Space>
-          <Button type="link" icon={<EyeOutlined />} onClick={() => setModal({ visible: true, mode: 'view', user: record })}>View</Button>
-          <Button type="link" icon={<EditOutlined />} onClick={() => setModal({ visible: true, mode: 'edit', user: record })}>Edit</Button>
+          <Button 
+            type="link" 
+            icon={<EyeOutlined />} 
+            onClick={() => handleViewEdit(record, 'view')}
+            loading={loadingUser}
+          >
+            View
+          </Button>
+          <Button 
+            type="link" 
+            icon={<EditOutlined />} 
+            onClick={() => handleViewEdit(record, 'edit')}
+            loading={loadingUser}
+          >
+            Edit
+          </Button>
 
           <Popconfirm
             title={`Bạn có chắc chắn muốn xóa ${record.firstName} ${record.lastName}?`}
@@ -69,12 +115,11 @@ const DriverTable = ({ search }) => {
           visible={modal.visible}
           mode={modal.mode}
           user={modal.user}
-          onClose={() => setModal({ ...modal, visible: false })}
-          onSave={user => {
-            // After saving, refresh list
-            setModal({ ...modal, visible: false });
-            refresh();
+          onClose={() => setModal({ visible: false, mode: 'view', user: null })}
+          onSave={() => {
+            setModal({ visible: false, mode: 'view', user: null });
           }}
+          onUpdate={update}
         />
       )}
       <style>{`
