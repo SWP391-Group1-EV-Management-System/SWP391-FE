@@ -85,7 +85,9 @@ export const getWaitingListByDate = async (date) => {
  */
 export const getWaitingListById = async (waitingListId) => {
   try {
+    console.log("🌐 [waitingListService] Calling API:", `/api/waiting-list/queue/${waitingListId}`);
     const response = await api.get(`/api/waiting-list/queue/${waitingListId}`);
+    console.log("✅ [waitingListService] Response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching waiting list by ID:", error);

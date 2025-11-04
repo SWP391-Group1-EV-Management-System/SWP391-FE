@@ -1,15 +1,100 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Card, Typography, Space, Row, Col, Divider } from "antd";
 import { ClockCircleOutlined, CalendarOutlined } from "@ant-design/icons";
+import { useCountdown } from "../../hooks/useCountdown";
 
 const { Title, Text } = Typography;
+
+/**
+ * Tính số phút chờ
+ * - Nếu maxWaitingTime là STRING (ISO datetime) → Tính maxWaitingTime - createdAt
+ * - Nếu maxWaitingTime là NUMBER (phút) → Dùng trực tiếp
+ */
+const calculateWaitingMinutes = (maxWaitingTime, createdAt) => {
+  if (!maxWaitingTime) return 0;
+
+  try {
+    // ✅ Case 1: maxWaitingTime là số (phút) → Dùng trực tiếp
+    if (typeof maxWaitingTime === "number") {
+      console.log("⏱️ [WaitingTime] maxWaitingTime is a number (minutes):", maxWaitingTime);
+      return maxWaitingTime;
+    }
+
+    // ✅ Case 2: maxWaitingTime là string datetime → Tính chênh lệch
+    if (typeof maxWaitingTime === "string" && createdAt) {
+      console.log("⏱️ [WaitingTime] maxWaitingTime is a datetime string");
+
+      const endTime = new Date(maxWaitingTime);
+      const startTime = new Date(createdAt);
+
+      // Kiểm tra valid dates
+      if (isNaN(endTime.getTime()) || isNaN(startTime.getTime())) {
+        console.warn("⚠️ [WaitingTime] Invalid datetime format");
+        return 0;
+      }
+
+      // Tính số milliseconds chênh lệch
+      const diffMs = endTime - startTime;
+
+      // Convert sang phút
+      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+
+      console.log("⏱️ [WaitingTime] Calculating waiting time:");
+      console.log("   - maxWaitingTime:", maxWaitingTime);
+      console.log("   - createdAt:", createdAt);
+      console.log("   - diffMinutes:", diffMinutes);
+
+      return diffMinutes > 0 ? diffMinutes : 0;
+    }
+
+    console.warn("⚠️ [WaitingTime] Unexpected maxWaitingTime format:", maxWaitingTime);
+    return 0;
+  } catch (error) {
+    console.error("❌ [WaitingTime] Error calculating waiting time:", error);
+    return 0;
+  }
+};
+
 // Component 2: Waiting Time (maxWaitingTime)
 export const WaitingTime = ({ sessionData }) => {
+  // ✅ Tính số phút cần chờ
+  const waitingMinutes = useMemo(() => {
+    return calculateWaitingMinutes(
+      sessionData.maxWaitingTime || sessionData.expectedWaitingTime,
+      sessionData.createdAt
+    );
+  }, [sessionData.maxWaitingTime, sessionData.expectedWaitingTime, sessionData.createdAt]);
+
+  // ✅ Tạo unique storage key dựa vào waitingListId hoặc bookingId
+  const storageKey = useMemo(() => {
+    const id = sessionData.waitingListId || sessionData.bookingId || "default";
+    return `countdown_${id}`;
+  }, [sessionData.waitingListId, sessionData.bookingId]);
+
+  // ✅ Sử dụng local countdown (không cần backend SSE nữa!)
+  const { countdown, status } = useCountdown(waitingMinutes, waitingMinutes > 0, storageKey);
+
+  // ✅ Display time: Ưu tiên countdown, fallback về tính toán local
+  const displayTime = countdown?.displayTime || `${waitingMinutes} phút`;
+  const displayStatus = 
+    status === "CANCELLED" ? "🛑 Đã hủy" :
+    status === "RUNNING" ? "⏳ Đang đếm..." : 
+    status === "COMPLETED" ? "✅ Hoàn thành" : "";
+
   const waitingSpecs = [
     {
       label: "Thời gian chờ tối đa",
-      value: `${sessionData.maxWaitingTime || 0} phút`,
+      value: displayTime,
+      highlight: status === "RUNNING" || status === "CANCELLED",
     },
+    ...(displayStatus
+      ? [
+          {
+            label: "Trạng thái",
+            value: displayStatus,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -51,9 +136,7 @@ export const WaitingTime = ({ sessionData }) => {
                 padding: "16px 20px",
                 backgroundColor: spec.highlight ? "#d1fae5" : "#f8fafc",
                 borderRadius: "12px",
-                border: spec.highlight
-                  ? "2px solid #10b981"
-                  : "1px solid #e2e8f0",
+                border: spec.highlight ? "2px solid #10b981" : "1px solid #e2e8f0",
                 transition: "all 0.3s ease",
               }}
             >
@@ -83,9 +166,7 @@ export const WaitingTime = ({ sessionData }) => {
             </Row>
 
             {/* Add divider between items except last one */}
-            {index < waitingSpecs.length - 1 && (
-              <Divider style={{ margin: "8px 0", borderColor: "#e2e8f0" }} />
-            )}
+            {index < waitingSpecs.length - 1 && <Divider style={{ margin: "8px 0", borderColor: "#e2e8f0" }} />}
           </div>
         ))}
       </Space>

@@ -110,31 +110,48 @@ const StationModal = ({ isOpen, onClose, station }) => {
       console.log("📦 [StationModal] Booking response:", res);
       console.log("   - status:", res?.status);
       console.log("   - rank:", res?.rank);
+      console.log("   - idAction:", res?.idAction);
 
       if (res?.success || res?.status) {
         // ✅ Kiểm tra status từ response
         const status = res.status?.toLowerCase();
 
         if (status === "waiting") {
-          // ✅ Lưu rank vào localStorage để WaitingListPage có thể lấy
-          if (res.rank !== undefined && res.rank !== null && res.rank > 0) {
-            console.log("💾 [StationModal] Saving initial queue rank:", res.rank);
-            localStorage.setItem("initialQueueRank", res.rank.toString());
+          // ✅ Lưu thông tin waiting vào localStorage
+          if (res.idAction) {
+            console.log("💾 [StationModal] Saving waiting info:");
+            localStorage.setItem("waitingListId", res.idAction); // idAction = waitingListId
+            localStorage.setItem("bookingStatus", "waiting");
+
+            // Vẫn lưu rank nếu có (để hiển thị ngay)
+            if (res.rank !== undefined && res.rank !== null && res.rank > 0) {
+              localStorage.setItem("initialQueueRank", res.rank.toString());
+            }
+
             localStorage.setItem("queuePostId", postId);
             console.log("✅ [StationModal] Saved to localStorage:");
+            console.log("   - waitingListId:", localStorage.getItem("waitingListId"));
+            console.log("   - bookingStatus:", localStorage.getItem("bookingStatus"));
             console.log("   - initialQueueRank:", localStorage.getItem("initialQueueRank"));
-            console.log("   - queuePostId:", localStorage.getItem("queuePostId"));
           } else {
-            console.warn("⚠️ [StationModal] No valid rank in response:", res.rank);
+            console.warn("⚠️ [StationModal] No idAction in response:", res);
           }
 
           alert(`Trụ ${postId} đang đầy. Bạn đã được thêm vào danh sách chờ.`);
-          // Navigate to booking page so user can see their waiting booking
           onClose();
           navigate("/app/waiting");
         } else if (status === "booking") {
+          // ✅ Lưu thông tin booking vào localStorage
+          if (res.idAction) {
+            console.log("💾 [StationModal] Saving booking info:");
+            localStorage.setItem("bookingId", res.idAction); // idAction = bookingId
+            localStorage.setItem("bookingStatus", "booking");
+            console.log("✅ [StationModal] Saved to localStorage:");
+            console.log("   - bookingId:", localStorage.getItem("bookingId"));
+            console.log("   - bookingStatus:", localStorage.getItem("bookingStatus"));
+          }
+
           alert(`Đặt chỗ thành công cho trụ ${postId}!`);
-          // Navigate to booking page to show booking details
           onClose();
           navigate("/app/booking");
         } else {

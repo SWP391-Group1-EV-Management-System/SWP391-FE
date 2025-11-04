@@ -5,6 +5,7 @@ export const useWebSocket = (userId, postId) => {
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState([]);
   const [position, setPosition] = useState(null);
+  const [maxWaitingTime, setMaxWaitingTime] = useState(null); // ✅ Thêm state cho endTime
 
   useEffect(() => {
     console.log("🎯 [useWebSocket] Hook called with:");
@@ -40,6 +41,23 @@ export const useWebSocket = (userId, postId) => {
 
           setMessages((prev) => [...prev, { type: "notification", text: message, time: new Date() }]);
 
+          // ✅ Parse EndTime message (from updateMaxWaitingTime)
+          const endTimeMatch = message.match(/EndTime:\s*(.+)/i);
+          if (endTimeMatch) {
+            const endTimeStr = endTimeMatch[1].trim();
+            console.log("⏰ [useWebSocket] EndTime parsed:", endTimeStr);
+            setMaxWaitingTime(endTimeStr);
+
+            // ✅ Lưu vào localStorage
+            try {
+              localStorage.setItem("maxWaitingTime", endTimeStr);
+              console.log("💾 [useWebSocket] Saved maxWaitingTime to localStorage:", endTimeStr);
+            } catch (error) {
+              console.error("❌ [useWebSocket] Error saving maxWaitingTime:", error);
+            }
+            return; // ✅ Không parse position nếu là EndTime message
+          }
+
           // ✅ Try multiple regex patterns to parse position
           let newPosition = null;
 
@@ -71,6 +89,14 @@ export const useWebSocket = (userId, postId) => {
           if (newPosition !== null) {
             console.log("✅ [useWebSocket] Setting position:", newPosition);
             setPosition(newPosition);
+
+            // ✅ Lưu vào localStorage
+            try {
+              localStorage.setItem("initialQueueRank", newPosition.toString());
+              console.log("💾 [useWebSocket] Updated rank in localStorage:", newPosition);
+            } catch (error) {
+              console.error("❌ [useWebSocket] Error saving rank:", error);
+            }
           } else {
             console.warn("⚠️ [useWebSocket] Could not parse position from message:", message);
           }
@@ -99,5 +125,5 @@ export const useWebSocket = (userId, postId) => {
     setMessages([]);
   }, []);
 
-  return { connected, messages, position, clearMessages };
+  return { connected, messages, position, maxWaitingTime, clearMessages };
 };

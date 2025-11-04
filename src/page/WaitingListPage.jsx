@@ -10,6 +10,8 @@ import useWaitingList from "../hooks/useWaitingList";
 import { useAuth } from "../hooks/useAuth";
 import { useWebSocket } from "../hooks/useWebSocket";
 import { ClockCircleOutlined, LockOutlined, HomeOutlined, WifiOutlined } from "@ant-design/icons";
+import { getWaitingListById } from "../services/waitingListService";
+import { getBookingById } from "../services/bookingService";
 
 const WaitingListPage = () => {
   const navigate = useNavigate();
@@ -28,6 +30,7 @@ const WaitingListPage = () => {
   // State quản lý waiting list data
   const [waitingData, setWaitingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   // ✅ ĐỌC LOCALSTORAGE NGAY TRONG useState INITIALIZER
   const [queueRank, setQueueRank] = useState(() => {
@@ -57,21 +60,35 @@ const WaitingListPage = () => {
     return null;
   });
 
-  // ✅ Sử dụng useWaitingList hook
-  const {
-    loading: waitingLoading,
-    error: waitingError,
-    waitingLists,
-    fetchWaitingListByUser,
-    cancelWaitingList,
-  } = useWaitingList();
+  // ✅ ĐỌC maxWaitingTime TỪ LOCALSTORAGE (giống như queueRank)
+  const [localMaxWaitingTime, setLocalMaxWaitingTime] = useState(() => {
+    try {
+      const savedTime = localStorage.getItem("maxWaitingTime");
+      if (savedTime) {
+        console.log("💾 [WaitingListPage] Initial maxWaitingTime from localStorage:", savedTime);
+        return savedTime;
+      }
+    } catch (error) {
+      console.error("❌ Error reading maxWaitingTime:", error);
+    }
+    console.log("⚠️ [WaitingListPage] No initial maxWaitingTime in localStorage");
+    return null;
+  });
+
+  // ✅ Sử dụng useWaitingList hook (chỉ cho cancel function)
+  const { cancelWaitingList } = useWaitingList();
 
   // ✅ WebSocket integration for real-time updates
   console.log("🔍 [WaitingListPage] WebSocket params:");
   console.log("   - user?.id:", user?.id);
   console.log("   - chargingPostId:", chargingPostId);
 
-  const { connected, messages, position } = useWebSocket(
+  const {
+    connected,
+    messages,
+    position,
+    maxWaitingTime: wsMaxWaitingTime,
+  } = useWebSocket(
     user?.id,
     chargingPostId // ← Dùng state riêng thay vì từ waitingData
   );
@@ -79,14 +96,99 @@ const WaitingListPage = () => {
   console.log("🔌 [WaitingListPage] WebSocket connected:", connected);
   console.log("📨 [WaitingListPage] WebSocket messages:", messages);
   console.log("🎯 [WaitingListPage] WebSocket position:", position);
+  console.log("⏰ [WaitingListPage] WebSocket maxWaitingTime:", wsMaxWaitingTime);
 
-  // ✅ Fetch waiting list data khi component mount
+  // ✅ Fetch CHI TIẾT waiting/booking khi component mount
   useEffect(() => {
+    const fetchDetail = async () => {
+      try {
+        const bookingStatus = localStorage.getItem("bookingStatus");
+        console.log("🔍 [WaitingListPage] Fetching detail with status:", bookingStatus);
+
+        if (bookingStatus === "waiting") {
+          const waitingListId = localStorage.getItem("waitingListId");
+          if (waitingListId) {
+            console.log("� [WaitingListPage] Fetching waiting list detail:", waitingListId);
+            setDetailLoading(true);
+            const detail = await getWaitingListById(waitingListId);
+            console.log("✅ [WaitingListPage] Waiting list detail:", detail);
+
+            // Map WaitingListResponseDTO to display format
+            const mappedData = {
+              waitingListId: detail.waitingListId,
+              stationName: detail.stationName || "Trạm sạc",
+              chargingPostId: detail.chargingPostId,
+              status: detail.status,
+              expectedWaitingTime: detail.expectedWaitingTime,
+              createdAt: detail.createdAt,
+              userId: detail.userId,
+              carId: detail.carId,
+              // ✅ Ưu tiên localStorage (nếu đã được update từ WebSocket)
+              maxWaitingTime: localMaxWaitingTime || detail.expectedWaitingTime,
+            };
+
+            setWaitingData(mappedData);
+            setChargingPostId(detail.chargingPostId);
+
+            setStatusConfig({
+              color: "warning",
+              icon: "⏳",
+              text: "Đang chờ",
+              isCompleted: false,
+              isCharging: false,
+            });
+
+            setDetailLoading(false);
+          }
+        } else if (bookingStatus === "booking") {
+          const bookingId = localStorage.getItem("bookingId");
+          if (bookingId) {
+            console.log("📞 [WaitingListPage] Fetching booking detail:", bookingId);
+            setDetailLoading(true);
+            const detail = await getBookingById(bookingId);
+            console.log("✅ [WaitingListPage] Booking detail:", detail);
+
+            // Map BookingResponseDTO to display format
+            const mappedData = {
+              bookingId: detail.bookingId,
+              stationName: detail.stationName || "Trạm sạc",
+              chargingPostId: detail.chargingPostId,
+              status: detail.status,
+              maxWaitingTime: detail.maxWaitingTime,
+              arrivalTime: detail.arrivalTime,
+              createdAt: detail.createdAt,
+              userId: detail.userId,
+              carId: detail.carId,
+              // Add more fields as needed
+            };
+
+            setWaitingData(mappedData);
+            setChargingPostId(detail.chargingPostId);
+
+            setStatusConfig({
+              color: "success",
+              icon: "✅",
+              text: "Đã đặt",
+              isCompleted: false,
+              isCharging: false,
+            });
+
+            setDetailLoading(false);
+          }
+        } else {
+          console.log("⚠️ [WaitingListPage] No bookingStatus in localStorage");
+        }
+      } catch (error) {
+        console.error("❌ [WaitingListPage] Error fetching detail:", error);
+        setDetailLoading(false);
+      }
+    };
+
     if (user?.id) {
-      console.log("🔍 [WaitingListPage] Fetching waiting list for userId:", user.id);
-      fetchWaitingListByUser(user.id);
+      fetchDetail();
     }
-  }, [user?.id, fetchWaitingListByUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // localMaxWaitingTime đã được đọc ở useState initializer
 
   // ✅ ĐỌC LOCALSTORAGE NGAY KHI COMPONENT MOUNT (không đợi API)
   useEffect(() => {
@@ -117,82 +219,6 @@ const WaitingListPage = () => {
       console.error("❌ [WaitingListPage] Error reading localStorage:", error);
     }
   }, []); // Chỉ chạy 1 lần khi mount
-
-  // ✅ Set waiting data khi có waitingLists
-  useEffect(() => {
-    console.log("📦 [WaitingListPage] Waiting lists data:", waitingLists);
-
-    if (waitingLists && waitingLists.length > 0) {
-      // ✅ Lấy waiting list đầu tiên với status 'active' hoặc 'waiting'
-      const activeWaiting =
-        waitingLists.find((w) => w.status?.toLowerCase() === "active" || w.status?.toLowerCase() === "waiting") ||
-        waitingLists[0];
-
-      console.log("✅ [WaitingListPage] Active waiting:", activeWaiting);
-      console.log("🔍 [WaitingListPage] Waiting structure:", {
-        hasPost: !!activeWaiting.post,
-        hasStation: !!activeWaiting.post?.station,
-        waitingListId: activeWaiting.waitingListId,
-        keys: Object.keys(activeWaiting),
-      });
-
-      // ⚠️ TEMPORARY FIX: Map waiting list data to match session structure
-      const mappedWaiting = {
-        ...activeWaiting,
-        maxPower: activeWaiting.post?.maxPower || activeWaiting.chargingPost?.maxPower || 0,
-        typeCharging: activeWaiting.post?.typeCharging || activeWaiting.chargingPost?.typeCharging || [],
-        pricePerKwh: activeWaiting.post?.pricePerKwh || activeWaiting.chargingPost?.pricePerKwh || 0,
-        stationName: activeWaiting.post?.station?.stationName || "Trạm sạc",
-        address: activeWaiting.post?.station?.address || "",
-        // Map expectedWaitingTime to maxWaitingTime for WaitingTime component
-        maxWaitingTime: activeWaiting.expectedWaitingTime || 0,
-      };
-
-      console.log("🔧 [WaitingListPage] Mapped waiting:", mappedWaiting);
-      setWaitingData(mappedWaiting);
-
-      // ✅ Set chargingPostId để WebSocket kết nối (nếu chưa có từ localStorage)
-      const postId = activeWaiting.chargingPostId || activeWaiting.post?.idChargingPost;
-      console.log("🔌 [WaitingListPage] Setting charging post ID for WebSocket:", postId);
-
-      // Chỉ update nếu khác với postId hiện tại
-      if (postId && postId !== chargingPostId) {
-        setChargingPostId(postId);
-      }
-
-      // ⚠️ localStorage đã được đọc ở useEffect mount, không cần đọc lại ở đây
-      // Rank đã được set từ localStorage hoặc sẽ được update từ WebSocket
-
-      // Queue rank sẽ được cập nhật từ WebSocket khi có message mới
-
-      // Set status config
-      const config = {
-        color: "warning",
-        icon: "⏳",
-        text: "Đang chờ",
-        isCompleted: false,
-        isCharging: false,
-      };
-
-      setStatusConfig(config);
-    } else if (waitingLists && waitingLists.length === 0) {
-      // ✅ CHỈ xóa localStorage khi XÁC NHẬN không có waiting list (array rỗng)
-      // ❌ KHÔNG xóa khi waitingLists = null (đang loading)
-      try {
-        localStorage.removeItem("initialQueueRank");
-        localStorage.removeItem("queuePostId");
-        console.log("🗑️ [WaitingListPage] Cleared rank from localStorage (confirmed no waiting list)");
-      } catch (error) {
-        console.error("❌ [WaitingListPage] Error clearing localStorage:", error);
-      }
-
-      setWaitingData(null);
-      setStatusConfig(null);
-      setQueueRank(null);
-      setChargingPostId(null);
-    }
-    // else: waitingLists = null → Đang loading → GIỮ localStorage!
-  }, [waitingLists, user?.id, chargingPostId]);
 
   // ✅ Update queue rank ONLY from WebSocket
   useEffect(() => {
@@ -232,6 +258,38 @@ const WaitingListPage = () => {
     }
   }, [position, chargingPostId]);
 
+  // ✅ Update maxWaitingTime from WebSocket
+  useEffect(() => {
+    console.log("⏰ [WaitingListPage] MaxWaitingTime effect triggered:");
+    console.log("   - wsMaxWaitingTime value:", wsMaxWaitingTime);
+
+    if (wsMaxWaitingTime) {
+      console.log("✅ [WaitingListPage] Updating maxWaitingTime from WebSocket:", wsMaxWaitingTime);
+
+      // ✅ Update state để trigger re-render
+      setLocalMaxWaitingTime(wsMaxWaitingTime);
+
+      // ✅ Update waitingData
+      setWaitingData((oldData) => {
+        if (oldData) {
+          return {
+            ...oldData,
+            maxWaitingTime: wsMaxWaitingTime,
+            expectedWaitingTime: wsMaxWaitingTime, // ✅ Update cả expectedWaitingTime
+          };
+        }
+        return oldData;
+      });
+
+      notification.info({
+        message: "Cập nhật thời gian chờ",
+        description: `Thời gian chờ tối đa: ${wsMaxWaitingTime}`,
+        placement: "topRight",
+        duration: 3,
+      });
+    }
+  }, [wsMaxWaitingTime]);
+
   // ✅ Show notifications for WebSocket messages
   useEffect(() => {
     if (messages.length > 0) {
@@ -247,19 +305,6 @@ const WaitingListPage = () => {
     }
   }, [messages]);
 
-  // Listen for waiting list events
-  useEffect(() => {
-    const handleWaitingCreated = (e) => {
-      console.log("waitingCreated event received:", e?.detail);
-      if (user?.id) {
-        fetchWaitingListByUser(user.id);
-      }
-    };
-
-    window.addEventListener("waitingCreated", handleWaitingCreated);
-    return () => window.removeEventListener("waitingCreated", handleWaitingCreated);
-  }, [user?.id, fetchWaitingListByUser]);
-
   // ✅ Handler hủy waiting
   const handleCancelWaiting = async () => {
     if (!waitingData?.waitingListId) {
@@ -271,13 +316,76 @@ const WaitingListPage = () => {
     }
 
     try {
+      // ✅ LƯU thời gian countdown hiện tại TRƯỚC KHI hủy
+      const waitingCountdownKey = `countdown_${waitingData.waitingListId}`;
+      const bookingCountdownKey = `countdown_${waitingData.bookingId}`;
+      const frozenWaitingKey = `countdown_frozen_${waitingData.waitingListId}`;
+      const frozenBookingKey = `countdown_frozen_${waitingData.bookingId}`;
+      
+      try {
+        // Lưu frozen time cho waiting
+        const savedWaitingEndTime = localStorage.getItem(waitingCountdownKey);
+        if (savedWaitingEndTime) {
+          const endTime = new Date(savedWaitingEndTime);
+          const now = new Date();
+          const remainingMs = endTime - now;
+          
+          if (remainingMs > 0) {
+            const remainingSeconds = Math.floor(remainingMs / 1000);
+            const hours = Math.floor(remainingSeconds / 3600);
+            const mins = Math.floor((remainingSeconds % 3600) / 60);
+            const secs = remainingSeconds % 60;
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+            
+            localStorage.setItem(frozenWaitingKey, frozenTime);
+            console.log("🧊 [WaitingListPage] Frozen waiting countdown:", frozenTime);
+          }
+        }
+        
+        // Lưu frozen time cho booking (nếu có)
+        const savedBookingEndTime = localStorage.getItem(bookingCountdownKey);
+        if (savedBookingEndTime) {
+          const endTime = new Date(savedBookingEndTime);
+          const now = new Date();
+          const remainingMs = endTime - now;
+          
+          if (remainingMs > 0) {
+            const remainingSeconds = Math.floor(remainingMs / 1000);
+            const hours = Math.floor(remainingSeconds / 3600);
+            const mins = Math.floor((remainingSeconds % 3600) / 60);
+            const secs = remainingSeconds % 60;
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+            
+            localStorage.setItem(frozenBookingKey, frozenTime);
+            console.log("🧊 [WaitingListPage] Frozen booking countdown:", frozenTime);
+          }
+        }
+      } catch (err) {
+        console.error("❌ [WaitingListPage] Error freezing countdown:", err);
+      }
+
       await cancelWaitingList(waitingData.waitingListId);
 
-      // ✅ Xóa rank từ localStorage khi cancel
+      // ✅ Xóa tất cả localStorage khi cancel (trừ frozen time)
       try {
         localStorage.removeItem("initialQueueRank");
         localStorage.removeItem("queuePostId");
-        console.log("🗑️ [WaitingListPage] Cleared rank from localStorage after cancel");
+        localStorage.removeItem("waitingListId");
+        localStorage.removeItem("bookingId");
+        localStorage.removeItem("bookingStatus");
+        localStorage.removeItem("maxWaitingTime");
+
+        // ✅ XÓA COUNTDOWN endTime (để dừng countdown)
+        if (waitingData.waitingListId) {
+          localStorage.removeItem(waitingCountdownKey);
+          console.log("🗑️ [WaitingListPage] Removed countdown for waitingListId:", waitingData.waitingListId);
+        }
+        if (waitingData.bookingId) {
+          localStorage.removeItem(bookingCountdownKey);
+          console.log("🗑️ [WaitingListPage] Removed countdown for bookingId:", waitingData.bookingId);
+        }
+
+        console.log("🗑️ [WaitingListPage] Cleared all localStorage after cancel (frozen time preserved)");
       } catch (error) {
         console.error("❌ [WaitingListPage] Error clearing localStorage:", error);
       }
@@ -313,7 +421,7 @@ const WaitingListPage = () => {
   };
 
   // ==================== LOADING STATE ====================
-  if (waitingLoading || authLoading) {
+  if (detailLoading || authLoading) {
     return (
       <div
         style={{
@@ -374,54 +482,9 @@ const WaitingListPage = () => {
             >
               Về trang chủ
             </Button>
-            <Button
-              onClick={() => {
-                if (user?.id) {
-                  fetchWaitingListByUser(user.id);
-                }
-              }}
-            >
-              Thử lại
-            </Button>
+            <Button onClick={() => window.location.reload()}>Thử lại</Button>
           </Space>
         </div>
-      </div>
-    );
-  }
-
-  // ==================== ERROR STATE ====================
-  if (waitingError) {
-    return (
-      <div
-        style={{
-          padding: "20px",
-          background: "white",
-          minHeight: "100vh",
-        }}
-      >
-        <Alert
-          message="Lỗi tải dữ liệu"
-          description={
-            <div>
-              <p>{waitingError.message || "Đã có lỗi xảy ra"}</p>
-            </div>
-          }
-          type="error"
-          showIcon
-          closable
-          action={
-            <Button
-              size="small"
-              onClick={() => {
-                if (user?.id) {
-                  fetchWaitingListByUser(user.id);
-                }
-              }}
-            >
-              Thử lại
-            </Button>
-          }
-        />
       </div>
     );
   }
@@ -446,14 +509,7 @@ const WaitingListPage = () => {
               <Button size="small" onClick={() => navigate("/app/map")}>
                 Tìm trạm sạc
               </Button>
-              <Button
-                size="small"
-                onClick={() => {
-                  if (user?.id) {
-                    fetchWaitingListByUser(user.id);
-                  }
-                }}
-              >
+              <Button size="small" onClick={() => window.location.reload()}>
                 Tải lại
               </Button>
             </Space>

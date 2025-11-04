@@ -8,11 +8,8 @@ import { SessionInfo } from "../components/energy/SessionInfo";
 import { WaitingTime } from "../components/energy/WaitingTime";
 import useBooking from "../hooks/useBooking";
 import { useAuth } from "../hooks/useAuth";
-import {
-  CalendarOutlined,
-  LockOutlined,
-  HomeOutlined,
-} from "@ant-design/icons";
+import { getBookingById } from "../services/bookingService";
+import { CalendarOutlined, LockOutlined, HomeOutlined } from "@ant-design/icons";
 
 const BookingPage = () => {
   const navigate = useNavigate();
@@ -24,100 +21,94 @@ const BookingPage = () => {
   // State quản lý booking data
   const [bookingData, setBookingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
-  // ✅ Sử dụng useBooking hook
-  const {
-    loading: bookingLoading,
-    error: bookingError,
-    bookings, // ✅ Lấy bookings (danh sách) thay vì booking (đơn lẻ)
-    fetchBookingsByUser,
-    completeBooking,
-    cancelBooking,
-  } = useBooking();
+  // ✅ Sử dụng useBooking hook (chỉ cho cancel function)
+  const { cancelBooking } = useBooking();
 
-  // ✅ Fetch booking data khi component mount
+  // ✅ Fetch CHI TIẾT booking từ localStorage (giống WaitingListPage)
   useEffect(() => {
-    if (user?.id) {
-      console.log("🔍 [BookingPage] Fetching bookings for userId:", user.id);
-      fetchBookingsByUser(user.id);
-    }
-  }, [user?.id, fetchBookingsByUser]);
+    const fetchDetail = async () => {
+      try {
+        const bookingId = localStorage.getItem("bookingId");
 
-  // ✅ Set booking data khi có bookings
-  useEffect(() => {
-    console.log("📦 [BookingPage] Bookings data:", bookings);
+        if (bookingId) {
+          console.log("� [BookingPage] Fetching booking detail:", bookingId);
+          setDetailLoading(true);
 
-    if (bookings && bookings.length > 0) {
-      // ✅ Lấy booking đầu tiên hoặc booking với status 'booking'/'waiting'
-      const activeBooking =
-        bookings.find(
-          (b) =>
-            b.status?.toLowerCase() === "booking" ||
-            b.status?.toLowerCase() === "waiting"
-        ) || bookings[0];
+          const detail = await getBookingById(bookingId);
+          console.log("✅ [BookingPage] Booking detail:", detail);
 
-      console.log("✅ [BookingPage] Active booking:", activeBooking);
-      setBookingData(activeBooking);
+          // Map BookingResponseDTO to display format
+          const mappedData = {
+            bookingId: detail.bookingId,
+            stationName: detail.stationName || "Trạm sạc",
+            chargingPostId: detail.chargingPostId,
+            status: detail.status,
+            maxWaitingTime: detail.maxWaitingTime,
+            arrivalTime: detail.arrivalTime,
+            createdAt: detail.createdAt,
+            userId: detail.userId,
+            carId: detail.carId,
+          };
 
-      // Determine status config based on booking status
-      const status = activeBooking.status?.toLowerCase();
-      let config = null;
+          setBookingData(mappedData);
 
-      if (status === "completed") {
-        config = {
-          color: "success",
-          icon: "✓",
-          text: "Hoàn thành",
-          isCompleted: true,
-          isCharging: false,
-        };
-      } else if (status === "cancelled") {
-        config = {
-          color: "error",
-          icon: "✕",
-          text: "Đã hủy",
-          isCompleted: false,
-          isCharging: false,
-        };
-      } else if (status === "booking" || status === "active") {
-        config = {
-          color: "processing",
-          icon: "⚡",
-          text: "Đang hoạt động",
-          isCompleted: false,
-          isCharging: true,
-        };
-      } else if (status === "waiting") {
-        config = {
-          color: "warning",
-          icon: "⏳",
-          text: "Đang chờ",
-          isCompleted: false,
-          isCharging: false,
-        };
-      }
+          // Determine status config based on booking status
+          const status = detail.status?.toLowerCase();
+          let config = null;
 
-      setStatusConfig(config);
-    } else {
-      setBookingData(null);
-      setStatusConfig(null);
-    }
-  }, [bookings]);
+          if (status === "completed") {
+            config = {
+              color: "success",
+              icon: "✓",
+              text: "Hoàn thành",
+              isCompleted: true,
+              isCharging: false,
+            };
+          } else if (status === "cancelled") {
+            config = {
+              color: "error",
+              icon: "✕",
+              text: "Đã hủy",
+              isCompleted: false,
+              isCharging: false,
+            };
+          } else if (status === "booking" || status === "active") {
+            config = {
+              color: "processing",
+              icon: "⚡",
+              text: "Đang hoạt động",
+              isCompleted: false,
+              isCharging: true,
+            };
+          } else if (status === "waiting") {
+            config = {
+              color: "warning",
+              icon: "⏳",
+              text: "Đang chờ",
+              isCompleted: false,
+              isCharging: false,
+            };
+          }
 
-  // Listen for booking events
-  useEffect(() => {
-    const handleBookingCreated = (e) => {
-      console.log("bookingCreated event received:", e?.detail);
-      if (user?.id) {
-        fetchBookingsByUser(user.id);
+          setStatusConfig(config);
+          setDetailLoading(false);
+        } else {
+          console.log("⚠️ [BookingPage] No bookingId in localStorage");
+          setBookingData(null);
+          setStatusConfig(null);
+        }
+      } catch (error) {
+        console.error("❌ [BookingPage] Error fetching detail:", error);
+        setDetailLoading(false);
       }
     };
 
-    window.addEventListener("bookingCreated", handleBookingCreated);
-    return () =>
-      window.removeEventListener("bookingCreated", handleBookingCreated);
-  }, [user?.id, fetchBookingsByUser]);
-
+    if (user?.id) {
+      fetchDetail();
+    }
+  }, [user?.id]);
   // ✅ Handler hủy booking
   const handleCancelBooking = async () => {
     if (!bookingData?.bookingId) {
@@ -129,7 +120,49 @@ const BookingPage = () => {
     }
 
     try {
+      // ✅ LƯU thời gian countdown hiện tại TRƯỚC KHI hủy
+      const countdownKey = `countdown_${bookingData.bookingId}`;
+      const frozenKey = `countdown_frozen_${bookingData.bookingId}`;
+      
+      try {
+        const savedEndTime = localStorage.getItem(countdownKey);
+        if (savedEndTime) {
+          const endTime = new Date(savedEndTime);
+          const now = new Date();
+          const remainingMs = endTime - now;
+          
+          if (remainingMs > 0) {
+            const remainingSeconds = Math.floor(remainingMs / 1000);
+            const hours = Math.floor(remainingSeconds / 3600);
+            const mins = Math.floor((remainingSeconds % 3600) / 60);
+            const secs = remainingSeconds % 60;
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+            
+            // ✅ LƯU thời gian đóng băng
+            localStorage.setItem(frozenKey, frozenTime);
+            console.log("🧊 [BookingPage] Frozen countdown time:", frozenTime);
+          }
+        }
+      } catch (err) {
+        console.error("❌ [BookingPage] Error freezing countdown:", err);
+      }
+
       await cancelBooking(bookingData.bookingId);
+
+      // ✅ Xóa TẤT CẢ localStorage (trừ frozen time)
+      try {
+        // Xóa booking info
+        localStorage.removeItem("bookingId");
+        localStorage.removeItem("bookingStatus");
+        localStorage.removeItem("maxWaitingTime");
+
+        // ✅ XÓA COUNTDOWN endTime (để dừng countdown)
+        localStorage.removeItem(countdownKey);
+
+        console.log("🗑️ [BookingPage] Cleared all localStorage after cancel (frozen time preserved)");
+      } catch (error) {
+        console.error("❌ [BookingPage] Error clearing localStorage:", error);
+      }
 
       // ✅ Update local state immediately
       const updatedBookingData = {
@@ -162,7 +195,7 @@ const BookingPage = () => {
   };
 
   // ==================== LOADING STATE ====================
-  if (bookingLoading || authLoading) {
+  if (detailLoading || authLoading) {
     return (
       <div
         style={{
@@ -183,11 +216,7 @@ const BookingPage = () => {
 
   // ==================== FORBIDDEN STATE (403) ====================
   const isForbidden =
-    !user ||
-    (bookingData &&
-      user.id !== bookingData.userId &&
-      user.role !== "ADMIN" &&
-      user.role !== "MANAGER");
+    !user || (bookingData && user.id !== bookingData.userId && user.role !== "ADMIN" && user.role !== "MANAGER");
 
   if (isForbidden) {
     return (
@@ -202,17 +231,14 @@ const BookingPage = () => {
         }}
       >
         <div style={{ textAlign: "center", maxWidth: "500px" }}>
-          <LockOutlined
-            style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }}
-          />
+          <LockOutlined style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }} />
           <Alert
             message="Không có quyền truy cập"
             description={
               <div>
                 <p>Bạn không có quyền truy cập booking này.</p>
                 <p style={{ marginTop: "10px", color: "#666" }}>
-                  Booking này có thể thuộc về người dùng khác hoặc bạn không có
-                  quyền xem.
+                  Booking này có thể thuộc về người dùng khác hoặc bạn không có quyền xem.
                 </p>
               </div>
             }
@@ -230,54 +256,9 @@ const BookingPage = () => {
             >
               Về trang chủ
             </Button>
-            <Button
-              onClick={() => {
-                if (user?.id) {
-                  fetchBookingsByUser(user.id);
-                }
-              }}
-            >
-              Thử lại
-            </Button>
+            <Button onClick={() => window.location.reload()}>Thử lại</Button>
           </Space>
         </div>
-      </div>
-    );
-  }
-
-  // ==================== ERROR STATE ====================
-  if (bookingError) {
-    return (
-      <div
-        style={{
-          padding: "20px",
-          background: "white",
-          minHeight: "100vh",
-        }}
-      >
-        <Alert
-          message="Lỗi tải dữ liệu"
-          description={
-            <div>
-              <p>{bookingError.message || "Đã có lỗi xảy ra"}</p>
-            </div>
-          }
-          type="error"
-          showIcon
-          closable
-          action={
-            <Button
-              size="small"
-              onClick={() => {
-                if (user?.id) {
-                  fetchBookingsByUser(user.id);
-                }
-              }}
-            >
-              Thử lại
-            </Button>
-          }
-        />
       </div>
     );
   }
@@ -302,14 +283,7 @@ const BookingPage = () => {
               <Button size="small" onClick={() => navigate("/app/map")}>
                 Tìm trạm sạc
               </Button>
-              <Button
-                size="small"
-                onClick={() => {
-                  if (user?.id) {
-                    fetchBookingsByUser(user.id);
-                  }
-                }}
-              >
+              <Button size="small" onClick={() => window.location.reload()}>
                 Tải lại
               </Button>
             </Space>

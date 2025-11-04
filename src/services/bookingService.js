@@ -1,4 +1,3 @@
-import { useState } from "react";
 import api from "../utils/axios";
 
 export const createBooking = async (bookingData) => {
@@ -53,10 +52,7 @@ export const getBookingsByStation = async (stationId) => {
 
 export const getBookingsByUser = async (userId) => {
   try {
-    console.log(
-      "🌐 [bookingService] Calling API:",
-      `/api/booking/getByUser/${userId}`
-    );
+    console.log("🌐 [bookingService] Calling API:", `/api/booking/getByUser/${userId}`);
     const response = await api.get(`/api/booking/getByUser/${userId}`);
     console.log("✅ [bookingService] Response:", response.data);
     return response.data;
@@ -68,9 +64,7 @@ export const getBookingsByUser = async (userId) => {
 
 export const getBookingsByDate = async (date) => {
   try {
-    const response = await api.get(
-      `/api/booking/getByCreatedDate?date=${date}`
-    );
+    const response = await api.get(`/api/booking/getByCreatedDate?date=${date}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching bookings by date:", error);
@@ -80,9 +74,7 @@ export const getBookingsByDate = async (date) => {
 
 export const getBookingByWaitingListId = async (waitingListId) => {
   try {
-    const response = await api.get(
-      `/api/booking/getByWaitingListId/${waitingListId}`
-    );
+    const response = await api.get(`/api/booking/getByWaitingListId/${waitingListId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching booking by waiting list ID:", error);
@@ -92,7 +84,9 @@ export const getBookingByWaitingListId = async (waitingListId) => {
 
 export const getBookingById = async (bookingId) => {
   try {
+    console.log("🌐 [bookingService] Calling API:", `/api/booking/getByBookingId/${bookingId}`);
     const response = await api.get(`/api/booking/getByBookingId/${bookingId}`);
+    console.log("✅ [bookingService] Response:", response.data);
     return response.data;
   } catch (error) {
     console.error("Error fetching booking by ID:", error);
