@@ -28,8 +28,7 @@ import "../../assets/styles/StationModal.css";
 
 const StationModal = ({ isOpen, onClose, station }) => {
   const { posts, loading, error, statistics } = useStationPosts(station?.id);
-  const { createBooking: createBookingApi, loading: bookingLoading } =
-    useBooking();
+  const { createBooking: createBookingApi, loading: bookingLoading } = useBooking();
   const { getCarsByUser, loading: carLoading } = useCar();
   const { user: currentUser } = useAuth();
 
@@ -54,11 +53,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
             cars = result.data;
           } else if (result?.data && Array.isArray(result.data)) {
             cars = result.data;
-          } else if (
-            result &&
-            typeof result === "object" &&
-            !Array.isArray(result)
-          ) {
+          } else if (result && typeof result === "object" && !Array.isArray(result)) {
             cars = [result];
           }
 
@@ -112,11 +107,27 @@ const StationModal = ({ isOpen, onClose, station }) => {
       // ✅ createBooking sẽ tự động lưu status vào localStorage
       const res = await createBookingApi(payload);
 
+      console.log("📦 [StationModal] Booking response:", res);
+      console.log("   - status:", res?.status);
+      console.log("   - rank:", res?.rank);
+
       if (res?.success || res?.status) {
         // ✅ Kiểm tra status từ response
         const status = res.status?.toLowerCase();
 
         if (status === "waiting") {
+          // ✅ Lưu rank vào localStorage để WaitingListPage có thể lấy
+          if (res.rank !== undefined && res.rank !== null && res.rank > 0) {
+            console.log("💾 [StationModal] Saving initial queue rank:", res.rank);
+            localStorage.setItem("initialQueueRank", res.rank.toString());
+            localStorage.setItem("queuePostId", postId);
+            console.log("✅ [StationModal] Saved to localStorage:");
+            console.log("   - initialQueueRank:", localStorage.getItem("initialQueueRank"));
+            console.log("   - queuePostId:", localStorage.getItem("queuePostId"));
+          } else {
+            console.warn("⚠️ [StationModal] No valid rank in response:", res.rank);
+          }
+
           alert(`Trụ ${postId} đang đầy. Bạn đã được thêm vào danh sách chờ.`);
           // Navigate to booking page so user can see their waiting booking
           onClose();
@@ -147,12 +158,9 @@ const StationModal = ({ isOpen, onClose, station }) => {
   const getAmenityIcon = (amenity) => {
     const amenityLower = amenity.toLowerCase();
     if (amenityLower.includes("wifi")) return IoWifiOutline;
-    if (amenityLower.includes("cafe") || amenityLower.includes("coffee"))
-      return IoCafeOutline;
-    if (amenityLower.includes("shop") || amenityLower.includes("store"))
-      return IoStorefrontOutline;
-    if (amenityLower.includes("parking") || amenityLower.includes("car"))
-      return IoCarOutline;
+    if (amenityLower.includes("cafe") || amenityLower.includes("coffee")) return IoCafeOutline;
+    if (amenityLower.includes("shop") || amenityLower.includes("store")) return IoStorefrontOutline;
+    if (amenityLower.includes("parking") || amenityLower.includes("car")) return IoCarOutline;
     if (amenityLower.includes("security")) return IoShieldCheckmarkOutline;
     return IoStorefrontOutline;
   };
@@ -215,41 +223,23 @@ const StationModal = ({ isOpen, onClose, station }) => {
         <div className="station-details">
           {posts.length > 0 && (
             <div className="station-details__section">
-              <div className="station-details__section-title">
-                Thông tin chi tiết
-              </div>
+              <div className="station-details__section-title">Thông tin chi tiết</div>
               <div className="statistics-grid">
                 <div className="statistics-item statistics-item--available">
-                  <div className="statistics-number statistics-number--available">
-                    {statistics.available}
-                  </div>
-                  <div className="statistics-label statistics-number--available">
-                    Sẵn sàng
-                  </div>
+                  <div className="statistics-number statistics-number--available">{statistics.available}</div>
+                  <div className="statistics-label statistics-number--available">Sẵn sàng</div>
                 </div>
                 <div className="statistics-item statistics-item--busy">
-                  <div className="statistics-number statistics-number--busy">
-                    {statistics.busy}
-                  </div>
-                  <div className="statistics-label statistics-number--busy">
-                    Đang sạc
-                  </div>
+                  <div className="statistics-number statistics-number--busy">{statistics.busy}</div>
+                  <div className="statistics-label statistics-number--busy">Đang sạc</div>
                 </div>
                 <div className="statistics-item statistics-item--inactive">
-                  <div className="statistics-number statistics-number--inactive">
-                    {statistics.inactive}
-                  </div>
-                  <div className="statistics-label statistics-number--inactive">
-                    Không hoạt động
-                  </div>
+                  <div className="statistics-number statistics-number--inactive">{statistics.inactive}</div>
+                  <div className="statistics-label statistics-number--inactive">Không hoạt động</div>
                 </div>
                 <div className="statistics-item statistics-item--total">
-                  <div className="statistics-number statistics-number--total">
-                    {statistics.total}
-                  </div>
-                  <div className="statistics-label statistics-number--total">
-                    Tổng cộng
-                  </div>
+                  <div className="statistics-number statistics-number--total">{statistics.total}</div>
+                  <div className="statistics-label statistics-number--total">Tổng cộng</div>
                 </div>
               </div>
             </div>
@@ -275,11 +265,8 @@ const StationModal = ({ isOpen, onClose, station }) => {
 
         <div>
           <h5 className="chargers-section__title">
-            Danh sách trụ sạc (
-            {posts.length > 0 ? posts.length : station.totalSlots || 0})
-            {loading && (
-              <span className="chargers-loading-text"> - Đang tải...</span>
-            )}
+            Danh sách trụ sạc ({posts.length > 0 ? posts.length : station.totalSlots || 0})
+            {loading && <span className="chargers-loading-text"> - Đang tải...</span>}
           </h5>
 
           {error && <div className="chargers-error">{error}</div>}
@@ -292,9 +279,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                     <div className="charger-item__title">
                       <IoPowerOutline
                         className={`charger-item__icon ${
-                          post.active
-                            ? "charger-item__icon--active"
-                            : "charger-item__icon--inactive"
+                          post.active ? "charger-item__icon--active" : "charger-item__icon--inactive"
                         }`}
                       />
                       <strong>Trụ {post.id}</strong>
@@ -314,11 +299,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                             : "charger-status-badge--inactive"
                         }`}
                       >
-                        {post.isAvailable
-                          ? "Sẵn sàng"
-                          : post.active
-                          ? "Đang sử dụng"
-                          : "Không hoạt động"}
+                        {post.isAvailable ? "Sẵn sàng" : post.active ? "Đang sử dụng" : "Không hoạt động"}
                       </span>
                     </div>
                   </div>
@@ -347,15 +328,12 @@ const StationModal = ({ isOpen, onClose, station }) => {
                     </div>
                     <div className="charger-item__action">
                       {(() => {
-                        const isProcessing =
-                          bookingLoading && bookingProcessingId === post.id;
+                        const isProcessing = bookingLoading && bookingProcessingId === post.id;
                         return (
                           <Button
                             variant={post.isAvailable ? "success" : "secondary"}
                             size="sm"
-                            disabled={
-                              !post.isAvailable || isProcessing || !selectedCar
-                            }
+                            disabled={!post.isAvailable || isProcessing || !selectedCar}
                             onClick={() => handleBookCharger(post.id)}
                             className="charger-book-btn"
                           >
@@ -388,25 +366,14 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 <div className="charger-empty-state__title">
                   <strong>Chưa có thông tin chi tiết trụ sạc</strong>
                 </div>
-                <div className="charger-empty-state__subtitle">
-                  Tổng số trụ: {station.totalSlots || 0}
-                </div>
-                <div className="charger-empty-state__info">
-                  Khả dụng: {station.availableSlots || 0} trụ
-                </div>
+                <div className="charger-empty-state__subtitle">Tổng số trụ: {station.totalSlots || 0}</div>
+                <div className="charger-empty-state__info">Khả dụng: {station.availableSlots || 0} trụ</div>
                 {(() => {
-                  const isGeneralProcessing =
-                    bookingLoading && bookingProcessingId === "general";
+                  const isGeneralProcessing = bookingLoading && bookingProcessingId === "general";
                   return (
                     <Button
-                      variant={
-                        station.status === "available" ? "success" : "secondary"
-                      }
-                      disabled={
-                        station.status !== "available" ||
-                        !selectedCar ||
-                        isGeneralProcessing
-                      }
+                      variant={station.status === "available" ? "success" : "secondary"}
+                      disabled={station.status !== "available" || !selectedCar || isGeneralProcessing}
                       onClick={() => handleBookCharger("general")}
                       className="charger-empty-state__btn"
                     >

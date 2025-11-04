@@ -14,19 +14,30 @@ class WebSocketService {
       return;
     }
 
+    console.log("🔌 [WebSocketService] Connecting with userId:", userId);
+
     const socket = new SockJS("http://localhost:8080/ws");
 
     this.client = new Client({
       webSocketFactory: () => socket,
       debug: (str) => {
         console.log("STOMP:", str);
+        // Log incoming MESSAGE frames
+        if (str.includes("MESSAGE")) {
+          console.log("🔔 INCOMING MESSAGE FRAME:", str);
+        }
       },
       reconnectDelay: 5000,
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
+      // ✅ Add connectHeaders to send username to Spring WebSocket
+      connectHeaders: {
+        "user-name": userId, // This matches the STOMP header from backend
+      },
 
       onConnect: (frame) => {
         console.log("✅ WebSocket Connected:", frame);
+        console.log("✅ Connected with user:", userId);
         this.connected = true;
         if (onConnectCallback) onConnectCallback(frame);
       },
@@ -58,7 +69,7 @@ class WebSocketService {
 
   /**
    * Subscribe để nhận thông báo cá nhân cho user
-   * @param {string} userId - ID của user
+   * @param {string} userId - ID của user (phải khớp với username trong connectHeaders)
    * @param {string} postId - ID của charging post
    * @param {function} callback - Hàm xử lý khi nhận message
    */
@@ -68,15 +79,49 @@ class WebSocketService {
       return null;
     }
 
+    // Backend gửi: convertAndSendToUser(userId, "/queue/notifications/" + postId, message)
+    // Spring tự động thêm /user/{username} prefix
+    // Client subscribe: /user/queue/notifications/{postId}
     const destination = `/user/queue/notifications/${postId}`;
 
+    // ✅ ALSO try subscribing to the direct destination as a fallback
+    const directDestination = `/queue/notifications/${postId}`;
+
+    console.log("🔔 [WebSocketService] Subscribing to notifications:");
+    console.log("   - userId:", userId);
+    console.log("   - postId:", postId);
+    console.log("   - destination:", destination);
+    console.log("   - Also trying direct:", directDestination);
+
     const subscription = this.client.subscribe(destination, (message) => {
-      console.log("📩 Notification received:", message.body);
+      console.log("📩 ✅ Notification received (user destination)!");
+      console.log("   - destination:", destination);
+      console.log("   - message body:", message.body);
+      console.log("   - message body type:", typeof message.body);
+      console.log("   - message body length:", message.body?.length);
+      console.log(
+        "   - message body chars:",
+        Array.from(message.body || "").map((c) => c.charCodeAt(0))
+      );
+      console.log("   - headers:", message.headers);
+      if (callback) callback(message.body);
+    });
+
+    // ✅ Subscribe to direct destination as well (debugging)
+    const directSubscription = this.client.subscribe(directDestination, (message) => {
+      console.log("📩 ✅ Notification received (direct destination)!");
+      console.log("   - destination:", directDestination);
+      console.log("   - message body:", message.body);
+      console.log("   - message body type:", typeof message.body);
+      console.log("   - message body length:", message.body?.length);
+      console.log("   - headers:", message.headers);
       if (callback) callback(message.body);
     });
 
     this.subscriptions.set(`notifications-${postId}`, subscription);
-    console.log("✅ Subscribed to:", destination);
+    this.subscriptions.set(`notifications-direct-${postId}`, directSubscription);
+    console.log("✅ Successfully subscribed to:", destination);
+    console.log("✅ Successfully subscribed to:", directDestination);
 
     return subscription;
   }

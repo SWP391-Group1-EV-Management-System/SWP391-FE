@@ -7,9 +7,17 @@ export const useWebSocket = (userId, postId) => {
   const [position, setPosition] = useState(null);
 
   useEffect(() => {
-    if (!userId || !postId) return;
+    console.log("🎯 [useWebSocket] Hook called with:");
+    console.log("   - userId:", userId);
+    console.log("   - postId:", postId);
+
+    if (!userId || !postId) {
+      console.warn("⚠️ [useWebSocket] Missing userId or postId, skipping connection");
+      return;
+    }
 
     // Connect to WebSocket
+    console.log("🔌 [useWebSocket] Calling wsService.connect with userId:", userId);
     wsService.connect(
       userId,
       () => setConnected(true),
@@ -19,27 +27,62 @@ export const useWebSocket = (userId, postId) => {
     // Wait for connection then subscribe
     const timer = setTimeout(() => {
       if (wsService.isConnected()) {
+        console.log("✅ [useWebSocket] WebSocket is connected, subscribing...");
+        console.log("   - userId:", userId);
+        console.log("   - postId:", postId);
+
         // Subscribe to notifications
         wsService.subscribeToNotifications(userId, postId, (message) => {
-          setMessages((prev) => [
-            ...prev,
-            { type: "notification", text: message, time: new Date() },
-          ]);
+          console.log("📩 [useWebSocket] Notification callback triggered!");
+          console.log("   - Raw message:", message);
+          console.log("   - Message type:", typeof message);
+          console.log("   - Message length:", message?.length);
 
-          // Parse position from message
-          const posMatch = message.match(/vị trí số (\d+)/);
-          if (posMatch) {
-            setPosition(parseInt(posMatch[1]));
+          setMessages((prev) => [...prev, { type: "notification", text: message, time: new Date() }]);
+
+          // ✅ Try multiple regex patterns to parse position
+          let newPosition = null;
+
+          // Pattern 1: "vị trí số X"
+          const posMatch1 = message.match(/vị trí số (\d+)/i);
+          if (posMatch1) {
+            newPosition = parseInt(posMatch1[1]);
+            console.log("🎯 [useWebSocket] Position parsed (pattern 1):", newPosition);
+          }
+
+          // Pattern 2: "số X" (fallback)
+          if (!newPosition) {
+            const posMatch2 = message.match(/số (\d+)/i);
+            if (posMatch2) {
+              newPosition = parseInt(posMatch2[1]);
+              console.log("🎯 [useWebSocket] Position parsed (pattern 2):", newPosition);
+            }
+          }
+
+          // Pattern 3: Any number at the end
+          if (!newPosition) {
+            const posMatch3 = message.match(/(\d+)$/);
+            if (posMatch3) {
+              newPosition = parseInt(posMatch3[1]);
+              console.log("🎯 [useWebSocket] Position parsed (pattern 3):", newPosition);
+            }
+          }
+
+          if (newPosition !== null) {
+            console.log("✅ [useWebSocket] Setting position:", newPosition);
+            setPosition(newPosition);
+          } else {
+            console.warn("⚠️ [useWebSocket] Could not parse position from message:", message);
           }
         });
 
         // Subscribe to topic (optional)
         wsService.subscribeToTopic(postId, (message) => {
-          setMessages((prev) => [
-            ...prev,
-            { type: "broadcast", text: message, time: new Date() },
-          ]);
+          console.log("📢 [useWebSocket] Topic message received:", message);
+          setMessages((prev) => [...prev, { type: "broadcast", text: message, time: new Date() }]);
         });
+      } else {
+        console.warn("⚠️ [useWebSocket] WebSocket not connected after timeout!");
       }
     }, 1000);
 

@@ -18,9 +18,7 @@ export const addToWaitingList = async (chargingPostId) => {
  */
 export const cancelWaitingList = async (waitingListId) => {
   try {
-    const response = await api.post(
-      `/api/waiting-list/cancel/${waitingListId}`
-    );
+    const response = await api.post(`/api/waiting-list/cancel/${waitingListId}`);
     return response.data;
   } catch (error) {
     console.error("Error canceling waiting list:", error);
@@ -33,9 +31,7 @@ export const cancelWaitingList = async (waitingListId) => {
  */
 export const getWaitingListByPost = async (chargingPostId) => {
   try {
-    const response = await api.get(
-      `/api/waiting-list/queue/post/${chargingPostId}`
-    );
+    const response = await api.get(`/api/waiting-list/queue/post/${chargingPostId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching waiting list by post:", error);
@@ -48,9 +44,7 @@ export const getWaitingListByPost = async (chargingPostId) => {
  */
 export const getWaitingListByStation = async (chargingStationId) => {
   try {
-    const response = await api.get(
-      `/api/waiting-list/queue/station/${chargingStationId}`
-    );
+    const response = await api.get(`/api/waiting-list/queue/station/${chargingStationId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching waiting list by station:", error);
@@ -63,10 +57,7 @@ export const getWaitingListByStation = async (chargingStationId) => {
  */
 export const getWaitingListByUser = async (userId) => {
   try {
-    console.log(
-      "🌐 [waitingListService] Calling API:",
-      `/api/waiting-list/queue/users/${userId}`
-    );
+    console.log("🌐 [waitingListService] Calling API:", `/api/waiting-list/queue/users/${userId}`);
     const response = await api.get(`/api/waiting-list/queue/users/${userId}`);
     console.log("✅ [waitingListService] Response:", response.data);
     return response.data;
@@ -101,3 +92,9 @@ export const getWaitingListById = async (waitingListId) => {
     throw error;
   }
 };
+
+// ⚠️ WARNING: DO NOT add getQueuePosition or any API to fetch queue position!
+// ⚠️ Queue position (rank) is ONLY accurate from:
+//    1. /api/booking/create response (initial rank)
+//    2. WebSocket real-time messages (position updates)
+// ⚠️ Other APIs like getWaitingListByPost DO NOT return correct rank/position!

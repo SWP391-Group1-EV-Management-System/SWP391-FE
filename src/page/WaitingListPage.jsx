@@ -9,25 +9,53 @@ import WaitingQueueInfo from "../components/energy/WaitingQueueInfo";
 import useWaitingList from "../hooks/useWaitingList";
 import { useAuth } from "../hooks/useAuth";
 import { useWebSocket } from "../hooks/useWebSocket";
-import {
-  ClockCircleOutlined,
-  LockOutlined,
-  HomeOutlined,
-  WifiOutlined,
-} from "@ant-design/icons";
+import { ClockCircleOutlined, LockOutlined, HomeOutlined, WifiOutlined } from "@ant-design/icons";
 
 const WaitingListPage = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  console.log("👤 [WaitingListPage] Current user:", user);
+  console.log("� [WaitingListPage] Component rendering...");
+  console.log("�👤 [WaitingListPage] Current user:", user);
+  console.log("👤 [WaitingListPage] User details:");
+  console.log("   - user.id:", user?.id);
+  console.log("   - user.userId:", user?.userId);
+  console.log("   - user.username:", user?.username);
+  console.log("   - user.email:", user?.email);
+  console.log("   - user object keys:", user ? Object.keys(user) : "null");
   console.log("⏳ [WaitingListPage] Auth loading:", authLoading);
 
   // State quản lý waiting list data
   const [waitingData, setWaitingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
-  const [queueRank, setQueueRank] = useState(null);
-  const [chargingPostId, setChargingPostId] = useState(null); // ✅ Thêm state cho postId
+
+  // ✅ ĐỌC LOCALSTORAGE NGAY TRONG useState INITIALIZER
+  const [queueRank, setQueueRank] = useState(() => {
+    try {
+      const savedRank = localStorage.getItem("initialQueueRank");
+      if (savedRank) {
+        console.log("💾 [WaitingListPage] Initial rank from localStorage:", savedRank);
+        return parseInt(savedRank);
+      }
+    } catch (error) {
+      console.error("❌ Error reading initialQueueRank:", error);
+    }
+    console.log("⚠️ [WaitingListPage] No initial rank in localStorage");
+    return null;
+  });
+
+  const [chargingPostId, setChargingPostId] = useState(() => {
+    try {
+      const savedPostId = localStorage.getItem("queuePostId");
+      if (savedPostId) {
+        console.log("💾 [WaitingListPage] Initial postId from localStorage:", savedPostId);
+        return savedPostId;
+      }
+    } catch (error) {
+      console.error("❌ Error reading queuePostId:", error);
+    }
+    return null;
+  });
 
   // ✅ Sử dụng useWaitingList hook
   const {
@@ -39,7 +67,11 @@ const WaitingListPage = () => {
   } = useWaitingList();
 
   // ✅ WebSocket integration for real-time updates
-  const { connected, messages, position, clearMessages } = useWebSocket(
+  console.log("🔍 [WaitingListPage] WebSocket params:");
+  console.log("   - user?.id:", user?.id);
+  console.log("   - chargingPostId:", chargingPostId);
+
+  const { connected, messages, position } = useWebSocket(
     user?.id,
     chargingPostId // ← Dùng state riêng thay vì từ waitingData
   );
@@ -51,13 +83,40 @@ const WaitingListPage = () => {
   // ✅ Fetch waiting list data khi component mount
   useEffect(() => {
     if (user?.id) {
-      console.log(
-        "🔍 [WaitingListPage] Fetching waiting list for userId:",
-        user.id
-      );
+      console.log("🔍 [WaitingListPage] Fetching waiting list for userId:", user.id);
       fetchWaitingListByUser(user.id);
     }
   }, [user?.id, fetchWaitingListByUser]);
+
+  // ✅ ĐỌC LOCALSTORAGE NGAY KHI COMPONENT MOUNT (không đợi API)
+  useEffect(() => {
+    console.log("� [WaitingListPage] Mount useEffect RUNNING!");
+    console.log("�💾 [WaitingListPage] Checking localStorage on mount...");
+
+    try {
+      const savedRank = localStorage.getItem("initialQueueRank");
+      const savedPostId = localStorage.getItem("queuePostId");
+
+      console.log("🔍 [WaitingListPage] localStorage values:");
+      console.log("   - savedRank:", savedRank);
+      console.log("   - savedPostId:", savedPostId);
+      console.log("   - typeof savedRank:", typeof savedRank);
+      console.log("   - typeof savedPostId:", typeof savedPostId);
+
+      if (savedRank && savedPostId) {
+        const initialRank = parseInt(savedRank);
+        console.log("✅ [WaitingListPage] Setting initial rank from localStorage:", initialRank);
+        setQueueRank(initialRank);
+        setChargingPostId(savedPostId); // Set postId luôn để WebSocket connect
+      } else {
+        console.log("⚠️ [WaitingListPage] No localStorage data found");
+        console.log("   - savedRank is falsy?", !savedRank);
+        console.log("   - savedPostId is falsy?", !savedPostId);
+      }
+    } catch (error) {
+      console.error("❌ [WaitingListPage] Error reading localStorage:", error);
+    }
+  }, []); // Chỉ chạy 1 lần khi mount
 
   // ✅ Set waiting data khi có waitingLists
   useEffect(() => {
@@ -66,11 +125,8 @@ const WaitingListPage = () => {
     if (waitingLists && waitingLists.length > 0) {
       // ✅ Lấy waiting list đầu tiên với status 'active' hoặc 'waiting'
       const activeWaiting =
-        waitingLists.find(
-          (w) =>
-            w.status?.toLowerCase() === "active" ||
-            w.status?.toLowerCase() === "waiting"
-        ) || waitingLists[0];
+        waitingLists.find((w) => w.status?.toLowerCase() === "active" || w.status?.toLowerCase() === "waiting") ||
+        waitingLists[0];
 
       console.log("✅ [WaitingListPage] Active waiting:", activeWaiting);
       console.log("🔍 [WaitingListPage] Waiting structure:", {
@@ -83,18 +139,9 @@ const WaitingListPage = () => {
       // ⚠️ TEMPORARY FIX: Map waiting list data to match session structure
       const mappedWaiting = {
         ...activeWaiting,
-        maxPower:
-          activeWaiting.post?.maxPower ||
-          activeWaiting.chargingPost?.maxPower ||
-          0,
-        typeCharging:
-          activeWaiting.post?.typeCharging ||
-          activeWaiting.chargingPost?.typeCharging ||
-          [],
-        pricePerKwh:
-          activeWaiting.post?.pricePerKwh ||
-          activeWaiting.chargingPost?.pricePerKwh ||
-          0,
+        maxPower: activeWaiting.post?.maxPower || activeWaiting.chargingPost?.maxPower || 0,
+        typeCharging: activeWaiting.post?.typeCharging || activeWaiting.chargingPost?.typeCharging || [],
+        pricePerKwh: activeWaiting.post?.pricePerKwh || activeWaiting.chargingPost?.pricePerKwh || 0,
         stationName: activeWaiting.post?.station?.stationName || "Trạm sạc",
         address: activeWaiting.post?.station?.address || "",
         // Map expectedWaitingTime to maxWaitingTime for WaitingTime component
@@ -104,17 +151,19 @@ const WaitingListPage = () => {
       console.log("🔧 [WaitingListPage] Mapped waiting:", mappedWaiting);
       setWaitingData(mappedWaiting);
 
-      // ✅ Set chargingPostId để WebSocket kết nối
-      const postId =
-        activeWaiting.chargingPostId || activeWaiting.post?.idChargingPost;
-      console.log(
-        "🔌 [WaitingListPage] Setting charging post ID for WebSocket:",
-        postId
-      );
-      setChargingPostId(postId);
+      // ✅ Set chargingPostId để WebSocket kết nối (nếu chưa có từ localStorage)
+      const postId = activeWaiting.chargingPostId || activeWaiting.post?.idChargingPost;
+      console.log("🔌 [WaitingListPage] Setting charging post ID for WebSocket:", postId);
 
-      // ✅ KHÔNG tính rank từ mảng nữa - chỉ lấy từ WebSocket
-      // Queue rank sẽ được cập nhật từ WebSocket useEffect bên dưới
+      // Chỉ update nếu khác với postId hiện tại
+      if (postId && postId !== chargingPostId) {
+        setChargingPostId(postId);
+      }
+
+      // ⚠️ localStorage đã được đọc ở useEffect mount, không cần đọc lại ở đây
+      // Rank đã được set từ localStorage hoặc sẽ được update từ WebSocket
+
+      // Queue rank sẽ được cập nhật từ WebSocket khi có message mới
 
       // Set status config
       const config = {
@@ -126,34 +175,62 @@ const WaitingListPage = () => {
       };
 
       setStatusConfig(config);
-    } else {
+    } else if (waitingLists && waitingLists.length === 0) {
+      // ✅ CHỈ xóa localStorage khi XÁC NHẬN không có waiting list (array rỗng)
+      // ❌ KHÔNG xóa khi waitingLists = null (đang loading)
+      try {
+        localStorage.removeItem("initialQueueRank");
+        localStorage.removeItem("queuePostId");
+        console.log("🗑️ [WaitingListPage] Cleared rank from localStorage (confirmed no waiting list)");
+      } catch (error) {
+        console.error("❌ [WaitingListPage] Error clearing localStorage:", error);
+      }
+
       setWaitingData(null);
       setStatusConfig(null);
       setQueueRank(null);
-      setChargingPostId(null); // ✅ Reset postId khi không có waiting list
+      setChargingPostId(null);
     }
-  }, [waitingLists]);
+    // else: waitingLists = null → Đang loading → GIỮ localStorage!
+  }, [waitingLists, user?.id, chargingPostId]);
 
   // ✅ Update queue rank ONLY from WebSocket
   useEffect(() => {
-    if (position !== null && position !== undefined) {
-      console.log(
-        "🎯 [WaitingListPage] Updating queue rank from WebSocket:",
-        position
-      );
-      setQueueRank(position);
+    console.log("🎯 [WaitingListPage] Position effect triggered:");
+    console.log("   - position value:", position);
+    console.log("   - position type:", typeof position);
 
-      // Show notification when position changes
-      if (queueRank !== null && position !== queueRank) {
-        notification.info({
-          message: "Cập nhật vị trí",
-          description: `Vị trí của bạn trong hàng đợi: #${position}`,
-          placement: "topRight",
-          duration: 3,
-        });
-      }
+    if (position !== null && position !== undefined) {
+      console.log("✅ [WaitingListPage] Updating queue rank from WebSocket:", position);
+
+      setQueueRank((oldRank) => {
+        // Show notification when position changes
+        if (oldRank !== null && position !== oldRank) {
+          notification.info({
+            message: "Cập nhật vị trí",
+            description: `Vị trí của bạn trong hàng đợi: #${position}`,
+            placement: "topRight",
+            duration: 3,
+          });
+        }
+
+        // ✅ Cập nhật localStorage với rank mới từ WebSocket
+        try {
+          if (chargingPostId) {
+            localStorage.setItem("initialQueueRank", position.toString());
+            localStorage.setItem("queuePostId", chargingPostId);
+            console.log("💾 [WaitingListPage] Updated rank in localStorage:", position);
+          }
+        } catch (error) {
+          console.error("❌ [WaitingListPage] Error updating localStorage:", error);
+        }
+
+        return position;
+      });
+    } else {
+      console.warn("⚠️ [WaitingListPage] Position is null or undefined, not updating queue rank");
     }
-  }, [position]);
+  }, [position, chargingPostId]);
 
   // ✅ Show notifications for WebSocket messages
   useEffect(() => {
@@ -180,8 +257,7 @@ const WaitingListPage = () => {
     };
 
     window.addEventListener("waitingCreated", handleWaitingCreated);
-    return () =>
-      window.removeEventListener("waitingCreated", handleWaitingCreated);
+    return () => window.removeEventListener("waitingCreated", handleWaitingCreated);
   }, [user?.id, fetchWaitingListByUser]);
 
   // ✅ Handler hủy waiting
@@ -196,6 +272,15 @@ const WaitingListPage = () => {
 
     try {
       await cancelWaitingList(waitingData.waitingListId);
+
+      // ✅ Xóa rank từ localStorage khi cancel
+      try {
+        localStorage.removeItem("initialQueueRank");
+        localStorage.removeItem("queuePostId");
+        console.log("🗑️ [WaitingListPage] Cleared rank from localStorage after cancel");
+      } catch (error) {
+        console.error("❌ [WaitingListPage] Error clearing localStorage:", error);
+      }
 
       // ✅ Update local state immediately
       const updatedWaitingData = {
@@ -249,11 +334,7 @@ const WaitingListPage = () => {
 
   // ==================== FORBIDDEN STATE (403) ====================
   const isForbidden =
-    !user ||
-    (waitingData &&
-      user.id !== waitingData.userId &&
-      user.role !== "ADMIN" &&
-      user.role !== "MANAGER");
+    !user || (waitingData && user.id !== waitingData.userId && user.role !== "ADMIN" && user.role !== "MANAGER");
 
   if (isForbidden) {
     return (
@@ -268,17 +349,14 @@ const WaitingListPage = () => {
         }}
       >
         <div style={{ textAlign: "center", maxWidth: "500px" }}>
-          <LockOutlined
-            style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }}
-          />
+          <LockOutlined style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }} />
           <Alert
             message="Không có quyền truy cập"
             description={
               <div>
                 <p>Bạn không có quyền truy cập hàng đợi này.</p>
                 <p style={{ marginTop: "10px", color: "#666" }}>
-                  Hàng đợi này có thể thuộc về người dùng khác hoặc bạn không có
-                  quyền xem.
+                  Hàng đợi này có thể thuộc về người dùng khác hoặc bạn không có quyền xem.
                 </p>
               </div>
             }
@@ -407,11 +485,7 @@ const WaitingListPage = () => {
               message={
                 <Space>
                   <WifiOutlined style={{ fontSize: "16px" }} />
-                  <span>
-                    {connected
-                      ? "Kết nối thời gian thực đang hoạt động"
-                      : "Đang kết nối lại WebSocket..."}
-                  </span>
+                  <span>{connected ? "Kết nối thời gian thực đang hoạt động" : "Đang kết nối lại WebSocket..."}</span>
                 </Space>
               }
               type={connected ? "success" : "warning"}
