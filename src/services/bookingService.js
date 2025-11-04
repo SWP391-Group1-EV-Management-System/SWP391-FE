@@ -1,12 +1,12 @@
-import { useState } from 'react';
-import api from '../utils/axios';
+import { useState } from "react";
+import api from "../utils/axios";
 
 export const createBooking = async (bookingData) => {
   try {
-    const response = await api.post('/api/booking/create', bookingData);
+    const response = await api.post("/api/booking/create", bookingData);
     return response.data;
   } catch (error) {
-    console.error('Error creating booking:', error);
+    console.error("Error creating booking:", error);
     throw error;
   }
 };
@@ -16,7 +16,7 @@ export const completeBooking = async (bookingId) => {
     const response = await api.post(`/api/booking/complete/${bookingId}`);
     return response.data;
   } catch (error) {
-    console.error('Error completing booking:', error);
+    console.error("Error completing booking:", error);
     throw error;
   }
 };
@@ -26,7 +26,7 @@ export const cancelBooking = async (bookingId) => {
     const response = await api.post(`/api/booking/cancel/${bookingId}`);
     return response.data;
   } catch (error) {
-    console.error('Error canceling booking:', error);
+    console.error("Error canceling booking:", error);
     throw error;
   }
 };
@@ -36,7 +36,7 @@ export const getBookingsByPost = async (postId) => {
     const response = await api.get(`/api/booking/getByPost/${postId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching bookings by post:', error);
+    console.error("Error fetching bookings by post:", error);
     throw error;
   }
 };
@@ -46,37 +46,46 @@ export const getBookingsByStation = async (stationId) => {
     const response = await api.get(`/api/booking/getByStation/${stationId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching bookings by station:', error);
+    console.error("Error fetching bookings by station:", error);
     throw error;
   }
 };
 
 export const getBookingsByUser = async (userId) => {
   try {
+    console.log(
+      "🌐 [bookingService] Calling API:",
+      `/api/booking/getByUser/${userId}`
+    );
     const response = await api.get(`/api/booking/getByUser/${userId}`);
+    console.log("✅ [bookingService] Response:", response.data);
     return response.data;
   } catch (error) {
-    console.error('Error fetching bookings by user:', error);
+    console.error("Error fetching bookings by user:", error);
     throw error;
   }
 };
 
 export const getBookingsByDate = async (date) => {
   try {
-    const response = await api.get(`/api/booking/getByCreatedDate?date=${date}`);
+    const response = await api.get(
+      `/api/booking/getByCreatedDate?date=${date}`
+    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching bookings by date:', error);
+    console.error("Error fetching bookings by date:", error);
     throw error;
   }
 };
 
 export const getBookingByWaitingListId = async (waitingListId) => {
   try {
-    const response = await api.get(`/api/booking/getByWaitingListId/${waitingListId}`);
+    const response = await api.get(
+      `/api/booking/getByWaitingListId/${waitingListId}`
+    );
     return response.data;
   } catch (error) {
-    console.error('Error fetching booking by waiting list ID:', error);
+    console.error("Error fetching booking by waiting list ID:", error);
     throw error;
   }
 };
@@ -86,7 +95,7 @@ export const getBookingById = async (bookingId) => {
     const response = await api.get(`/api/booking/getByBookingId/${bookingId}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching booking by ID:', error);
+    console.error("Error fetching booking by ID:", error);
     throw error;
   }
 };
@@ -96,9 +105,7 @@ export const getBookingsByStatus = async (statusList) => {
     const response = await api.get(`/api/booking/getByStatus/${statusList}`);
     return response.data;
   } catch (error) {
-    console.error('Error fetching bookings by status:', error);
+    console.error("Error fetching bookings by status:", error);
     throw error;
   }
 };
-
-

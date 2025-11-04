@@ -132,7 +132,13 @@ export default function useBooking() {
 
   const fetchBookingsByUser = useCallback(
     async (userId) => {
-      return wrap(() => bookingService.getBookingsByUser(userId), setBookings);
+      console.log("🔍 [useBooking] Fetching bookings for userId:", userId);
+      const result = await wrap(
+        () => bookingService.getBookingsByUser(userId),
+        setBookings
+      );
+      console.log("✅ [useBooking] Bookings fetched:", result);
+      return result;
     },
     [wrap]
   );

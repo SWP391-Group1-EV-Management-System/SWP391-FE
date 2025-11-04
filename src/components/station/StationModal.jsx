@@ -35,6 +35,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
 
   const [selectedCar, setSelectedCar] = useState(null);
   const [userCars, setUserCars] = useState([]);
+  const [bookingProcessingId, setBookingProcessingId] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,7 +90,10 @@ const StationModal = ({ isOpen, onClose, station }) => {
 
   const handleBookCharger = async (postId) => {
     try {
+      // mark this specific post as processing so only its button shows loading
+      setBookingProcessingId(postId);
       if (!currentUser) {
+        setBookingProcessingId(null);
         alert("Vui lòng đăng nhập trước khi đặt chỗ.");
         return;
       }
@@ -134,6 +138,9 @@ const StationModal = ({ isOpen, onClose, station }) => {
     } catch (err) {
       console.error("Booking error:", err);
       alert("Lỗi khi đặt chỗ, vui lòng thử lại sau.");
+    } finally {
+      // clear per-post processing flag
+      setBookingProcessingId(null);
     }
   };
 
@@ -339,23 +346,29 @@ const StationModal = ({ isOpen, onClose, station }) => {
                       )}
                     </div>
                     <div className="charger-item__action">
-                      <Button
-                        variant={post.isAvailable ? "success" : "secondary"}
-                        size="sm"
-                        disabled={
-                          !post.isAvailable || bookingLoading || !selectedCar
-                        }
-                        onClick={() => handleBookCharger(post.id)}
-                        className="charger-book-btn"
-                      >
-                        {bookingLoading
-                          ? "Đang xử lý..."
-                          : !selectedCar
-                          ? "Chưa có xe"
-                          : post.isAvailable
-                          ? "Đặt chỗ"
-                          : "Không khả dụng"}
-                      </Button>
+                      {(() => {
+                        const isProcessing =
+                          bookingLoading && bookingProcessingId === post.id;
+                        return (
+                          <Button
+                            variant={post.isAvailable ? "success" : "secondary"}
+                            size="sm"
+                            disabled={
+                              !post.isAvailable || isProcessing || !selectedCar
+                            }
+                            onClick={() => handleBookCharger(post.id)}
+                            className="charger-book-btn"
+                          >
+                            {isProcessing
+                              ? "Đang xử lý..."
+                              : !selectedCar
+                              ? "Chưa có xe"
+                              : post.isAvailable
+                              ? "Đặt chỗ"
+                              : "Không khả dụng"}
+                          </Button>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -381,20 +394,32 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 <div className="charger-empty-state__info">
                   Khả dụng: {station.availableSlots || 0} trụ
                 </div>
-                <Button
-                  variant={
-                    station.status === "available" ? "success" : "secondary"
-                  }
-                  disabled={station.status !== "available" || !selectedCar}
-                  onClick={() => handleBookCharger("general")}
-                  className="charger-empty-state__btn"
-                >
-                  {station.status === "available"
-                    ? "Đặt chỗ"
-                    : station.status === "maintenance"
-                    ? "Bảo trì"
-                    : "Đầy chỗ"}
-                </Button>
+                {(() => {
+                  const isGeneralProcessing =
+                    bookingLoading && bookingProcessingId === "general";
+                  return (
+                    <Button
+                      variant={
+                        station.status === "available" ? "success" : "secondary"
+                      }
+                      disabled={
+                        station.status !== "available" ||
+                        !selectedCar ||
+                        isGeneralProcessing
+                      }
+                      onClick={() => handleBookCharger("general")}
+                      className="charger-empty-state__btn"
+                    >
+                      {isGeneralProcessing
+                        ? "Đang xử lý..."
+                        : station.status === "available"
+                        ? "Đặt chỗ"
+                        : station.status === "maintenance"
+                        ? "Bảo trì"
+                        : "Đầy chỗ"}
+                    </Button>
+                  );
+                })()}
               </div>
             )}
           </div>
