@@ -321,7 +321,7 @@ const WaitingListPage = () => {
       const bookingCountdownKey = `countdown_${waitingData.bookingId}`;
       const frozenWaitingKey = `countdown_frozen_${waitingData.waitingListId}`;
       const frozenBookingKey = `countdown_frozen_${waitingData.bookingId}`;
-      
+
       try {
         // Lưu frozen time cho waiting
         const savedWaitingEndTime = localStorage.getItem(waitingCountdownKey);
@@ -329,33 +329,37 @@ const WaitingListPage = () => {
           const endTime = new Date(savedWaitingEndTime);
           const now = new Date();
           const remainingMs = endTime - now;
-          
+
           if (remainingMs > 0) {
             const remainingSeconds = Math.floor(remainingMs / 1000);
             const hours = Math.floor(remainingSeconds / 3600);
             const mins = Math.floor((remainingSeconds % 3600) / 60);
             const secs = remainingSeconds % 60;
-            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-            
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(
+              secs
+            ).padStart(2, "0")}`;
+
             localStorage.setItem(frozenWaitingKey, frozenTime);
             console.log("🧊 [WaitingListPage] Frozen waiting countdown:", frozenTime);
           }
         }
-        
+
         // Lưu frozen time cho booking (nếu có)
         const savedBookingEndTime = localStorage.getItem(bookingCountdownKey);
         if (savedBookingEndTime) {
           const endTime = new Date(savedBookingEndTime);
           const now = new Date();
           const remainingMs = endTime - now;
-          
+
           if (remainingMs > 0) {
             const remainingSeconds = Math.floor(remainingMs / 1000);
             const hours = Math.floor(remainingSeconds / 3600);
             const mins = Math.floor((remainingSeconds % 3600) / 60);
             const secs = remainingSeconds % 60;
-            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-            
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(
+              secs
+            ).padStart(2, "0")}`;
+
             localStorage.setItem(frozenBookingKey, frozenTime);
             console.log("🧊 [WaitingListPage] Frozen booking countdown:", frozenTime);
           }

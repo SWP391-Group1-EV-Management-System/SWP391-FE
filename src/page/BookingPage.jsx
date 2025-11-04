@@ -123,21 +123,23 @@ const BookingPage = () => {
       // ✅ LƯU thời gian countdown hiện tại TRƯỚC KHI hủy
       const countdownKey = `countdown_${bookingData.bookingId}`;
       const frozenKey = `countdown_frozen_${bookingData.bookingId}`;
-      
+
       try {
         const savedEndTime = localStorage.getItem(countdownKey);
         if (savedEndTime) {
           const endTime = new Date(savedEndTime);
           const now = new Date();
           const remainingMs = endTime - now;
-          
+
           if (remainingMs > 0) {
             const remainingSeconds = Math.floor(remainingMs / 1000);
             const hours = Math.floor(remainingSeconds / 3600);
             const mins = Math.floor((remainingSeconds % 3600) / 60);
             const secs = remainingSeconds % 60;
-            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-            
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(
+              secs
+            ).padStart(2, "0")}`;
+
             // ✅ LƯU thời gian đóng băng
             localStorage.setItem(frozenKey, frozenTime);
             console.log("🧊 [BookingPage] Frozen countdown time:", frozenTime);

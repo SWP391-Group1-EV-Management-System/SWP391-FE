@@ -251,6 +251,9 @@ const ChatBox = () => {
                 try {
                   const parsed = JSON.parse(data);
 
+                  // ✅ IN RA TẤT CẢ DỮ LIỆU NHẬN ĐƯỢC
+                  console.log("📦 Full parsed data:", parsed);
+
                   if (currentEvent === "heartbeat") {
                     console.log("💓 Heartbeat:", parsed.message);
                     setMessages((prev) =>
@@ -261,15 +264,43 @@ const ChatBox = () => {
                   } else if (currentEvent === "message") {
                     if (parsed.status === "completed" && parsed.result) {
                       console.log("✉️ Received final result");
+                      console.log("🎯 Action:", parsed.action);
+                      console.log("🆔 ActionId:", parsed.actionId); // ✅ IN RA ACTION ID
+                      console.log("🔢 Rank:", parsed.rank); // ✅ IN RA RANK
 
                       // ✅ Xử lý action nếu có
                       if (parsed.action) {
                         const action = parsed.action.toLowerCase();
-                        console.log("🎯 Action detected:", action);
+                        const actionId = parsed.actionId; // ✅ LẤY ACTION ID
+                        const rank = parsed.rank; // ✅ LẤY RANK (số thứ tự)
+
+                        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+                        console.log("🔍 ACTION DETECTED:");
+                        console.log("   Type:", action);
+                        console.log("   ID:", actionId);
+                        console.log("   Rank:", rank);
+                        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
                         // Lưu status vào localStorage
                         if (action === "booking") {
                           setDriverStatus("booking");
+
+                          // ✅ Lưu bookingId, status và rank nếu có
+                          if (actionId) {
+                            localStorage.setItem("bookingId", actionId);
+                            localStorage.setItem("bookingStatus", "booking"); // ✅ Set status = "booking"
+
+                            // ✅ Lưu rank nếu có
+                            if (rank !== undefined && rank !== null) {
+                              localStorage.setItem("initialQueueRank", rank.toString());
+                            }
+
+                            console.log("💾 Saved to localStorage:");
+                            console.log("   - bookingId:", actionId);
+                            console.log("   - bookingStatus: booking");
+                            console.log("   - initialQueueRank:", rank);
+                          }
+
                           console.log("📍 Navigating to booking page...");
 
                           // Navigate sau 1.5 giây để user đọc message
@@ -278,6 +309,23 @@ const ChatBox = () => {
                           }, 1500);
                         } else if (action === "waiting") {
                           setDriverStatus("waiting");
+
+                          // ✅ Lưu waitingListId, status và rank nếu có
+                          if (actionId) {
+                            localStorage.setItem("waitingListId", actionId);
+                            localStorage.setItem("bookingStatus", "waiting"); // ✅ Set status = "waiting"
+
+                            // ✅ Lưu rank nếu có
+                            if (rank !== undefined && rank !== null) {
+                              localStorage.setItem("initialQueueRank", rank.toString());
+                            }
+
+                            console.log("💾 Saved to localStorage:");
+                            console.log("   - waitingListId:", actionId);
+                            console.log("   - bookingStatus: waiting");
+                            console.log("   - initialQueueRank:", rank);
+                          }
+
                           console.log("⏳ Navigating to waiting list page...");
 
                           // Navigate sau 1.5 giây
@@ -305,6 +353,7 @@ const ChatBox = () => {
                             minute: "2-digit",
                           }),
                           action: parsed.action, // ✅ Lưu action vào message
+                          actionId: parsed.actionId, // ✅ Lưu actionId vào message
                         },
                       ]);
                       setIsLoading(false);

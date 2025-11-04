@@ -76,10 +76,14 @@ export const WaitingTime = ({ sessionData }) => {
 
   // ✅ Display time: Ưu tiên countdown, fallback về tính toán local
   const displayTime = countdown?.displayTime || `${waitingMinutes} phút`;
-  const displayStatus = 
-    status === "CANCELLED" ? "🛑 Đã hủy" :
-    status === "RUNNING" ? "⏳ Đang đếm..." : 
-    status === "COMPLETED" ? "✅ Hoàn thành" : "";
+  const displayStatus =
+    status === "CANCELLED"
+      ? "🛑 Đã hủy"
+      : status === "RUNNING"
+      ? "⏳ Đang đếm..."
+      : status === "COMPLETED"
+      ? "✅ Hoàn thành"
+      : "";
 
   const waitingSpecs = [
     {

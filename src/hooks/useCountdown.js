@@ -63,11 +63,11 @@ export const useCountdown = (minutes, enabled = true, storageKey = "countdownEnd
       const savedEndTime = localStorage.getItem(storageKey);
       if (!savedEndTime) {
         console.log("🛑 [useCountdown] localStorage key removed - countdown cancelled!");
-        
+
         // ✅ KIỂM TRA frozen time - nếu có thì hiển thị thời gian đóng băng
-        const frozenKey = `${storageKey.replace('countdown_', 'countdown_frozen_')}`;
+        const frozenKey = `${storageKey.replace("countdown_", "countdown_frozen_")}`;
         const frozenTime = localStorage.getItem(frozenKey);
-        
+
         if (frozenTime) {
           console.log("🧊 [useCountdown] Found frozen time:", frozenTime);
           setCountdown({
@@ -82,7 +82,7 @@ export const useCountdown = (minutes, enabled = true, storageKey = "countdownEnd
           setCountdown(null);
           setStatus("IDLE");
         }
-        
+
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
