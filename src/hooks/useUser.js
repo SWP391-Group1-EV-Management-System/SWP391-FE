@@ -1,17 +1,29 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getDrivers, getStaff, getManagers } from '../services/userService';
+import { getDrivers, getStaff, updateUser, deleteUser } from '../services/userService';
 
-const mapApiUser = (apiUser) => ({
-  id: apiUser.id || apiUser.userID || apiUser._id,
-  email: apiUser.email || '',
-  firstName: apiUser.firstName || '',
-  lastName: apiUser.lastName || '',
-  role: apiUser.role || '',
-  createdAt: apiUser.createdAt || '',
-  gender: apiUser.gender === true ? 'Male' : apiUser.gender === false ? 'Female' : '',
-  phone: apiUser.phone || apiUser.phoneNumber || '',
-  status: apiUser.active === true ? 'Active' : 'Inactive',
-});
+const mapApiUser = (apiUser) => {
+  console.log('🔥 Raw API User:', apiUser);
+  console.log('🔥 birthDate:', apiUser.birthDate);
+  
+  // ✅ Backend dùng LocalDate → luôn trả string "YYYY-MM-DD" hoặc null
+  const birthDate = apiUser.birthDate && apiUser.birthDate !== '' ? apiUser.birthDate : null;
+  
+  console.log('✅ Mapped birthDate:', birthDate);
+  
+  return {
+    id: apiUser.userID || apiUser.id || apiUser.userId || apiUser.ID,
+    email: apiUser.email || '',
+    firstName: apiUser.firstName || '',
+    lastName: apiUser.lastName || '',
+    role: (apiUser.role || '').toLowerCase(),
+    createdAt: apiUser.createdAt || '',
+    gender: apiUser.gender === true ? 'Male' : apiUser.gender === false ? 'Female' : '',
+    phone: apiUser.phoneNumber || apiUser.phone || '',
+    status: apiUser.status === true || apiUser.active === true ? 'Active' : 'Inactive',
+    birthDate: birthDate, // ✅ STRING "YYYY-MM-DD" hoặc null
+    password: apiUser.password || '',
+  };
+};
 
 const useUser = (role) => {
   const [users, setUsers] = useState([]);
@@ -32,8 +44,6 @@ const useUser = (role) => {
         data = await getDrivers();
       } else if (role === 'Staff') {
         data = await getStaff();
-      } else if (role === 'Manager') {
-        data = await getManagers();
       } else {
         data = [];
       }
@@ -60,7 +70,29 @@ const useUser = (role) => {
 
   const refresh = () => fetch();
 
-  return { users, loading, error, refresh };
+  const update = async (userId, userData) => {
+    try {
+      await updateUser(userId, userData);
+      await refresh();
+      return { success: true };
+    } catch (err) {
+      console.error('Update user error:', err);
+      throw err;
+    }
+  };
+
+  const remove = async (userId) => {
+    try {
+      await deleteUser(userId);
+      await refresh();
+      return { success: true };
+    } catch (err) {
+      console.error('Delete user error:', err);
+      throw err;
+    }
+  };
+
+  return { users, loading, error, refresh, update, remove };
 };
 
 export default useUser;

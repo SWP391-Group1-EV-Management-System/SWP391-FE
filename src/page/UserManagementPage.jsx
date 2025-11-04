@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { Tabs, Input, Row, Col } from 'antd';
 import DriverTable from '../components/user/DriverTable';
-import ManagerTable from '../components/user/ManagerTable';
 import StaffTable from '../components/user/StaffTable';
 import PageHeader from '../components/PageHeader';
 import ServicePackageManagement from '../components/service/ServicePackageManagement';
 import { FaUserAlt } from 'react-icons/fa';
 import ReportList from '../components/ReportList';
-
-// Remove centralized user API calls and mock data; page now only provides UI + search
 
 const UserManagementPage = () => {
   const [search, setSearch] = useState('');
@@ -24,8 +21,7 @@ const UserManagementPage = () => {
           tabBarStyle={{ color: '#166534', fontWeight: 600 }}
           items={[
             { key: '1', label: <span className="tab-animate">Driver</span>, children: <DriverTable search={search} /> },
-            { key: '2', label: <span className="tab-animate">Manager</span>, children: <ManagerTable search={search} /> },
-            { key: '3', label: <span className="tab-animate">Staff</span>, children: <StaffTable search={search} /> },
+            { key: '2', label: <span className="tab-animate">Staff</span>, children: <StaffTable search={search} /> },
           ]}
         />
       )

@@ -2,13 +2,12 @@ import React, { useState } from 'react';
 import { Table, Button, Space, Modal, message, Popconfirm } from 'antd';
 import { EyeOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { useUsers } from '../hooks/useUsers';
-import { userService } from '../services/userService';
+import { userService } from '../../services/userService';
 import UserModal from './UserModal';
 
 const UserList = () => {
   const [refreshKey, setRefreshKey] = useState(0);
   const { users, loading } = useUsers(refreshKey);
-  console.log('UserList users:', users);
   const [modal, setModal] = useState({ visible: false, mode: 'view', user: null });
 
   // Refresh user list after CRUD

@@ -20,16 +20,6 @@ export const getStaff = async () => {
   }
 };
 
-export const getManagers = async () => {
-  try {
-    const response = await api.get('/api/users/getUserByRole/Manager');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching managers:', error);
-    throw error;
-  }
-};
-
 export const getAllUsers = async () => {
   try {
     const response = await api.get('/api/users/getAllUsers');
