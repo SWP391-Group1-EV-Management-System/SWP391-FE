@@ -1,7 +1,10 @@
 .show-qr {
+  min-height: 100vh;
+  background-image: url("../../images/Frame 16.png");
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
 .qr-wrapper {

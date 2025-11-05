@@ -4,8 +4,22 @@ import { DollarOutlined, StopOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
-const BookingActions = ({ sessionData, onCancel, isCancelled }) => {
-  const pricePerKwh = sessionData?.pricePerKwh ?? "-";
+const BookingActions = ({
+  sessionData,
+  onCancel,
+  isCancelled,
+  chargingPostData,
+}) => {
+  console.log("🔍 [BookingActions] sessionData:", sessionData);
+  console.log("🔍 [BookingActions] chargingPostData:", chargingPostData);
+
+  // ✅ Lấy giá từ chargingPostData hoặc sessionData
+  // BE trả về: chargingFeePerKWh hoặc pricePerKwh
+  const pricePerKwh =
+    chargingPostData?.chargingFeePerKWh ||
+    chargingPostData?.pricePerKwh ||
+    sessionData?.pricePerKwh ||
+    sessionData?.chargingFeePerKWh;
 
   const pricingItems = [
     {
@@ -13,7 +27,7 @@ const BookingActions = ({ sessionData, onCancel, isCancelled }) => {
       value:
         typeof pricePerKwh === "number"
           ? `${pricePerKwh.toLocaleString("vi-VN")}đ`
-          : pricePerKwh,
+          : pricePerKwh || "-",
     },
   ];
 

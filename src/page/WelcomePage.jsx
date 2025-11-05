@@ -20,8 +20,8 @@ function WelcomePage() {
           <div id="welcome-header">
             <div className="welcomePage-header">
               <div className="welcome-header-btn">
-                <Link to="/login" className="welcome-login-btn">Login</Link>
-                <Link to="/register" className="welcome-register-btn">Register</Link>
+                <Link to="/login" className="welcome-login-btn">ĐĂNG NHẬP</Link>
+                <Link to="/register" className="welcome-register-btn">ĐĂNG KÝ</Link>
               </div>
             </div>
           </div>

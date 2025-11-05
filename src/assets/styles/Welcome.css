@@ -16,35 +16,43 @@
 .welcome-register-btn {
   padding: 10px 20px;
   border: none;
-  border-radius: 25px;
-  font-size: 16px;
-  font-weight: 600;
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .welcome-login-btn {
-  background: transparent;
-  color: #0b9459;
-  border: 2px solid #0b9459;
+  background: #0b9459;
+  color: #e1ad20;
 }
 
 .welcome-login-btn:hover {
-  background: #0b9459;
-  color: white;
+  background: white;
+  color: #0b9459;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(11, 148, 89, 0.3);
   text-decoration: none;
 }
 
 .welcome-register-btn {
-  background: #0b9459;
-  color: white;
-
+  background: #e1ad20;
+  color: #0b9459;
 }
 
 .welcome-register-btn:hover {
-  color: #0b9459;
+  color: #e1ad20;
   background: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(11, 148, 89, 0.3);
   text-decoration: none;
+}
+
+.welcome-header-btn {
+  display: flex;
+  top: 500px;
+  left: 180px;
+  gap: 40px;
+  position: relative;
 }

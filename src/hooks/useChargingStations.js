@@ -30,15 +30,14 @@ export const useChargingStations = (options = {}) => {
 
       // Gọi API để lấy danh sách trạm sạc
       const stations = await chargingStationService.getAllStations();
-      console.log('Danh sách trạm lấy từ API:', stations);
+      console.log("Danh sách trạm lấy từ API:", stations);
       setStations(stations);
 
       // Tính toán thống kê từ dữ liệu API
       const stats = {
         totalStations: stations.length,
-        availableStations: stations.filter(
-          (station) => station.active === true
-        ).length,
+        availableStations: stations.filter((station) => station.active === true)
+          .length,
         bookedStations: stations.filter((station) => station.active === false)
           .length,
       };
@@ -78,6 +77,31 @@ export const useChargingStations = (options = {}) => {
     }
   };
 
+  // Hàm lấy thông tin trụ sạc theo ID
+  const fetchPostById = async (postId) => {
+    try {
+      setLoading(true);
+      setError(null);
+      return await chargingStationService.getPostById(postId);
+    } catch (err) {
+      console.error(`Lỗi khi tải thông tin trụ ${postId}:`, err);
+      setError(err.message || "Không thể tải thông tin trụ sạc");
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Hàm lấy thông tin trạm sạc theo ID
+  const fetchStationById = async (stationId) => {
+    try {
+      return await chargingStationService.getStationById(stationId);
+    } catch (err) {
+      console.error(`Lỗi khi tải thông tin trạm ${stationId}:`, err);
+      throw err;
+    }
+  };
+
   // Trả về dữ liệu và các hàm để sử dụng
   return {
     // Dữ liệu chính
@@ -89,6 +113,8 @@ export const useChargingStations = (options = {}) => {
     // Các hàm điều khiển
     fetchStations,
     fetchStationPosts,
+    fetchPostById,
+    fetchStationById,
     refresh,
     clearError,
 

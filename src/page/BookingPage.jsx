@@ -3,13 +3,17 @@ import { Row, Col, Space, Spin, Alert, Button, notification } from "antd";
 import { useNavigate } from "react-router";
 import PageHeader from "../components/PageHeader";
 import TechnicalDetails from "../components/energy/TechnicalDetails";
-import BookingActions from "../components/energy/BookingActions";
 import { SessionInfo } from "../components/energy/SessionInfo";
 import { WaitingTime } from "../components/energy/WaitingTime";
 import useBooking from "../hooks/useBooking";
 import { useAuth } from "../hooks/useAuth";
 import { getBookingById } from "../services/bookingService";
-import { CalendarOutlined, LockOutlined, HomeOutlined } from "@ant-design/icons";
+import chargingStationService from "../services/chargingStationService";
+import {
+  CalendarOutlined,
+  LockOutlined,
+  HomeOutlined,
+} from "@ant-design/icons";
 
 const BookingPage = () => {
   const navigate = useNavigate();
@@ -22,6 +26,7 @@ const BookingPage = () => {
   const [bookingData, setBookingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [chargingPostData, setChargingPostData] = useState(null); // ✅ Thêm state cho charging post details
 
   // ✅ Sử dụng useBooking hook (chỉ cho cancel function)
   const { cancelBooking } = useBooking();
@@ -44,6 +49,7 @@ const BookingPage = () => {
             bookingId: detail.bookingId,
             stationName: detail.stationName || "Trạm sạc",
             chargingPostId: detail.chargingPostId,
+            chargingStationId: detail.chargingStationId,
             status: detail.status,
             maxWaitingTime: detail.maxWaitingTime,
             arrivalTime: detail.arrivalTime,
@@ -53,6 +59,29 @@ const BookingPage = () => {
           };
 
           setBookingData(mappedData);
+
+          // ✅ Fetch charging post details
+          if (detail.chargingPostId) {
+            try {
+              console.log(
+                "🔌 [BookingPage] Fetching charging post details:",
+                detail.chargingPostId
+              );
+              const postDetail = await chargingStationService.getPostById(
+                detail.chargingPostId
+              );
+              console.log(
+                "✅ [BookingPage] Charging post details:",
+                postDetail
+              );
+              setChargingPostData(postDetail);
+            } catch (postError) {
+              console.error(
+                "❌ [BookingPage] Error fetching charging post:",
+                postError
+              );
+            }
+          }
 
           // Determine status config based on booking status
           const status = detail.status?.toLowerCase();
@@ -136,9 +165,9 @@ const BookingPage = () => {
             const hours = Math.floor(remainingSeconds / 3600);
             const mins = Math.floor((remainingSeconds % 3600) / 60);
             const secs = remainingSeconds % 60;
-            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(
-              secs
-            ).padStart(2, "0")}`;
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(
+              mins
+            ).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
             // ✅ LƯU thời gian đóng băng
             localStorage.setItem(frozenKey, frozenTime);
@@ -161,7 +190,9 @@ const BookingPage = () => {
         // ✅ XÓA COUNTDOWN endTime (để dừng countdown)
         localStorage.removeItem(countdownKey);
 
-        console.log("🗑️ [BookingPage] Cleared all localStorage after cancel (frozen time preserved)");
+        console.log(
+          "🗑️ [BookingPage] Cleared all localStorage after cancel (frozen time preserved)"
+        );
       } catch (error) {
         console.error("❌ [BookingPage] Error clearing localStorage:", error);
       }
@@ -218,7 +249,11 @@ const BookingPage = () => {
 
   // ==================== FORBIDDEN STATE (403) ====================
   const isForbidden =
-    !user || (bookingData && user.id !== bookingData.userId && user.role !== "ADMIN" && user.role !== "MANAGER");
+    !user ||
+    (bookingData &&
+      user.id !== bookingData.userId &&
+      user.role !== "ADMIN" &&
+      user.role !== "MANAGER");
 
   if (isForbidden) {
     return (
@@ -233,14 +268,17 @@ const BookingPage = () => {
         }}
       >
         <div style={{ textAlign: "center", maxWidth: "500px" }}>
-          <LockOutlined style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }} />
+          <LockOutlined
+            style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }}
+          />
           <Alert
             message="Không có quyền truy cập"
             description={
               <div>
                 <p>Bạn không có quyền truy cập booking này.</p>
                 <p style={{ marginTop: "10px", color: "#666" }}>
-                  Booking này có thể thuộc về người dùng khác hoặc bạn không có quyền xem.
+                  Booking này có thể thuộc về người dùng khác hoặc bạn không có
+                  quyền xem.
                 </p>
               </div>
             }
@@ -334,21 +372,20 @@ const BookingPage = () => {
             </Col>
 
             <Col xs={24} lg={12}>
-              <WaitingTime sessionData={bookingData} />
-            </Col>
-          </Row>
-
-          {/* Row 2: Technical Details & Booking Actions */}
-          <Row gutter={[16, 16]}>
-            <Col xs={24} lg={12}>
-              <TechnicalDetails sessionData={bookingData} />
-            </Col>
-
-            <Col xs={24} lg={12}>
-              <BookingActions
+              <WaitingTime
                 sessionData={bookingData}
                 onCancel={handleCancelBooking}
                 isCancelled={bookingData?.status?.toLowerCase() === "cancelled"}
+              />
+            </Col>
+          </Row>
+
+          {/* Row 2: Technical Details & Booking Info */}
+          <Row gutter={16}>
+            <Col xs={24} lg={24}>
+              <TechnicalDetails
+                sessionData={bookingData}
+                chargingPostData={chargingPostData}
               />
             </Col>
           </Row>

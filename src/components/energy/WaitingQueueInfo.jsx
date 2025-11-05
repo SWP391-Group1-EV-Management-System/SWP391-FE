@@ -10,6 +10,19 @@ const WaitingQueueInfo = ({
   onCancel,
   isCancelled,
 }) => {
+  const formatDateTime = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return date.toLocaleString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+  };
+
   const queueInfo = [
     {
       label: "Vị trí trong hàng đợi",
@@ -21,8 +34,21 @@ const WaitingQueueInfo = ({
     },
     {
       label: "Trạng thái",
-      value: isCancelled ? "Đã hủy" : "Đang chờ",
+      value: isCancelled
+        ? "Đã hủy"
+        : sessionData?.status === "waiting"
+        ? "Đang chờ"
+        : sessionData?.status || "Đang chờ",
     },
+    ...(sessionData?.outedAt
+      ? [
+          {
+            label: "Rời hàng đợi lúc",
+            value: formatDateTime(sessionData.outedAt),
+            highlight: true,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -46,7 +72,7 @@ const WaitingQueueInfo = ({
         }}
       >
         <Space>
-          <TeamOutlined style={{ fontSize: "24px", color: "#f59e0b" }} />
+          <TeamOutlined style={{ fontSize: "24px", color: "#10b981" }} />
           <Title level={4} style={{ margin: 0, color: "#1a1a1a" }}>
             Thông tin hàng đợi
           </Title>
@@ -57,7 +83,7 @@ const WaitingQueueInfo = ({
       <Space
         direction="vertical"
         size="medium"
-        style={{ width: "100%", marginBottom: "24px" }}
+        style={{ width: "100%", marginBottom: "14px" }}
       >
         {queueInfo.map((item, index) => (
           <div key={index}>
@@ -130,7 +156,7 @@ const WaitingQueueInfo = ({
       {!isCancelled && (
         <div
           style={{
-            marginTop: "16px",
+            marginTop: "13px",
             padding: "12px",
             backgroundColor: "#fef3c7",
             borderRadius: "8px",

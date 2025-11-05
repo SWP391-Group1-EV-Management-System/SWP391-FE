@@ -11,14 +11,40 @@ import { ClockCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
-const CurrentTime = ({ currentTime, sessionData }) => {
+const CurrentTime = ({
+  currentTime,
+  sessionData,
+  remainingSeconds: propRemainingSeconds,
+  displayTime: propDisplayTime,
+}) => {
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [progressPercent, setProgressPercent] = useState(0);
 
   /**
    * Tính thời gian còn lại và phần trăm tiến độ
+   * Ưu tiên sử dụng dữ liệu từ battery countdown API nếu có
    */
   useEffect(() => {
+    // ✅ Nếu có dữ liệu từ battery countdown API, sử dụng luôn
+    if (propDisplayTime && propRemainingSeconds !== undefined) {
+      setTimeRemaining(propDisplayTime);
+
+      // Tính progress percent từ remainingSeconds
+      if (sessionData?.expectedEndTime && sessionData?.startTime) {
+        const start = new Date(sessionData.startTime);
+        const end = new Date(sessionData.expectedEndTime);
+        const totalDuration = end - start;
+        const elapsed = totalDuration - propRemainingSeconds * 1000;
+        const percent =
+          totalDuration > 0
+            ? Math.min(100, Math.max(0, (elapsed / totalDuration) * 100))
+            : 0;
+        setProgressPercent(Math.round(percent));
+      }
+      return;
+    }
+
+    // ✅ Fallback: Tính toán thời gian còn lại thủ công như cũ
     if (!sessionData?.expectedEndTime || !sessionData?.startTime) {
       setTimeRemaining(null);
       setProgressPercent(0);
@@ -70,7 +96,12 @@ const CurrentTime = ({ currentTime, sessionData }) => {
     const interval = setInterval(calculateTimeInfo, 1000);
 
     return () => clearInterval(interval);
-  }, [sessionData?.expectedEndTime, sessionData?.startTime]);
+  }, [
+    sessionData?.expectedEndTime,
+    sessionData?.startTime,
+    propDisplayTime,
+    propRemainingSeconds,
+  ]);
 
   /**
    * Tính tổng năng lượng đã sạc realtime

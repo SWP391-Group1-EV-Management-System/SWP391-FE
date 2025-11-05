@@ -24,6 +24,23 @@ export const SessionInfo = ({ sessionData }) => {
       label: "Đặt chỗ lúc",
       value: formatDateTime(sessionData.createdAt),
     },
+    {
+      label: "Trạm sạc",
+      value: sessionData.stationName || sessionData.chargingStationId || "-",
+    },
+    {
+      label: "Trụ sạc",
+      value: sessionData.chargingPostId || "-",
+    },
+    ...(sessionData.outedAt
+      ? [
+          {
+            label: "Rời hàng đợi lúc",
+            value: formatDateTime(sessionData.outedAt),
+            highlight: true,
+          },
+        ]
+      : []),
   ];
 
   return (
