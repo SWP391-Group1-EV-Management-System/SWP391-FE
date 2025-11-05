@@ -7,6 +7,7 @@ export const useWebSocket = (userId, postId) => {
   const [position, setPosition] = useState(null);
   const [maxWaitingTime, setMaxWaitingTime] = useState(null);
   const [bookingConfirmed, setBookingConfirmed] = useState(null); // ✅ Thay đổi từ statusChanged
+  const [earlyChargingOffer, setEarlyChargingOffer] = useState(null); // ✅ NEW: Early charging offer
 
   useEffect(() => {
     console.log("🎯 [useWebSocket] Hook called with:");
@@ -18,24 +19,22 @@ export const useWebSocket = (userId, postId) => {
       return;
     }
 
-    // Connect to WebSocket
+    // Connect to WebSocket with onConnect callback
     console.log(
       "🔌 [useWebSocket] Calling wsService.connect with userId:",
       userId
     );
     wsService.connect(
       userId,
-      () => setConnected(true),
-      () => setConnected(false)
-    );
-
-    // Wait for connection then subscribe
-    const timer = setTimeout(() => {
-      if (wsService.isConnected()) {
-        console.log("✅ [useWebSocket] WebSocket is connected, subscribing...");
+      () => {
+        console.log(
+          "✅ [useWebSocket] WebSocket connected! Subscribing immediately..."
+        );
         console.log("   - userId:", userId);
         console.log("   - postId:", postId);
+        setConnected(true);
 
+        // ✅ Subscribe NGAY LẬP TỨC khi connect (không đợi setTimeout)
         // ✅ Subscribe to booking status changes (waiting -> booking)
         wsService.subscribeToBookingStatus((data) => {
           console.log("🎉 [useWebSocket] Booking status update received!");
@@ -66,6 +65,35 @@ export const useWebSocket = (userId, postId) => {
           }
         });
 
+        // ✅ Subscribe to early charging offer (A rút sạc sớm)
+        wsService.subscribeToEarlyChargingOffer((data) => {
+          console.log("🔋 [useWebSocket] Early charging offer received!");
+          console.log("   - Full data:", data);
+          console.log("   - PostId:", data.postId);
+          console.log("   - Message:", data.message);
+          console.log("   - Minutes early:", data.minutesEarly);
+          console.log("   - Expected time:", data.expectedTime);
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              type: "early-charging-offer",
+              text: data.message || "Trạm sạc sẵn sàng sớm!",
+              data,
+              time: new Date(),
+            },
+          ]);
+
+          // Set early charging offer state để trigger dialog
+          setEarlyChargingOffer({
+            postId: data.postId,
+            message: data.message,
+            minutesEarly: data.minutesEarly,
+            expectedTime: data.expectedTime,
+            availableNow: data.availableNow,
+          });
+        });
+
         // ✅ Subscribe to position updates
         wsService.subscribeToPositionUpdate((data) => {
           console.log("📍 [useWebSocket] Position update received!");
@@ -85,8 +113,11 @@ export const useWebSocket = (userId, postId) => {
           ]);
 
           if (data.position !== null && data.position !== undefined) {
-            console.log("✅ [useWebSocket] Setting position STATE:", data.position);
-            
+            console.log(
+              "✅ [useWebSocket] Setting position STATE:",
+              data.position
+            );
+
             // ✅ CRITICAL: Update position state
             setPosition((prevPosition) => {
               console.log("🔄 [useWebSocket] Position state changing:");
@@ -109,7 +140,9 @@ export const useWebSocket = (userId, postId) => {
               console.error("❌ [useWebSocket] Error saving rank:", error);
             }
           } else {
-            console.warn("⚠️ [useWebSocket] Position is null/undefined, not updating");
+            console.warn(
+              "⚠️ [useWebSocket] Position is null/undefined, not updating"
+            );
           }
         });
 
@@ -140,22 +173,33 @@ export const useWebSocket = (userId, postId) => {
               const match = message.match(pattern);
               if (match) {
                 const parsedPosition = parseInt(match[1]);
-                console.log("🎯 [useWebSocket] Position parsed from old channel:", parsedPosition);
-                
+                console.log(
+                  "🎯 [useWebSocket] Position parsed from old channel:",
+                  parsedPosition
+                );
+
                 setPosition((prevPosition) => {
-                  console.log("🔄 [useWebSocket] Position state changing (old channel):");
+                  console.log(
+                    "🔄 [useWebSocket] Position state changing (old channel):"
+                  );
                   console.log("   - From:", prevPosition);
                   console.log("   - To:", parsedPosition);
                   return parsedPosition;
                 });
 
                 try {
-                  localStorage.setItem("initialQueueRank", parsedPosition.toString());
-                  console.log("💾 [useWebSocket] Updated rank from old channel:", parsedPosition);
+                  localStorage.setItem(
+                    "initialQueueRank",
+                    parsedPosition.toString()
+                  );
+                  console.log(
+                    "💾 [useWebSocket] Updated rank from old channel:",
+                    parsedPosition
+                  );
                 } catch (error) {
                   console.error("❌ [useWebSocket] Error saving rank:", error);
                 }
-                
+
                 break; // Stop after first match
               }
             }
@@ -191,16 +235,15 @@ export const useWebSocket = (userId, postId) => {
             { type: "broadcast", text: message, time: new Date() },
           ]);
         });
-      } else {
-        console.warn(
-          "⚠️ [useWebSocket] WebSocket not connected after timeout!"
-        );
+      },
+      () => {
+        console.log("❌ [useWebSocket] WebSocket connection failed!");
+        setConnected(false);
       }
-    }, 1000);
+    );
 
     // Cleanup on unmount
     return () => {
-      clearTimeout(timer);
       wsService.unsubscribeAll();
       wsService.disconnect();
       setConnected(false);
@@ -217,6 +260,7 @@ export const useWebSocket = (userId, postId) => {
     position,
     maxWaitingTime,
     bookingConfirmed,
+    earlyChargingOffer,
     clearMessages,
   };
 };

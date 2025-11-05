@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Space, Spin, Alert, Button, notification } from "antd";
+import {
+  Row,
+  Col,
+  Space,
+  Spin,
+  Alert,
+  Button,
+  notification,
+  Modal,
+} from "antd";
 import { useNavigate } from "react-router";
 import PageHeader from "../components/PageHeader";
 import TechnicalDetails from "../components/energy/TechnicalDetails";
@@ -38,7 +47,8 @@ const WaitingListPage = () => {
   const [waitingData, setWaitingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [chargingPostData, setChargingPostData] = useState(null); // ✅ Thêm state cho charging post details
+  const [hasEarlyChargingOfferPending, setHasEarlyChargingOfferPending] =
+    useState(false); // ✅ Track pending offer to disable polling
 
   // ✅ ĐỌC LOCALSTORAGE NGAY TRONG useState INITIALIZER
   const [queueRank, setQueueRank] = useState(() => {
@@ -95,7 +105,11 @@ const WaitingListPage = () => {
   });
 
   // ✅ Sử dụng useWaitingList hook (chỉ cho cancel function)
-  const { cancelWaitingList } = useWaitingList();
+  const {
+    cancelWaitingList,
+    acceptEarlyChargingOffer,
+    declineEarlyChargingOffer,
+  } = useWaitingList();
   const { fetchBookingsByUser } = useBooking();
 
   // ✅ WebSocket integration for real-time updates
@@ -109,6 +123,7 @@ const WaitingListPage = () => {
     position,
     maxWaitingTime: wsMaxWaitingTime,
     bookingConfirmed,
+    earlyChargingOffer,
   } = useWebSocket(
     user?.id,
     chargingPostId // ← Dùng state riêng thay vì từ waitingData
@@ -124,6 +139,10 @@ const WaitingListPage = () => {
   console.log(
     "🎉 [WaitingListPage] WebSocket bookingConfirmed:",
     bookingConfirmed
+  );
+  console.log(
+    "🔋 [WaitingListPage] WebSocket earlyChargingOffer:",
+    earlyChargingOffer
   );
 
   // ✅ Fetch CHI TIẾT waiting/booking khi component mount
@@ -438,11 +457,179 @@ const WaitingListPage = () => {
     }
   }, [bookingConfirmed, navigate]);
 
+  // ✅ HANDLE EARLY CHARGING OFFER: A rút sạc sớm
+  useEffect(() => {
+    console.log("🔋 [WaitingListPage] EarlyChargingOffer effect triggered:");
+    console.log("   - earlyChargingOffer value:", earlyChargingOffer);
+
+    if (earlyChargingOffer) {
+      console.log("🔋 [WaitingListPage] Early charging offer received!");
+      console.log("   - Full object:", earlyChargingOffer);
+      console.log("   - postId:", earlyChargingOffer.postId);
+      console.log("   - minutesEarly:", earlyChargingOffer.minutesEarly);
+      console.log("   - expectedEndTime:", earlyChargingOffer.expectedEndTime);
+      console.log("   - actualEndTime:", earlyChargingOffer.actualEndTime);
+      console.log("   - availableNow:", earlyChargingOffer.availableNow);
+      console.log("   - All keys:", Object.keys(earlyChargingOffer));
+
+      // ✅ Set flag để tắt polling
+      setHasEarlyChargingOfferPending(true);
+      console.log(
+        "🚫 [WaitingListPage] Disabling polling - waiting for user choice"
+      );
+
+      const minutesEarly = earlyChargingOffer.minutesEarly;
+
+      // ✅ Parse expectedEndTime với validation và fallback
+      let expectedTime = "không xác định";
+      try {
+        // Try các field có thể có: expectedEndTime, expectedTime, hoặc dùng wsMaxWaitingTime
+        const timeValue =
+          earlyChargingOffer.expectedEndTime ||
+          earlyChargingOffer.expectedTime ||
+          wsMaxWaitingTime;
+
+        console.log("🕐 Trying to parse time value:", timeValue);
+
+        if (timeValue) {
+          const dateObj = new Date(timeValue);
+          if (!isNaN(dateObj.getTime())) {
+            expectedTime = dateObj.toLocaleTimeString("vi-VN", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+            console.log("✅ Successfully parsed time:", expectedTime);
+          } else {
+            console.error("❌ Invalid date:", timeValue);
+          }
+        } else {
+          console.error("❌ No time value available");
+        }
+      } catch (error) {
+        console.error("❌ Error parsing date:", error);
+      }
+
+      console.log("⏰ Final expectedTime:", expectedTime);
+
+      // ✅ Show Modal with Accept/Decline options
+      Modal.confirm({
+        title: "🔋 Trạm sạc sẵn sàng sớm!",
+        icon: null,
+        width: 500,
+        content: (
+          <div style={{ fontSize: "16px", lineHeight: "1.6" }}>
+            <p style={{ marginBottom: "16px" }}>
+              ⚡ <strong>Trạm sạc đã sẵn sàng sớm {minutesEarly} phút!</strong>
+            </p>
+            <p style={{ marginBottom: "16px" }}>Bạn có muốn sạc ngay không?</p>
+            <div
+              style={{
+                padding: "12px",
+                background: "#fff7e6",
+                borderRadius: "8px",
+                border: "1px solid #ffd666",
+                marginTop: "16px",
+              }}
+            >
+              <p style={{ margin: 0, fontSize: "14px", color: "#ad6800" }}>
+                ⏰ Nếu từ chối, bạn sẽ tự động vào booking lúc:{" "}
+                <strong>{expectedTime}</strong>
+              </p>
+            </div>
+          </div>
+        ),
+        okText: "✅ Sạc ngay",
+        cancelText: "⏰ Chờ đến giờ",
+        okButtonProps: {
+          size: "large",
+          style: { height: "48px", fontSize: "16px", fontWeight: 600 },
+        },
+        cancelButtonProps: {
+          size: "large",
+          style: { height: "48px", fontSize: "16px" },
+        },
+        onOk: async () => {
+          console.log("✅ [WaitingListPage] User accepted early charging");
+
+          // ✅ Clear flag trước khi accept
+          setHasEarlyChargingOfferPending(false);
+          console.log("✅ [WaitingListPage] Re-enabling polling");
+
+          try {
+            await acceptEarlyChargingOffer(user.id, earlyChargingOffer.postId);
+
+            notification.success({
+              message: "Đã chuyển vào booking!",
+              description:
+                "Bạn đã được chuyển vào booking. Vui lòng đến trạm sạc ngay!",
+              placement: "topRight",
+              duration: 5,
+            });
+
+            // Redirect will happen automatically via WebSocket booking-status message
+          } catch (error) {
+            console.error(
+              "❌ [WaitingListPage] Error accepting early charging:",
+              error
+            );
+            notification.error({
+              message: "Lỗi",
+              description: "Không thể chấp nhận đề nghị. Vui lòng thử lại.",
+              placement: "topRight",
+            });
+          }
+        },
+        onCancel: async () => {
+          console.log("⏰ [WaitingListPage] User declined early charging");
+
+          // ✅ Clear flag sau khi decline
+          setHasEarlyChargingOfferPending(false);
+          console.log("✅ [WaitingListPage] Re-enabling polling");
+
+          try {
+            await declineEarlyChargingOffer(user.id, earlyChargingOffer.postId);
+
+            notification.info({
+              message: "Đã từ chối",
+              description: `Bạn sẽ được thông báo khi đến giờ dự kiến (${expectedTime})`,
+              placement: "topRight",
+              duration: 5,
+            });
+          } catch (error) {
+            console.error(
+              "❌ [WaitingListPage] Error declining early charging:",
+              error
+            );
+            notification.error({
+              message: "Lỗi",
+              description: "Không thể từ chối đề nghị. Vui lòng thử lại.",
+              placement: "topRight",
+            });
+          }
+        },
+      });
+    }
+  }, [
+    earlyChargingOffer,
+    user?.id,
+    wsMaxWaitingTime,
+    acceptEarlyChargingOffer,
+    declineEarlyChargingOffer,
+  ]);
+
   // ✅ POLLING: Check if status changed from waiting to booking (fallback if WebSocket fails)
   useEffect(() => {
     if (!user?.id || !waitingData?.waitingListId) {
       console.log(
         "⏹️ [WaitingListPage] Polling: Missing user or waitingData, skipping"
+      );
+      return;
+    }
+
+    // ✅ SKIP polling if early charging offer is pending user choice
+    if (hasEarlyChargingOfferPending) {
+      console.log(
+        "🚫 [WaitingListPage] Polling: Early charging offer pending, skipping polling"
       );
       return;
     }
@@ -636,6 +823,7 @@ const WaitingListPage = () => {
     waitingData?.chargingPostId,
     navigate,
     fetchBookingsByUser,
+    hasEarlyChargingOfferPending,
   ]);
 
   // ✅ Show notifications for WebSocket messages

@@ -21,10 +21,24 @@ class WebSocketService {
     this.client = new Client({
       webSocketFactory: () => socket,
       debug: (str) => {
-        console.log("STOMP:", str);
+        console.log("🔧 STOMP DEBUG:", str);
+        // Log outgoing CONNECT frame
+        if (str.includes("CONNECT")) {
+          console.log("🔗 ⚡ OUTGOING CONNECT FRAME:", str);
+        }
         // Log incoming MESSAGE frames
         if (str.includes("MESSAGE")) {
-          console.log("🔔 INCOMING MESSAGE FRAME:", str);
+          console.log("🔔 ⚡⚡⚡ INCOMING MESSAGE FRAME DETECTED! ⚡⚡⚡");
+          console.log("🔔 Full frame:", str);
+
+          // Check if it's early-charging-offer
+          if (str.includes("early-charging-offer")) {
+            console.log("🎯🎯🎯 EARLY CHARGING OFFER MESSAGE! 🎯🎯🎯");
+          }
+        }
+        // Log outgoing SUBSCRIBE frames
+        if (str.includes("SUBSCRIBE")) {
+          console.log("📡 SUBSCRIBE FRAME:", str);
         }
       },
       reconnectDelay: 5000,
@@ -36,8 +50,13 @@ class WebSocketService {
       },
 
       onConnect: (frame) => {
-        console.log("✅ WebSocket Connected:", frame);
+        console.log("=====================================");
+        console.log("✅ WebSocket Connected!");
         console.log("✅ Connected with user:", userId);
+        console.log("✅ Frame headers:", frame.headers);
+        console.log("✅ Session ID:", frame.headers.session);
+        console.log("✅ User principal:", frame.headers["user-name"]);
+        console.log("=====================================");
         this.connected = true;
         if (onConnectCallback) onConnectCallback(frame);
       },
@@ -65,6 +84,60 @@ class WebSocketService {
       this.connected = false;
       console.log("👋 Disconnected from WebSocket");
     }
+  }
+
+  /**
+   * Subscribe để nhận early charging offer (A rút sạc sớm)
+   * @param {function} callback - Hàm xử lý khi nhận message
+   */
+  subscribeToEarlyChargingOffer(callback) {
+    if (!this.client || !this.connected) {
+      console.error("WebSocket chưa kết nối!");
+      return null;
+    }
+
+    // Backend gửi: convertAndSendToUser(userId, "/queue/early-charging-offer", message)
+    const destination = `/user/queue/early-charging-offer`;
+
+    console.log("🔔 [WebSocketService] Subscribing to early charging offer:");
+    console.log("   - destination:", destination);
+
+    const subscription = this.client.subscribe(destination, (message) => {
+      console.log("🎉🎉🎉 ============================================");
+      console.log("📩 ✅ EARLY CHARGING OFFER MESSAGE RECEIVED!");
+      console.log("🎉🎉🎉 ============================================");
+      console.log("   - destination:", destination);
+      console.log("   - message body:", message.body);
+      console.log("   - message body type:", typeof message.body);
+      console.log("   - message body length:", message.body?.length);
+      console.log("   - headers:", message.headers);
+      console.log("   - subscription ID:", message.headers.subscription);
+      console.log("   - full message object:", message);
+
+      try {
+        const data = JSON.parse(message.body);
+        console.log("✅ Parsed data successfully:", data);
+        console.log("   - postId:", data.postId);
+        console.log("   - message:", data.message);
+        console.log("   - minutesEarly:", data.minutesEarly);
+        if (callback) {
+          console.log("✅ Calling callback with data:", data);
+          callback(data);
+        } else {
+          console.warn("⚠️ No callback provided!");
+        }
+      } catch (error) {
+        console.error("❌ Error parsing early charging offer message:", error);
+        console.error("❌ Raw body:", message.body);
+        if (callback) callback(message.body);
+      }
+    });
+
+    this.subscriptions.set("early-charging-offer", subscription);
+    console.log("✅ Successfully subscribed to:", destination);
+    console.log("✅ Subscription ID:", subscription.id);
+
+    return subscription;
   }
 
   /**

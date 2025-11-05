@@ -126,6 +126,32 @@ export default function useWaitingList() {
     setWaitingList(null);
   }, []);
 
+  /**
+   * Accept early charging offer
+   */
+  const acceptEarlyChargingOffer = useCallback(
+    async (userId, chargingPostId) => {
+      console.log("🔋 [useWaitingList] Accepting early charging offer");
+      return wrap(() =>
+        waitingListService.acceptEarlyCharging(userId, chargingPostId)
+      );
+    },
+    [wrap]
+  );
+
+  /**
+   * Decline early charging offer
+   */
+  const declineEarlyChargingOffer = useCallback(
+    async (userId, chargingPostId) => {
+      console.log("⏰ [useWaitingList] Declining early charging offer");
+      return wrap(() =>
+        waitingListService.declineEarlyCharging(userId, chargingPostId)
+      );
+    },
+    [wrap]
+  );
+
   return {
     loading,
     error,
@@ -138,6 +164,8 @@ export default function useWaitingList() {
     fetchWaitingListByUser,
     fetchWaitingListByDate,
     fetchWaitingListById,
+    acceptEarlyChargingOffer,
+    declineEarlyChargingOffer,
     clear,
   };
 }
