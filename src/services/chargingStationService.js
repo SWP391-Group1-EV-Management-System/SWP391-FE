@@ -38,13 +38,60 @@ export const chargingStationService = {
   async getAllStations() {
     try {
       const response = await api.get("/api/charging/station/all");
+
+      // ⭐ Debug: Log API response
+      console.log("🔍 [Service] API Response sample:", {
+        totalStations: response.data.length,
+        firstStation: response.data[0],
+        chargingPostsAvailable: response.data[0]?.chargingPostsAvailable,
+        typeOfMap: typeof response.data[0]?.chargingPostsAvailable,
+      });
+
       const mappedStations = stationDataMapper.mapStationsFromApi(
         response.data
       );
+
+      // ⭐ Debug: Log mapped data
+      console.log("📦 [Service] Mapped stations sample:", {
+        totalMapped: mappedStations.length,
+        firstMapped: mappedStations[0],
+        availableSlots: mappedStations[0]?.availableSlots,
+      });
+
       return mappedStations;
     } catch (error) {
       // Trường hợp lỗi: chuyển lỗi gốc thành Error có message dễ hiểu
       throw this.handleError(error, "Không thể tải danh sách trạm sạc");
+    }
+  },
+
+  /**
+   * ⭐ MỚI: Tìm trạm sạc gần nhất dựa trên vị trí hiện tại
+   * API này trả về khoảng cách từ vị trí user đến từng trạm
+   *
+   * @param {number} latitude - Vĩ độ của user
+   * @param {number} longitude - Kinh độ của user
+   * @returns {Promise<Array>} Danh sách trạm đã được sắp xếp theo khoảng cách
+   * @throws {Error} Khi yêu cầu API thất bại
+   */
+  async getNearestStations(latitude, longitude) {
+    try {
+      const response = await api.post("/api/charging/station/available", {
+        latitude,
+        longitude,
+      });
+
+      // Map dữ liệu từ StationAndPost DTO
+      const mappedStations = stationDataMapper.mapNearestStationsFromApi(
+        response.data,
+        latitude,
+        longitude
+      );
+
+      return mappedStations;
+    } catch (error) {
+      console.error("Error fetching nearest stations:", error);
+      throw this.handleError(error, "Không thể tải danh sách trạm sạc gần bạn");
     }
   },
 
@@ -214,20 +261,30 @@ export const stationDataMapper = {
       status: this.mapActiveStatus(apiStation.active),
       establishedTime: apiStation.establishedTime,
       numberOfPosts: apiStation.numberOfPosts || 0,
-      chargingPosts: apiStation.chargingPosts || [],
 
-      // Map coordinates - use API data if available, otherwise default values
+      // Charging posts data
+      chargingPosts: apiStation.chargingPosts || [],
+      chargingPostsAvailable: apiStation.chargingPostsAvailable || {},
+      chargingSessionIds: apiStation.chargingSessionIds || [],
+
+      // Map coordinates - use API data
       lat: apiStation.latitude || 21.0285, // Default to Hanoi coordinates
       lng: apiStation.longitude || 105.8542,
 
-      // Trường thông tin tính toán/hiển thị cho UI
-      distance: "N/A", // Khoảng cách sẽ được tính dựa vào vị trí người dùng (nếu có)
+      // User manager info
+      userManagerName: apiStation.userManagerName || "N/A",
+
+      // Calculated fields for UI
+      distance: "N/A", // Will be calculated based on user location
       totalSlots: apiStation.numberOfPosts || 0,
-      availableSlots: this.calculateAvailableSlots(apiStation.chargingPosts),
+      availableSlots: this.calculateAvailableSlotsFromMap(
+        apiStation.chargingPostsAvailable
+      ),
       power: this.calculateTotalPower(apiStation.chargingPosts),
-      type: "AC/DC", // Giá trị tạm (có thể lấy từ API nếu chi tiết)
-      openHours: "24/7", // Mặc định
-      rating: 0, // Placeholder - tính năng đánh giá sau
+      chargingTypes: this.getChargingTypes(apiStation.chargingPosts), // ⭐ Unique charging types
+      type: this.getChargingTypes(apiStation.chargingPosts), // ⭐ For backward compatibility
+      openHours: "24/7", // Default value
+      rating: 0, // Placeholder for future rating feature
       reviewCount: 0, // Placeholder
     };
   },
@@ -241,12 +298,26 @@ export const stationDataMapper = {
   },
 
   /**
-   * Tính số trụ/slot đang sẵn sàng
+   * Tính số trụ/slot đang sẵn sàng từ chargingPosts array
    *
    */
   calculateAvailableSlots(chargingPosts) {
     if (!Array.isArray(chargingPosts)) return 0;
     return chargingPosts.filter((post) => post.isAvailable === true).length;
+  },
+
+  /**
+   * Tính số trụ/slot đang sẵn sàng từ chargingPostsAvailable map
+   * API trả về format: { "POST001": true, "POST002": false, ... }
+   */
+  calculateAvailableSlotsFromMap(chargingPostsAvailable) {
+    if (!chargingPostsAvailable || typeof chargingPostsAvailable !== "object")
+      return 0;
+
+    // Count how many posts have value = true
+    return Object.values(chargingPostsAvailable).filter(
+      (available) => available === true
+    ).length;
   },
 
   /**
@@ -262,6 +333,40 @@ export const stationDataMapper = {
 
     // Trả về chuỗi ví dụ: "150 kW" hoặc "N/A" nếu không có dữ liệu
     return totalPower > 0 ? `${totalPower} kW` : "N/A";
+  },
+
+  /**
+   * ⭐ Lấy danh sách loại sạc unique từ chargingPosts
+   * Loại bỏ duplicate, chỉ giữ unique types
+   */
+  getChargingTypes(chargingPosts) {
+    if (!Array.isArray(chargingPosts) || chargingPosts.length === 0) {
+      return "AC/DC"; // Default
+    }
+
+    // Collect all charging types from all posts
+    const allTypes = new Set();
+
+    chargingPosts.forEach((post) => {
+      if (Array.isArray(post.chargingType)) {
+        post.chargingType.forEach((type) => {
+          // Extract type name (could be object or string)
+          const typeName =
+            typeof type === "object"
+              ? type.typeName || type.name || type.idChargingType
+              : type;
+
+          if (typeName) {
+            allTypes.add(typeName.toString().toUpperCase());
+          }
+        });
+      }
+    });
+
+    // Convert Set to Array and join with comma
+    const uniqueTypes = Array.from(allTypes);
+
+    return uniqueTypes.length > 0 ? uniqueTypes.join(", ") : "AC/DC";
   },
 
   /**
@@ -308,10 +413,75 @@ export const stationDataMapper = {
   },
 
   /**
+   * ⭐ MỚI: Map dữ liệu từ API /available (StationAndPost DTO)
+   * API này trả về thêm trường distance (khoảng cách tính từ BE)
+   *
+   * @param {Array} apiStations - Mảng StationAndPost từ BE
+   * @param {number} userLat - Vĩ độ user (để tính lại nếu cần)
+   * @param {number} userLng - Kinh độ user (để tính lại nếu cần)
+   */
+  mapNearestStationsFromApi(apiStations, userLat, userLng) {
+    if (!Array.isArray(apiStations)) return [];
+
+    return apiStations
+      .map((station) => {
+        // Map giống getAllStations nhưng có thêm distance từ BE
+        const mapped = {
+          // Core station data
+          id: station.idChargingStation,
+          name: station.nameChargingStation || "Không có tên",
+          address: station.address || "Chưa có địa chỉ",
+          active: station.active,
+          status: this.mapActiveStatus(station.active),
+          establishedTime: station.establishedTime,
+          numberOfPosts: station.numberOfPosts || 0,
+
+          // ⭐ Coordinates từ API
+          lat: station.latitude || 21.0285,
+          lng: station.longitude || 105.8542,
+
+          // ⭐ Post availability map từ API
+          chargingPostsAvailable: station.postAvailable || {},
+
+          // ⭐ Distance từ BE (đã tính sẵn)
+          distance: station.distance
+            ? `${station.distance.toFixed(1)} km`
+            : "N/A",
+          distanceValue: station.distance || 0, // Số để sort
+
+          // Calculated fields
+          totalSlots: station.numberOfPosts || 0,
+          availableSlots: this.calculateAvailableSlotsFromMap(
+            station.postAvailable
+          ),
+          power: "N/A", // Không có trong StationAndPost DTO
+          type: "AC/DC",
+          openHours: "24/7",
+          rating: 0,
+          reviewCount: 0,
+
+          // Manager info (không có trong StationAndPost DTO)
+          userManagerName: "N/A",
+          chargingSessionIds: [],
+        };
+
+        return mapped;
+      })
+      .sort((a, b) => a.distanceValue - b.distanceValue); // Sort theo khoảng cách gần nhất
+  },
+
+  /**
    * Chuyển dữ liệu trụ sạc từ API sang định dạng UI
    *
    */
   mapPostFromApi(apiPost) {
+    // ⭐ Map charging type IDs to names
+    const CHARGING_TYPE_NAMES = {
+      1: "CCS",
+      2: "CHAdeMO",
+      3: "AC",
+    };
+
     return {
       // Dữ liệu cốt lõi của trụ sạc
       id: apiPost.idChargingPost,
@@ -329,6 +499,8 @@ export const stationDataMapper = {
         apiPost.chargingStationId ||
         apiPost.id_charging_station ||
         apiPost.chargingStation,
+      waitingList: apiPost.waitingList || [],
+      bookings: apiPost.bookings || [],
 
       // Display fields for UI
       powerDisplay: `${apiPost.maxPower || 0} kW`,
@@ -339,9 +511,16 @@ export const stationDataMapper = {
       isAvailable:
         (apiPost.active || apiPost.is_active) &&
         !this.isPostBusy(apiPost.chargingSessions),
-      supportedTypes: apiPost.chargingType?.map(
-        (type) => type.typeName || type.name || "AC"
-      ) || ["AC"],
+      // ⭐ Map chargingType array of IDs to array of names and remove duplicates
+      supportedTypes: Array.isArray(apiPost.chargingType)
+        ? [
+            ...new Set(
+              apiPost.chargingType.map(
+                (typeId) => CHARGING_TYPE_NAMES[typeId] || `Type ${typeId}`
+              )
+            ),
+          ]
+        : ["AC"],
     };
   },
 

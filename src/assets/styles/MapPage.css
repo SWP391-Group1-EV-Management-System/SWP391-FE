@@ -40,7 +40,6 @@
 
 .stat-icon {
   font-size: 3.5rem;
-  margin-bottom: 1rem;
   display: block;
 }
 
@@ -207,26 +206,7 @@
   background: #5a67d8;
 }
 
-.station-list-item {
-  background: #f8f9fa;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin: 0 0.25rem 1rem 0.25rem;
-  border: 1px solid #e5e7eb;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-}
-
-.station-list-item:hover {
-  background: #e3f2fd;
-  border-color: #667eea;
-  transform: translateX(4px);
-}
-
-.station-list-item:last-child {
-  margin-bottom: 0;
-}
+/* ==================== STATION LIST ITEMS ==================== */
 
 .stations-list-header {
   margin-bottom: 1.5rem;
@@ -253,9 +233,26 @@
   padding: 0 0.5rem;
 }
 
+/* Station list item */
+.station-list-item {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.station-list-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
 .station-header {
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
@@ -265,15 +262,18 @@
   font-weight: 600;
   color: #1f2937;
   margin: 0;
+  flex: 1;
+  padding-right: 1rem;
 }
 
 .station-status {
-  font-size: 1.25rem;
-  padding: 0.25rem 0.75rem;
+  font-size: 1.1rem;
+  padding: 0.4rem 1rem;
   border-radius: 20px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .station-status.available {
@@ -291,28 +291,92 @@
   color: #92400e;
 }
 
-.station-details {
+/* Station details grid */
+.station-stats-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 0.75rem;
-  font-size: 1.4rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.station-detail {
+.station-stat-item {
   display: flex;
   align-items: center;
-  color: #6b7280;
+  gap: 0.5rem;
+  color: #374151;
+  font-size: 1.35rem;
+  padding: 0.5rem 0.75rem;
+  background: #f9fafb;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
-.station-detail-icon {
-  margin-right: 0.5rem;
-  font-size: 1.3rem;
+.station-stat-item:hover {
+  background: #f3f4f6;
+}
+
+.station-stat-item--sessions {
+  background: #fffbeb;
+  border-left: 3px solid #f59e0b;
+}
+
+.station-stat-item--sessions:hover {
+  background: #fef3c7;
+}
+
+.station-stat-item--type {
+  background: #ede9fe;
+  border-left: 3px solid #8b5cf6;
+}
+
+.station-stat-item--type:hover {
+  background: #ddd6fe;
+}
+
+.stat-icon {
+  font-size: 1.4rem;
   color: #667eea;
+  flex-shrink: 0;
 }
 
-.station-distance {
-  font-weight: 600;
+.station-stat-item--sessions .stat-icon {
+  color: #f59e0b;
+}
+
+.station-stat-item--type .stat-icon {
+  color: #8b5cf6;
+}
+
+.stat-value-map {
+  font-size: 1.4rem;
+  font-weight: 500;
   color: #1f2937;
+}
+
+/* Address (full width at bottom) */
+.station-address {
+  display: flex;
+  align-items: flex-start;
+  color: #6b7280;
+  font-size: 1.25rem;
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.station-address-icon {
+  margin-right: 0.5rem;
+  margin-top: 0.2rem;
+  font-size: 1.3rem;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.station-address-text {
+  line-height: 1.5;
+  color: #6b7280;
 }
 
 /* ==================== RESPONSIVE DESIGN ==================== */
@@ -372,6 +436,10 @@
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+
+  .station-stats-grid {
+    grid-template-columns: 1fr;
   }
 }
 

@@ -28,7 +28,8 @@ import "../../assets/styles/StationModal.css";
 
 const StationModal = ({ isOpen, onClose, station }) => {
   const { posts, loading, error, statistics } = useStationPosts(station?.id);
-  const { createBooking: createBookingApi, loading: bookingLoading } = useBooking();
+  const { createBooking: createBookingApi, loading: bookingLoading } =
+    useBooking();
   const { getCarsByUser, loading: carLoading } = useCar();
   const { user: currentUser } = useAuth();
 
@@ -36,6 +37,73 @@ const StationModal = ({ isOpen, onClose, station }) => {
   const [userCars, setUserCars] = useState([]);
   const [bookingProcessingId, setBookingProcessingId] = useState(null);
   const navigate = useNavigate();
+
+  // ⭐ Merge trạng thái thực tế từ chargingPostsAvailable map vào posts array
+  const mergedPosts = posts.map((post) => {
+    // Nếu có chargingPostsAvailable map từ station data
+    if (
+      station?.chargingPostsAvailable &&
+      post.id in station.chargingPostsAvailable
+    ) {
+      // Lấy trạng thái thật từ map (true/false)
+      const actualAvailability = station.chargingPostsAvailable[post.id];
+      return {
+        ...post,
+        isAvailable: actualAvailability, // ⭐ Ghi đè với trạng thái thật từ map
+      };
+    }
+    return post; // Giữ nguyên nếu không có trong map
+  });
+
+  // ⭐ Tính statistics từ chargingPostsAvailable map (từ API /all)
+  const calculateStatsFromMap = (chargingPostsAvailable) => {
+    if (!chargingPostsAvailable || typeof chargingPostsAvailable !== "object") {
+      return { available: 0, busy: 0, total: 0 };
+    }
+
+    const postStatuses = Object.values(chargingPostsAvailable);
+    const total = postStatuses.length;
+    const available = postStatuses.filter((status) => status === true).length;
+    const busy = total - available;
+
+    console.log("📊 [StationModal] Calculating stats from map:", {
+      chargingPostsAvailable,
+      postStatuses,
+      total,
+      available,
+      busy,
+    });
+
+    return { available, busy, total, inactive: 0 };
+  };
+
+  // Sử dụng stats từ posts API hoặc fallback sang map từ station data
+  const displayStats =
+    mergedPosts.length > 0
+      ? {
+          total: mergedPosts.length,
+          available: mergedPosts.filter((p) => p.isAvailable).length,
+          busy: mergedPosts.filter((p) => !p.isAvailable && p.active).length,
+          inactive: mergedPosts.filter((p) => !p.active).length,
+        }
+      : calculateStatsFromMap(station?.chargingPostsAvailable);
+
+  // Debug logging
+  useEffect(() => {
+    if (station) {
+      console.log("🏢 [StationModal] Station data:", {
+        id: station.id,
+        name: station.name,
+        chargingPostsAvailable: station.chargingPostsAvailable,
+        totalSlots: station.totalSlots,
+        availableSlots: station.availableSlots,
+        chargingSessionIds: station.chargingSessionIds,
+        postsLoaded: posts.length,
+        mergedPostsCount: mergedPosts.length,
+        displayStats,
+      });
+    }
+  }, [station, posts, mergedPosts, displayStats]);
 
   useEffect(() => {
     if (isOpen && currentUser) {
@@ -53,7 +121,11 @@ const StationModal = ({ isOpen, onClose, station }) => {
             cars = result.data;
           } else if (result?.data && Array.isArray(result.data)) {
             cars = result.data;
-          } else if (result && typeof result === "object" && !Array.isArray(result)) {
+          } else if (
+            result &&
+            typeof result === "object" &&
+            !Array.isArray(result)
+          ) {
             cars = [result];
           }
 
@@ -130,9 +202,18 @@ const StationModal = ({ isOpen, onClose, station }) => {
 
             localStorage.setItem("queuePostId", postId);
             console.log("✅ [StationModal] Saved to localStorage:");
-            console.log("   - waitingListId:", localStorage.getItem("waitingListId"));
-            console.log("   - bookingStatus:", localStorage.getItem("bookingStatus"));
-            console.log("   - initialQueueRank:", localStorage.getItem("initialQueueRank"));
+            console.log(
+              "   - waitingListId:",
+              localStorage.getItem("waitingListId")
+            );
+            console.log(
+              "   - bookingStatus:",
+              localStorage.getItem("bookingStatus")
+            );
+            console.log(
+              "   - initialQueueRank:",
+              localStorage.getItem("initialQueueRank")
+            );
           } else {
             console.warn("⚠️ [StationModal] No idAction in response:", res);
           }
@@ -148,7 +229,10 @@ const StationModal = ({ isOpen, onClose, station }) => {
             localStorage.setItem("bookingStatus", "booking");
             console.log("✅ [StationModal] Saved to localStorage:");
             console.log("   - bookingId:", localStorage.getItem("bookingId"));
-            console.log("   - bookingStatus:", localStorage.getItem("bookingStatus"));
+            console.log(
+              "   - bookingStatus:",
+              localStorage.getItem("bookingStatus")
+            );
           }
 
           alert(`Đặt chỗ thành công cho trụ ${postId}!`);
@@ -175,9 +259,12 @@ const StationModal = ({ isOpen, onClose, station }) => {
   const getAmenityIcon = (amenity) => {
     const amenityLower = amenity.toLowerCase();
     if (amenityLower.includes("wifi")) return IoWifiOutline;
-    if (amenityLower.includes("cafe") || amenityLower.includes("coffee")) return IoCafeOutline;
-    if (amenityLower.includes("shop") || amenityLower.includes("store")) return IoStorefrontOutline;
-    if (amenityLower.includes("parking") || amenityLower.includes("car")) return IoCarOutline;
+    if (amenityLower.includes("cafe") || amenityLower.includes("coffee"))
+      return IoCafeOutline;
+    if (amenityLower.includes("shop") || amenityLower.includes("store"))
+      return IoStorefrontOutline;
+    if (amenityLower.includes("parking") || amenityLower.includes("car"))
+      return IoCarOutline;
     if (amenityLower.includes("security")) return IoShieldCheckmarkOutline;
     return IoStorefrontOutline;
   };
@@ -192,111 +279,176 @@ const StationModal = ({ isOpen, onClose, station }) => {
           </button>
         </div>
 
-        {carLoading && (
-          <div className="car-loading-info">
-            <p>Đang tải thông tin xe...</p>
+        {/* ⭐ NEW: Station Status Badge */}
+        <div className="station-status-section">
+          <div className="station-status-badge-large">
+            {station.active ? (
+              <>
+                <IoCheckmarkCircle className="status-icon status-icon--active" />
+                <span className="status-text">Đang hoạt động</span>
+              </>
+            ) : (
+              <>
+                <IoCloseCircle className="status-icon status-icon--inactive" />
+                <span className="status-text">Đang bảo trì</span>
+              </>
+            )}
           </div>
-        )}
 
-        {!carLoading && userCars && userCars.length > 0 && (
-          <div className="car-info">
-            <IoCarOutline className="car-info-icon" />
-            <span>
-              Xe: {userCars[0].typeCar || userCars[0].carName || "Xe của bạn"}
-              {userCars[0].licensePlate ? ` - ${userCars[0].licensePlate}` : ""}
-            </span>
-          </div>
-        )}
-
-        {!carLoading && (!userCars || userCars.length === 0) && currentUser && (
-          <div className="car-warning">
-            <p>⚠️ Bạn chưa có xe. Vui lòng thêm xe để đặt chỗ.</p>
-          </div>
-        )}
+          {/* ⭐ NEW: Show coordinates for debugging/admin */}
+          {station.lat && station.lng && (
+            <div className="station-coordinates">
+              📍 {station.lat.toFixed(6)}, {station.lng.toFixed(6)}
+            </div>
+          )}
+        </div>
 
         <div className="station-info">
-          <div className="station-info__item">
-            <IoLocationOutline className="station-info__icon" />
-            <span>{station.address}</span>
-          </div>
-          <div className="station-info__item">
-            <IoTimeOutline className="station-info__icon" />
-            <span>{station.openHours || "Mở cửa 24/7"}</span>
-          </div>
-          <div className="station-info__item">
-            <IoPeopleOutline className="station-info__icon" />
-            <span>{station.totalBookings || 0} người đã đặt chỗ hôm nay</span>
-          </div>
-          {station.rating && (
+          {/* Địa chỉ - Có từ API */}
+          {station.address && (
             <div className="station-info__item">
-              <IoStarSharp className="station-info__icon station-info__icon--star" />
+              <IoLocationOutline
+                className="station-info__icon"
+                style={{ fontSize: "24px", color: "#10b981" }}
+              />
+              <span>{station.address}</span>
+            </div>
+          )}
+
+          {/* Manager - Có từ API */}
+          {station.userManagerName && station.userManagerName !== "N/A" && (
+            <div className="station-info__item">
+              <IoPeopleOutline
+                className="station-info__icon"
+                style={{ fontSize: "24px", color: "#10b981" }}
+              />
+              <span>Quản lý: {station.userManagerName}</span>
+            </div>
+          )}
+
+          {/* Active Sessions - Có từ API */}
+          {station.chargingSessionIds &&
+            station.chargingSessionIds.length > 0 && (
+              <div className="station-info__item">
+                <IoFlashOutline
+                  className="station-info__icon"
+                  style={{ fontSize: "24px", color: "#10b981" }}
+                />
+                <span>
+                  {station.chargingSessionIds.length} phiên sạc đang hoạt động
+                </span>
+              </div>
+            )}
+
+          {/* Distance - Chỉ có từ /available API */}
+          {station.distance && station.distance !== "N/A" && (
+            <div className="station-info__item">
+              <IoLocationOutline
+                className="station-info__icon"
+                style={{ fontSize: "24px", color: "#10b981" }}
+              />
+              <span>Khoảng cách: {station.distance}</span>
+            </div>
+          )}
+
+          {/* Established Time - Có từ API */}
+          {station.establishedTime && (
+            <div className="station-info__item">
+              <IoTimeOutline
+                className="station-info__icon"
+                style={{ fontSize: "24px", color: "#10b981" }}
+              />
               <span>
-                {station.rating}/5 ({station.reviewCount || 0} đánh giá)
+                Thành lập:{" "}
+                {new Date(station.establishedTime).toLocaleDateString("vi-VN")}
               </span>
             </div>
           )}
         </div>
 
         <div className="station-details">
-          {posts.length > 0 && (
-            <div className="station-details__section">
-              <div className="station-details__section-title">Thông tin chi tiết</div>
-              <div className="statistics-grid">
-                <div className="statistics-item statistics-item--available">
-                  <div className="statistics-number statistics-number--available">{statistics.available}</div>
-                  <div className="statistics-label statistics-number--available">Sẵn sàng</div>
+          {/* ⭐ Statistics - Always show from displayStats */}
+          <div className="station-details__section">
+            <div className="station-details__section-title">
+              {posts.length > 0 ? "Thông tin chi tiết" : "Tổng quan trạm sạc"}
+            </div>
+            <div className="statistics-grid">
+              <div className="statistics-item statistics-item--available">
+                <div className="statistics-number statistics-number--available">
+                  {displayStats.available}
                 </div>
-                <div className="statistics-item statistics-item--busy">
-                  <div className="statistics-number statistics-number--busy">{statistics.busy}</div>
-                  <div className="statistics-label statistics-number--busy">Đang sạc</div>
-                </div>
-                <div className="statistics-item statistics-item--inactive">
-                  <div className="statistics-number statistics-number--inactive">{statistics.inactive}</div>
-                  <div className="statistics-label statistics-number--inactive">Không hoạt động</div>
-                </div>
-                <div className="statistics-item statistics-item--total">
-                  <div className="statistics-number statistics-number--total">{statistics.total}</div>
-                  <div className="statistics-label statistics-number--total">Tổng cộng</div>
+                <div className="statistics-label statistics-number--available">
+                  {posts.length > 0 ? "Sẵn sàng" : "Trụ trống"}
                 </div>
               </div>
-            </div>
-          )}
+              <div className="statistics-item statistics-item--busy">
+                <div className="statistics-number statistics-number--busy">
+                  {displayStats.busy}
+                </div>
+                <div className="statistics-label statistics-number--busy">
+                  {posts.length > 0 ? "Đang bận" : "Đang sử dụng"}
+                </div>
+              </div>
 
-          {station.amenities && station.amenities.length > 0 && (
-            <div className="station-details__section--with-top-margin">
-              <div className="station-details__section-title">Tiện ích</div>
-              <div className="amenities-list">
-                {station.amenities.map((amenity, index) => {
-                  const IconComponent = getAmenityIcon(amenity);
-                  return (
-                    <span key={index} className="amenity-tag">
-                      <IconComponent className="amenity-icon" />
-                      {amenity}
-                    </span>
-                  );
-                })}
+              {/* Only show inactive if we have detailed posts data */}
+              {posts.length > 0 && displayStats.inactive > 0 && (
+                <div className="statistics-item statistics-item--inactive">
+                  <div className="statistics-number statistics-number--inactive">
+                    {displayStats.inactive}
+                  </div>
+                  <div className="statistics-label statistics-number--inactive">
+                    Không hoạt động
+                  </div>
+                </div>
+              )}
+
+              <div className="statistics-item statistics-item--total">
+                <div className="statistics-number statistics-number--total">
+                  {displayStats.total}
+                </div>
+                <div className="statistics-label statistics-number--total">
+                  Tổng cộng
+                </div>
               </div>
+
+              {/* Show active sessions if available */}
+              {station.chargingSessionIds &&
+                station.chargingSessionIds.length > 0 && (
+                  <div className="statistics-item statistics-item--busy">
+                    <div className="statistics-number statistics-number--busy">
+                      {station.chargingSessionIds.length}
+                    </div>
+                    <div className="statistics-label statistics-number--busy">
+                      Phiên sạc
+                    </div>
+                  </div>
+                )}
             </div>
-          )}
+          </div>
         </div>
 
         <div>
           <h5 className="chargers-section__title">
-            Danh sách trụ sạc ({posts.length > 0 ? posts.length : station.totalSlots || 0})
-            {loading && <span className="chargers-loading-text"> - Đang tải...</span>}
+            Danh sách trụ sạc (
+            {posts.length > 0 ? posts.length : station.totalSlots || 0})
+            {loading && (
+              <span className="chargers-loading-text"> - Đang tải...</span>
+            )}
           </h5>
 
           {error && <div className="chargers-error">{error}</div>}
 
           <div className="chargers-grid">
-            {posts.length > 0 ? (
-              posts.map((post) => (
+            {mergedPosts.length > 0 ? (
+              mergedPosts.map((post) => (
                 <div key={post.id} className="charger-item">
                   <div className="charger-item__header">
                     <div className="charger-item__title">
                       <IoPowerOutline
                         className={`charger-item__icon ${
-                          post.active ? "charger-item__icon--active" : "charger-item__icon--inactive"
+                          post.active
+                            ? "charger-item__icon--active"
+                            : "charger-item__icon--inactive"
                         }`}
                       />
                       <strong>Trụ {post.id}</strong>
@@ -316,7 +468,11 @@ const StationModal = ({ isOpen, onClose, station }) => {
                             : "charger-status-badge--inactive"
                         }`}
                       >
-                        {post.isAvailable ? "Sẵn sàng" : post.active ? "Đang sử dụng" : "Không hoạt động"}
+                        {post.isAvailable
+                          ? "Sẵn sàng"
+                          : post.active
+                          ? "Đang sử dụng"
+                          : "Không hoạt động"}
                       </span>
                     </div>
                   </div>
@@ -345,12 +501,13 @@ const StationModal = ({ isOpen, onClose, station }) => {
                     </div>
                     <div className="charger-item__action">
                       {(() => {
-                        const isProcessing = bookingLoading && bookingProcessingId === post.id;
+                        const isProcessing =
+                          bookingLoading && bookingProcessingId === post.id;
                         return (
                           <Button
-                            variant={post.isAvailable ? "success" : "secondary"}
+                            variant={post.isAvailable ? "success" : "warning"}
                             size="sm"
-                            disabled={!post.isAvailable || isProcessing || !selectedCar}
+                            disabled={isProcessing || !selectedCar}
                             onClick={() => handleBookCharger(post.id)}
                             className="charger-book-btn"
                           >
@@ -358,9 +515,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                               ? "Đang xử lý..."
                               : !selectedCar
                               ? "Chưa có xe"
-                              : post.isAvailable
-                              ? "Đặt chỗ"
-                              : "Không khả dụng"}
+                              : "Đặt chỗ"}
                           </Button>
                         );
                       })()}
@@ -375,6 +530,71 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 </div>
                 <div>Đang tải danh sách trụ sạc...</div>
               </div>
+            ) : station.chargingPostsAvailable &&
+              Object.keys(station.chargingPostsAvailable).length > 0 ? (
+              // ⭐ Render posts from chargingPostsAvailable map
+              Object.entries(station.chargingPostsAvailable).map(
+                ([postId, isAvailable]) => (
+                  <div key={postId} className="charger-item">
+                    <div className="charger-item__header">
+                      <div className="charger-item__title">
+                        <IoPowerOutline
+                          className={`charger-item__icon ${
+                            isAvailable
+                              ? "charger-item__icon--active"
+                              : "charger-item__icon--busy"
+                          }`}
+                        />
+                        <strong>Trụ {postId}</strong>
+                      </div>
+                      <div className="charger-item__status-area">
+                        {isAvailable ? (
+                          <IoCheckmarkCircle className="charger-status-icon charger-status-icon--active" />
+                        ) : (
+                          <IoCloseCircle className="charger-status-icon charger-status-icon--busy" />
+                        )}
+                        <span
+                          className={`charger-status-badge ${
+                            isAvailable
+                              ? "charger-status-badge--available"
+                              : "charger-status-badge--busy"
+                          }`}
+                        >
+                          {isAvailable ? "Sẵn sàng" : "Đang bận"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="charger-item__content">
+                      <div className="charger-item__details">
+                        <div className="charger-detail-info">
+                          Thông tin chi tiết đang tải...
+                        </div>
+                      </div>
+                      <div className="charger-item__action">
+                        {(() => {
+                          const isProcessing =
+                            bookingLoading && bookingProcessingId === postId;
+                          return (
+                            <Button
+                              variant={isAvailable ? "success" : "warning"}
+                              size="sm"
+                              disabled={isProcessing || !selectedCar}
+                              onClick={() => handleBookCharger(postId)}
+                              className="charger-book-btn"
+                            >
+                              {isProcessing
+                                ? "Đang xử lý..."
+                                : !selectedCar
+                                ? "Chưa có xe"
+                                : "Đặt chỗ"}
+                            </Button>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                )
+              )
             ) : (
               <div className="charger-empty-state">
                 <div>
@@ -383,14 +603,25 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 <div className="charger-empty-state__title">
                   <strong>Chưa có thông tin chi tiết trụ sạc</strong>
                 </div>
-                <div className="charger-empty-state__subtitle">Tổng số trụ: {station.totalSlots || 0}</div>
-                <div className="charger-empty-state__info">Khả dụng: {station.availableSlots || 0} trụ</div>
+                <div className="charger-empty-state__subtitle">
+                  Tổng số trụ: {station.totalSlots || 0}
+                </div>
+                <div className="charger-empty-state__info">
+                  Khả dụng: {station.availableSlots || 0} trụ
+                </div>
                 {(() => {
-                  const isGeneralProcessing = bookingLoading && bookingProcessingId === "general";
+                  const isGeneralProcessing =
+                    bookingLoading && bookingProcessingId === "general";
                   return (
                     <Button
-                      variant={station.status === "available" ? "success" : "secondary"}
-                      disabled={station.status !== "available" || !selectedCar || isGeneralProcessing}
+                      variant={
+                        station.status === "available" ? "success" : "secondary"
+                      }
+                      disabled={
+                        station.status !== "available" ||
+                        !selectedCar ||
+                        isGeneralProcessing
+                      }
                       onClick={() => handleBookCharger("general")}
                       className="charger-empty-state__btn"
                     >
