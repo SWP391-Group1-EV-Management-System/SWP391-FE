@@ -73,7 +73,7 @@ const MAP_STYLES = {
  */
 const formatDistance = (from, to) => {
   const distance = from.distanceTo(to); // Returns distance in meters
-  
+
   if (distance < 1000) {
     return `${Math.round(distance)} m`;
   }
@@ -380,8 +380,11 @@ function CustomZoomControl() {
     const zoomControl = L.control({ position: "topleft" });
 
     zoomControl.onAdd = function () {
-      const container = L.DomUtil.create("div", "leaflet-bar custom-zoom-control");
-      
+      const container = L.DomUtil.create(
+        "div",
+        "leaflet-bar custom-zoom-control"
+      );
+
       container.innerHTML = `
         <a class="custom-zoom-in" href="#" title="Zoom in" role="button" aria-label="Zoom in">
           <span aria-hidden="true">+</span>
@@ -555,9 +558,16 @@ function StationMarkers({ stations, onStationClick, userLocation }) {
       if (userLocation) {
         const stationLatLng = L.latLng(station.lat, station.lng);
         distanceText = formatDistance(userLocation, stationLatLng);
-        console.log('Distance calculated:', distanceText, 'from', userLocation, 'to', stationLatLng);
+        console.log(
+          "Distance calculated:",
+          distanceText,
+          "from",
+          userLocation,
+          "to",
+          stationLatLng
+        );
       } else {
-        console.log('User location not available yet');
+        console.log("User location not available yet");
       }
 
       const stationIconMarkup = station.active
@@ -588,7 +598,9 @@ function StationMarkers({ stations, onStationClick, userLocation }) {
             ${
               distanceText
                 ? `<div class="info-row">
-              ${renderToStaticMarkup(<IoNavigate className="icon-svg" style={{ color: "#1890ff" }} />)}
+              ${renderToStaticMarkup(
+                <IoNavigate className="icon-svg" style={{ color: "#1890ff" }} />
+              )}
               <div class="info-text">
                 <span class="label">Khoảng cách</span>
                 <span class="value"><strong class="highlight">${distanceText}</strong></span>
@@ -623,8 +635,12 @@ function StationMarkers({ stations, onStationClick, userLocation }) {
             </button>
             ${
               userLocation
-                ? `<button class="btn-get-directions" data-station-id="${station.id}" data-lat="${station.lat}" data-lng="${station.lng}">
-              ${renderToStaticMarkup(<IoCarSport style={{ marginRight: "6px" }} />)}
+                ? `<button class="btn-get-directions" data-station-id="${
+                    station.id
+                  }" data-lat="${station.lat}" data-lng="${station.lng}">
+              ${renderToStaticMarkup(
+                <IoCarSport style={{ marginRight: "6px" }} />
+              )}
               Chỉ đường
             </button>`
                 : ""
@@ -662,31 +678,46 @@ function StationMarkers({ stations, onStationClick, userLocation }) {
         const directionsBtn = document.querySelector(
           `button[data-station-id="${station.id}"].btn-get-directions`
         );
-        console.log('🔍 Directions button found:', directionsBtn, 'User location:', userLocation);
-        
+        console.log(
+          "🔍 Directions button found:",
+          directionsBtn,
+          "User location:",
+          userLocation
+        );
+
         if (directionsBtn && userLocation) {
           directionsBtn.onclick = (e) => {
             e.stopPropagation();
             e.preventDefault();
-            
+
             const lat = parseFloat(directionsBtn.dataset.lat);
             const lng = parseFloat(directionsBtn.dataset.lng);
-            
-            console.log('🎯 Directions button clicked! From:', userLocation, 'To:', { lat, lng });
-            
+
+            console.log(
+              "🎯 Directions button clicked! From:",
+              userLocation,
+              "To:",
+              { lat, lng }
+            );
+
             // Trigger routing by dispatching custom event
-            const event = new CustomEvent('showRoute', {
-              detail: { 
-                from: userLocation, 
+            const event = new CustomEvent("showRoute", {
+              detail: {
+                from: userLocation,
                 to: L.latLng(lat, lng),
-                stationName: station.name 
-              }
+                stationName: station.name,
+              },
             });
             window.dispatchEvent(event);
-            console.log('📡 showRoute event dispatched');
+            console.log("📡 showRoute event dispatched");
           };
         } else {
-          console.warn('⚠️ Cannot add directions handler - button:', !!directionsBtn, 'userLocation:', !!userLocation);
+          console.warn(
+            "⚠️ Cannot add directions handler - button:",
+            !!directionsBtn,
+            "userLocation:",
+            !!userLocation
+          );
         }
       });
 
@@ -718,72 +749,71 @@ function RoutingControl({ userLocation }) {
 
   useEffect(() => {
     if (!userLocation) {
-      console.log('⚠️ Routing: User location not available yet');
+      console.log("⚠️ Routing: User location not available yet");
       return;
     }
 
-    console.log('✅ Routing control ready with user location:', userLocation);
+    console.log("✅ Routing control ready with user location:", userLocation);
 
     const handleShowRoute = (event) => {
-      console.log('🗺️ Show route event received:', event.detail);
+      console.log("🗺️ Show route event received:", event.detail);
       const { from, to, stationName } = event.detail;
 
       // Check if L.Routing is available
       if (!L.Routing) {
-        console.error('❌ L.Routing is not available. Please check if leaflet-routing-machine is loaded.');
-        alert('Tính năng chỉ đường chưa sẵn sàng. Vui lòng tải lại trang.');
+        console.error(
+          "❌ L.Routing is not available. Please check if leaflet-routing-machine is loaded."
+        );
+        alert("Tính năng chỉ đường chưa sẵn sàng. Vui lòng tải lại trang.");
         return;
       }
 
       // Remove existing routing control if any
       if (routingControlRef.current) {
-        console.log('🧹 Removing old routing control');
+        console.log("🧹 Removing old routing control");
         map.removeControl(routingControlRef.current);
         routingControlRef.current = null;
       }
 
-      console.log('🚀 Creating routing control from', from, 'to', to);
+      console.log("🚀 Creating routing control from", from, "to", to);
 
       // Create new routing control
       const routingControl = L.Routing.control({
-        waypoints: [
-          L.latLng(from.lat, from.lng),
-          L.latLng(to.lat, to.lng)
-        ],
+        waypoints: [L.latLng(from.lat, from.lng), L.latLng(to.lat, to.lng)],
         routeWhileDragging: false,
         addWaypoints: false,
         draggableWaypoints: false,
         fitSelectedRoutes: true,
         showAlternatives: true, // Enable alternative routes
         lineOptions: {
-          styles: [
-            { color: '#10b981', opacity: 0.8, weight: 6 }
-          ],
+          styles: [{ color: "#10b981", opacity: 0.8, weight: 6 }],
           extendToWaypoints: false,
-          missingRouteTolerance: 0
+          missingRouteTolerance: 0,
         },
         altLineOptions: {
           styles: [
-            { color: '#94a3b8', opacity: 0.4, weight: 4, dashArray: '5, 10' }
+            { color: "#94a3b8", opacity: 0.4, weight: 4, dashArray: "5, 10" },
           ],
           extendToWaypoints: false,
-          missingRouteTolerance: 0
+          missingRouteTolerance: 0,
         },
-        createMarker: function() { return null; }, // Don't create default markers
+        createMarker: function () {
+          return null;
+        }, // Don't create default markers
         router: L.Routing.osrmv1({
-          serviceUrl: 'https://router.project-osrm.org/route/v1',
+          serviceUrl: "https://router.project-osrm.org/route/v1",
         }),
         formatter: new L.Routing.Formatter({
-          units: 'metric',
+          units: "metric",
           unitNames: {
-            meters: 'm',
-            kilometers: 'km',
-            yards: 'yd',
-            miles: 'mi',
-            hours: 'giờ',
-            minutes: 'phút',
-            seconds: 'giây'
-          }
+            meters: "m",
+            kilometers: "km",
+            yards: "yd",
+            miles: "mi",
+            hours: "giờ",
+            minutes: "phút",
+            seconds: "giây",
+          },
         }),
         collapsible: true,
         collapsed: true, // Collapse the routing panel by default
@@ -793,7 +823,7 @@ function RoutingControl({ userLocation }) {
       // Hide the routing control panel (we'll show custom popup instead)
       const routingContainer = routingControl.getContainer();
       if (routingContainer) {
-        routingContainer.style.display = 'none';
+        routingContainer.style.display = "none";
       }
 
       // Store routes in a variable accessible to event handlers
@@ -801,73 +831,85 @@ function RoutingControl({ userLocation }) {
       let customRouteLines = []; // Store custom route lines
 
       // Customize the routing instructions panel
-      routingControl.on('routesfound', function(e) {
+      routingControl.on("routesfound", function (e) {
         allRoutes = e.routes; // Save routes for later use
         const routes = e.routes;
         const selectedRoute = routes[0]; // Default to first route
         const summary = selectedRoute.summary;
         const instructions = selectedRoute.instructions;
-        
+
         // Format distance and time
         const distance = (summary.totalDistance / 1000).toFixed(1);
         const time = Math.round(summary.totalTime / 60);
 
-        console.log(`🚗 Tuyến đường đến ${stationName}: ${distance} km, ${time} phút`);
+        console.log(
+          `🚗 Tuyến đường đến ${stationName}: ${distance} km, ${time} phút`
+        );
         console.log(`📍 Tìm thấy ${routes.length} tuyến đường`);
-        
+
         // Hide default routing lines after a short delay
         setTimeout(() => {
-          map.eachLayer(layer => {
-            if (layer instanceof L.Polyline && layer.options && layer.options.className === 'leaflet-routing-line') {
+          map.eachLayer((layer) => {
+            if (
+              layer instanceof L.Polyline &&
+              layer.options &&
+              layer.options.className === "leaflet-routing-line"
+            ) {
               layer.setStyle({ opacity: 0, weight: 0 });
             }
           });
-          
+
           // Draw custom route lines with proper styling
           routes.forEach((route, idx) => {
-            const coords = route.coordinates.map(coord => [coord.lat, coord.lng]);
+            const coords = route.coordinates.map((coord) => [
+              coord.lat,
+              coord.lng,
+            ]);
             const isSelected = idx === 0;
-            
+
             const routeLine = L.polyline(coords, {
-              color: isSelected ? '#10b981' : '#94a3b8',
+              color: isSelected ? "#10b981" : "#94a3b8",
               opacity: isSelected ? 0.9 : 0.3,
               weight: isSelected ? 7 : 4,
-              dashArray: isSelected ? null : '5, 10',
-              className: 'custom-route-line',
-              interactive: false
+              dashArray: isSelected ? null : "5, 10",
+              className: "custom-route-line",
+              interactive: false,
             }).addTo(map);
-            
+
             customRouteLines.push(routeLine);
-            
+
             if (isSelected) {
               routeLine.bringToFront();
             }
           });
         }, 100);
-        
+
         // Build instructions in Vietnamese
-        const vietnameseInstructions = instructions.map((instruction, index) => {
-          const dist = instruction.distance < 1000 
-            ? `${Math.round(instruction.distance)} m` 
-            : `${(instruction.distance / 1000).toFixed(1)} km`;
-          
-          // Translate directions to Vietnamese
-          let direction = instruction.text;
-          direction = direction.replace(/Head/g, 'Đi')
-            .replace(/Turn left/g, 'Rẽ trái')
-            .replace(/Turn right/g, 'Rẽ phải')
-            .replace(/Continue/g, 'Tiếp tục')
-            .replace(/Slight left/g, 'Hơi rẽ trái')
-            .replace(/Slight right/g, 'Hơi rẽ phải')
-            .replace(/Sharp left/g, 'Rẽ gắt trái')
-            .replace(/Sharp right/g, 'Rẽ gắt phải')
-            .replace(/You have arrived/g, 'Bạn đã đến nơi')
-            .replace(/north/g, 'hướng Bắc')
-            .replace(/south/g, 'hướng Nam')
-            .replace(/east/g, 'hướng Đông')
-            .replace(/west/g, 'hướng Tây');
-          
-          return `
+        const vietnameseInstructions = instructions
+          .map((instruction, index) => {
+            const dist =
+              instruction.distance < 1000
+                ? `${Math.round(instruction.distance)} m`
+                : `${(instruction.distance / 1000).toFixed(1)} km`;
+
+            // Translate directions to Vietnamese
+            let direction = instruction.text;
+            direction = direction
+              .replace(/Head/g, "Đi")
+              .replace(/Turn left/g, "Rẽ trái")
+              .replace(/Turn right/g, "Rẽ phải")
+              .replace(/Continue/g, "Tiếp tục")
+              .replace(/Slight left/g, "Hơi rẽ trái")
+              .replace(/Slight right/g, "Hơi rẽ phải")
+              .replace(/Sharp left/g, "Rẽ gắt trái")
+              .replace(/Sharp right/g, "Rẽ gắt phải")
+              .replace(/You have arrived/g, "Bạn đã đến nơi")
+              .replace(/north/g, "hướng Bắc")
+              .replace(/south/g, "hướng Nam")
+              .replace(/east/g, "hướng Đông")
+              .replace(/west/g, "hướng Tây");
+
+            return `
             <div class="route-instruction-item">
               <div class="instruction-number">${index + 1}</div>
               <div class="instruction-content">
@@ -876,20 +918,26 @@ function RoutingControl({ userLocation }) {
               </div>
             </div>
           `;
-        }).join('');
-        
+          })
+          .join("");
+
         // Build alternative routes selector if multiple routes
-        let alternativeRoutesHTML = '';
+        let alternativeRoutesHTML = "";
         if (routes.length > 1) {
           alternativeRoutesHTML = `
             <div class="route-alternatives">
               <div class="alternatives-header">Chọn tuyến đường khác:</div>
-              ${routes.map((route, index) => {
-                const routeDist = (route.summary.totalDistance / 1000).toFixed(1);
-                const routeTime = Math.round(route.summary.totalTime / 60);
-                const isSelected = index === 0;
-                return `
-                  <button class="route-alternative-btn ${isSelected ? 'selected' : ''}" data-route-index="${index}">
+              ${routes
+                .map((route, index) => {
+                  const routeDist = (
+                    route.summary.totalDistance / 1000
+                  ).toFixed(1);
+                  const routeTime = Math.round(route.summary.totalTime / 60);
+                  const isSelected = index === 0;
+                  return `
+                  <button class="route-alternative-btn ${
+                    isSelected ? "selected" : ""
+                  }" data-route-index="${index}">
                     <div class="route-alt-label">Tuyến ${index + 1}</div>
                     <div class="route-alt-info">
                       <span>📍 ${routeDist} km</span>
@@ -897,11 +945,12 @@ function RoutingControl({ userLocation }) {
                     </div>
                   </button>
                 `;
-              }).join('')}
+                })
+                .join("")}
             </div>
           `;
         }
-        
+
         // Show enhanced panel with instructions
         const carIconMarkup = renderToStaticMarkup(
           <IoCarSport style={{ fontSize: "24px", color: "#10b981" }} />
@@ -959,7 +1008,7 @@ function RoutingControl({ userLocation }) {
         `;
 
         // Remove old panel if exists
-        const oldPanel = document.getElementById('customRoutePanel');
+        const oldPanel = document.getElementById("customRoutePanel");
         if (oldPanel) {
           oldPanel.remove();
         }
@@ -967,18 +1016,21 @@ function RoutingControl({ userLocation }) {
         // Create custom control panel
         const RoutePanel = L.Control.extend({
           options: {
-            position: 'topright'
+            position: "topright",
           },
-          onAdd: function() {
-            const container = L.DomUtil.create('div', 'custom-route-panel leaflet-bar');
-            container.id = 'customRoutePanel';
+          onAdd: function () {
+            const container = L.DomUtil.create(
+              "div",
+              "custom-route-panel leaflet-bar"
+            );
+            container.id = "customRoutePanel";
             container.innerHTML = panelContent;
-            
+
             L.DomEvent.disableClickPropagation(container);
             L.DomEvent.disableScrollPropagation(container);
-            
+
             return container;
-          }
+          },
         });
 
         const routePanel = new RoutePanel();
@@ -987,112 +1039,133 @@ function RoutingControl({ userLocation }) {
         // Add event listeners after panel is added
         setTimeout(() => {
           // Clear route button
-          const clearBtn = document.getElementById('clearRouteBtn');
+          const clearBtn = document.getElementById("clearRouteBtn");
           if (clearBtn) {
             clearBtn.onclick = (e) => {
               e.stopPropagation();
-              
+
               // Remove custom route lines
-              customRouteLines.forEach(line => {
+              customRouteLines.forEach((line) => {
                 map.removeLayer(line);
               });
               customRouteLines = [];
-              
+
               // Remove all route lines from map (including default ones)
               const routeLayers = [];
-              map.eachLayer(layer => {
-                if (layer instanceof L.Polyline && 
-                    layer.options && 
-                    (layer.options.className === 'leaflet-routing-line' || 
-                     layer.options.className === 'custom-route-line')) {
+              map.eachLayer((layer) => {
+                if (
+                  layer instanceof L.Polyline &&
+                  layer.options &&
+                  (layer.options.className === "leaflet-routing-line" ||
+                    layer.options.className === "custom-route-line")
+                ) {
                   routeLayers.push(layer);
                 }
               });
-              routeLayers.forEach(layer => {
+              routeLayers.forEach((layer) => {
                 map.removeLayer(layer);
               });
-              
+
               // Remove routing control
               if (routingControlRef.current) {
                 map.removeControl(routingControlRef.current);
                 routingControlRef.current = null;
               }
-              
+
               // Remove panel
-              const panel = document.getElementById('customRoutePanel');
+              const panel = document.getElementById("customRoutePanel");
               if (panel) panel.remove();
-              
-              console.log('🧹 Route cleared completely');
+
+              console.log("🧹 Route cleared completely");
             };
           }
 
           // Alternative route buttons
-          const altBtns = document.querySelectorAll('.route-alternative-btn');
-          altBtns.forEach(btn => {
+          const altBtns = document.querySelectorAll(".route-alternative-btn");
+          altBtns.forEach((btn) => {
             btn.onclick = (e) => {
               e.stopPropagation();
               const routeIndex = parseInt(btn.dataset.routeIndex);
-              console.log(`🔘 Clicked route button ${routeIndex + 1}, available routes:`, allRoutes.length);
+              console.log(
+                `🔘 Clicked route button ${routeIndex + 1}, available routes:`,
+                allRoutes.length
+              );
               const selectedRoute = allRoutes[routeIndex];
-              
+
               // Update button states
-              altBtns.forEach(b => b.classList.remove('selected'));
-              btn.classList.add('selected');
-              
+              altBtns.forEach((b) => b.classList.remove("selected"));
+              btn.classList.add("selected");
+
               // Update route summary (distance and time)
-              const distance = (selectedRoute.summary.totalDistance / 1000).toFixed(1);
+              const distance = (
+                selectedRoute.summary.totalDistance / 1000
+              ).toFixed(1);
               const time = Math.round(selectedRoute.summary.totalTime / 60);
-              
-              const distanceEl = document.querySelector('.route-summary .summary-value');
-              const timeEl = document.querySelectorAll('.route-summary .summary-value')[1];
+
+              const distanceEl = document.querySelector(
+                ".route-summary .summary-value"
+              );
+              const timeEl = document.querySelectorAll(
+                ".route-summary .summary-value"
+              )[1];
               if (distanceEl) distanceEl.textContent = `${distance} km`;
               if (timeEl) timeEl.textContent = `~${time} phút`;
-              
+
               // Update styling of existing custom route lines
-              console.log(`🎨 Updating ${customRouteLines.length} routes, selected: ${routeIndex + 1}`);
+              console.log(
+                `🎨 Updating ${customRouteLines.length} routes, selected: ${
+                  routeIndex + 1
+                }`
+              );
               customRouteLines.forEach((routeLine, idx) => {
                 const isSelected = idx === routeIndex;
-                
+
                 routeLine.setStyle({
-                  color: isSelected ? '#10b981' : '#94a3b8',
+                  color: isSelected ? "#10b981" : "#94a3b8",
                   opacity: isSelected ? 0.9 : 0.3,
                   weight: isSelected ? 7 : 4,
-                  dashArray: isSelected ? null : '5, 10'
+                  dashArray: isSelected ? null : "5, 10",
                 });
-                
+
                 // Bring selected route to front
                 if (isSelected) {
                   routeLine.bringToFront();
                 }
               });
-              
+
               // Fit map to selected route only
-              const selectedCoords = selectedRoute.coordinates.map(coord => [coord.lat, coord.lng]);
+              const selectedCoords = selectedRoute.coordinates.map((coord) => [
+                coord.lat,
+                coord.lng,
+              ]);
               const selectedLine = L.polyline(selectedCoords);
               map.fitBounds(selectedLine.getBounds(), { padding: [50, 50] });
-              
+
               // Update instructions
-              const newInstructions = selectedRoute.instructions.map((instruction, index) => {
-                const dist = instruction.distance < 1000 
-                  ? `${Math.round(instruction.distance)} m` 
-                  : `${(instruction.distance / 1000).toFixed(1)} km`;
-                
-                let direction = instruction.text;
-                direction = direction.replace(/Head/g, 'Đi')
-                  .replace(/Turn left/g, 'Rẽ trái')
-                  .replace(/Turn right/g, 'Rẽ phải')
-                  .replace(/Continue/g, 'Tiếp tục')
-                  .replace(/Slight left/g, 'Hơi rẽ trái')
-                  .replace(/Slight right/g, 'Hơi rẽ phải')
-                  .replace(/Sharp left/g, 'Rẽ gắt trái')
-                  .replace(/Sharp right/g, 'Rẽ gắt phải')
-                  .replace(/You have arrived/g, 'Bạn đã đến nơi')
-                  .replace(/north/g, 'hướng Bắc')
-                  .replace(/south/g, 'hướng Nam')
-                  .replace(/east/g, 'hướng Đông')
-                  .replace(/west/g, 'hướng Tây');
-                
-                return `
+              const newInstructions = selectedRoute.instructions
+                .map((instruction, index) => {
+                  const dist =
+                    instruction.distance < 1000
+                      ? `${Math.round(instruction.distance)} m`
+                      : `${(instruction.distance / 1000).toFixed(1)} km`;
+
+                  let direction = instruction.text;
+                  direction = direction
+                    .replace(/Head/g, "Đi")
+                    .replace(/Turn left/g, "Rẽ trái")
+                    .replace(/Turn right/g, "Rẽ phải")
+                    .replace(/Continue/g, "Tiếp tục")
+                    .replace(/Slight left/g, "Hơi rẽ trái")
+                    .replace(/Slight right/g, "Hơi rẽ phải")
+                    .replace(/Sharp left/g, "Rẽ gắt trái")
+                    .replace(/Sharp right/g, "Rẽ gắt phải")
+                    .replace(/You have arrived/g, "Bạn đã đến nơi")
+                    .replace(/north/g, "hướng Bắc")
+                    .replace(/south/g, "hướng Nam")
+                    .replace(/east/g, "hướng Đông")
+                    .replace(/west/g, "hướng Tây");
+
+                  return `
                   <div class="route-instruction-item">
                     <div class="instruction-number">${index + 1}</div>
                     <div class="instruction-content">
@@ -1101,14 +1174,20 @@ function RoutingControl({ userLocation }) {
                     </div>
                   </div>
                 `;
-              }).join('');
-              
-              const instructionsContainer = document.getElementById('routeInstructions');
+                })
+                .join("");
+
+              const instructionsContainer =
+                document.getElementById("routeInstructions");
               if (instructionsContainer) {
                 instructionsContainer.innerHTML = newInstructions;
               }
-              
-              console.log(`🔄 Switched to route ${routeIndex + 1}: ${distance}km, ${time}min`);
+
+              console.log(
+                `🔄 Switched to route ${
+                  routeIndex + 1
+                }: ${distance}km, ${time}min`
+              );
             };
           });
         }, 100);
@@ -1118,10 +1197,10 @@ function RoutingControl({ userLocation }) {
     };
 
     // Listen for custom route event
-    window.addEventListener('showRoute', handleShowRoute);
+    window.addEventListener("showRoute", handleShowRoute);
 
     return () => {
-      window.removeEventListener('showRoute', handleShowRoute);
+      window.removeEventListener("showRoute", handleShowRoute);
       if (routingControlRef.current) {
         map.removeControl(routingControlRef.current);
       }
@@ -1172,8 +1251,8 @@ function Map({ onStationClick }) {
 
         {/* Station markers with clustering */}
         {!loading && !error && mapReady && (
-          <StationMarkers 
-            stations={stations} 
+          <StationMarkers
+            stations={stations}
             onStationClick={onStationClick}
             userLocation={userLocation}
           />
