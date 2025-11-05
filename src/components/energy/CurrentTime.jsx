@@ -11,76 +11,50 @@ import { ClockCircleOutlined, CheckCircleOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 
-const CurrentTime = ({
-  currentTime,
-  sessionData,
-  remainingSeconds: propRemainingSeconds,
-  displayTime: propDisplayTime,
-}) => {
+const CurrentTime = ({ currentTime, sessionData }) => {
   const [timeRemaining, setTimeRemaining] = useState(null);
   const [progressPercent, setProgressPercent] = useState(0);
 
   /**
-   * Tính thời gian còn lại và phần trăm tiến độ
-   * Ưu tiên sử dụng dữ liệu từ battery countdown API nếu có
+   * Tính thời gian còn lại và phần trăm tiến độ từ SSE data
+   * Dữ liệu lấy từ API progress/{sessionId}:
+   * - secondRemaining: thời gian còn lại (giây)
+   * - maxSeconds: tổng thời gian sạc (giây)
    */
   useEffect(() => {
-    // ✅ Nếu có dữ liệu từ battery countdown API, sử dụng luôn
-    if (propDisplayTime && propRemainingSeconds !== undefined) {
-      setTimeRemaining(propDisplayTime);
-
-      // Tính progress percent từ remainingSeconds
-      if (sessionData?.expectedEndTime && sessionData?.startTime) {
-        const start = new Date(sessionData.startTime);
-        const end = new Date(sessionData.expectedEndTime);
-        const totalDuration = end - start;
-        const elapsed = totalDuration - propRemainingSeconds * 1000;
-        const percent =
-          totalDuration > 0
-            ? Math.min(100, Math.max(0, (elapsed / totalDuration) * 100))
-            : 0;
-        setProgressPercent(Math.round(percent));
-      }
-      return;
-    }
-
-    // ✅ Fallback: Tính toán thời gian còn lại thủ công như cũ
-    if (!sessionData?.expectedEndTime || !sessionData?.startTime) {
+    if (!sessionData) {
       setTimeRemaining(null);
       setProgressPercent(0);
       return;
     }
 
     const calculateTimeInfo = () => {
-      const now = new Date();
-      const start = new Date(sessionData.startTime);
-      const end = new Date(sessionData.expectedEndTime);
-
-      // Tổng thời gian dự kiến (ms)
-      const totalDuration = end - start;
-      // Thời gian đã trôi qua (ms)
-      const elapsed = now - start;
-      // Thời gian còn lại (ms)
-      const remaining = end - now;
+      // ✅ Lấy dữ liệu từ SSE progress API
+      const secondRemaining = sessionData.secondRemaining || 0;
+      const maxSeconds = sessionData.maxSeconds || 0;
 
       // Tính phần trăm tiến độ
-      const percent =
-        totalDuration > 0
-          ? Math.min(100, Math.max(0, (elapsed / totalDuration) * 100))
-          : 0;
-
-      setProgressPercent(Math.round(percent));
+      if (maxSeconds > 0) {
+        const elapsed = maxSeconds - secondRemaining;
+        const percent = Math.min(
+          100,
+          Math.max(0, (elapsed / maxSeconds) * 100)
+        );
+        setProgressPercent(Math.round(percent));
+      } else {
+        setProgressPercent(0);
+      }
 
       // Nếu đã hết thời gian
-      if (remaining <= 0) {
+      if (secondRemaining <= 0) {
         setTimeRemaining("00:00:00");
         return;
       }
 
-      // Format thời gian còn lại
-      const hours = Math.floor(remaining / (1000 * 60 * 60));
-      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+      // Format thời gian còn lại từ giây
+      const hours = Math.floor(secondRemaining / 3600);
+      const minutes = Math.floor((secondRemaining % 3600) / 60);
+      const seconds = secondRemaining % 60;
 
       const formatted = `${hours.toString().padStart(2, "0")}:${minutes
         .toString()
@@ -91,17 +65,7 @@ const CurrentTime = ({
 
     // Tính ngay khi mount
     calculateTimeInfo();
-
-    // Update mỗi giây
-    const interval = setInterval(calculateTimeInfo, 1000);
-
-    return () => clearInterval(interval);
-  }, [
-    sessionData?.expectedEndTime,
-    sessionData?.startTime,
-    propDisplayTime,
-    propRemainingSeconds,
-  ]);
+  }, [sessionData]);
 
   /**
    * Tính tổng năng lượng đã sạc realtime

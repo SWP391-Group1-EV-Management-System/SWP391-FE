@@ -40,6 +40,7 @@ export default function ChargingTimeSlider({
   stepSize = 15,
   onTimeChange = () => {},
   loading = false,
+  currentBattery = 0, // ✅ % pin hiện tại của xe
 }) {
   return (
     <div className={`slider-container charging-time-slider ${className}`}>
@@ -58,6 +59,7 @@ export default function ChargingTimeSlider({
           rightIcon={<BsClockFill />}
           onValueChange={onTimeChange}
           isTimeSlider={true}
+          currentBattery={currentBattery}
         />
       )}
     </div>
@@ -78,6 +80,7 @@ function Slider({
   rightIcon,
   onValueChange,
   isTimeSlider = false,
+  currentBattery = 0, // ✅ % pin hiện tại
 }) {
   // State lưu giá trị hiện tại của slider
   const [value, setValue] = useState(defaultValue);
@@ -203,6 +206,27 @@ function Slider({
     }
   };
 
+  /**
+   * Tính % pin dựa trên thời gian sạc
+   * Công thức: 13.25 giây = 1% pin
+   * 1 phút = 60 giây
+   * => 1 phút = (60 / 13.25) % ≈ 4.53% pin
+   */
+  const calculateBatteryPercent = (minutes) => {
+    const seconds = minutes * 60;
+    const percentIncrease = seconds / 13.25;
+    return Math.min(100, Math.round(percentIncrease)); // Giới hạn max 100%
+  };
+
+  /**
+   * Tính % pin SAU KHI sạc = % hiện tại + % tăng thêm
+   */
+  const getFinalBatteryPercent = (minutes) => {
+    const increase = calculateBatteryPercent(minutes);
+    const final = currentBattery + increase;
+    return Math.min(100, Math.round(final)); // Giới hạn max 100%
+  };
+
   // Render slider UI
   return (
     <>
@@ -298,10 +322,65 @@ function Slider({
 
       {/* Time indicator hiển thị thời gian sạc hiện tại */}
       <div className="time-indicator">
-        <p className="time-value">
-          {isTimeSlider ? formatTime(Math.round(value)) : Math.round(value)}
-        </p>
-        {isTimeSlider && <p className="time-label">Thời gian sạc</p>}
+        {/* Battery percentage indicator - Đặt lên trên cùng */}
+        {isTimeSlider && (
+          <div className="battery-percentage-display">
+            <div className="battery-icon-wrapper">
+              <svg
+                className="battery-icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <rect x="2" y="7" width="18" height="10" rx="1" />
+                <path d="M20 10h2v4h-2" />
+                {/* Background fill - % pin hiện tại (màu xám nhạt) */}
+                <rect
+                  x="4"
+                  y="9"
+                  width={`${Math.min((currentBattery / 100) * 14, 14)}`}
+                  height="6"
+                  fill="#9ca3af"
+                  opacity="0.4"
+                />
+                {/* Foreground fill - % pin sau khi sạc (màu xanh) */}
+                <rect
+                  x="4"
+                  y="9"
+                  width={`${Math.min(
+                    (getFinalBatteryPercent(value) / 100) * 14,
+                    14
+                  )}`}
+                  height="6"
+                  fill="currentColor"
+                  className="battery-fill"
+                />
+              </svg>
+            </div>
+            <div className="battery-text">
+              <div className="battery-percent-row">
+                <span className="battery-current">{currentBattery}%</span>
+                <span className="battery-arrow">→</span>
+                <span className="battery-final">
+                  {getFinalBatteryPercent(value)}%
+                </span>
+              </div>
+              <p className="battery-label">
+                {currentBattery === 0
+                  ? `Sạc được ${calculateBatteryPercent(value)}%`
+                  : `+${calculateBatteryPercent(value)}% pin`}
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="time-display">
+          <p className="time-value">
+            {isTimeSlider ? formatTime(Math.round(value)) : Math.round(value)}
+          </p>
+          {isTimeSlider && <p className="time-label">Thời gian sạc</p>}
+        </div>
       </div>
     </>
   );

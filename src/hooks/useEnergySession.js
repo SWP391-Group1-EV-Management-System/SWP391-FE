@@ -80,7 +80,9 @@ export const useEnergySession = (userID = null) => {
       if (!userID) {
         setIsLoading(false);
         setError("Vui lòng đăng nhập để xem phiên sạc");
-        console.warn("useEnergySession: userID is null or undefined");
+        console.log(
+          "⚠️ [useEnergySession] userID is null or undefined, skipping fetch"
+        );
         return;
       }
 

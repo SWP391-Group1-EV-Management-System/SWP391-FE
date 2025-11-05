@@ -2,11 +2,11 @@ import { useState, useCallback } from "react";
 import * as bookingService from "../services/bookingService";
 
 /**
- * Hook quản lý booking với localStorage status
+ * Hook quản lý booking
  *
- * THAY ĐỔI:
- * - Sau khi createBooking thành công, lưu status vào localStorage
- * - Menu sẽ tự động cập nhật khi localStorage thay đổi
+ * ✅ Redis-based status:
+ * - Backend tự động lưu status vào Redis khi tạo/hoàn thành/hủy booking
+ * - Frontend dispatch event "driverStatusChanged" để trigger refetch
  */
 export default function useBooking() {
   const [loading, setLoading] = useState(false);
@@ -39,20 +39,19 @@ export default function useBooking() {
         bookingService.createBooking(bookingData)
       );
 
-      // ✅ Lưu status vào localStorage nếu có trong response
+      // ✅ Backend tự động set Redis, frontend chỉ dispatch event để refetch
       if (result?.status) {
         try {
-          localStorage.setItem("driverStatus", result.status);
-          console.log("✅ Saved status to localStorage:", result.status);
+          console.log("✅ Booking created with status:", result.status);
 
-          // ✅ Dispatch custom event để Menu update ngay (cùng tab)
+          // ✅ Dispatch custom event để useDriverStatus hook refetch từ Redis
           window.dispatchEvent(
             new CustomEvent("driverStatusChanged", {
               detail: { status: result.status },
             })
           );
         } catch (error) {
-          console.error("Error saving status to localStorage:", error);
+          console.error("Error dispatching status event:", error);
         }
       }
 
@@ -67,11 +66,10 @@ export default function useBooking() {
         bookingService.completeBooking(bookingId)
       );
 
-      // ✅ Xóa status khi complete booking
+      // ✅ Backend tự động xóa Redis, frontend chỉ dispatch event
       if (result?.success) {
         try {
-          localStorage.removeItem("driverStatus");
-          console.log("✅ Removed status from localStorage");
+          console.log("✅ Booking completed, status cleared");
 
           window.dispatchEvent(
             new CustomEvent("driverStatusChanged", {
@@ -79,7 +77,7 @@ export default function useBooking() {
             })
           );
         } catch (error) {
-          console.error("Error removing status from localStorage:", error);
+          console.error("Error dispatching status event:", error);
         }
       }
 
@@ -92,11 +90,10 @@ export default function useBooking() {
     async (bookingId) => {
       const result = await wrap(() => bookingService.cancelBooking(bookingId));
 
-      // ✅ Xóa status khi cancel booking
+      // ✅ Backend tự động xóa Redis, frontend chỉ dispatch event
       if (result?.success) {
         try {
-          localStorage.removeItem("driverStatus");
-          console.log("✅ Removed status from localStorage");
+          console.log("✅ Booking cancelled, status cleared");
 
           window.dispatchEvent(
             new CustomEvent("driverStatusChanged", {
@@ -104,7 +101,7 @@ export default function useBooking() {
             })
           );
         } catch (error) {
-          console.error("Error removing status from localStorage:", error);
+          console.error("Error dispatching status event:", error);
         }
       }
 

@@ -9,9 +9,31 @@ class WebSocketService {
   }
 
   connect(userId, onConnectCallback, onErrorCallback) {
+    // ✅ Check if already connected
     if (this.client && this.connected) {
-      console.log("Already connected");
+      console.log(
+        "✅ [WebSocketService] Already connected, calling onConnect callback immediately"
+      );
+      if (onConnectCallback) {
+        onConnectCallback({ headers: {} });
+      }
       return;
+    }
+
+    // ✅ If client exists but not connected, deactivate it first
+    if (this.client && !this.connected) {
+      console.log(
+        "⚠️ [WebSocketService] Cleaning up previous failed connection..."
+      );
+      try {
+        this.client.deactivate();
+      } catch (error) {
+        console.warn(
+          "⚠️ [WebSocketService] Error deactivating previous client:",
+          error
+        );
+      }
+      this.client = null;
     }
 
     console.log("🔌 [WebSocketService] Connecting with userId:", userId);
@@ -21,27 +43,16 @@ class WebSocketService {
     this.client = new Client({
       webSocketFactory: () => socket,
       debug: (str) => {
-        console.log("🔧 STOMP DEBUG:", str);
-        // Log outgoing CONNECT frame
-        if (str.includes("CONNECT")) {
-          console.log("🔗 ⚡ OUTGOING CONNECT FRAME:", str);
-        }
-        // Log incoming MESSAGE frames
-        if (str.includes("MESSAGE")) {
-          console.log("🔔 ⚡⚡⚡ INCOMING MESSAGE FRAME DETECTED! ⚡⚡⚡");
-          console.log("🔔 Full frame:", str);
-
-          // Check if it's early-charging-offer
-          if (str.includes("early-charging-offer")) {
-            console.log("🎯🎯🎯 EARLY CHARGING OFFER MESSAGE! 🎯🎯🎯");
-          }
-        }
-        // Log outgoing SUBSCRIBE frames
-        if (str.includes("SUBSCRIBE")) {
-          console.log("📡 SUBSCRIBE FRAME:", str);
+        // Only log important events, not all debug messages
+        if (
+          str.includes("CONNECT") ||
+          str.includes("MESSAGE") ||
+          str.includes("SUBSCRIBE")
+        ) {
+          console.log("� STOMP:", str.substring(0, 100)); // Truncate long messages
         }
       },
-      reconnectDelay: 5000,
+      reconnectDelay: 0, // ✅ Disable auto-reconnect to avoid spam
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
       // ✅ Add connectHeaders to send username to Spring WebSocket
@@ -66,6 +77,12 @@ class WebSocketService {
         console.error("Details:", frame.body);
         this.connected = false;
         if (onErrorCallback) onErrorCallback(frame);
+      },
+
+      onWebSocketError: (error) => {
+        console.error("❌ WebSocket Error (connection failed):", error);
+        this.connected = false;
+        if (onErrorCallback) onErrorCallback(error);
       },
 
       onDisconnect: () => {
@@ -301,6 +318,49 @@ class WebSocketService {
 
     this.subscriptions.set(`topic-${postId}`, subscription);
     console.log("✅ Subscribed to:", destination);
+
+    return subscription;
+  }
+
+  /**
+   * Subscribe to charging post status updates (public - no auth required)
+   * @param {string} postId - ID của charging post
+   * @param {function} callback - Hàm xử lý khi nhận status update
+   */
+  subscribeToPostStatus(postId, callback) {
+    if (!this.client || !this.connected) {
+      console.error("WebSocket chưa kết nối!");
+      return null;
+    }
+
+    // Backend gửi broadcast: messagingTemplate.convertAndSend("/topic/post/{postId}/status", statusData)
+    const destination = `/topic/post/${postId}/status`;
+
+    console.log("🔔 [WebSocketService] Subscribing to post status:");
+    console.log("   - postId:", postId);
+    console.log("   - destination:", destination);
+
+    const subscription = this.client.subscribe(destination, (message) => {
+      console.log("📩 ✅ Post status update received!");
+      console.log("   - destination:", destination);
+      console.log("   - message body:", message.body);
+      console.log("   - headers:", message.headers);
+
+      try {
+        const data = JSON.parse(message.body);
+        console.log("   - parsed status data:", data);
+        console.log("   - status:", data.status);
+        console.log("   - subStatus:", data.subStatus);
+        console.log("   - waitingCount:", data.waitingCount);
+        if (callback) callback(data);
+      } catch (error) {
+        console.error("❌ Error parsing post status message:", error);
+        if (callback) callback(message.body);
+      }
+    });
+
+    this.subscriptions.set(`post-status-${postId}`, subscription);
+    console.log("✅ Successfully subscribed to:", destination);
 
     return subscription;
   }

@@ -23,7 +23,7 @@ export default function ShowQR() {
         />
 
         <div className="qr-overlay-icon" aria-hidden>
-          <PiChargingStation className="overlay-icon-svg" />
+          {/* <PiChargingStation className="overlay-icon-svg" /> */}
         </div>
       </div>
     </div>

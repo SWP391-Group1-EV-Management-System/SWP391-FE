@@ -76,6 +76,51 @@ export const energySessionService = {
   },
 
   /**
+   * Cập nhật preference (targetPin và maxSecond) trước khi bắt đầu sạc
+   * API: POST /api/charging/session/update-preference
+   * Body: { userId, targetPin, maxSecond }
+   */
+  async updateChargingPreference(userId, targetPin, maxSecond) {
+    try {
+      console.log("📤 Cập nhật charging preference:", {
+        userId,
+        targetPin,
+        maxSecond,
+      });
+
+      const response = await api.post(
+        "/api/charging/session/update-preference",
+        {
+          userId,
+          targetPin,
+          maxSecond,
+        }
+      );
+
+      console.log("✅ Update preference response:", response.data);
+
+      if (response.status === 200 && response.data?.status === "success") {
+        return {
+          success: true,
+          data: response.data,
+          message: "Cập nhật preference thành công",
+        };
+      }
+
+      return {
+        success: false,
+        message: "Không thể cập nhật preference",
+      };
+    } catch (error) {
+      console.error("❌ Error updating preference:", error);
+      return {
+        success: false,
+        message: error.response?.data?.message || "Lỗi khi cập nhật preference",
+      };
+    }
+  },
+
+  /**
    * Tạo phiên sạc mới (phương thức cũ - giữ lại để tương thích ngược)
    * Lưu ý: Hàm này xử lý nhiều format response khác nhau từ backend:
    * - Format 1: Backend trả về plain string (sessionId)
@@ -330,7 +375,11 @@ export const energySessionService = {
         return s;
       })();
 
-      console.debug("Updating session status", { sessionId, status, normalizedStatus });
+      console.debug("Updating session status", {
+        sessionId,
+        status,
+        normalizedStatus,
+      });
       // Gọi API cập nhật trạng thái
       const response = await api.put(
         `/api/charging/session/${sessionId}/status`,

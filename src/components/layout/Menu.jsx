@@ -1,10 +1,10 @@
 /**
- * Menu.jsx - Component Sidebar Menu với localStorage-based status
+ * Menu.jsx - Sidebar Menu Component
  *
- * THAY ĐỔI:
- * - Không còn gọi API GET /api/users/status/{userId}
- * - Đọc status trực tiếp từ localStorage (key: "driverStatus")
- * - Lắng nghe thay đổi localStorage để tự động cập nhật menu
+ * ✅ Redis-based driver status
+ * - Dùng useDriverStatus hook để fetch từ Redis
+ * - Auto-refresh khi có event "driverStatusChanged"
+ * - Không còn localStorage
  */
 
 import React, { useState, useEffect } from "react";
@@ -26,6 +26,7 @@ import {
 import { MdMenuOpen, MdDashboard } from "react-icons/md";
 import { Button } from "react-bootstrap";
 import { useRole } from "../../hooks/useAuth";
+import useDriverStatus from "../../hooks/useDriverStatus"; // ✅ NEW: Redis hook
 import Logo from "../../assets/images/logo.png";
 import "../../assets/styles/Menu.css";
 
@@ -131,7 +132,12 @@ const getDriverMenuItems = (status) => {
       icon: BsBookmarkStar,
       path: "/app/servicepackage",
     },
-    { id: "vehicleregistration", label: "Đăng ký xe", icon: BsGear, path: "/app/vehicleregistration" },
+    {
+      id: "vehicleregistration",
+      label: "Đăng ký xe",
+      icon: BsGear,
+      path: "/app/vehicleregistration",
+    },
   ];
 
   // Chỉ thêm statusMenuItem nếu có status
@@ -145,8 +151,8 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
   const location = useLocation();
   const { userRole } = useRole();
 
-  // State quản lý driver status từ localStorage
-  const [driverStatus, setDriverStatus] = useState(null);
+  // ✅ NEW: Dùng Redis-based status thay vì localStorage
+  const { driverStatus, loading: statusLoading } = useDriverStatus();
 
   // Xác định role hiện tại
   const currentRole = Array.isArray(userRole)
@@ -158,56 +164,6 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
     currentRole === "DRIVER"
       ? getDriverMenuItems(driverStatus)
       : menuItemsByRole[currentRole] || getDriverMenuItems(null);
-
-  // ==================== EFFECT: ĐỌC STATUS TỪ LOCALSTORAGE ====================
-  useEffect(() => {
-    if (currentRole !== "DRIVER") {
-      return;
-    }
-
-    // Đọc status từ localStorage
-    const loadStatusFromLocalStorage = () => {
-      try {
-        const savedStatus = localStorage.getItem("driverStatus");
-        if (savedStatus) {
-          console.log("📦 Loaded status from localStorage:", savedStatus);
-          setDriverStatus(savedStatus.toLowerCase());
-        } else {
-          console.log("📦 No status in localStorage");
-          setDriverStatus(null);
-        }
-      } catch (error) {
-        console.error("Error reading localStorage:", error);
-        setDriverStatus(null);
-      }
-    };
-
-    // Load ngay khi mount
-    loadStatusFromLocalStorage();
-
-    // Lắng nghe thay đổi từ cùng tab (custom event)
-    const handleCustomEvent = (e) => {
-      console.log("📦 Custom event received:", e.detail);
-      const newStatus = e.detail?.status;
-      setDriverStatus(newStatus ? newStatus.toLowerCase() : null);
-    };
-
-    // Lắng nghe thay đổi localStorage (từ tab khác)
-    const handleStorageChange = (e) => {
-      if (e.key === "driverStatus") {
-        console.log("📦 localStorage changed:", e.newValue);
-        setDriverStatus(e.newValue ? e.newValue.toLowerCase() : null);
-      }
-    };
-
-    window.addEventListener("driverStatusChanged", handleCustomEvent);
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("driverStatusChanged", handleCustomEvent);
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, [currentRole]);
 
   // Tìm active menu item dựa trên current path
   const getActiveMenuIdFromPath = () => {

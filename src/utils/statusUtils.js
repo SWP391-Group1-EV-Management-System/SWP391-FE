@@ -1,83 +1,53 @@
 /**
- * statusUtils.js - Helper functions để quản lý driver status
+ * statusUtils.js - Driver status event dispatcher
  *
- * localStorage key: "driverStatus"
- * Giá trị hợp lệ: "session" | "waiting" | "booking" | null
+ * ✅ Redis-based: Status lưu ở backend Redis
+ * Frontend chỉ dispatch event để trigger useDriverStatus hook refetch
  */
 
-const STORAGE_KEY = "driverStatus";
+import { cleanupAllCountdowns } from "./countdownUtils";
 
 /**
- * Lưu status vào localStorage và dispatch event
- * @param {string} status - "session" | "waiting" | "booking"
+ * Trigger refetch driver status từ Redis
+ * Dispatch event để useDriverStatus hook gọi API lấy status mới
+ *
+ * @param {string|null} status - Optional status hint for logging
  */
 export const setDriverStatus = (status) => {
   try {
-    if (!status) {
-      localStorage.removeItem(STORAGE_KEY);
-      console.log("✅ Removed driver status");
-    } else {
-      const normalizedStatus = status.toLowerCase();
-      localStorage.setItem(STORAGE_KEY, normalizedStatus);
-      console.log("✅ Set driver status:", normalizedStatus);
+    console.log(
+      "🔄 [statusUtils] Trigger status refetch:",
+      status || "cleared"
+    );
+
+    // ✅ Xóa tất cả countdown keys khi status thay đổi
+    const cleanedCount = cleanupAllCountdowns();
+    if (cleanedCount > 0) {
+      console.log(`🧹 [statusUtils] Cleaned ${cleanedCount} countdown keys`);
     }
 
-    // Dispatch custom event để Menu update ngay (cùng tab)
+    // Dispatch event để useDriverStatus hook refetch từ Redis
     window.dispatchEvent(
       new CustomEvent("driverStatusChanged", {
         detail: { status: status ? status.toLowerCase() : null },
       })
     );
   } catch (error) {
-    console.error("Error setting driver status:", error);
+    console.error("❌ [statusUtils] Error dispatching event:", error);
   }
 };
 
 /**
- * Lấy status hiện tại từ localStorage
- * @returns {string|null} - "session" | "waiting" | "booking" | null
- */
-export const getDriverStatus = () => {
-  try {
-    const status = localStorage.getItem(STORAGE_KEY);
-    return status ? status.toLowerCase() : null;
-  } catch (error) {
-    console.error("Error getting driver status:", error);
-    return null;
-  }
-};
-
-/**
- * Xóa status khỏi localStorage
+ * Xóa status và trigger refetch
+ * Backend sẽ xóa khỏi Redis
  */
 export const clearDriverStatus = () => {
+  // ✅ Xóa countdown keys trước khi clear status
+  cleanupAllCountdowns();
   setDriverStatus(null);
-};
-
-/**
- * Kiểm tra xem có status hay không
- * @returns {boolean}
- */
-export const hasDriverStatus = () => {
-  return !!getDriverStatus();
-};
-
-/**
- * Xử lý response từ API và tự động lưu status
- * @param {Object} response - Response từ API {status: "...", ...}
- * @returns {Object} - Response gốc
- */
-export const handleApiResponseWithStatus = (response) => {
-  if (response?.status) {
-    setDriverStatus(response.status);
-  }
-  return response;
 };
 
 export default {
   setDriverStatus,
-  getDriverStatus,
   clearDriverStatus,
-  hasDriverStatus,
-  handleApiResponseWithStatus,
 };

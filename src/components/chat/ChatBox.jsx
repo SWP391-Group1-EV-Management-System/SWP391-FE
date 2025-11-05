@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import "../../assets/styles/ChatBox.css";
 import aiRobotIcon from "../../assets/images/ai-robot.png";
 import ecoLogo from "../../assets/images/logo.png";
@@ -597,6 +597,7 @@ const ChatBox = () => {
           )}
         </form>
       </div>
+      <Outlet />
     </>
   );
 };

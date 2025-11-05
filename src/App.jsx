@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import { App as AntdApp } from "antd";
 import Layout from "./components/layout/Layout.jsx";
@@ -29,6 +29,9 @@ import WaitingPage from "./page/WaitingListPage.jsx";
 import BookingPage from "./page/BookingPage.jsx";
 
 import PaymentHistory from "./page/PaymentHistoryPage.jsx";
+
+// Utilities
+import { cleanupExpiredFrozenCountdowns } from "./utils/countdownUtils.js";
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
 import {
@@ -41,6 +44,16 @@ import RootRedirect from "./components/auth/RootRedirect.jsx";
 import ChatBox from "./components/chat/ChatBox.jsx";
 
 function App() {
+  // ✅ Cleanup frozen countdown keys cũ khi app khởi động
+  useEffect(() => {
+    const cleanedCount = cleanupExpiredFrozenCountdowns();
+    if (cleanedCount > 0) {
+      console.log(
+        `🧹 [App] Cleaned ${cleanedCount} expired frozen countdown keys on startup`
+      );
+    }
+  }, []);
+
   return (
     <AntdApp>
       <BrowserRouter>
