@@ -5,20 +5,24 @@ export const useWebSocket = (userId, postId) => {
   const [connected, setConnected] = useState(false);
   const [messages, setMessages] = useState([]);
   const [position, setPosition] = useState(null);
-  const [maxWaitingTime, setMaxWaitingTime] = useState(null); // ✅ Thêm state cho endTime
+  const [maxWaitingTime, setMaxWaitingTime] = useState(null);
+  const [bookingConfirmed, setBookingConfirmed] = useState(null); // ✅ Thay đổi từ statusChanged
 
   useEffect(() => {
     console.log("🎯 [useWebSocket] Hook called with:");
     console.log("   - userId:", userId);
     console.log("   - postId:", postId);
 
-    if (!userId || !postId) {
-      console.warn("⚠️ [useWebSocket] Missing userId or postId, skipping connection");
+    if (!userId) {
+      console.warn("⚠️ [useWebSocket] Missing userId, skipping connection");
       return;
     }
 
     // Connect to WebSocket
-    console.log("🔌 [useWebSocket] Calling wsService.connect with userId:", userId);
+    console.log(
+      "🔌 [useWebSocket] Calling wsService.connect with userId:",
+      userId
+    );
     wsService.connect(
       userId,
       () => setConnected(true),
@@ -32,83 +36,165 @@ export const useWebSocket = (userId, postId) => {
         console.log("   - userId:", userId);
         console.log("   - postId:", postId);
 
-        // Subscribe to notifications
-        wsService.subscribeToNotifications(userId, postId, (message) => {
-          console.log("📩 [useWebSocket] Notification callback triggered!");
-          console.log("   - Raw message:", message);
-          console.log("   - Message type:", typeof message);
-          console.log("   - Message length:", message?.length);
+        // ✅ Subscribe to booking status changes (waiting -> booking)
+        wsService.subscribeToBookingStatus((data) => {
+          console.log("🎉 [useWebSocket] Booking status update received!");
+          console.log("   - Full data:", data);
+          console.log("   - Status:", data.status);
+          console.log("   - BookingId:", data.bookingId);
+          console.log("   - Message:", data.message);
 
-          setMessages((prev) => [...prev, { type: "notification", text: message, time: new Date() }]);
+          setMessages((prev) => [
+            ...prev,
+            {
+              type: "booking-status",
+              text: data.message || "Booking confirmed",
+              data,
+              time: new Date(),
+            },
+          ]);
 
-          // ✅ Parse EndTime message (from updateMaxWaitingTime)
-          const endTimeMatch = message.match(/EndTime:\s*(.+)/i);
-          if (endTimeMatch) {
-            const endTimeStr = endTimeMatch[1].trim();
-            console.log("⏰ [useWebSocket] EndTime parsed:", endTimeStr);
-            setMaxWaitingTime(endTimeStr);
+          if (data.status === "CONFIRMED") {
+            console.log(
+              "✅ [useWebSocket] BOOKING CONFIRMED! Setting bookingConfirmed state"
+            );
+            setBookingConfirmed({
+              bookingId: data.bookingId,
+              postId: data.postId,
+              message: data.message,
+            });
+          }
+        });
 
-            // ✅ Lưu vào localStorage
+        // ✅ Subscribe to position updates
+        wsService.subscribeToPositionUpdate((data) => {
+          console.log("📍 [useWebSocket] Position update received!");
+          console.log("   - Full data:", data);
+          console.log("   - Position:", data.position);
+          console.log("   - PostId:", data.postId);
+          console.log("   - Message:", data.message);
+
+          setMessages((prev) => [
+            ...prev,
+            {
+              type: "position-update",
+              text: data.message || `Position: ${data.position}`,
+              data,
+              time: new Date(),
+            },
+          ]);
+
+          if (data.position !== null && data.position !== undefined) {
+            console.log("✅ [useWebSocket] Setting position STATE:", data.position);
+            
+            // ✅ CRITICAL: Update position state
+            setPosition((prevPosition) => {
+              console.log("🔄 [useWebSocket] Position state changing:");
+              console.log("   - From:", prevPosition);
+              console.log("   - To:", data.position);
+              return data.position;
+            });
+
+            // Save to localStorage
             try {
-              localStorage.setItem("maxWaitingTime", endTimeStr);
-              console.log("💾 [useWebSocket] Saved maxWaitingTime to localStorage:", endTimeStr);
-            } catch (error) {
-              console.error("❌ [useWebSocket] Error saving maxWaitingTime:", error);
-            }
-            return; // ✅ Không parse position nếu là EndTime message
-          }
-
-          // ✅ Try multiple regex patterns to parse position
-          let newPosition = null;
-
-          // Pattern 1: "vị trí số X"
-          const posMatch1 = message.match(/vị trí số (\d+)/i);
-          if (posMatch1) {
-            newPosition = parseInt(posMatch1[1]);
-            console.log("🎯 [useWebSocket] Position parsed (pattern 1):", newPosition);
-          }
-
-          // Pattern 2: "số X" (fallback)
-          if (!newPosition) {
-            const posMatch2 = message.match(/số (\d+)/i);
-            if (posMatch2) {
-              newPosition = parseInt(posMatch2[1]);
-              console.log("🎯 [useWebSocket] Position parsed (pattern 2):", newPosition);
-            }
-          }
-
-          // Pattern 3: Any number at the end
-          if (!newPosition) {
-            const posMatch3 = message.match(/(\d+)$/);
-            if (posMatch3) {
-              newPosition = parseInt(posMatch3[1]);
-              console.log("🎯 [useWebSocket] Position parsed (pattern 3):", newPosition);
-            }
-          }
-
-          if (newPosition !== null) {
-            console.log("✅ [useWebSocket] Setting position:", newPosition);
-            setPosition(newPosition);
-
-            // ✅ Lưu vào localStorage
-            try {
-              localStorage.setItem("initialQueueRank", newPosition.toString());
-              console.log("💾 [useWebSocket] Updated rank in localStorage:", newPosition);
+              localStorage.setItem(
+                "initialQueueRank",
+                data.position.toString()
+              );
+              console.log(
+                "💾 [useWebSocket] Updated rank in localStorage:",
+                data.position
+              );
             } catch (error) {
               console.error("❌ [useWebSocket] Error saving rank:", error);
             }
           } else {
-            console.warn("⚠️ [useWebSocket] Could not parse position from message:", message);
+            console.warn("⚠️ [useWebSocket] Position is null/undefined, not updating");
           }
         });
+
+        // ✅ Subscribe to old notifications channel (optional, keep for backward compatibility)
+
+        // ✅ Subscribe to old notifications channel (optional, keep for backward compatibility)
+        if (postId) {
+          wsService.subscribeToNotifications(userId, postId, (message) => {
+            console.log(
+              "📩 [useWebSocket] Old notification callback triggered!"
+            );
+            console.log("   - Raw message:", message);
+
+            setMessages((prev) => [
+              ...prev,
+              { type: "notification", text: message, time: new Date() },
+            ]);
+
+            // ✅ Parse position from text message (e.g., "Bạn đang ở vị trí số 1")
+            const positionPatterns = [
+              /vị trí số (\d+)/i,
+              /vị trí (\d+)/i,
+              /position[:\s]+(\d+)/i,
+              /số (\d+)/i,
+            ];
+
+            for (const pattern of positionPatterns) {
+              const match = message.match(pattern);
+              if (match) {
+                const parsedPosition = parseInt(match[1]);
+                console.log("🎯 [useWebSocket] Position parsed from old channel:", parsedPosition);
+                
+                setPosition((prevPosition) => {
+                  console.log("🔄 [useWebSocket] Position state changing (old channel):");
+                  console.log("   - From:", prevPosition);
+                  console.log("   - To:", parsedPosition);
+                  return parsedPosition;
+                });
+
+                try {
+                  localStorage.setItem("initialQueueRank", parsedPosition.toString());
+                  console.log("💾 [useWebSocket] Updated rank from old channel:", parsedPosition);
+                } catch (error) {
+                  console.error("❌ [useWebSocket] Error saving rank:", error);
+                }
+                
+                break; // Stop after first match
+              }
+            }
+
+            // ✅ Parse EndTime message (from updateMaxWaitingTime)
+            const endTimeMatch = message.match(/EndTime:\s*(.+)/i);
+            if (endTimeMatch) {
+              const endTimeStr = endTimeMatch[1].trim();
+              console.log("⏰ [useWebSocket] EndTime parsed:", endTimeStr);
+              setMaxWaitingTime(endTimeStr);
+
+              try {
+                localStorage.setItem("maxWaitingTime", endTimeStr);
+                console.log(
+                  "💾 [useWebSocket] Saved maxWaitingTime to localStorage:",
+                  endTimeStr
+                );
+              } catch (error) {
+                console.error(
+                  "❌ [useWebSocket] Error saving maxWaitingTime:",
+                  error
+                );
+              }
+            }
+          });
+        }
 
         // Subscribe to topic (optional)
         wsService.subscribeToTopic(postId, (message) => {
           console.log("📢 [useWebSocket] Topic message received:", message);
-          setMessages((prev) => [...prev, { type: "broadcast", text: message, time: new Date() }]);
+          setMessages((prev) => [
+            ...prev,
+            { type: "broadcast", text: message, time: new Date() },
+          ]);
         });
       } else {
-        console.warn("⚠️ [useWebSocket] WebSocket not connected after timeout!");
+        console.warn(
+          "⚠️ [useWebSocket] WebSocket not connected after timeout!"
+        );
       }
     }, 1000);
 
@@ -125,5 +211,12 @@ export const useWebSocket = (userId, postId) => {
     setMessages([]);
   }, []);
 
-  return { connected, messages, position, maxWaitingTime, clearMessages };
+  return {
+    connected,
+    messages,
+    position,
+    maxWaitingTime,
+    bookingConfirmed,
+    clearMessages,
+  };
 };
