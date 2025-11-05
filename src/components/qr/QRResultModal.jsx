@@ -2,12 +2,18 @@ import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router";
 import { message as staticMessage, ConfigProvider, App } from "antd";
+import {
+  ThunderboltOutlined,
+  ClockCircleOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
 import "../../assets/styles/QRResultModal.css";
 import ElasticSlider from "./ElasticSlider";
 import { energySessionService } from "../../services/energySessionService";
 import { useAuth } from "../../hooks/useAuth";
 import { useRandomPin } from "../../hooks/useRandomPin";
 import { useChargingStations } from "../../hooks/useChargingStations";
+import { useChargingPreference } from "../../hooks/useChargingPreference";
 import { LoadingSpinner } from "../../components/common";
 import { setDriverStatus } from "../../utils/statusUtils"; // ← IMPORT HELPER
 
@@ -19,7 +25,8 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
   const { fetchPostById, fetchStationById } = useChargingStations({
     autoFetch: false,
   }); // ✅ Sử dụng hook
-  const [selectedChargingTime, setSelectedChargingTime] = useState(60);
+  const { updatePreference } = useChargingPreference(); // ✅ Hook mới
+  const [selectedChargingTime, setSelectedChargingTime] = useState(2);
   const [isLoading, setIsLoading] = useState(false);
   const [postData, setPostData] = useState(null);
   const [stationInfo, setStationInfo] = useState(null);
@@ -28,8 +35,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
 
   const chargingConfig = {
     minChargingTime: 2,
-    maxChargingTime: 240, // ← Sẽ được override bởi maxChargingTime từ API
-    defaultChargingTime: 60,
+    defaultChargingTime: 10,
     stepSize: 1,
   };
 
@@ -89,26 +95,46 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     }
   }, [qrResult, message, fetchPostById, fetchStationById]); // ✅ Thêm dependencies
 
+  // ✅ Fetch data khi modal mở - FIXED: Loại bỏ dependencies gây infinite loop
   useEffect(() => {
-    if (isOpen && qrResult) {
-      fetchPostData();
-      fetchRandomPin(); // ✅ Gọi API random_pin khi modal mở
-    }
-  }, [isOpen, qrResult]); // ❌ BỎ fetchPostData và fetchRandomPin khỏi dependencies
+    const fetchData = async () => {
+      if (!isOpen || !qrResult) return;
 
-  // ✅ Điều chỉnh selectedChargingTime nếu vượt quá maxChargingTime từ API
-  useEffect(() => {
-    if (maxChargingTime && selectedChargingTime > maxChargingTime) {
-      setSelectedChargingTime(maxChargingTime);
-      handleChargingTimeChange(maxChargingTime);
-    }
-  }, [maxChargingTime, selectedChargingTime, handleChargingTimeChange]);
+      await fetchPostData();
 
+      // ✅ Lấy userId để gọi fetchRandomPin
+      let userProfile = user;
+      if (!userProfile) {
+        try {
+          userProfile = await fetchUserProfile();
+        } catch (error) {
+          console.error("❌ Error fetching user profile:", error);
+        }
+      }
+
+      const userId = userProfile?.userId || userProfile?.id;
+      if (userId) {
+        await fetchRandomPin(userId); // ✅ Truyền userId vào API
+        console.log("🔋 [QRResultModal] Fetched random pin for user:", userId);
+      } else {
+        console.warn(
+          "⚠️ [QRResultModal] No userId found, skipping random pin fetch"
+        );
+      }
+    };
+
+    fetchData();
+  }, [isOpen, qrResult]); // ❌ CHỈ dependency isOpen và qrResult để tránh loop
+
+  // ✅ Set giá trị mặc định khi nhận maxChargingTime từ API
   useEffect(() => {
-    if (isOpen && selectedChargingTime) {
-      handleChargingTimeChange(selectedChargingTime);
+    if (maxChargingTime && isOpen) {
+      // Set giá trị mặc định là giá trị tối thiểu (2 phút)
+      const defaultValue = chargingConfig.minChargingTime;
+      setSelectedChargingTime(defaultValue);
+      handleChargingTimeChange(defaultValue);
     }
-  }, [isOpen]);
+  }, [maxChargingTime, isOpen, handleChargingTimeChange]);
 
   // ✅ UPDATED: Xử lý response có status và sessionId
   const handleStartCharging = useCallback(async () => {
@@ -137,6 +163,23 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         return;
       }
 
+      // ✅ Bước 1: Cập nhật preference (targetPin và maxSecond)
+      if (pinData?.pinNow && selectedChargingTime) {
+        const preferenceResult = await updatePreference(
+          userId,
+          pinData.pinNow,
+          selectedChargingTime
+        );
+
+        if (!preferenceResult.success) {
+          message.error("Không thể cập nhật thông tin sạc");
+          return;
+        }
+
+        console.log("✅ Preference updated successfully");
+      }
+
+      // ✅ Bước 2: Tạo session
       const formattedEndTime = formatLocalDateTime(expectedEndTime);
 
       const sessionData = {
@@ -169,6 +212,57 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           response.message?.sessionId ||
           response.sessionId ||
           null;
+
+        // ✅ CHECK: Nếu trụ đang bận (backend trả về status đặc biệt)
+        if (
+          status === "trụ đang bận" ||
+          status === "bạn đang có đặt chỗ khác hoặc trong hàng đợi"
+        ) {
+          console.warn("⚠️ [QRResultModal] Trụ đang bận:", status);
+
+          const isStationBusy = status === "trụ đang bận";
+
+          message.warning({
+            content: (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "12px" }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontWeight: "600",
+                      marginBottom: "4px",
+                      fontSize: "15px",
+                    }}
+                  >
+                    {isStationBusy
+                      ? "Trụ đang bận"
+                      : "Bạn đang có đặt chỗ khác"}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "13px",
+                      color: "#666",
+                      lineHeight: "1.5",
+                    }}
+                  >
+                    {isStationBusy
+                      ? "Trụ này đã được đặt chỗ. Vui lòng quét QR trụ khác!"
+                      : "Vui lòng hoàn thành đặt chỗ hiện tại trước khi sạc tại trụ khác!"}
+                  </div>
+                </div>
+              </div>
+            ),
+            duration: 5,
+            style: {
+              marginTop: "20vh",
+            },
+            // icon: <WarningOutlined style={{ color: '#faad14' }} />,
+          });
+
+          onClose();
+          return; // ← Dừng không xử lý tiếp
+        }
 
         // Nếu data.message là string và chưa có sessionId, thử lấy string nếu nó trông giống id
         if (!sessionId && typeof response?.data?.message === "string") {
@@ -222,27 +316,20 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
             console.warn("Failed to dispatch sessionCreated event:", e);
           }
 
-          // ✅ Dispatch event for VirtualStationPage to switch to ShowSession
-          try {
-            window.dispatchEvent(
-              new CustomEvent("chargingStarted", {
-                detail: { sessionId, postId: postData.id },
-              })
-            );
-            console.log(
-              "✅ Dispatched chargingStarted event for VirtualStationPage"
-            );
-          } catch (e) {
-            console.warn("Failed to dispatch chargingStarted event:", e);
-          }
-
           // Close modal
           onClose();
 
-          // If not already on session page, navigate there. If already on
-          // /app/session the page will receive the event and call refetch().
+          // ✅ Check if we're on VirtualStationPage (public route)
           const locPath = window.location.pathname || location.pathname;
-          if (locPath !== "/app/session") {
+          const isVirtualStation = locPath.includes("/virtualstation/");
+
+          if (isVirtualStation) {
+            // Don't navigate - VirtualStationPage will handle showing session via event
+            console.log(
+              "🎯 [QRResultModal] On VirtualStationPage, not navigating. Event dispatched."
+            );
+          } else if (locPath !== "/app/session") {
+            // Navigate to session page if not already there and not on virtual station
             navigate("/app/session");
           }
         } else {
@@ -382,6 +469,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                       maxTime={maxChargingTime} // ✅ Sử dụng maxChargingTime từ API
                       stepSize={chargingConfig.stepSize}
                       onTimeChange={handleChargingTimeChange}
+                      currentBattery={pinData?.pinNow || 0} // ✅ Truyền % pin hiện tại
                     />
 
                     {/* ✅ Hiển thị thông tin pin nếu có */}
@@ -443,15 +531,6 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                             })}
                             )
                           </span>
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            marginTop: "4px",
-                            color: "#64748b",
-                          }}
-                        >
-                          Thời gian sạc: {selectedChargingTime} phút
                         </div>
                       </div>
                     )}

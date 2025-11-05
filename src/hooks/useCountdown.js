@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { cleanupAllCountdowns } from "../utils/countdownUtils";
 
 /**
  * Hook để kết nối SSE countdown từ backend
@@ -6,7 +7,11 @@ import { useState, useEffect, useRef } from "react";
  * @param {boolean} enabled - Có bật countdown không
  * @param {string} storageKey - Key để lưu endTime vào localStorage (unique per booking/waiting)
  */
-export const useCountdown = (minutes, enabled = true, storageKey = "countdownEndTime") => {
+export const useCountdown = (
+  minutes,
+  enabled = true,
+  storageKey = "countdownEndTime"
+) => {
   const [countdown, setCountdown] = useState(null);
   const [status, setStatus] = useState("IDLE"); // IDLE, RUNNING, COMPLETED, ERROR
   const [error] = useState(null);
@@ -14,11 +19,29 @@ export const useCountdown = (minutes, enabled = true, storageKey = "countdownEnd
 
   useEffect(() => {
     if (!enabled || !minutes || minutes <= 0) {
-      console.log("⏱️ [useCountdown] Countdown not enabled or invalid minutes:", minutes);
+      console.log(
+        "⏱️ [useCountdown] Countdown not enabled or invalid minutes:",
+        minutes
+      );
       return;
     }
 
-    console.log("🚀 [useCountdown] Initializing countdown for", minutes, "minutes");
+    console.log(
+      "🚀 [useCountdown] Initializing countdown for",
+      minutes,
+      "minutes"
+    );
+
+    // ✅ XÓA TẤT CẢ countdown keys cũ (trừ key hiện tại) khi tạo countdown mới
+    const cleanedCount = cleanupAllCountdowns([
+      storageKey,
+      storageKey.replace("countdown_", "countdown_frozen_"),
+    ]);
+    if (cleanedCount > 0) {
+      console.log(
+        `🧹 [useCountdown] Cleaned ${cleanedCount} old countdown keys`
+      );
+    }
 
     // ✅ CHECK localStorage xem đã có endTime chưa
     let endTime = null;
@@ -26,14 +49,16 @@ export const useCountdown = (minutes, enabled = true, storageKey = "countdownEnd
       const savedEndTime = localStorage.getItem(storageKey);
       if (savedEndTime) {
         endTime = new Date(savedEndTime);
-        console.log("� [useCountdown] Found saved endTime:", endTime);
+        console.log("📦 [useCountdown] Found saved endTime:", endTime);
 
         // Kiểm tra endTime còn valid không
         const now = new Date();
         if (endTime > now) {
           console.log("✅ [useCountdown] Using saved endTime (not expired)");
         } else {
-          console.log("⚠️ [useCountdown] Saved endTime expired, creating new one");
+          console.log(
+            "⚠️ [useCountdown] Saved endTime expired, creating new one"
+          );
           endTime = null;
           localStorage.removeItem(storageKey);
         }
@@ -49,7 +74,10 @@ export const useCountdown = (minutes, enabled = true, storageKey = "countdownEnd
 
       try {
         localStorage.setItem(storageKey, endTime.toISOString());
-        console.log("💾 [useCountdown] Saved new endTime to localStorage:", endTime);
+        console.log(
+          "💾 [useCountdown] Saved new endTime to localStorage:",
+          endTime
+        );
       } catch (err) {
         console.error("❌ [useCountdown] Error saving to localStorage:", err);
       }
@@ -62,10 +90,15 @@ export const useCountdown = (minutes, enabled = true, storageKey = "countdownEnd
       // ✅ CHECK localStorage mỗi lần update - nếu bị xóa = đã cancel
       const savedEndTime = localStorage.getItem(storageKey);
       if (!savedEndTime) {
-        console.log("🛑 [useCountdown] localStorage key removed - countdown cancelled!");
+        console.log(
+          "🛑 [useCountdown] localStorage key removed - countdown cancelled!"
+        );
 
         // ✅ KIỂM TRA frozen time - nếu có thì hiển thị thời gian đóng băng
-        const frozenKey = `${storageKey.replace("countdown_", "countdown_frozen_")}`;
+        const frozenKey = `${storageKey.replace(
+          "countdown_",
+          "countdown_frozen_"
+        )}`;
         const frozenTime = localStorage.getItem(frozenKey);
 
         if (frozenTime) {
@@ -106,9 +139,14 @@ export const useCountdown = (minutes, enabled = true, storageKey = "countdownEnd
         // Xóa localStorage
         try {
           localStorage.removeItem(storageKey);
-          console.log("🗑️ [useCountdown] Removed endTime from localStorage (completed)");
+          console.log(
+            "🗑️ [useCountdown] Removed endTime from localStorage (completed)"
+          );
         } catch (err) {
-          console.error("❌ [useCountdown] Error removing from localStorage:", err);
+          console.error(
+            "❌ [useCountdown] Error removing from localStorage:",
+            err
+          );
         }
 
         if (intervalRef.current) {
@@ -124,10 +162,9 @@ export const useCountdown = (minutes, enabled = true, storageKey = "countdownEnd
       const hours = Math.floor(remainingSeconds / 3600);
       const mins = Math.floor((remainingSeconds % 3600) / 60);
       const secs = remainingSeconds % 60;
-      const displayTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(
-        2,
-        "0"
-      )}`;
+      const displayTime = `${String(hours).padStart(2, "0")}:${String(
+        mins
+      ).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
       setCountdown({
         remainingSeconds,

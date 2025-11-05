@@ -12,6 +12,7 @@
 
 /* Card trắng chứa nội dung */
 .plugin-card {
+  position: relative; /* Để connection indicator absolute positioning hoạt động */
   text-align: center;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);

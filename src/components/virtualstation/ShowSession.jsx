@@ -1,47 +1,77 @@
 import React, { useState, useEffect } from "react";
 import { Car, Zap, Clock, Battery } from "lucide-react";
+import { useEnergySession } from "../../hooks/useEnergySession";
+import usePublicSession from "../../hooks/usePublicSession";
 import "./ShowSession.css";
 
 /*
   Component: ShowSession
-  - Mô phỏng giao diện phiên sạc: hiển thị phần trăm pin, công suất, năng lượng, thời gian
-  - Các state ở phía dưới mô phỏng dữ liệu thời gian thực (ví dụ khi kết nối với thiết bị hoặc server)
+  - Hiển thị phiên sạc thời gian thực từ SessionPage
+  - Đồng bộ dữ liệu với SessionPage qua useEnergySession
+  - SSE real-time updates cho battery level, energy, time
+  - Hỗ trợ 2 chế độ: authenticated (SessionPage) và public (VirtualStationPage)
+  NOTE: Không import useAuth để tránh trigger getUserProfile khi public mode
 */
-export default function ShowSession() {
-  // Trạng thái phần trăm pin (0-100)
-  const [battery, setBattery] = useState(45);
-  // Thời gian đã trôi qua (giây)
-  const [elapsedTime, setElapsedTime] = useState(0);
-  // Công suất hiện tại (kW) - mô phỏng
-  const [power, setPower] = useState(7.2);
-  // Tổng năng lượng nạp (kWh)
-  const [energy, setEnergy] = useState(0);
+export default function ShowSession({
+  sessionId: propSessionId,
+  isPublic = false,
+  userId = null, // ✅ Pass userId từ parent component khi authenticated
+}) {
+  // ✅ Chọn hook phù hợp dựa vào chế độ
+  const { sessionData: authSessionData, isLoading: authLoading } =
+    useEnergySession(isPublic ? null : userId);
+  const {
+    sessionData: publicSessionData,
+    loading: publicLoading,
+    batteryLevel: publicBatteryLevel,
+    finishSession,
+    finishLoading,
+  } = usePublicSession(isPublic ? propSessionId : null);
 
-  // Effect: timer mô phỏng dữ liệu thời gian thực mỗi giây
+  // Chọn dữ liệu phù hợp
+  const sessionData = isPublic ? publicSessionData : authSessionData;
+  const isLoading = isPublic ? publicLoading : authLoading;
+
+  // ✅ Data đã được lấy từ usePublicSession SSE
+  // sessionData đã chứa thông tin real-time từ SSE "chargingProgress":
+  // - pin: % pin hiện tại
+  // - targetPin: % pin mục tiêu
+  // - secondRemaining: thời gian còn lại (giây)
+  // - maxSeconds: tổng thời gian sạc (giây)
+  // - chargedEnergy_kWh: năng lượng đã sạc
+  // - elapsedSeconds: thời gian đã trôi qua
+
+  // ✅ Tính toán giá trị hiển thị từ real data
+  const battery = isPublic
+    ? publicBatteryLevel || sessionData?.pin || sessionData?.batteryLevel || 0
+    : sessionData?.batteryLevel || 0;
+
+  const targetPin = sessionData?.targetPin || 100;
+  const secondRemaining = sessionData?.secondRemaining || 0;
+  const maxSeconds = sessionData?.maxSeconds || 0;
+
+  // ✅ Debug logging
   useEffect(() => {
-    const timer = setInterval(() => {
-      // Tăng dần phần trăm pin (giả lập sạc)
-      setBattery((prev) => {
-        if (prev >= 100) return 100;
-        return prev + 0.5;
+    if (isPublic) {
+      console.log("🔍 [ShowSession] SSE Data:", {
+        battery,
+        targetPin,
+        secondRemaining,
+        maxSeconds,
+        sessionData,
       });
+    }
+  }, [battery, targetPin, secondRemaining, maxSeconds, sessionData, isPublic]);
 
-      // Tăng thời gian đã trôi qua
-      setElapsedTime((prev) => prev + 1);
+  const energy =
+    parseFloat(
+      (sessionData?.chargedEnergy_kWh || "0").toString().replace(",", ".")
+    ) || 0;
 
-      // Tính năng lượng nạp dựa trên công suất (kW -> kWh)
-      setEnergy((prev) => prev + 7.2 / 3600);
+  const power = sessionData?.maxPower || 7.2;
 
-      // Thay đổi nhỏ công suất để mô phỏng dao động
-      setPower((prev) => {
-        const variation = (Math.random() - 0.5) * 0.3;
-        return Math.max(6.5, Math.min(7.5, prev + variation));
-      });
-    }, 1000);
-
-    // Cleanup khi component unmount
-    return () => clearInterval(timer);
-  }, []);
+  // ✅ Backend trả về elapsedSeconds
+  const elapsedSec = parseInt(sessionData?.elapsedSeconds || "0", 10);
 
   // Hàm tiện ích: chuyển seconds -> HH:MM:SS
   const formatTime = (seconds) => {
@@ -54,7 +84,15 @@ export default function ShowSession() {
     )}:${String(secs).padStart(2, "0")}`;
   };
 
-  // Chọn lớp màu cho progress fill dựa trên mức pin
+  const elapsedTimeStr = formatTime(elapsedSec);
+
+  // ✅ Tính thời gian còn lại từ SSE data
+  const remainingTimeStr = formatTime(secondRemaining);
+  const getRemainingMinutes = () => {
+    return Math.ceil(secondRemaining / 60);
+  };
+
+  // Chọn lớp màu cho progress fill dựa trên mức pin (giống BatteryProgress)
   const getBatteryColorClass = () => {
     if (battery < 20) return "battery-red";
     if (battery < 50) return "battery-yellow";
@@ -62,7 +100,37 @@ export default function ShowSession() {
     return "battery-green";
   };
 
-  // JSX UI: cấu trúc giao diện, sử dụng class CSS đã tách ra
+  // ✅ Handler dừng sạc
+  const handleStopCharging = async () => {
+    if (!sessionData?.chargingSessionId && !propSessionId) {
+      alert("Không tìm thấy phiên sạc");
+      return;
+    }
+
+    const sessionId = sessionData?.chargingSessionId || propSessionId;
+    const totalEnergy = energy || 0;
+
+    // Confirm trước khi dừng
+    const confirmed = window.confirm(
+      `Bạn có chắc muốn dừng sạc?\n\nNăng lượng đã sạc: ${totalEnergy.toFixed(
+        2
+      )} kWh\nPin hiện tại: ${battery}%`
+    );
+
+    if (!confirmed) return;
+
+    const result = await finishSession(sessionId, totalEnergy);
+
+    if (result.success) {
+      alert("✅ Đã dừng phiên sạc thành công!");
+      // Reload hoặc navigate về trang chủ
+      window.location.reload();
+    } else {
+      alert(`❌ Lỗi: ${result.message}`);
+    }
+  };
+
+  // JSX UI: cấu trúc giao diện, giữ UI cũ nhưng dùng data từ hooks
   return (
     <div className="charging-container">
       <div className="charging-wrapper">
@@ -74,18 +142,15 @@ export default function ShowSession() {
           <h1 className="charging-title">Đang Sạc</h1>
         </div>
 
-        <div className="charging-card glass3d">
+        <div className="charging-card ">
           <div className="battery-display">
             <div className="car-icon-wrapper">
               {/* Hình xe minh hoạ */}
-              <Car color="#cbd5e1" size={120} />
-              <div className="charging-badge">
-                <Zap color="white" size={24} />
-              </div>
+              <Car color="#10b981" size={120} />
             </div>
 
-            {/* Phần hiển thị phần trăm pin lớn */}
-            <div className="battery-percentage">{battery.toFixed(0)}%</div>
+            {/* Phần hiển thị phần trăm pin lớn - ✅ Real data */}
+            <div className="battery-percentage">{Math.round(battery)}%</div>
             <div className="progress-bar">
               <div
                 className={`progress-fill ${getBatteryColorClass()}`}
@@ -95,42 +160,50 @@ export default function ShowSession() {
           </div>
 
           <div className="stats-grid">
-            <div className="stat-card-show-session glass3d">
+            <div className="stat-card-show-session ">
               <div className="stat-header">
-                <Clock size={20} />
+                <Clock size={20} color="#10b981" />
                 <span>Thời gian</span>
               </div>
-              <div className="stat-value">{formatTime(elapsedTime)}</div>
+              {/* ✅ Real data from SSE - elapsedSeconds */}
+              <div className="stat-value">{elapsedTimeStr}</div>
             </div>
 
-            <div className="stat-card-show-session glass3d">
+            <div className="stat-card-show-session ">
               <div className="stat-header">
-                <Zap size={20} />
+                <Zap size={20} color="#10b981" />
                 <span>Công suất</span>
               </div>
+              {/* ✅ Real data from sessionData */}
               <div className="stat-value">{power.toFixed(1)} kW</div>
             </div>
 
-            <div className="stat-card-show-session glass3d">
+            <div className="stat-card-show-session ">
               <div className="stat-header">
-                <Battery size={20} />
+                <Battery size={20} color="#10b981" />
                 <span>Năng lượng</span>
               </div>
+              {/* ✅ Real data from SSE - chargedEnergy_kWh */}
               <div className="stat-value">{energy.toFixed(2)} kWh</div>
             </div>
 
-            <div className="stat-card-show-session glass3d">
+            <div className="stat-card-show-session ">
               <div className="stat-header">
-                <Clock size={20} />
+                <Clock size={20} color="#10b981" />
                 <span>Thời gian còn lại</span>
               </div>
-              <div className="stat-value">
-                {Math.max(0, Math.ceil((100 - battery) / 0.5 / 60))} phút
-              </div>
+              {/* ✅ Real data from SSE - secondRemaining */}
+              <div className="stat-value">{remainingTimeStr}</div>
             </div>
           </div>
 
-          <button className="stop-button">Dừng sạc</button>
+          <button
+            className="stop-button"
+            onClick={handleStopCharging}
+            disabled={finishLoading}
+          >
+            {finishLoading ? "Đang dừng..." : "Dừng sạc"}
+          </button>
         </div>
       </div>
     </div>

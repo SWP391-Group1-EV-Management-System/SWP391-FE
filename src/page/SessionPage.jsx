@@ -10,7 +10,6 @@ import PricingInfo from "../components/energy/PricingInfo";
 import { useEnergySession } from "../hooks/useEnergySession";
 import { useAuth } from "../hooks/useAuth";
 import { usePaymentData } from "../hooks/usePayment";
-import { useBatteryCountdown } from "../hooks/useBatteryCountdown";
 import {
   ThunderboltOutlined,
   LockOutlined,
@@ -60,38 +59,6 @@ const EnergyPage = ({ userID }) => {
       }
     }
   }, [sessionData?.chargingSessionId]);
-
-  // ✅ Sử dụng battery countdown hook
-  const {
-    batteryLevel: countdownBatteryLevel,
-    remainingSeconds,
-    displayTime,
-    status: countdownStatus,
-    isCompleted: countdownCompleted,
-  } = useBatteryCountdown(
-    batteryCountdownInfo?.currentBattery,
-    batteryCountdownInfo?.remainingMinutes,
-    !!batteryCountdownInfo && !sessionData?.isDone // Chỉ active khi có data và session chưa done
-  );
-
-  // ✅ Debug log để kiểm tra hook hoạt động
-  useEffect(() => {
-    console.log("🔍 [SessionPage] Battery Countdown Debug:", {
-      batteryCountdownInfo,
-      countdownBatteryLevel,
-      remainingSeconds,
-      displayTime,
-      countdownStatus,
-      isActive: !!batteryCountdownInfo && !sessionData?.isDone,
-    });
-  }, [
-    batteryCountdownInfo,
-    countdownBatteryLevel,
-    remainingSeconds,
-    displayTime,
-    countdownStatus,
-    sessionData?.isDone,
-  ]);
 
   // ✅ Kiểm tra trạng thái thanh toán khi sessionData thay đổi
   useEffect(() => {
@@ -156,18 +123,27 @@ const EnergyPage = ({ userID }) => {
             // Reset reconnect attempts on successful message
             reconnectAttempts = 0;
 
-            // ✅ Backend trả về: chargedEnergy_kWh, elapsedSeconds, pin, minuteMax
-            // Parse và chuyển đổi sang format FE cần
+            // ✅ Backend mới trả về:
+            // - chargedEnergy_kWh: năng lượng đã sạc (kWh)
+            // - elapsedSeconds: thời gian đã trôi qua (giây)
+            // - pin: % pin hiện tại
+            // - targetPin: % pin mục tiêu
+            // - secondRemaining: thời gian còn lại (giây)
+            // - maxSeconds: tổng thời gian sạc (giây)
+
             const energyStr = progress.chargedEnergy_kWh || "0";
             const energyCharged = parseFloat(energyStr.replace(",", ".")) || 0;
 
             const elapsedSec = parseInt(progress.elapsedSeconds || "0", 10);
-
-            // ✅ Parse battery level và max minutes từ backend
             const batteryLevel = parseInt(progress.pin || "0", 10);
-            const maxMinutes = parseInt(progress.minuteMax || "0", 10);
+            const targetPin = parseInt(progress.targetPin || "100", 10);
+            const secondRemaining = parseInt(
+              progress.secondRemaining || "0",
+              10
+            );
+            const maxSeconds = parseInt(progress.maxSeconds || "0", 10);
 
-            // Chuyển seconds thành HH:MM:SS hoặc MM:SS
+            // Chuyển elapsedSeconds thành HH:MM:SS
             const hours = Math.floor(elapsedSec / 3600);
             const minutes = Math.floor((elapsedSec % 3600) / 60);
             const seconds = elapsedSec % 60;
@@ -186,14 +162,18 @@ const EnergyPage = ({ userID }) => {
               energyCharged,
               timeElapsed,
               batteryLevel,
-              maxMinutes,
+              targetPin,
+              secondRemaining,
+              maxSeconds,
             });
 
             setRealtimeProgress({
               energyCharged,
               timeElapsed,
               batteryLevel,
-              maxMinutes,
+              targetPin,
+              secondRemaining,
+              maxSeconds,
             });
           } catch (error) {
             console.error("❌ Error parsing SSE progress data:", error);
@@ -588,12 +568,12 @@ const EnergyPage = ({ userID }) => {
             <Col xs={24} lg={12}>
               <BatteryProgress
                 batteryLevel={
-                  countdownBatteryLevel || sessionData.batteryLevel || 0
+                  realtimeProgress?.batteryLevel ||
+                  sessionData.batteryLevel ||
+                  0
                 }
                 isCharging={statusConfig?.isCharging || false}
-                isCompleted={
-                  countdownCompleted || statusConfig?.isCompleted || false
-                }
+                isCompleted={statusConfig?.isCompleted || false}
               />
             </Col>
 
@@ -604,9 +584,11 @@ const EnergyPage = ({ userID }) => {
                     ? new Date(sessionData.expectedEndTime)
                     : currentTime
                 }
-                sessionData={sessionData}
-                remainingSeconds={remainingSeconds}
-                displayTime={displayTime}
+                sessionData={{
+                  ...sessionData,
+                  secondRemaining: realtimeProgress?.secondRemaining,
+                  maxSeconds: realtimeProgress?.maxSeconds,
+                }}
               />
             </Col>
           </Row>
