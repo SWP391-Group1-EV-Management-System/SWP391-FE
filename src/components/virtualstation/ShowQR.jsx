@@ -20,7 +20,6 @@ export default function ShowQR() {
           value={qrData}
           size={420}
           fgColor="#0b9459"
-          bgColor="transparent"
         />
 
         <div className="qr-overlay-icon" aria-hidden>

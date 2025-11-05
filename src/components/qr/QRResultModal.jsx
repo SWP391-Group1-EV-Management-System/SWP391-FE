@@ -6,7 +6,8 @@ import "../../assets/styles/QRResultModal.css";
 import ElasticSlider from "./ElasticSlider";
 import { energySessionService } from "../../services/energySessionService";
 import { useAuth } from "../../hooks/useAuth";
-import { chargingStationService } from "../../services/chargingStationService";
+import { useRandomPin } from "../../hooks/useRandomPin";
+import { useChargingStations } from "../../hooks/useChargingStations";
 import { LoadingSpinner } from "../../components/common";
 import { setDriverStatus } from "../../utils/statusUtils"; // ← IMPORT HELPER
 
@@ -14,6 +15,10 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
   const navigate = useNavigate();
   const { user, fetchUserProfile } = useAuth();
   const { message } = App.useApp();
+  const { pinData, maxChargingTime, fetchRandomPin } = useRandomPin();
+  const { fetchPostById, fetchStationById } = useChargingStations({
+    autoFetch: false,
+  }); // ✅ Sử dụng hook
   const [selectedChargingTime, setSelectedChargingTime] = useState(60);
   const [isLoading, setIsLoading] = useState(false);
   const [postData, setPostData] = useState(null);
@@ -22,10 +27,10 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
   const [expectedEndTime, setExpectedEndTime] = useState(null);
 
   const chargingConfig = {
-    minChargingTime: 15,
-    maxChargingTime: 240,
+    minChargingTime: 2,
+    maxChargingTime: 240, // ← Sẽ được override bởi maxChargingTime từ API
     defaultChargingTime: 60,
-    stepSize: 15,
+    stepSize: 1,
   };
 
   const formatLocalDateTime = useCallback((date) => {
@@ -48,7 +53,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
   const fetchPostData = useCallback(async () => {
     try {
       setDataLoading(true);
-      const postInfo = await chargingStationService.getPostById(qrResult);
+      const postInfo = await fetchPostById(qrResult); // ✅ Sử dụng hook thay vì service
       setPostData(postInfo);
 
       const stationId =
@@ -57,9 +62,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         postInfo.stationId;
 
       if (stationId) {
-        const stationDetails = await chargingStationService.getStationById(
-          stationId
-        );
+        const stationDetails = await fetchStationById(stationId); // ✅ Sử dụng hook thay vì service
         setStationInfo(stationDetails);
       } else {
         setStationInfo({
@@ -84,13 +87,22 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     } finally {
       setDataLoading(false);
     }
-  }, [qrResult, message]);
+  }, [qrResult, message, fetchPostById, fetchStationById]); // ✅ Thêm dependencies
 
   useEffect(() => {
     if (isOpen && qrResult) {
       fetchPostData();
+      fetchRandomPin(); // ✅ Gọi API random_pin khi modal mở
     }
-  }, [isOpen, qrResult, fetchPostData]);
+  }, [isOpen, qrResult]); // ❌ BỎ fetchPostData và fetchRandomPin khỏi dependencies
+
+  // ✅ Điều chỉnh selectedChargingTime nếu vượt quá maxChargingTime từ API
+  useEffect(() => {
+    if (maxChargingTime && selectedChargingTime > maxChargingTime) {
+      setSelectedChargingTime(maxChargingTime);
+      handleChargingTimeChange(maxChargingTime);
+    }
+  }, [maxChargingTime, selectedChargingTime, handleChargingTimeChange]);
 
   useEffect(() => {
     if (isOpen && selectedChargingTime) {
@@ -176,6 +188,22 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           localStorage.setItem("currentSessionId", sessionId);
           console.log("✅ Saved sessionId to localStorage:", sessionId);
 
+          // ✅ Lưu thông tin pin và thời gian để sử dụng cho battery countdown
+          if (pinData?.pinNow && selectedChargingTime) {
+            localStorage.setItem(
+              "batteryCountdown",
+              JSON.stringify({
+                currentBattery: pinData.pinNow,
+                remainingMinutes: selectedChargingTime,
+                startTime: new Date().toISOString(),
+              })
+            );
+            console.log("✅ Saved battery countdown info:", {
+              currentBattery: pinData.pinNow,
+              remainingMinutes: selectedChargingTime,
+            });
+          }
+
           // Clear finished marker
           try {
             localStorage.removeItem("currentSessionFinished");
@@ -192,6 +220,20 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
             );
           } catch (e) {
             console.warn("Failed to dispatch sessionCreated event:", e);
+          }
+
+          // ✅ Dispatch event for VirtualStationPage to switch to ShowSession
+          try {
+            window.dispatchEvent(
+              new CustomEvent("chargingStarted", {
+                detail: { sessionId, postId: postData.id },
+              })
+            );
+            console.log(
+              "✅ Dispatched chargingStarted event for VirtualStationPage"
+            );
+          } catch (e) {
+            console.warn("Failed to dispatch chargingStarted event:", e);
           }
 
           // Close modal
@@ -244,6 +286,8 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     onClose,
     navigate,
     message,
+    pinData,
+    selectedChargingTime,
   ]);
 
   if (!isOpen) return null;
@@ -335,10 +379,32 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                     <ElasticSlider
                       defaultValue={selectedChargingTime}
                       minTime={chargingConfig.minChargingTime}
-                      maxTime={chargingConfig.maxChargingTime}
+                      maxTime={maxChargingTime} // ✅ Sử dụng maxChargingTime từ API
                       stepSize={chargingConfig.stepSize}
                       onTimeChange={handleChargingTimeChange}
                     />
+
+                    {/* ✅ Hiển thị thông tin pin nếu có */}
+                    {pinData && (
+                      <div
+                        style={{
+                          marginTop: "12px",
+                          padding: "10px 14px",
+                          background:
+                            "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                          border: "1px solid #fbbf24",
+                          borderRadius: "8px",
+                          fontSize: "13px",
+                          color: "#78350f",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                        }}
+                      >
+                        <strong>🔋 Mức pin hiện tại:</strong> {pinData.pinNow}%
+                        <br />
+                        <strong>⏱️ Thời gian sạc tối đa:</strong>{" "}
+                        {pinData.minuteMax} phút
+                      </div>
+                    )}
 
                     {expectedEndTime && (
                       <div

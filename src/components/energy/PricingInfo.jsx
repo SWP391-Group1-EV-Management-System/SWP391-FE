@@ -32,11 +32,18 @@ const PricingInfo = ({
   onPay,
   finishSession, // Từ hook
   isFinishing, // Loading state từ hook
+  isPaid = false, // ✅ Thêm prop để biết đã thanh toán chưa
 }) => {
   const [pausedAt, setPausedAt] = useState(null);
   // Lock the stop button for the first 60 seconds from session start
   const [stopLocked, setStopLocked] = useState(false);
   const [lockRemaining, setLockRemaining] = useState(0);
+
+  // ✅ Debug log khi isPaid thay đổi
+  useEffect(() => {
+    console.log("💳 [PricingInfo] isPaid changed to:", isPaid);
+    console.log("💳 [PricingInfo] isCompleted:", sessionData?.isDone);
+  }, [isPaid, sessionData?.isDone]);
 
   const formatMsToMMSS = (seconds) => {
     const mm = Math.floor(seconds / 60)
@@ -57,8 +64,7 @@ const PricingInfo = ({
   ];
 
   const isCompleted = sessionData?.isDone || false;
-  const isDisabled =
-    isFinishing || !sessionData?.chargingSessionId;
+  const isDisabled = isFinishing || !sessionData?.chargingSessionId;
 
   /**
    * Tính tổng năng lượng đã sạc tại một thời điểm
@@ -335,18 +341,20 @@ const PricingInfo = ({
         {isCompleted && (
           <Button
             className="pay-button"
-            type="success"
+            type={isPaid ? "default" : "success"}
             onClick={handlePayClick}
             size="large"
-            disabled={!onPay}
+            disabled={!onPay || isPaid}
             style={{
               width: "100%",
               height: "56px",
               fontSize: "18px",
               fontWeight: "600",
+              opacity: isPaid ? 0.6 : 1,
+              cursor: isPaid ? "not-allowed" : "pointer",
             }}
           >
-            THANH TOÁN
+            {isPaid ? "✓ ĐÃ THANH TOÁN" : "THANH TOÁN"}
           </Button>
         )}
       </div>

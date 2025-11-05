@@ -31,7 +31,12 @@ import BookingPage from "./page/BookingPage.jsx";
 import PaymentHistory from "./page/PaymentHistoryPage.jsx";
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
-import { AdminRoute, StaffRoute, ManagerRoute, DriverRoute } from "./components/auth/AdminRoute.jsx";
+import {
+  AdminRoute,
+  StaffRoute,
+  ManagerRoute,
+  DriverRoute,
+} from "./components/auth/AdminRoute.jsx";
 import RootRedirect from "./components/auth/RootRedirect.jsx";
 import ChatBox from "./components/chat/ChatBox.jsx";
 
@@ -116,7 +121,10 @@ function App() {
             />
 
             {/* Legacy Energy Page - Redirect to session for backward compatibility */}
-            <Route path="energy" element={<Navigate to="/app/session" replace />} />
+            <Route
+              path="energy"
+              element={<Navigate to="/app/session" replace />}
+            />
 
             <Route
               path="history"
@@ -196,14 +204,10 @@ function App() {
             />
           </Route>
 
-          {/* Virtual Station - Protected but accessible to all authenticated users */}
+          {/* Virtual Station - Public access (no login required) */}
           <Route
             path="virtualstation/:postId"
-            element={
-              <ProtectedRoute>
-                <VirtualStationPage />
-              </ProtectedRoute>
-            }
+            element={<VirtualStationPage />}
           />
 
           {/* 404 Page */}

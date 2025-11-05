@@ -27,6 +27,7 @@ import {
 } from "@ant-design/icons";
 import { getWaitingListById } from "../services/waitingListService";
 import { getBookingById } from "../services/bookingService";
+import chargingStationService from "../services/chargingStationService";
 
 const WaitingListPage = () => {
   const navigate = useNavigate();
@@ -170,9 +171,11 @@ const WaitingListPage = () => {
               waitingListId: detail.waitingListId,
               stationName: detail.stationName || "Trạm sạc",
               chargingPostId: detail.chargingPostId,
+              chargingStationId: detail.chargingStationId,
               status: detail.status,
               expectedWaitingTime: detail.expectedWaitingTime,
               createdAt: detail.createdAt,
+              outedAt: detail.outedAt,
               userId: detail.userId,
               carId: detail.carId,
               // ✅ Ưu tiên localStorage (nếu đã được update từ WebSocket)
@@ -181,6 +184,29 @@ const WaitingListPage = () => {
 
             setWaitingData(mappedData);
             setChargingPostId(detail.chargingPostId);
+
+            // ✅ Fetch charging post details
+            if (detail.chargingPostId) {
+              try {
+                console.log(
+                  "🔌 [WaitingListPage] Fetching charging post details:",
+                  detail.chargingPostId
+                );
+                const postDetail = await chargingStationService.getPostById(
+                  detail.chargingPostId
+                );
+                console.log(
+                  "✅ [WaitingListPage] Charging post details:",
+                  postDetail
+                );
+                setChargingPostData(postDetail);
+              } catch (postError) {
+                console.error(
+                  "❌ [WaitingListPage] Error fetching charging post:",
+                  postError
+                );
+              }
+            }
 
             setStatusConfig({
               color: "warning",
@@ -208,6 +234,7 @@ const WaitingListPage = () => {
               bookingId: detail.bookingId,
               stationName: detail.stationName || "Trạm sạc",
               chargingPostId: detail.chargingPostId,
+              chargingStationId: detail.chargingStationId,
               status: detail.status,
               maxWaitingTime: detail.maxWaitingTime,
               arrivalTime: detail.arrivalTime,
@@ -219,6 +246,29 @@ const WaitingListPage = () => {
 
             setWaitingData(mappedData);
             setChargingPostId(detail.chargingPostId);
+
+            // ✅ Fetch charging post details
+            if (detail.chargingPostId) {
+              try {
+                console.log(
+                  "🔌 [WaitingListPage] Fetching charging post details:",
+                  detail.chargingPostId
+                );
+                const postDetail = await chargingStationService.getPostById(
+                  detail.chargingPostId
+                );
+                console.log(
+                  "✅ [WaitingListPage] Charging post details:",
+                  postDetail
+                );
+                setChargingPostData(postDetail);
+              } catch (postError) {
+                console.error(
+                  "❌ [WaitingListPage] Error fetching charging post:",
+                  postError
+                );
+              }
+            }
 
             setStatusConfig({
               color: "success",
@@ -1098,7 +1148,10 @@ const WaitingListPage = () => {
           {/* Row 2: Technical Details & Queue Info */}
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <TechnicalDetails sessionData={waitingData} />
+              <TechnicalDetails
+                sessionData={waitingData}
+                chargingPostData={chargingPostData}
+              />
             </Col>
 
             <Col xs={24} lg={12}>

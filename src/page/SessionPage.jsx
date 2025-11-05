@@ -10,6 +10,7 @@ import PricingInfo from "../components/energy/PricingInfo";
 import { useEnergySession } from "../hooks/useEnergySession";
 import { useAuth } from "../hooks/useAuth";
 import { usePaymentData } from "../hooks/usePayment";
+import { useBatteryCountdown } from "../hooks/useBatteryCountdown";
 import {
   ThunderboltOutlined,
   LockOutlined,
@@ -37,6 +38,90 @@ const EnergyPage = ({ userID }) => {
 
   // ✅ State để lưu dữ liệu realtime từ SSE
   const [realtimeProgress, setRealtimeProgress] = useState(null);
+
+  // ✅ State để theo dõi trạng thái thanh toán
+  const [isPaid, setIsPaid] = useState(false);
+
+  // ✅ Lấy thông tin battery countdown từ localStorage
+  const [batteryCountdownInfo, setBatteryCountdownInfo] = useState(null);
+
+  useEffect(() => {
+    const countdownData = localStorage.getItem("batteryCountdown");
+    if (countdownData) {
+      try {
+        const parsed = JSON.parse(countdownData);
+        setBatteryCountdownInfo(parsed);
+        console.log("🔋 [SessionPage] Loaded battery countdown info:", parsed);
+      } catch (error) {
+        console.error(
+          "❌ [SessionPage] Error parsing battery countdown:",
+          error
+        );
+      }
+    }
+  }, [sessionData?.chargingSessionId]);
+
+  // ✅ Sử dụng battery countdown hook
+  const {
+    batteryLevel: countdownBatteryLevel,
+    remainingSeconds,
+    displayTime,
+    status: countdownStatus,
+    isCompleted: countdownCompleted,
+  } = useBatteryCountdown(
+    batteryCountdownInfo?.currentBattery,
+    batteryCountdownInfo?.remainingMinutes,
+    !!batteryCountdownInfo && !sessionData?.isDone // Chỉ active khi có data và session chưa done
+  );
+
+  // ✅ Debug log để kiểm tra hook hoạt động
+  useEffect(() => {
+    console.log("🔍 [SessionPage] Battery Countdown Debug:", {
+      batteryCountdownInfo,
+      countdownBatteryLevel,
+      remainingSeconds,
+      displayTime,
+      countdownStatus,
+      isActive: !!batteryCountdownInfo && !sessionData?.isDone,
+    });
+  }, [
+    batteryCountdownInfo,
+    countdownBatteryLevel,
+    remainingSeconds,
+    displayTime,
+    countdownStatus,
+    sessionData?.isDone,
+  ]);
+
+  // ✅ Kiểm tra trạng thái thanh toán khi sessionData thay đổi
+  useEffect(() => {
+    if (sessionData?.chargingSessionId) {
+      console.log(
+        "🔍 [SessionPage] Checking payment status for session:",
+        sessionData.chargingSessionId
+      );
+
+      // Kiểm tra localStorage xem session này đã thanh toán chưa
+      const paidSessionsStr = localStorage.getItem("paidSessions");
+      console.log(
+        "📦 [SessionPage] paidSessions from localStorage:",
+        paidSessionsStr
+      );
+
+      const paidSessions = JSON.parse(paidSessionsStr || "{}");
+
+      if (paidSessions[sessionData.chargingSessionId]) {
+        console.log(
+          "✅ [SessionPage] Session already paid:",
+          paidSessions[sessionData.chargingSessionId]
+        );
+        setIsPaid(true);
+      } else {
+        console.log("⚠️ [SessionPage] Session not paid yet");
+        setIsPaid(false);
+      }
+    }
+  }, [sessionData?.chargingSessionId]);
 
   // ✅ Kết nối SSE để nhận dữ liệu realtime
   useEffect(() => {
@@ -71,12 +156,16 @@ const EnergyPage = ({ userID }) => {
             // Reset reconnect attempts on successful message
             reconnectAttempts = 0;
 
-            // ✅ Backend trả về: chargedEnergy_kWh (string với dấu phấy) và elapsedSeconds (string)
+            // ✅ Backend trả về: chargedEnergy_kWh, elapsedSeconds, pin, minuteMax
             // Parse và chuyển đổi sang format FE cần
             const energyStr = progress.chargedEnergy_kWh || "0";
             const energyCharged = parseFloat(energyStr.replace(",", ".")) || 0;
 
             const elapsedSec = parseInt(progress.elapsedSeconds || "0", 10);
+
+            // ✅ Parse battery level và max minutes từ backend
+            const batteryLevel = parseInt(progress.pin || "0", 10);
+            const maxMinutes = parseInt(progress.minuteMax || "0", 10);
 
             // Chuyển seconds thành HH:MM:SS hoặc MM:SS
             const hours = Math.floor(elapsedSec / 3600);
@@ -93,9 +182,18 @@ const EnergyPage = ({ userID }) => {
                     seconds
                   ).padStart(2, "0")}`;
 
+            console.log("🔋 [SessionPage] SSE Progress:", {
+              energyCharged,
+              timeElapsed,
+              batteryLevel,
+              maxMinutes,
+            });
+
             setRealtimeProgress({
               energyCharged,
               timeElapsed,
+              batteryLevel,
+              maxMinutes,
             });
           } catch (error) {
             console.error("❌ Error parsing SSE progress data:", error);
@@ -171,6 +269,56 @@ const EnergyPage = ({ userID }) => {
       window.removeEventListener("sessionCreated", handleSessionCreated);
   }, [refetch]);
 
+  // ✅ Listen for payment success event
+  useEffect(() => {
+    const handlePaymentSuccess = (e) => {
+      const { sessionId } = e?.detail || {};
+      console.log("💰 [SessionPage] Payment success event received");
+      console.log("💰 [SessionPage] Event sessionId:", sessionId);
+      console.log(
+        "💰 [SessionPage] Current sessionData.chargingSessionId:",
+        sessionData?.chargingSessionId
+      );
+
+      if (sessionId && sessionId === sessionData?.chargingSessionId) {
+        console.log("✅ [SessionPage] SessionId matches! Marking as paid");
+
+        // Lưu vào localStorage
+        const paidSessions = JSON.parse(
+          localStorage.getItem("paidSessions") || "{}"
+        );
+        paidSessions[sessionId] = {
+          paidAt: new Date().toISOString(),
+          timestamp: Date.now(),
+        };
+        localStorage.setItem("paidSessions", JSON.stringify(paidSessions));
+        console.log("✅ [SessionPage] Saved to paidSessions:", paidSessions);
+
+        // Cập nhật state
+        setIsPaid(true);
+        console.log("✅ [SessionPage] isPaid set to true");
+
+        // Xóa pending payment
+        localStorage.removeItem("pendingPayment");
+
+        notification.success({
+          message: "Thanh toán thành công",
+          description: "Phiên sạc đã được thanh toán.",
+        });
+      } else {
+        console.warn("⚠️ [SessionPage] SessionId mismatch or missing");
+      }
+    };
+
+    console.log("🎧 [SessionPage] Registering paymentSuccess event listener");
+    window.addEventListener("paymentSuccess", handlePaymentSuccess);
+
+    return () => {
+      console.log("🎧 [SessionPage] Removing paymentSuccess event listener");
+      window.removeEventListener("paymentSuccess", handlePaymentSuccess);
+    };
+  }, [sessionData?.chargingSessionId]);
+
   // ✅ Handler thanh toán - Lấy payment và navigate
   const handlePayment = async () => {
     if (!user?.id) {
@@ -185,7 +333,7 @@ const EnergyPage = ({ userID }) => {
       // ✅ Gọi API lấy danh sách payment chưa thanh toán
       const unpaidPayments = await fetchUnpaidPaymentsByUserId(user.id);
 
-      console.log("✅ [EnergyPage] Unpaid payments:", unpaidPayments);
+      console.log("✅ [SessionPage] Unpaid payments:", unpaidPayments);
 
       if (unpaidPayments && unpaidPayments.length > 0) {
         // ✅ Tìm payment tương ứng với session hiện tại
@@ -200,24 +348,46 @@ const EnergyPage = ({ userID }) => {
         if (!targetPayment) {
           targetPayment = unpaidPayments[0];
           console.log(
-            "⚠️ [EnergyPage] Session payment not found, using first unpaid payment"
+            "⚠️ [SessionPage] Session payment not found, using first unpaid payment"
           );
         }
 
         // Lấy paymentId (có thể là paymentId hoặc id)
         const paymentId = targetPayment.paymentId || targetPayment.id;
+        const sessionIdToSave =
+          targetPayment.sessionId || sessionData?.chargingSessionId;
 
-        console.log("✅ [EnergyPage] Navigating to payment:", paymentId);
+        console.log("✅ [SessionPage] Navigating to payment:", paymentId);
+        console.log(
+          "✅ [SessionPage] Saving sessionId to pendingPayment:",
+          sessionIdToSave
+        );
+
+        // ✅ Lưu thông tin vào localStorage để track payment này
+        localStorage.setItem(
+          "pendingPayment",
+          JSON.stringify({
+            sessionId: sessionIdToSave,
+            paymentId: paymentId,
+            timestamp: Date.now(),
+          })
+        );
+
+        console.log(
+          "✅ [SessionPage] pendingPayment saved:",
+          localStorage.getItem("pendingPayment")
+        );
+
         navigate(`/app/payment/${paymentId}`);
       } else {
-        console.warn("⚠️ [EnergyPage] No unpaid payments found");
+        console.warn("⚠️ [SessionPage] No unpaid payments found");
         notification.info({
           message: "Không có thanh toán",
           description: "Bạn không có thanh toán nào cần hoàn thành.",
         });
       }
     } catch (error) {
-      console.error("❌ [EnergyPage] Error fetching payments:", error);
+      console.error("❌ [SessionPage] Error fetching payments:", error);
       notification.error({
         message: "Lỗi tải dữ liệu",
         description: "Không thể tải thông tin thanh toán. Vui lòng thử lại.",
@@ -417,9 +587,13 @@ const EnergyPage = ({ userID }) => {
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
               <BatteryProgress
-                batteryLevel={sessionData.batteryLevel || 0}
+                batteryLevel={
+                  countdownBatteryLevel || sessionData.batteryLevel || 0
+                }
                 isCharging={statusConfig?.isCharging || false}
-                isCompleted={statusConfig?.isCompleted || false}
+                isCompleted={
+                  countdownCompleted || statusConfig?.isCompleted || false
+                }
               />
             </Col>
 
@@ -431,6 +605,8 @@ const EnergyPage = ({ userID }) => {
                     : currentTime
                 }
                 sessionData={sessionData}
+                remainingSeconds={remainingSeconds}
+                displayTime={displayTime}
               />
             </Col>
           </Row>
@@ -448,12 +624,13 @@ const EnergyPage = ({ userID }) => {
             </Col>
 
             <Col xs={24} lg={12}>
-              {/* ✅ Truyền handler thanh toán vào PricingInfo */}
+              {/* ✅ Truyền handler thanh toán và trạng thái isPaid vào PricingInfo */}
               <PricingInfo
                 finishSession={finishSession}
                 isFinishing={isFinishing}
                 sessionData={sessionData}
                 onPay={handlePayment}
+                isPaid={isPaid}
               />
             </Col>
           </Row>
