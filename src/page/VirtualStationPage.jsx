@@ -5,7 +5,7 @@ import ShowSession from "../components/virtualstation/ShowSession";
 function VirtualStationPage() {
   return (
     <>
-      {/* <ShowQR /> */}
+      {<ShowQR />}
       <ShowSession />
     </>
   );
