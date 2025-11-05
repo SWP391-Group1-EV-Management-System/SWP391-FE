@@ -28,6 +28,7 @@ import {
 import { getWaitingListById } from "../services/waitingListService";
 import { getBookingById } from "../services/bookingService";
 import chargingStationService from "../services/chargingStationService";
+import { setDriverStatus } from "../utils/statusUtils"; // ← IMPORT HELPER
 
 const WaitingListPage = () => {
   const navigate = useNavigate();
@@ -47,6 +48,7 @@ const WaitingListPage = () => {
   const [waitingData, setWaitingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [chargingPostData, setChargingPostData] = useState(null); // ✅ Thêm state cho charging post data
   const [hasEarlyChargingOfferPending, setHasEarlyChargingOfferPending] =
     useState(false); // ✅ Track pending offer to disable polling
 
@@ -429,6 +431,9 @@ const WaitingListPage = () => {
         localStorage.removeItem("waitingListId");
         localStorage.removeItem("initialQueueRank");
         localStorage.removeItem("queuePostId");
+
+        // ✅ Update driver status để Menu update ngay
+        setDriverStatus("booking");
 
         console.log(
           "💾 [WaitingListPage] Updated localStorage for booking status"
