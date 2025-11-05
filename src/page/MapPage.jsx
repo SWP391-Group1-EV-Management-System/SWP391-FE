@@ -62,8 +62,10 @@ function MapPage() {
     error,
     refresh: refreshStations,
     fetchStationPosts,
+    userLocation, // Vị trí người dùng
   } = useChargingStations({
     autoFetch: true, // Auto-load data on component mount
+    useLocation: true, // Tự động lấy vị trí người dùng và tính khoảng cách
   });
 
   /**
@@ -156,7 +158,10 @@ function MapPage() {
         <Row className="map-stats-section">
           <Col lg={4} md={4} sm={12}>
             <Card className="map-stat-card total-stations">
-              <BsLightning className="stat-icon" />
+              <BsLightning
+                style={{ color: "#10b981", fontSize: "30px" }}
+                className="stat-icon"
+              />
               <div className="stat-number">
                 {loading ? "..." : mapStats.totalStations}
               </div>
@@ -165,7 +170,10 @@ function MapPage() {
           </Col>
           <Col lg={4} md={4} sm={12}>
             <Card className="map-stat-card available-stations">
-              <BsClock className="stat-icon" />
+              <BsClock
+                style={{ color: "#10b981", fontSize: "30px" }}
+                className="stat-icon"
+              />
               <div className="stat-number">
                 {loading ? "..." : mapStats.availableStations}
               </div>
@@ -174,11 +182,14 @@ function MapPage() {
           </Col>
           <Col lg={4} md={4} sm={12}>
             <Card className="map-stat-card busy-stations">
-              <BsPeople className="stat-icon" />
+              <BsPeople
+                style={{ color: "#10b981", fontSize: "30px" }}
+                className="stat-icon"
+              />
               <div className="stat-number">
                 {loading ? "..." : mapStats.bookedStations}
               </div>
-              <div className="stat-label">Số trạm đang sạc</div>
+              <div className="stat-label">Số trạm đang bảo trì</div>
             </Card>
           </Col>
         </Row>
@@ -189,7 +200,10 @@ function MapPage() {
           <Col lg={8} md={7}>
             <Card className="map-content-card">
               <div className="map-container">
-                <GGMap onStationClick={handleStationClick} />
+                <GGMap
+                  style={{ color: "#10b981" }}
+                  onStationClick={handleStationClick}
+                />
               </div>
             </Card>
           </Col>
@@ -246,28 +260,70 @@ function MapPage() {
                           </span>
                         </div>
 
-                        <div className="station-details">
-                          <div className="station-detail">
-                            <BsGeoAlt className="station-detail-icon" />
-                            <span className="station-distance">
-                              {station.distance}
+                        {/* Grid 2x2 for main stats */}
+                        <div className="station-stats-grid">
+                          {/* Distance - always show */}
+                          <div className="station-stat-item">
+                            <BsGeoAlt
+                              style={{ color: "#10b981" }}
+                              className="stat-icon"
+                            />
+                            <span className="stat-value-map">
+                              {station.distance || "Đang tính..."}
                             </span>
                           </div>
-                          <div className="station-detail">
-                            <BsLightning className="station-detail-icon" />
-                            <span>
+
+                          {/* Available/Total slots */}
+                          <div className="station-stat-item">
+                            <BsLightning
+                              style={{ color: "#10b981" }}
+                              className="stat-icon"
+                            />
+                            <span className="stat-value-map">
                               {station.availableSlots}/{station.totalSlots}{" "}
                               trống
                             </span>
                           </div>
-                          <div className="station-detail">
-                            <BsBattery className="station-detail-icon" />
-                            <span>{station.power}</span>
-                          </div>
-                          <div className="station-detail">
-                            <BsSpeedometer2 className="station-detail-icon" />
-                            <span>{station.type}</span>
-                          </div>
+
+                          {/* Charging Types - Show unique types */}
+                          {station.chargingTypes &&
+                            station.chargingTypes !== "AC/DC" && (
+                              <div className="station-stat-item station-stat-item--type">
+                                <BsSpeedometer2
+                                  style={{ color: "#10b981" }}
+                                  className="stat-icon"
+                                />
+                                <span className="stat-value-map">
+                                  {station.chargingTypes}
+                                </span>
+                              </div>
+                            )}
+
+                          {/* Active sessions - only if exists */}
+                          {station.chargingSessionIds &&
+                            station.chargingSessionIds.length > 0 && (
+                              <div className="station-stat-item station-stat-item--sessions">
+                                <BsBattery
+                                  style={{ color: "#10b981" }}
+                                  className="stat-icon"
+                                />
+                                <span className="stat-value-map">
+                                  {station.chargingSessionIds.length} Phiên đã
+                                  sạc
+                                </span>
+                              </div>
+                            )}
+                        </div>
+
+                        {/* Address - Full width at bottom */}
+                        <div className="station-address">
+                          <BsGeoAlt
+                            style={{ color: "#10b981" }}
+                            className="station-address-icon"
+                          />
+                          <span className="station-address-text">
+                            {station.address}
+                          </span>
                         </div>
                       </div>
                     ))

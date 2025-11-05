@@ -82,7 +82,9 @@ function VirtualStationPage() {
     if (!status) {
       return {
         color: "#10b981",
-        icon: <LoadingOutlined style={{ fontSize: "24px", color: "#10b981" }} />,
+        icon: (
+          <LoadingOutlined style={{ fontSize: "24px", color: "#10b981" }} />
+        ),
         message: isConnected ? "Đang tải trạng thái..." : "Đang kết nối...",
         canPlugIn: true, // ✅ Cho phép cắm sạc khi chưa có status
       };
@@ -92,7 +94,11 @@ function VirtualStationPage() {
       case "AVAILABLE":
         return {
           color: "#10b981",
-          icon: <CheckCircleOutlined style={{ fontSize: "24px", color: "#10b981" }} />,
+          icon: (
+            <CheckCircleOutlined
+              style={{ fontSize: "24px", color: "#10b981" }}
+            />
+          ),
           message: "Trụ rảnh - Sẵn sàng sử dụng",
           canPlugIn: true,
         };
@@ -108,7 +114,11 @@ function VirtualStationPage() {
       case "BOOKED":
         return {
           color: "#f59e0b",
-          icon: <ClockCircleOutlined style={{ fontSize: "24px", color: "#f59e0b" }} />,
+          icon: (
+            <ClockCircleOutlined
+              style={{ fontSize: "24px", color: "#f59e0b" }}
+            />
+          ),
           message: `ĐÃ CÓ NGƯỜI BOOKING TRƯỚC`,
           subtitle: `Người đặt: ${status.details?.userName || "Unknown"}`,
           canPlugIn: true, // ✅ Cho phép bấm, backend sẽ kiểm tra và báo lỗi
@@ -117,7 +127,11 @@ function VirtualStationPage() {
       case "CHARGING":
         return {
           color: "#ef4444",
-          icon: <ThunderboltOutlined style={{ fontSize: "24px", color: "#ef4444" }} />,
+          icon: (
+            <ThunderboltOutlined
+              style={{ fontSize: "24px", color: "#ef4444" }}
+            />
+          ),
           message: "Đang có người sạc",
           subtitle: `Người sạc: ${status.details?.userName || "Unknown"}`,
           canPlugIn: true, // ✅ Cho phép bấm, backend sẽ kiểm tra và báo lỗi
@@ -126,7 +140,11 @@ function VirtualStationPage() {
       default:
         return {
           color: "#6b7280",
-          icon: <QuestionCircleOutlined style={{ fontSize: "24px", color: "#6b7280" }} />,
+          icon: (
+            <QuestionCircleOutlined
+              style={{ fontSize: "24px", color: "#6b7280" }}
+            />
+          ),
           message: "Trạng thái không xác định",
           canPlugIn: true, // ✅ Mặc định cho phép nếu không xác định
         };
