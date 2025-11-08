@@ -66,6 +66,7 @@ function Login() {
                   name="username"
                   required
                   placeholder="email@example.com"
+                  autoComplete="username"
                 />
               </div>
               <div className="password-field">
@@ -80,6 +81,7 @@ function Login() {
                     name="password"
                     required
                     placeholder="Nhập mật khẩu"
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"

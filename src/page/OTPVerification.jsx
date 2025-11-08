@@ -52,20 +52,19 @@ function OTPVerification() {
     setIsResending(true);
     setError("");
 
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || "https://api.ecoz.dev";
+
     try {
       console.log("Resending OTP to:", email);
-      const response = await axios.post(
-        "http://localhost:8080/users/register",
-        {
-          email: email,
-          firstName: location.state?.userData?.firstName || "",
-          lastName: location.state?.userData?.lastName || "",
-          birthDate: location.state?.userData?.birthDate || "",
-          gender: location.state?.userData?.gender || false,
-          phoneNumber: location.state?.userData?.phoneNumber || "",
-          password: location.state?.userData?.password || "",
-        }
-      );
+      const response = await axios.post(`${apiUrl}/users/register`, {
+        email: email,
+        firstName: location.state?.userData?.firstName || "",
+        lastName: location.state?.userData?.lastName || "",
+        birthDate: location.state?.userData?.birthDate || "",
+        gender: location.state?.userData?.gender || false,
+        phoneNumber: location.state?.userData?.phoneNumber || "",
+        password: location.state?.userData?.password || "",
+      });
 
       console.log("OTP resent successfully");
       setTimer(60); // Reset timer to 1 minute
@@ -123,15 +122,14 @@ function OTPVerification() {
 
     setIsLoading(true);
 
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || "https://api.ecoz.dev";
+
     try {
       console.log("Sending OTP verification request...");
-      const response = await axios.post(
-        "http://localhost:8080/users/register/verify-otp",
-        {
-          email: email,
-          otp: otpCode,
-        }
-      );
+      const response = await axios.post(`${apiUrl}/users/register/verify-otp`, {
+        email: email,
+        otp: otpCode,
+      });
 
       console.log("OTP verification response status:", response.status);
       console.log("OTP verification response:", response.data);

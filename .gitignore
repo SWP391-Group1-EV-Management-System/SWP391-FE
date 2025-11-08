@@ -10,7 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-*.local
+# *.local - Commented out để commit .env.local cho team
 
 # Editor directories and files
 .vscode/*

@@ -19,11 +19,12 @@ function ForgotPasswordPage() {
     setMessage("");
     setIsLoading(true);
 
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || "https://api.ecoz.dev";
+
     try {
-      const response = await axios.post(
-        "http://localhost:8080/users/forgot-password", // Đảm bảo API này tồn tại
-        { email }
-      );
+      const response = await axios.post(`${apiUrl}/users/forgot-password`, {
+        email,
+      });
 
       setMessage("Mã OTP đã được gửi đến email của bạn.");
       console.log("Response:", response.data);
@@ -65,11 +66,7 @@ function ForgotPasswordPage() {
               placeholder="Email của bạn"
               required
             />
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="submit-btn"
-            >
+            <button type="submit" disabled={isLoading} className="submit-btn">
               {isLoading ? "Đang gửi..." : "Gửi mã OTP"}
             </button>
           </form>
