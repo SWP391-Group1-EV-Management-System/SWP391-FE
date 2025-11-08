@@ -46,15 +46,24 @@ export const useAuth = () => {
       "/about",
     ];
     if (publicPaths.some((path) => location.pathname.startsWith(path))) {
+      console.log("⏭️ Skipping auto-fetch on public page");
       return;
     }
 
     // Chỉ fetch nếu chưa có user VÀ chưa từng fetch
     if (!user && !hasFetchedRef.current) {
+      console.log("📡 Auto-fetching user profile...");
       hasFetchedRef.current = true;
-      fetchUserProfile();
+      fetchUserProfile().catch((err) => {
+        // Suppress 401/403 errors on initial load - user not logged in yet
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          console.log("⚠️ Not authenticated (expected on initial load)");
+        } else {
+          console.error("❌ Unexpected error fetching user:", err);
+        }
+      });
     }
-  }, [location.pathname]);
+  }, [location.pathname, user, fetchUserProfile]);
 
   const login = useCallback(
     async (email, password, redirectTo = "/app/home") => {

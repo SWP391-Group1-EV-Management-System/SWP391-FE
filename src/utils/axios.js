@@ -41,13 +41,22 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // KHÔNG retry cho các endpoint public (login, re-login)
-    const publicEndpoints = ["/users/login", "/users/re-login"];
+    // KHÔNG retry cho các endpoint public (login, re-login, register, etc.)
+    const publicEndpoints = [
+      "/users/login",
+      "/users/re-login",
+      "/users/register",
+      "/users/send-otp",
+      "/users/verify-otp",
+      "/users/forgot-password",
+      "/users/reset-password",
+    ];
     if (
       publicEndpoints.some((endpoint) =>
         originalRequest.url?.includes(endpoint)
       )
     ) {
+      console.log("⏭️ Public endpoint, không retry:", originalRequest.url);
       return Promise.reject(error);
     }
 
@@ -61,31 +70,47 @@ api.interceptors.response.use(
       const isTokenExpired =
         (typeof errorData === "string" &&
           (errorData.includes("Token expired") ||
-            errorData.includes("Invalid token"))) ||
+            errorData.includes("Invalid token") ||
+            errorData.includes("JWT expired") ||
+            errorData.includes("Unauthorized"))) ||
         errorData?.error === "Token expired" ||
         errorData?.error === "Invalid token";
 
       // Nếu là 403, có thể do token hết hạn → Thử refresh
       if (error.response?.status === 403 || isTokenExpired) {
-        console.log("Token có thể hết hạn (401/403), thử refresh...");
+        console.log("🔑 Token có thể hết hạn (401/403), thử refresh...");
       } else {
-        // Không phải token expired → Có thể là unauthorized khác
-        console.warn("Unauthorized nhưng không phải token expired:", errorData);
+        // Không phải token expired → Có thể là unauthorized khác (CORS, permissions)
+        console.warn(
+          "⚠️ 403 Forbidden - Có thể là CORS hoặc không có quyền truy cập"
+        );
+        console.warn("URL:", originalRequest.url);
+        console.warn("Response:", errorData);
+
+        // Nếu là /users/me và 403, có thể user chưa login → redirect về login
+        if (originalRequest.url?.includes("/users/me")) {
+          console.log("🚨 Không thể lấy thông tin user, có thể chưa đăng nhập");
+          // Không redirect tự động ở đây, để component xử lý
+        }
+
         return Promise.reject(error);
       }
 
       // Nếu đang refresh, thêm vào queue
       if (isRefreshing) {
-        console.log("Đang refresh token, thêm request vào queue...");
+        console.log("⏳ Đang refresh token, thêm request vào queue...");
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then(() => {
-            console.log("Retry request sau khi refresh:", originalRequest.url);
+            console.log(
+              "♻️ Retry request sau khi refresh:",
+              originalRequest.url
+            );
             return api(originalRequest);
           })
           .catch((err) => {
-            console.error("Retry thất bại:", err);
+            console.error("❌ Retry thất bại:", err.message);
             return Promise.reject(err);
           });
       }
@@ -94,27 +119,33 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        console.log("Bắt đầu refresh token...");
+        console.log("🔄 Bắt đầu refresh token...");
         await refreshAccessToken();
 
         // Refresh thành công → Retry tất cả requests
         processQueue(null);
 
         console.log(
-          "Refresh thành công, retry request gốc:",
+          "✅ Refresh thành công, retry request gốc:",
           originalRequest.url
         );
         return api(originalRequest);
       } catch (refreshError) {
-        console.error("Refresh token thất bại:", refreshError.response?.status);
+        console.error(
+          "❌ Refresh token thất bại:",
+          refreshError.response?.status
+        );
 
         // Refresh thất bại → Clear queue và logout
         processQueue(refreshError);
 
         // Redirect về login nếu refresh token hết hạn
-        if (refreshError.response?.status === 401) {
-          console.warn('🚨 Refresh token hết hạn → Redirect về login');
-         
+        if (
+          refreshError.response?.status === 401 ||
+          refreshError.response?.status === 403
+        ) {
+          console.warn("🚨 Refresh token hết hạn → Redirect về login");
+
           // Redirect về login
           window.location.href = "/login";
         }

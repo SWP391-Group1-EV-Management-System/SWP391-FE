@@ -37,6 +37,13 @@ const ProtectedRoute = ({
   // Kiểm tra xác thực khi component mount
   useEffect(() => {
     const initAuth = async () => {
+      console.log(
+        "[ProtectedRoute] initAuth - user:",
+        !!user,
+        "loading:",
+        loading
+      );
+
       // Nếu đã có user, không cần loading
       if (user) {
         setIsInitialized(true);
@@ -49,12 +56,27 @@ const ProtectedRoute = ({
         try {
           await fetchUserProfile();
         } catch (error) {
-          console.warn("[ProtectedRoute] Failed to fetch user profile:", error);
+          // Nếu là 401/403, user chưa đăng nhập → redirect về login
+          if (
+            error?.response?.status === 401 ||
+            error?.response?.status === 403
+          ) {
+            console.log(
+              "[ProtectedRoute] User not authenticated, will redirect to login"
+            );
+          } else {
+            console.warn(
+              "[ProtectedRoute] Unexpected error fetching user:",
+              error
+            );
+          }
         } finally {
           setShouldShowLoading(false);
+          setIsInitialized(true);
         }
+      } else {
+        setIsInitialized(true);
       }
-      setIsInitialized(true);
     };
 
     initAuth();

@@ -60,12 +60,11 @@ function Register() {
     setIsLoading(true);
     console.log("Sending registration data:", formData);
 
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || "https://api.ecoz.dev";
+
     try {
       // Call API to register + send OTP
-      console.log(
-        "Making API call to:",
-        "http://localhost:8080/users/register"
-      );
+      console.log("Making API call to:", `${apiUrl}/users/register`);
       console.log("Request body:", {
         email: formData.email,
         firstName: formData.firstName,
@@ -76,7 +75,7 @@ function Register() {
         password: formData.password,
       });
 
-      const response = await fetch("http://localhost:8080/users/register", {
+      const response = await fetch(`${apiUrl}/users/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -270,6 +269,7 @@ function Register() {
                       onChange={handleInputChange}
                       required
                       placeholder="Nhập mật khẩu"
+                      autoComplete="new-password"
                     />
                     <button
                       type="button"

@@ -2,6 +2,14 @@
 # Sử dụng base image Node.js 20 (react-router@7 yêu cầu Node >= 20)
 FROM node:20-alpine AS builder
 
+# ✅ Nhận build argument từ docker-compose
+ARG VITE_API_BASE_URL=https://api.ecoz.dev
+ARG VITE_API_URL=https://api.ecoz.dev
+
+# ✅ Set environment variables cho build process
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ENV VITE_API_URL=${VITE_API_URL}
+
 # Cài đặt build dependencies cho Alpine Linux
 RUN apk add --no-cache python3 make g++
 
@@ -37,7 +45,8 @@ RUN npm run build
 
 # --- GIAI ĐOẠN 2: "SERVER" ---
 # Sử dụng base image Nginx (web server) siêu nhẹ
-FROM nginx:1.23-alpine
+# ✅ Using latest stable Alpine-based Nginx
+FROM nginx:stable-alpine
 
 # Copy các file tĩnh đã được build ở Giai đoạn 1
 # Vite build output là /dist (không phải /build)

@@ -38,7 +38,8 @@ class WebSocketService {
 
     console.log("🔌 [WebSocketService] Connecting with userId:", userId);
 
-    const socket = new SockJS("http://localhost:8080/ws");
+    const wsUrl = import.meta.env.VITE_API_BASE_URL || "https://api.ecoz.dev";
+    const socket = new SockJS(`${wsUrl}/ws`);
 
     this.client = new Client({
       webSocketFactory: () => socket,
