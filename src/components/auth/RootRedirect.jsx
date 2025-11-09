@@ -13,6 +13,9 @@ import { LoadingSpinner } from "../common";
 const RootRedirect = () => {
   const { user, loading } = useAuth();
 
+  // Debug log để kiểm tra
+  console.log("🔀 [RootRedirect] user:", user, "loading:", loading);
+
   // Hiển thị loading trong khi kiểm tra authentication
   if (loading) {
     return (

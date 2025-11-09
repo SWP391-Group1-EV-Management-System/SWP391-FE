@@ -139,16 +139,9 @@ api.interceptors.response.use(
         // Refresh thất bại → Clear queue và logout
         processQueue(refreshError);
 
-        // Redirect về login nếu refresh token hết hạn
-        if (
-          refreshError.response?.status === 401 ||
-          refreshError.response?.status === 403
-        ) {
-          console.warn("🚨 Refresh token hết hạn → Redirect về login");
-
-          // Redirect về login
-          window.location.href = "/login";
-        }
+        // KHÔNG redirect tự động về login nữa
+        // Để các component tự xử lý (RootRedirect, ProtectedRoute, etc.)
+        console.warn("⚠️ Refresh token thất bại - để component xử lý redirect");
 
         return Promise.reject(refreshError);
       } finally {
