@@ -1,5 +1,5 @@
 import React from 'react';
-import { Row, Col, Typography, Divider, Space } from 'antd';
+import { Row, Col, Typography, Space } from 'antd';
 import { UnorderedListOutlined } from '@ant-design/icons';
 import HistorySessionCard from './HistorySessionCard';
 import HistorySessionDetail from './HistorySessionDetail';

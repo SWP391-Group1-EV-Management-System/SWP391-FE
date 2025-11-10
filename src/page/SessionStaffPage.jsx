@@ -43,7 +43,6 @@ import {
   DollarOutlined,
 } from "@ant-design/icons";
 import PageHeader from "../components/PageHeader";
-import ReportModal from "../components/ReportModal";
 import "../assets/styles/SessionStaff.css";
 import "../assets/styles/utilities.css";
 
@@ -68,7 +67,6 @@ const SessionStaffPage = () => {
   const [filteredSessions, setFilteredSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   // Memoized stats data với màu chính #43e97b
   const statsData = useMemo(
@@ -192,15 +190,6 @@ const SessionStaffPage = () => {
       message.success("Đã làm mới dữ liệu!");
     }, 1500);
   }, []);
-
-  // Report modal handlers
-  const handleOpenReportModal = () => setIsReportModalOpen(true);
-  const handleCloseReportModal = () => setIsReportModalOpen(false);
-  const handleAddReport = (values) => {
-    // You can handle report submission here
-    // For now, just log
-    console.log("Report added:", values);
-  };
 
   // Memoized table columns với màu sắc mới
   const columns = useMemo(
@@ -521,39 +510,21 @@ const SessionStaffPage = () => {
           </Space>
         }
       >
-        {/* Search Bar + Report Button */}
-        <div
-          className="session-margin-bottom-16"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <div style={{ flex: 1, marginRight: 16 }}>
-            <Search
-              placeholder="Tìm kiếm theo mã phiên sạc hoặc tên người dùng..."
-              allowClear
-              enterButton={
-                <Button className="session-button-success-ghost">
-                  <SearchOutlined />
-                </Button>
-              }
-              size="large"
-              onSearch={handleSearch}
-              onChange={(e) => setSearchText(e.target.value)}
-              className="session-search-input"
-            />
-          </div>
-          <Button
-            type="primary"
-            danger
+        {/* Search Bar */}
+        <div className="session-margin-bottom-16">
+          <Search
+            placeholder="Tìm kiếm theo mã phiên sạc hoặc tên người dùng..."
+            allowClear
+            enterButton={
+              <Button className="session-button-success-ghost">
+                <SearchOutlined />
+              </Button>
+            }
             size="large"
-            style={{ minWidth: 200 }}
-            onClick={handleOpenReportModal}
-          >
-            Báo cáo sự cố trụ sạc
-          </Button>
+            onSearch={handleSearch}
+            onChange={(e) => setSearchText(e.target.value)}
+            className="session-search-input"
+          />
         </div>
 
         <Table
@@ -575,20 +546,6 @@ const SessionStaffPage = () => {
           rowClassName={(record, index) =>
             index % 2 === 0 ? "table-row-light" : "table-row-dark"
           }
-        />
-        <ReportModal
-          open={isReportModalOpen}
-          onClose={handleCloseReportModal}
-          reportData={null}
-          isAdmin={false}
-          onAddReport={handleAddReport}
-          initialValues={{
-            title: "",
-            description: "",
-            type: "",
-            isUrgent: false,
-          }}
-          validationSchema={null}
         />
       </Card>
     </div>

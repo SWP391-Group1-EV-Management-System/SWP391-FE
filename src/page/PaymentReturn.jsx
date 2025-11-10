@@ -110,7 +110,7 @@ const PaymentReturn = () => {
   };
 
   const handleViewPackages = () => {
-    window.location.href = "/app/packages";
+    window.location.href = "/app/payment-history";
   };
 
   const handleViewHistory = () => {

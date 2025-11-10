@@ -13,7 +13,6 @@ import Login from "./page/Login.jsx";
 import Register from "./page/Register.jsx";
 import WelcomePage from "./page/WelcomePage.jsx";
 import SessionStaffPage from "./page/SessionStaffPage.jsx";
-import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
 import OTPVerification from "./page/OTPVerification.jsx";
 import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
 import UserManagementPage from "./page/UserManagementPage.jsx";
@@ -35,7 +34,6 @@ import { cleanupExpiredFrozenCountdowns } from "./utils/countdownUtils.js";
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
 import {
-  AdminRoute,
   StaffRoute,
   ManagerRoute,
   DriverRoute,
@@ -204,14 +202,6 @@ function App() {
               element={
                 <StaffRoute>
                   <SessionStaffPage />
-                </StaffRoute>
-              }
-            />
-            <Route
-              path="waitingstaff"
-              element={
-                <StaffRoute>
-                  <WaitingStaffPage />
                 </StaffRoute>
               }
             />

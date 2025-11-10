@@ -8,6 +8,7 @@ import {
   DollarOutlined,
   AlertOutlined,
   EnvironmentOutlined,
+  UserOutlined,
 } from "@ant-design/icons";
 import PageHeader from "../components/PageHeader";
 import { Area } from '@ant-design/plots';
@@ -26,7 +27,47 @@ const revenueData = [
   { day: 'CN', revenue: 1050 }
 ];
 
+// Dữ liệu bảng doanh thu theo trạm
+const stationRevenueColumns = [
+  {
+    title: 'Trạm',
+    dataIndex: 'station',
+    key: 'station',
+    render: (text) => <Text strong>{text}</Text>,
+  },
+  {
+    title: 'Doanh thu',
+    dataIndex: 'revenue',
+    key: 'revenue',
+    render: (value) => <Text>{value.toLocaleString()}đ</Text>,
+    sorter: (a, b) => a.revenue - b.revenue,
+  },
+  {
+    title: 'Lượt sạc',
+    dataIndex: 'charges',
+    key: 'charges',
+    align: 'center',
+  },
+  {
+    title: 'Trạng thái',
+    dataIndex: 'status',
+    key: 'status',
+    align: 'center',
+    render: (status) => (
+      <Tag color={status === 'Hoạt động' ? 'green' : 'red'}>
+        {status}
+      </Tag>
+    ),
+  },
+];
 
+const stationRevenueData = [
+  { key: '1', station: 'Trạm Quận 1', revenue: 4500000, charges: 128, status: 'Hoạt động' },
+  { key: '2', station: 'Trạm Quận 3', revenue: 3800000, charges: 95, status: 'Hoạt động' },
+  { key: '3', station: 'Trạm Quận 7', revenue: 5200000, charges: 142, status: 'Hoạt động' },
+  { key: '4', station: 'Trạm Bình Thạnh', revenue: 2900000, charges: 78, status: 'Bảo trì' },
+  { key: '5', station: 'Trạm Thủ Đức', revenue: 4100000, charges: 115, status: 'Hoạt động' },
+];
 
 function DashboardContent() {
   // Cấu hình cho biểu đồ AreaChart của Ant Design Plots
@@ -51,72 +92,77 @@ function DashboardContent() {
           icon={<ThunderboltOutlined />}
         />
 
-        {/* Stats Grid */}
+        {/* Stats Grid - 4 thống kê */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={24} sm={12} md={6}>
+          <Col xs={24} sm={12} md={12} lg={6}>
             <Card>
-              <Space>
-                <DollarOutlined style={{ fontSize: 32, color: "#1890ff" }} />
-                <div>
-                  <Text type="secondary">Doanh thu hôm nay</Text>
-                  <Title level={3} style={{ margin: 0, color: "#262626" }}>1.250.000đ</Title>
-                </div>
+              <Space direction="vertical" size={0}>
+                <Text type="secondary" style={{ fontSize: 12 }}>Doanh thu hôm nay</Text>
+                <Title level={4} style={{ margin: 0, color: "#1890ff" }}>1.250.000đ</Title>
               </Space>
             </Card>
           </Col>
-          <Col xs={24} sm={12} md={6}>
+          <Col xs={24} sm={12} md={12} lg={6}>
             <Card>
-              <Space>
-                <ThunderboltOutlined style={{ fontSize: 32, color: "#52c41a" }} />
-                <div>
-                  <Text type="secondary">Trụ đang hoạt động</Text>
-                  <Title level={3} style={{ margin: 0, color: "#262626" }}>32</Title>
-                </div>
+              <Space direction="vertical" size={0}>
+                <Text type="secondary" style={{ fontSize: 12 }}>Doanh thu tháng</Text>
+                <Title level={4} style={{ margin: 0, color: "#52c41a" }}>35.480.000đ</Title>
               </Space>
             </Card>
           </Col>
-          <Col xs={24} sm={12} md={6}>
+          <Col xs={24} sm={12} md={12} lg={6}>
             <Card>
-              <Space>
-                <EnvironmentOutlined style={{ fontSize: 32, color: "#faad14" }} />
-                <div>
-                  <Text type="secondary">Số trạm</Text>
-                  <Title level={3} style={{ margin: 0, color: "#262626" }}>3</Title>
-                </div>
+              <Space direction="vertical" size={0}>
+                <Text type="secondary" style={{ fontSize: 12 }}>Lượt sạc</Text>
+                <Title level={4} style={{ margin: 0, color: "#faad14" }}>558</Title>
               </Space>
             </Card>
           </Col>
-          <Col xs={24} sm={12} md={6}>
+          <Col xs={24} sm={12} md={12} lg={6}>
             <Card>
-              <Space>
-                <AlertOutlined style={{ fontSize: 32, color: "#ff4d4f" }} />
-                <div>
-                  <Text type="secondary">Sự cố mới</Text>
-                  <Title level={3} style={{ margin: 0, color: "#262626" }}>5</Title>
-                </div>
+              <Space direction="vertical" size={0}>
+                <Text type="secondary" style={{ fontSize: 12 }}>Người dùng trả phí</Text>
+                <Title level={4} style={{ margin: 0, color: "#eb2f96" }}>248</Title>
               </Space>
             </Card>
           </Col>
         </Row>
 
-        {/* Main Content Grid */}
+        {/* Map Section */}
         <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
-          <Col xs={24} md={14}>
+          <Col xs={24}>
             <Card
-              title={<span style={{ fontWeight: 600 }}>Tổng quan trạm</span>}
-              style={{ borderRadius: 8, minHeight: 320 }}
+              title={<span style={{ fontWeight: 600 }}>Tổng quan trạm sạc</span>}
+              style={{ borderRadius: 8 }}
             >
-              <div style={{ height: '300px', width: '100%' }}>  {/* Thêm wrapper với height cố định để bản đồ render đúng */}
+              <div style={{ height: '400px', width: '100%' }}>
                 <Map />
               </div>
             </Card>
           </Col>
-          <Col xs={24} md={10}>
+        </Row>
+
+        {/* Revenue Chart & Station Revenue Table */}
+        <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
+          <Col xs={24} md={12}>
             <Card
-              title={<span style={{ fontWeight: 600 }}>Doanh thu (7 ngày gần nhất)</span>}
+              title={<span style={{ fontWeight: 600 }}>Doanh thu 7 ngày gần nhất</span>}
               style={{ borderRadius: 8 }}
             >
               <Area {...areaConfig} />
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card
+              title={<span style={{ fontWeight: 600 }}>Bảng doanh thu theo trạm</span>}
+              style={{ borderRadius: 8 }}
+            >
+              <Table
+                columns={stationRevenueColumns}
+                dataSource={stationRevenueData}
+                pagination={false}
+                size="small"
+              />
             </Card>
           </Col>
         </Row>

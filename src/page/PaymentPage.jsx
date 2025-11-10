@@ -39,7 +39,7 @@ function PaymentPage() {
         };
         setSessionData(mappedSessionData);
       })
-      .catch((err) => {
+      .catch(() => {
         notification.error({
           message: 'Lỗi tải dữ liệu',
           description: 'Không thể tải thông tin thanh toán.',

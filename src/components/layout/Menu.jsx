@@ -55,12 +55,6 @@ const menuItemsByRole = {
       icon: BsClipboardData,
       path: "/app/sessionstaff",
     },
-    {
-      id: "waitingstaff",
-      label: "Waiting Staff",
-      icon: BsHourglassSplit,
-      path: "/app/waitingstaff",
-    },
   ],
   MANAGER: [
     { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },

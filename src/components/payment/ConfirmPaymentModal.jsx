@@ -8,7 +8,6 @@ const ConfirmPaymentModal = ({
   onConfirm, 
   onCancel, 
   totalAmount,
-  paymentData = {},
   titleText = "Xác nhận thanh toán",
   messageText = "Bạn có chắc chắn muốn thanh toán?"
 }) => {

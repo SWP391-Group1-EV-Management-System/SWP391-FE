@@ -5,7 +5,7 @@ import StaffTable from '../components/user/StaffTable';
 import PageHeader from '../components/PageHeader';
 import ServicePackageManagement from '../components/service/ServicePackageManagement';
 import { FaUserAlt } from 'react-icons/fa';
-import ReportList from '../components/ReportList';
+
 
 const UserManagementPage = () => {
   const [search, setSearch] = useState('');
@@ -33,15 +33,6 @@ const UserManagementPage = () => {
         <ServicePackageManagement />
       )
     },
-    {
-      key: 'report',
-      label: <span className="tab-animate">Quản lý báo cáo</span>,
-      children: (
-        <div style={{ padding: '20px 0' }}>
-          <ReportList />
-        </div>
-      )
-    }
   ];
 
   return (

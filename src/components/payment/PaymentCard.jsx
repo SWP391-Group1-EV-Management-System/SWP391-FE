@@ -12,20 +12,15 @@ import { useAuth } from "../../hooks/useAuth";
 
 const { Text, Title } = Typography;
 
-// Define package information (no discounts applied)
-const packageInfo = {
-  basic: {
-    name: "Gói cơ bản",
-  },
-  standard: {
-    name: "Gói tiêu chuẩn",
-  },
-  premium: {
-    name: "Gói cao cấp",
-  },
-  vip: {
-    name: "Gói VIP",
-  },
+const formatCurrency = (amount) => {
+  // chấp nhận 0, loại bỏ giá trị null/undefined/NaN
+  if (amount == null || isNaN(Number(amount))) return '0 VND';
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    currencyDisplay: 'code',
+    maximumFractionDigits: 0
+  }).format(Number(amount));
 };
 
 const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
@@ -48,9 +43,7 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
     const paymentData = {
       paymentMethod,
       usePackage,
-      // Không cho user chọn gói ở UI => hệ thống tự lấy gói đăng ký
       selectedPackage: usePackage ? registeredPackage : null,
-      packageInfo: usePackage ? packageInfo[registeredPackage] : null,
       totalAmount: calculateTotal(),
     };
     onConfirm(paymentData);
@@ -76,7 +69,7 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
           {/* Không hiển thị chi tiết giảm giá */}
           <Descriptions.Item label="Tổng tiền thanh toán">
             <Text strong style={{ fontSize: "18px", color: "#ff4d4f" }}>
-              {calculateTotal().toLocaleString("vi-VN")} VNĐ
+              {formatCurrency(calculateTotal())}
             </Text>
           </Descriptions.Item>
         </Descriptions>

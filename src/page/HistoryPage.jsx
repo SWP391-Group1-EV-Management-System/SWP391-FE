@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Spin, Typography, Space } from 'antd';
-import { ThunderboltOutlined, ReloadOutlined } from '@ant-design/icons';
+import { ThunderboltOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useHistory } from '../hooks/useHistory';
 import HistorySummary from '../components/history/HistorySummary';
