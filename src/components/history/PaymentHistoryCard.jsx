@@ -4,6 +4,17 @@ import { ThunderboltOutlined, CreditCardOutlined, CheckCircleOutlined, ClockCirc
 
 const { Text } = Typography;
 
+// Thêm helper formatCurrency tại đây
+const formatCurrency = (amount) => {
+  if (amount == null || isNaN(Number(amount))) return '0 VND';
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    currencyDisplay: 'code',
+    maximumFractionDigits: 0
+  }).format(Number(amount));
+};
+
 const PaymentHistoryCard = ({ payment, onPayment }) => {
 
   const isPaid = payment.paid === true;
@@ -140,7 +151,7 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
                 Số tiền:
               </Text>
               <Text style={{ fontSize: '2rem', fontWeight: 700, color: '#1f7a1f' }}>
-                {payment.price.toLocaleString('vi-VN')} VNĐ
+                {formatCurrency(payment.price)}
               </Text>
             </div>
           </Col>

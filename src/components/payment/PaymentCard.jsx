@@ -12,17 +12,6 @@ import { useAuth } from "../../hooks/useAuth";
 
 const { Text, Title } = Typography;
 
-const formatCurrency = (amount) => {
-  // chấp nhận 0, loại bỏ giá trị null/undefined/NaN
-  if (amount == null || isNaN(Number(amount))) return '0 VND';
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    currencyDisplay: 'code',
-    maximumFractionDigits: 0
-  }).format(Number(amount));
-};
-
 const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
   const { user } = useAuth(); // Lấy user để biết gói đã đăng ký
   // Chọn 1 trong 2 phương thức: 'momo' hoặc 'package'
@@ -69,7 +58,7 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
           {/* Không hiển thị chi tiết giảm giá */}
           <Descriptions.Item label="Tổng tiền thanh toán">
             <Text strong style={{ fontSize: "18px", color: "#ff4d4f" }}>
-              {formatCurrency(calculateTotal())}
+              {calculateTotal()} VNĐ
             </Text>
           </Descriptions.Item>
         </Descriptions>
