@@ -10,11 +10,12 @@ import {
   getAllPayments as getAllPaymentsService
 } from '../services/paymentService';
 
-// Hook for payment operations
+// Hook xử lý các thao tác payment
 export const usePayment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Xử lý thanh toán
   const processPayment = useCallback(async (paymentId, paymentMethodId) => {
     setLoading(true);
     setError(null);
@@ -34,6 +35,7 @@ export const usePayment = () => {
     }
   }, []);
 
+  // Tạo thanh toán Momo
   const createMomoPayment = useCallback(async (orderId, amount, orderInfo) => {
     setLoading(true);
     setError(null);
@@ -49,16 +51,14 @@ export const usePayment = () => {
     }
   }, []);
 
+  // Hoàn thành thanh toán
   const completePayment = useCallback(async (orderId) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔄 [usePayment] Completing payment for order:', orderId);
       const res = await completePaymentService({ orderId });
-      console.log('✅ [usePayment] Complete payment response:', res);
       return res;
     } catch (err) {
-      console.error('❌ [usePayment] Complete payment error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -75,24 +75,22 @@ export const usePayment = () => {
   };
 };
 
-// Hook for fetching payment data
+// Hook lấy dữ liệu payment
 export const usePaymentData = () => {
   const [payments, setPayments] = useState([]);
   const [payment, setPayment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Lấy payment theo ID
   const fetchPaymentById = useCallback(async (paymentId) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔍 [usePaymentData] Fetching payment by ID:', paymentId);
       const res = await getPaymentById(paymentId);
-      console.log('✅ [usePaymentData] Payment fetched:', res);
       setPayment(res);
       return res;
     } catch (err) {
-      console.error('❌ [usePaymentData] Fetch payment error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -100,17 +98,15 @@ export const usePaymentData = () => {
     }
   }, []);
 
+  // Lấy tất cả payment của user
   const fetchPaymentsByUserId = useCallback(async (userId) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔍 [usePaymentData] Fetching payments for user:', userId);
       const res = await getPaymentsByUserId(userId);
-      console.log('✅ [usePaymentData] Payments fetched:', res?.length, 'items');
       setPayments(res);
       return res;
     } catch (err) {
-      console.error('❌ [usePaymentData] Fetch payments error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -118,17 +114,15 @@ export const usePaymentData = () => {
     }
   }, []);
 
+  // Lấy payment chưa thanh toán
   const fetchUnpaidPaymentsByUserId = useCallback(async (userId) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔍 [usePaymentData] Fetching unpaid payments for user:', userId);
       const res = await getUnpaidPaymentsByUserId(userId);
-      console.log('✅ [usePaymentData] Unpaid payments fetched:', res?.length, 'items');
       setPayments(res);
       return res;
     } catch (err) {
-      console.error('❌ [usePaymentData] Fetch unpaid payments error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -136,17 +130,15 @@ export const usePaymentData = () => {
     }
   }, []);
 
+  // Lấy payment đã thanh toán
   const fetchPaidPaymentsByUserId = useCallback(async (userId) => {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔍 [usePaymentData] Fetching paid payments for user:', userId);
       const res = await getPaidPaymentsByUserId(userId);
-      console.log('✅ [usePaymentData] Paid payments fetched:', res?.length, 'items');
       setPayments(res);
       return res;
     } catch (err) {
-      console.error('❌ [usePaymentData] Fetch paid payments error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -154,17 +146,15 @@ export const usePaymentData = () => {
     }
   }, []);
 
+  // Lấy tất cả payment
   const fetchAllPayments = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔍 [usePaymentData] Fetching all payments');
       const res = await getAllPaymentsService();
-      console.log('✅ [usePaymentData] All payments fetched:', res?.length, 'items');
       setPayments(res);
       return res;
     } catch (err) {
-      console.error('❌ [usePaymentData] Fetch all payments error:', err);
       setError(err.response?.data || err.message);
       throw err;
     } finally {
@@ -185,7 +175,7 @@ export const usePaymentData = () => {
   };
 };
 
-// Combined hook for all payment operations
+// Hook kết hợp tất cả payment operations
 export const usePaymentManager = () => {
   const paymentOperations = usePayment();
   const paymentData = usePaymentData();

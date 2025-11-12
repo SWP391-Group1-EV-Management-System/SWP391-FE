@@ -19,6 +19,13 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
   };
 
   const paymentMethodInfo = getPaymentMethodDisplay(payment.paymentMethod);
+  const formatCurrency = (amount) => {
+    if (!amount && amount !== 0) return '0 VND';
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
 
   return (
     <Card
@@ -140,7 +147,7 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
                 Số tiền:
               </Text>
               <Text style={{ fontSize: '2rem', fontWeight: 700, color: '#1f7a1f' }}>
-                {payment.price.toLocaleString('vi-VN')} VNĐ
+                {formatCurrency(payment.price)}
               </Text>
             </div>
           </Col>

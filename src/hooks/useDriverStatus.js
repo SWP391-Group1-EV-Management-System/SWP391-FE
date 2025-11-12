@@ -2,10 +2,7 @@ import { useState, useEffect } from "react";
 import { getUserStatus } from "../services/userStatusService";
 import { useAuth } from "./useAuth";
 
-/**
- * Hook để lấy driver status từ Redis thay vì localStorage
- * Auto-refresh khi có thay đổi
- */
+// Hook lấy driver status từ Redis
 export const useDriverStatus = () => {
   const { user } = useAuth();
   const userId = user?.userId || user?.id;
@@ -14,7 +11,7 @@ export const useDriverStatus = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch status từ Redis
+  // Lấy status từ Redis
   const fetchStatus = async () => {
     if (!userId) {
       setDriverStatus(null);
@@ -26,9 +23,7 @@ export const useDriverStatus = () => {
       setError(null);
       const status = await getUserStatus(userId);
       setDriverStatus(status ? status.toLowerCase() : null);
-      console.log("🔄 [useDriverStatus] Fetched status:", status);
     } catch (err) {
-      console.error("❌ [useDriverStatus] Error:", err);
       setError(err.message);
       setDriverStatus(null);
     } finally {
@@ -36,15 +31,14 @@ export const useDriverStatus = () => {
     }
   };
 
-  // Initial fetch
+  // Fetch ban đầu
   useEffect(() => {
     fetchStatus();
   }, [userId]);
 
-  // Listen to custom events để refresh (khi booking/charging được tạo)
+  // Lắng nghe sự kiện thay đổi status
   useEffect(() => {
     const handleStatusChanged = () => {
-      console.log("🔔 [useDriverStatus] Status changed event, refetching...");
       fetchStatus();
     };
 

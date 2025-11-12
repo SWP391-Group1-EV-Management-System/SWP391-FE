@@ -1,14 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getDrivers, getStaff, updateUser, deleteUser } from '../services/userService';
 
-const mapApiUser = (apiUser) => {
-  console.log('🔥 Raw API User:', apiUser);
-  console.log('🔥 birthDate:', apiUser.birthDate);
+const mapApiUser = (apiUser) => {;
   
   // ✅ Backend dùng LocalDate → luôn trả string "YYYY-MM-DD" hoặc null
   const birthDate = apiUser.birthDate && apiUser.birthDate !== '' ? apiUser.birthDate : null;
   
-  console.log('✅ Mapped birthDate:', birthDate);
   
   return {
     id: apiUser.userID || apiUser.id || apiUser.userId || apiUser.ID,

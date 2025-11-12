@@ -10,8 +10,10 @@ import { FaUser, FaCalendarAlt, FaPhone } from "react-icons/fa";
 import { PiGenderIntersexBold } from "react-icons/pi";
 
 function Register() {
+  // ===== STATE MANAGEMENT =====
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -22,15 +24,19 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  // ===== HOOKS =====
   const navigate = useNavigate();
 
+  // ===== FUNCTION: Điều hướng về trang Welcome =====
   const handleBackToWelcome = () => {
     navigate("/welcome");
   };
 
-  // Handle input changes
+  // ===== FUNCTION: Xử lý thay đổi input trong form =====
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -39,43 +45,27 @@ function Register() {
     }));
   };
 
-  // Handle form submission
+  // ===== FUNCTION: Xử lý submit form đăng ký =====
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    console.log("Form submitted with data:", formData);
-
-    // Validation
+    // Validate mật khẩu xác nhận
     if (formData.password !== formData.confirmPassword) {
       setError("Mật khẩu xác nhận không khớp!");
       return;
     }
 
+    // Validate độ dài mật khẩu
     if (formData.password.length < 6) {
       setError("Mật khẩu phải có ít nhất 6 ký tự!");
       return;
     }
 
     setIsLoading(true);
-    console.log("Sending registration data:", formData);
 
     try {
-      // Call API to register + send OTP
-      console.log(
-        "Making API call to:",
-        "http://localhost:8080/users/register"
-      );
-      console.log("Request body:", {
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        birthDate: formData.birthDate,
-        gender: formData.gender,
-        phoneNumber: formData.phoneNumber,
-        password: formData.password,
-      });
-
+      // Gọi API đăng ký và gửi OTP
       const response = await fetch("http://localhost:8080/users/register", {
         method: "POST",
         headers: {
@@ -92,14 +82,8 @@ function Register() {
         }),
       });
 
-      console.log("Response received:", response);
-      console.log("Response status:", response.status);
-
       if (response.ok) {
-        console.log(
-          "Registration successful! OTP sent. Navigating to OTP page"
-        );
-        // Registration successful + OTP sent, redirect to OTP verification
+        // Đăng ký thành công, chuyển đến trang xác thực OTP
         navigate("/otp-verification", {
           state: {
             email: formData.email,
@@ -114,32 +98,33 @@ function Register() {
           },
         });
       } else {
-        console.log("Response not OK, status:", response.status);
         const errorText = await response.text();
-        console.log("Error response text:", errorText);
         setError(`Đăng ký thất bại: ${errorText}`);
       }
     } catch (error) {
-      console.error("Network error:", error);
       setError("Không thể kết nối đến server!");
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ===== FUNCTION: Toggle hiển thị/ẩn mật khẩu =====
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  // ===== FUNCTION: Toggle hiển thị/ẩn mật khẩu xác nhận =====
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
+  // ===== RENDER UI =====
   return (
     <>
       <div className="register-page">
         <div className="register-container">
           <div className="register-inner">
+            {/* Nút quay lại trang Welcome */}
             <button
               className="back-to-welcome-btn"
               onClick={handleBackToWelcome}
@@ -147,8 +132,14 @@ function Register() {
             >
               <IoClose size={24} />
             </button>
+            
+            {/* Tiêu đề trang */}
             <h2>Đăng ký</h2>
+            
+            {/* Hiển thị thông báo lỗi nếu có */}
             {error && <div className="error-message">{error}</div>}
+            
+            {/* Form đăng ký */}
             <form onSubmit={handleSubmit}>
               {/* Row 1: Email và Số điện thoại */}
               <div className="form-row">
@@ -254,7 +245,7 @@ function Register() {
                 </div>
               </div>
 
-              {/* Row 4: Mật khẩu */}
+              {/* Row 4: Mật khẩu và Xác nhận mật khẩu */}
               <div className="form-row">
                 <div className="form-field half-width password-field">
                   <label htmlFor="password">
@@ -319,6 +310,8 @@ function Register() {
                   </div>
                 </div>
               </div>
+              
+              {/* Checkbox đồng ý điều khoản */}
               <div className="form-options-register">
                 <label className="checkbox-label">
                   <input type="checkbox" id="agree-terms" required />
@@ -328,6 +321,8 @@ function Register() {
                   </span>
                 </label>
               </div>
+              
+              {/* Nút submit form */}
               <button
                 type="submit"
                 className="register-button"
@@ -336,6 +331,8 @@ function Register() {
                 {isLoading ? "Đang gửi..." : "Gửi mã xác thực"}{" "}
                 <IoIosArrowForward size={24} />
               </button>
+              
+              {/* Link chuyển đến trang đăng nhập */}
               <div className="login-prompt">
                 <div>Đã có tài khoản?</div>
                 <a href="/login" className="login-link">
@@ -343,6 +340,8 @@ function Register() {
                 </a>
               </div>
             </form>
+            
+            {/* Footer copyright */}
             <div className="copyright">
               <span> © 2025 Group1SE1818. All rights reserved.</span>
             </div>

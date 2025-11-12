@@ -1,12 +1,17 @@
 /**
- * HomePage Component
- * Main dashboard page for the Eco-Z EV Charging Management System
- * Displays system statistics, quick actions, recent activities, and user achievements
+ * HOMEPAGE COMPONENT
+ * 
+ * Trang chính hiển thị dashboard hệ thống quản lý trạm sạc xe điện
+ * 
+ * Tính năng:
+ * - Hiển thị thống kê hệ thống với animation
+ * - Danh sách hoạt động gần đây
+ * - Trạm sạc nổi bật
+ * - Thành tích người dùng
+ * - Thông tin hỗ trợ và ưu đãi
  */
 
 import React, { useState, useEffect } from "react";
-
-// React Bootstrap Components
 import {
   Container,
   Row,
@@ -17,88 +22,70 @@ import {
   ProgressBar,
   ListGroup,
 } from "react-bootstrap";
-
-// Bootstrap Icons
 import {
-  BsLightning, // Lightning icon for charging/energy
-  BsMap, // Map icon for location services
-  BsClock, // Clock icon for time/history
-  BsBookmarkStar, // Bookmark star for favorites/promotions
-  BsShield, // Shield icon for security/reliability
-  BsGlobe, // Globe icon for global/network
-  BsStarFill, // Filled star for ratings
-  BsTrophy, // Trophy for achievements
-  BsGraphUp, // Graph up for trends/statistics
-  BsPeople, // People icon for users
-  BsCheck2Circle, // Check circle for completion
-  BsArrowRight, // Arrow right for navigation
-  BsFire, // Fire icon for streaks/hot items
-  BsAward, // Award icon for achievements
+  BsLightning,
+  BsMap,
+  BsClock,
+  BsBookmarkStar,
+  BsShield,
+  BsGlobe,
+  BsStarFill,
+  BsTrophy,
+  BsGraphUp,
+  BsPeople,
+  BsCheck2Circle,
+  BsArrowRight,
+  BsFire,
+  BsAward,
 } from "react-icons/bs";
-
-// Component Styles
 import "../assets/styles/HomePage.css";
 import useAuth from "../hooks/useAuth";
 
-/**
- * HomePage Functional Component
- */
 function HomePage() {
-  // ==================== STATE MANAGEMENT ====================
-
-  /**
-   * State for animated counter values
-   * Displays animated numbers for statistics cards
-   */
+  // ===== STATE: Giá trị animation cho các thống kê =====
   const [animatedValues, setAnimatedValues] = useState({
-    stations: 0, // Number of active charging stations
-    sessions: 0, // Number of charging sessions today
-    users: 0, // Number of active users
-    reliability: 0, // System reliability percentage
+    stations: 0,
+    sessions: 0,
+    users: 0,
+    reliability: 0,
   });
 
-  // Use authenticated profile from hook instead of localStorage
+  // ===== HOOK: Lấy thông tin người dùng =====
   const { user, loading, fetchUserProfile } = useAuth();
 
+  // ===== EFFECT: Tải profile người dùng khi component mount =====
   useEffect(() => {
-    // ensure profile is loaded when HomePage mounts
     fetchUserProfile().catch(() => {});
   }, [fetchUserProfile]);
 
+  // ===== Xác định tên hiển thị người dùng =====
   const userName = loading
     ? "Đang tải..."
     : user
     ? `${(user.firstName || "").trim()} ${(user.lastName || "").trim()}`.trim() || (user.email ? user.email.split("@")[0] : "Guest User")
     : "Guest User";
   
-  // ==================== EFFECTS ====================
-
-  /**
-   * Effect: Animate statistics numbers on component mount
-   * Creates a smooth counting animation from 0 to target values
-   */
+  // ===== EFFECT: Animation đếm số liệu thống kê =====
   useEffect(() => {
-    // Animation configuration
-    const duration = 2000; // Total animation duration in milliseconds
-    const steps = 60; // Number of animation steps
-    const increment = duration / steps; // Time per step
+    const duration = 2000; // Thời gian animation: 2 giây
+    const steps = 60; // Số bước animation
+    const increment = duration / steps;
 
-    // Target values for the animation
+    // Giá trị mục tiêu
     const targets = {
-      stations: 248, // Target: 248 active stations
-      sessions: 1247, // Target: 1,247 sessions today
-      users: 8932, // Target: 8,932 active users
-      reliability: 99.8, // Target: 99.8% reliability
+      stations: 248,
+      sessions: 1247,
+      users: 8932,
+      reliability: 99.8,
     };
 
     let currentStep = 0;
 
-    // Set up interval for animation
     const timer = setInterval(() => {
       currentStep++;
-      const progress = currentStep / steps; // Calculate progress (0 to 1)
+      const progress = currentStep / steps;
 
-      // Update animated values proportionally
+      // Cập nhật giá trị animation theo tỷ lệ tiến độ
       setAnimatedValues({
         stations: Math.floor(targets.stations * progress),
         sessions: Math.floor(targets.sessions * progress),
@@ -106,106 +93,94 @@ function HomePage() {
         reliability: (targets.reliability * progress).toFixed(1),
       });
 
-      // Complete animation when all steps are done
+      // Kết thúc animation
       if (currentStep >= steps) {
         clearInterval(timer);
-        setAnimatedValues(targets); // Ensure final values are exact
+        setAnimatedValues(targets);
       }
     }, increment);
 
-    // Cleanup: Clear interval on component unmount
     return () => clearInterval(timer);
   }, []);
 
-  // ==================== DATA CONFIGURATION ====================
-
-  /**
-   * Statistics cards data
-   * Displays key metrics about the charging system
-   */
+  // ===== DATA: Thống kê hệ thống =====
   const stats = [
     {
-      label: "Trạm sạc hoạt động", // Active charging stations
+      label: "Trạm sạc hoạt động",
       value: animatedValues.stations,
       icon: BsLightning,
-      gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", // Purple gradient
+      gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       change: "+12%",
       trend: "up",
     },
     {
-      label: "Phiên sạc tháng này", // Today's charging sessions
+      label: "Phiên sạc tháng này",
       value: animatedValues.sessions.toLocaleString(),
       icon: BsLightning,
-      gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)", // Pink gradient
+      gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
       change: "+8%",
       trend: "up",
     },
     {
-      label: "Người dùng active", // Active users
+      label: "Người dùng active",
       value: animatedValues.users.toLocaleString(),
       icon: BsGlobe,
-      gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)", // Blue gradient
+      gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
       change: "+15%",
       trend: "up",
     },
     {
-      label: "Độ tin cậy", // System reliability
+      label: "Độ tin cậy",
       value: `${animatedValues.reliability}%`,
       icon: BsShield,
-      gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)", // Green gradient
+      gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
       change: "+0.2%",
       trend: "up",
     },
   ];
 
-  /**
-   * Recent activities data
-   * Shows latest system events and user activities
-   */
+  // ===== DATA: Hoạt động gần đây =====
   const recentActivities = [
     {
       icon: BsCheck2Circle,
-      text: "Trạm #A-234 hoàn thành sạc", // Station completed charging
+      text: "Trạm #A-234 hoàn thành sạc",
       time: "2 phút trước",
-      color: "#43e97b", // Green
+      color: "#43e97b",
     },
     {
       icon: BsLightning,
-      text: "Trạm sạc nhanh mới tại Trung tâm Thành phố", // New fast charging station
+      text: "Trạm sạc nhanh mới tại Trung tâm Thành phố",
       time: "15 phút trước",
-      color: "#667eea", // Purple
+      color: "#667eea",
     },
     {
       icon: BsPeople,
-      text: "1,000+ người dùng tham gia tháng này", // New users this month
+      text: "1,000+ người dùng tham gia tháng này",
       time: "1 giờ trước",
-      color: "#4facfe", // Blue
+      color: "#4facfe",
     },
     {
       icon: BsTrophy,
-      text: "Bạn đã nhận huy hiệu 'Eco Warrior'!", // Achievement unlocked
+      text: "Bạn đã nhận huy hiệu 'Eco Warrior'!",
       time: "2 giờ trước",
-      color: "#f5576c", // Pink
+      color: "#f5576c",
     },
     {
       icon: BsGraphUp,
-      text: "Tiết kiệm năng lượng tăng 23%", // Energy savings increased
+      text: "Tiết kiệm năng lượng tăng 23%",
       time: "5 giờ trước",
-      color: "#38f9d7", // Cyan
+      color: "#38f9d7",
     },
   ];
 
-  /**
-   * Featured charging stations data
-   * Displays top-rated nearby stations
-   */
+  // ===== DATA: Trạm sạc nổi bật =====
   const featuredStations = [
     {
-      name: "Downtown Central Hub", // Station name
-      rating: 4.9, // User rating (out of 5)
-      charging: 12, // Currently charging vehicles
-      available: 8, // Available charging ports
-      distance: "0.5 km", // Distance from user
+      name: "Downtown Central Hub",
+      rating: 4.9,
+      charging: 12,
+      available: 8,
+      distance: "0.5 km",
     },
     {
       name: "Airport Express Station",
@@ -223,46 +198,41 @@ function HomePage() {
     },
   ];
 
-  /**
-   * User achievements data
-   * Tracks user progress towards different goals
-   */
+  // ===== DATA: Thành tích người dùng =====
   const achievements = [
     {
       icon: BsTrophy,
-      title: "Eco Champion", // Achievement name
-      description: "Tiết kiệm 100 kWh", // Goal: Save 100 kWh
-      progress: 78, // Progress: 78%
+      title: "Eco Champion",
+      description: "Tiết kiệm 100 kWh",
+      progress: 78,
       gradient: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
     },
     {
       icon: BsAward,
       title: "Power User",
-      description: "50 phiên sạc", // Goal: 50 charging sessions
-      progress: 92, // Progress: 92%
+      description: "50 phiên sạc",
+      progress: 92,
       gradient: "linear-gradient(90deg, #f093fb 0%, #f5576c 100%)",
     },
     {
       icon: BsFire,
       title: "Streak Master",
-      description: "30 ngày liên tục", // Goal: 30 day streak
-      progress: 45, // Progress: 45%
+      description: "30 ngày liên tục",
+      progress: 45,
       gradient: "linear-gradient(90deg, #4facfe 0%, #00f2fe 100%)",
     },
   ];
 
-  // ==================== RENDER ====================
-
+  // ===== RENDER UI =====
   return (
     <div className="home-dashboard-container">
       <Container fluid className="px-4">
-        {/* Hero Header Section */}
+        {/* Header chào mừng người dùng */}
         <div className="hero-header mb-4">
           <Row className="align-items-center">
             <Col lg={9}>
               <div className="d-flex align-items-center mb-2">
                 <div>
-                
                   <h1 className="hero-title mb-1">Chào mừng {userName} đến với Eco-Z</h1>
                   <p className="hero-subtitle mb-0">
                     Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và
@@ -280,7 +250,7 @@ function HomePage() {
           </Row>
         </div>
 
-        {/* Stats Cards */}
+        {/* Các card thống kê */}
         <div className="info-card-container">
           {stats.map((stat, index) => (
             <div key={index} className="info-card">
@@ -297,8 +267,9 @@ function HomePage() {
           ))}
         </div>
 
-        {/* Activities and Featured Stations */}
+        {/* Hoạt động gần đây và Trạm sạc nổi bật */}
         <Row className="g-4 mb-4">
+          {/* Cột hoạt động gần đây */}
           <Col lg={6}>
             <Card className="info-detail-card border-0 shadow-sm">
               <Card.Header className="info-detail-header">
@@ -335,6 +306,7 @@ function HomePage() {
             </Card>
           </Col>
 
+          {/* Cột trạm sạc nổi bật */}
           <Col lg={6}>
             <Card className="info-detail-card border-0 shadow-sm">
               <Card.Header className="info-detail-header">
@@ -346,6 +318,7 @@ function HomePage() {
               <Card.Body className="p-4">
                 {featuredStations.map((station, index) => (
                   <div key={index} className="featured-station-item mb-3">
+                    {/* Header: Tên trạm và đánh giá */}
                     <div className="d-flex justify-content-between align-items-start mb-2">
                       <h6 className="station-name mb-1">{station.name}</h6>
                       <Badge className="rating-badge">
@@ -353,6 +326,7 @@ function HomePage() {
                         {station.rating}
                       </Badge>
                     </div>
+                    {/* Thông tin trạm: số trạm đang sạc, trống, khoảng cách */}
                     <div className="station-info">
                       <span className="info-item">
                         <BsLightning size={14} className="me-1 text-warning" />
@@ -380,7 +354,7 @@ function HomePage() {
           </Col>
         </Row>
 
-        {/* Achievements Section */}
+        {/* Phần thành tích người dùng */}
         <h3 className="section-title mb-3">
           <BsTrophy className="me-2 text-warning" />
           Thành tích của bạn
@@ -390,6 +364,7 @@ function HomePage() {
             <Col key={index} lg={4} md={6}>
               <Card className="info-detail-card border-0 shadow-sm">
                 <Card.Body className="p-4">
+                  {/* Header thành tích: icon và tiêu đề */}
                   <div className="d-flex align-items-center mb-3">
                     <div className="achievement-icon me-3">
                       <achievement.icon size={24} />
@@ -403,6 +378,7 @@ function HomePage() {
                       </small>
                     </div>
                   </div>
+                  {/* Progress bar hiển thị tiến độ */}
                   <ProgressBar
                     now={achievement.progress}
                     variant="primary"
@@ -419,8 +395,9 @@ function HomePage() {
           ))}
         </Row>
 
-        {/* Enhanced Information Cards */}
+        {/* Phần thông tin hỗ trợ và ưu đãi */}
         <Row className="g-4 mb-4">
+          {/* Card hỗ trợ 24/7 */}
           <Col lg={6}>
             <Card className="info-detail-card border-0 shadow">
               <Card.Body className="p-4 text-center">
@@ -442,6 +419,8 @@ function HomePage() {
               </Card.Body>
             </Card>
           </Col>
+          
+          {/* Card ưu đãi đặc biệt */}
           <Col lg={6}>
             <Card className="info-detail-card border-0 shadow">
               <Card.Body className="p-4 text-center">

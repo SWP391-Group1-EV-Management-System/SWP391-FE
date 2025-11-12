@@ -6,6 +6,11 @@ import {
   getUserProfile,
 } from "../services/authService";
 
+/**
+ * Hook quản lý xác thực người dùng
+ * Xử lý login, logout, và quản lý thông tin user profile
+ * @returns {Object} - Các hàm và state liên quan đến authentication
+ */
 export const useAuth = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -14,7 +19,10 @@ export const useAuth = () => {
   const [user, setUser] = useState(null);
   const hasFetchedRef = useRef(false);
 
-  // Fetch user profile helper
+  /**
+   * Lấy thông tin profile của user từ API
+   * @returns {Promise<Object|null>} - Thông tin user hoặc null nếu có lỗi
+   */
   const fetchUserProfile = useCallback(async () => {
     try {
       setLoading(true);
@@ -22,7 +30,6 @@ export const useAuth = () => {
       if (me) setUser(me);
       return me;
     } catch (e) {
-      console.error("[useAuth] fetchUserProfile error", e);
       setUser(null);
       return null;
     } finally {
@@ -30,13 +37,11 @@ export const useAuth = () => {
     }
   }, []);
 
-  // Chỉ auto-fetch user một lần khi khởi tạo ứng dụng
+  /**
+   * Auto-fetch user profile một lần khi khởi tạo ứng dụng
+   * Bỏ qua các trang public như login, register, forgot-password
+   */
   useEffect(() => {
-    console.log("🔍 useAuth useEffect triggered");
-    console.log("- Current user:", user);
-    console.log("- Current path:", location.pathname);
-    console.log("- Has fetched:", hasFetchedRef.current);
-
     // Skip auto-fetch ở các trang public
     const publicPaths = [
       "/login",
@@ -56,6 +61,13 @@ export const useAuth = () => {
     }
   }, [location.pathname]);
 
+  /**
+   * Xử lý đăng nhập người dùng
+   * @param {string} email - Email đăng nhập
+   * @param {string} password - Mật khẩu
+   * @param {string} redirectTo - Đường dẫn chuyển hướng sau khi đăng nhập thành công
+   * @returns {Promise<boolean>} - true nếu đăng nhập thành công, false nếu thất bại
+   */
   const login = useCallback(
     async (email, password, redirectTo = "/app/home") => {
       setLoading(true);
@@ -66,7 +78,7 @@ export const useAuth = () => {
           try {
             await fetchUserProfile();
           } catch (e) {
-            console.error("[useAuth] fetchUserProfile after login failed", e);
+            // Bỏ qua lỗi fetch profile sau login
           }
 
           navigate(redirectTo);
@@ -75,7 +87,6 @@ export const useAuth = () => {
         setError(new Error(result?.message || "Đăng nhập thất bại."));
         return false;
       } catch (e) {
-        console.error("[useAuth] login error", e);
         setError(e);
         return false;
       } finally {
@@ -85,13 +96,16 @@ export const useAuth = () => {
     [navigate, fetchUserProfile]
   );
 
+  /**
+   * Xử lý đăng xuất người dùng
+   * Xóa thông tin user và chuyển hướng về trang login
+   */
   const logout = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       await logoutApi();
     } catch (e) {
-      console.error("[useAuth] logout API error", e);
       setError(e);
     } finally {
       setUser(null);
@@ -104,10 +118,19 @@ export const useAuth = () => {
   return { login, logout, loading, error, user, setUser, fetchUserProfile };
 };
 
-// Role-based access control hook
+/**
+ * Hook quản lý phân quyền dựa trên role của user
+ * Cung cấp các hàm kiểm tra quyền và thông tin role
+ * @returns {Object} - Thông tin role và các hàm kiểm tra quyền
+ */
 export const useRole = () => {
   const { user } = useAuth();
 
+  /**
+   * Kiểm tra user có role cụ thể hay không
+   * @param {string} requiredRole - Role cần kiểm tra
+   * @returns {boolean} - true nếu user có role đó
+   */
   const hasRole = (requiredRole) => {
     if (!user || !user.role) return false;
     const roles = user.role;
@@ -115,6 +138,11 @@ export const useRole = () => {
     return roles === requiredRole;
   };
 
+  /**
+   * Kiểm tra user có bất kỳ role nào trong danh sách hay không
+   * @param {Array<string>} roles - Danh sách các role cần kiểm tra
+   * @returns {boolean} - true nếu user có ít nhất 1 role trong danh sách
+   */
   const hasAnyRole = (roles = []) => {
     if (!user) return false;
     const userRoles = user.role;
@@ -127,7 +155,7 @@ export const useRole = () => {
   return useMemo(
     () => ({
       userRole: Array.isArray(user?.role) ? user.role : user?.role,
-      userId: user?.id || user?.userId || null, // ← THÊM DÒNG NÀY
+      userId: user?.id || user?.userId || null,
       hasRole,
       hasAnyRole,
       isAdmin: hasRole("ADMIN"),
@@ -139,12 +167,19 @@ export const useRole = () => {
   );
 };
 
-// Convenience wrappers
+/**
+ * Hook wrapper cho chức năng login
+ * @returns {Object} - Hàm login và các state liên quan
+ */
 export const useLogin = () => {
   const { login, loading, error } = useAuth();
   return { login, loading, error };
 };
 
+/**
+ * Hook wrapper cho chức năng logout
+ * @returns {Object} - Hàm logout và các state liên quan
+ */
 export const useLogout = () => {
   const { logout, loading, error } = useAuth();
   return { logout, loading, error };

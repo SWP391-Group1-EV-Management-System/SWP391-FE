@@ -5,15 +5,14 @@ import {
   getActivePackageTransaction 
 } from '../services/packageTransactionService';
 
+// Hook quản lý package transaction
 export const usePackageTransaction = () => {
   const [transactions, setTransactions] = useState([]);
   const [activeTransaction, setActiveTransaction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /**
-   * Fetch tất cả package transactions của user
-   */
+  // Lấy tất cả package transactions của user
   const fetchUserTransactions = useCallback(async (userId) => {
     if (!userId) return;
     
@@ -23,13 +22,11 @@ export const usePackageTransaction = () => {
       const data = await getUserPackageTransactions(userId);
       setTransactions(data);
       
-      // Tự động tìm transaction đang ACTIVE
       const active = data.find(t => t.status === 'ACTIVE');
       setActiveTransaction(active || null);
       
       return data;
     } catch (err) {
-      console.error('Error fetching user transactions:', err);
       setError(err.response?.data || err.message);
       setTransactions([]);
       setActiveTransaction(null);
@@ -39,9 +36,7 @@ export const usePackageTransaction = () => {
     }
   }, []);
 
-  /**
-   * Chỉ fetch transaction đang ACTIVE
-   */
+  // Lấy transaction đang ACTIVE
   const fetchActiveTransaction = useCallback(async (userId) => {
     if (!userId) return null;
     
@@ -52,7 +47,6 @@ export const usePackageTransaction = () => {
       setActiveTransaction(active);
       return active;
     } catch (err) {
-      console.error('Error fetching active transaction:', err);
       setError(err.response?.data || err.message);
       setActiveTransaction(null);
       throw err;

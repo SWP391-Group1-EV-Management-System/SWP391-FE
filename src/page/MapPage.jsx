@@ -1,14 +1,14 @@
 /**
  * MAP PAGE COMPONENT
  *
- * Main page for displaying charging stations map and management interface.
+ * Trang chính hiển thị bản đồ trạm sạc và giao diện quản lý
  *
- * Features:
- * - Interactive map with charging stations
- * - Real-time statistics dashboard
- * - Station list with filtering capabilities
- * - Station detail modal
- * - Responsive design for all devices
+ * Tính năng:
+ * - Bản đồ tương tác với các trạm sạc
+ * - Dashboard thống kê theo thời gian thực
+ * - Danh sách trạm với khả năng lọc
+ * - Modal chi tiết trạm
+ * - Thiết kế responsive cho mọi thiết bị
  *
  * @component
  */
@@ -45,16 +45,10 @@ import "../assets/styles/utilities.css";
 /**
  * Main Map Page Component
  *
- * Renders the charging stations map interface with statistics and station list
+ * Render giao diện bản đồ trạm sạc với thống kê và danh sách trạm
  */
 function MapPage() {
-  /**
-   * ===============================
-   * DATA MANAGEMENT
-   * ===============================
-   */
-
-  // Fetch charging stations data and statistics
+  // ===== HOOKS: Lấy dữ liệu trạm sạc và thống kê =====
   const {
     stations: chargingStations,
     statistics: mapStats,
@@ -62,32 +56,16 @@ function MapPage() {
     error,
     refresh: refreshStations,
     fetchStationPosts,
-    userLocation, // Vị trí người dùng
-  } = useChargingStations({
-    autoFetch: true, // Auto-load data on component mount
+    } = useChargingStations({
+    autoFetch: true, // Tự động tải dữ liệu khi component mount
     useLocation: true, // Tự động lấy vị trí người dùng và tính khoảng cách
   });
 
-  /**
-   * ===============================
-   * LOCAL STATE
-   * ===============================
-   */
-
-  // Modal state for station details
+  // ===== STATE: Quản lý modal chi tiết trạm =====
   const [showModal, setShowModal] = useState(false);
   const [selectedStation, setSelectedStation] = useState(null);
 
-  /**
-   * ===============================
-   * UTILITY FUNCTIONS
-   * ===============================
-   */
-
-  /**
-   * Convert station status to Vietnamese display text
-   *
-   */
+  // ===== FUNCTION: Chuyển đổi trạng thái sang tiếng Việt =====
   const getStatusText = (status) => {
     const statusMap = {
       available: "Còn trống",
@@ -97,30 +75,18 @@ function MapPage() {
     return statusMap[status] || "Không xác định";
   };
 
-  /**
-   * Get CSS class name for station status styling
-   *
-   */
+  // ===== FUNCTION: Lấy CSS class cho styling trạng thái =====
   const getStatusClass = (status) => {
     return `station-status ${status}`;
   };
 
-  /**
-   * ===============================
-   * EVENT HANDLERS
-   * ===============================
-   */
-
-  /**
-   * Handle station item click - loads detailed information and shows modal
-   *
-   */
+  // ===== FUNCTION: Xử lý click vào trạm - tải thông tin chi tiết và hiển thị modal =====
   const handleStationClick = async (station) => {
     try {
-      // Fetch detailed charging posts information for the station
+      // Lấy thông tin chi tiết các charging posts của trạm
       const stationPosts = await fetchStationPosts(station.id);
 
-      // Combine station data with posts information
+      // Kết hợp dữ liệu trạm với thông tin posts
       const stationWithPosts = {
         ...station,
         posts: stationPosts,
@@ -129,33 +95,28 @@ function MapPage() {
       setSelectedStation(stationWithPosts);
       setShowModal(true);
     } catch (error) {
-      console.error("Error loading station details:", error);
-
-      // Show modal with basic station info even if posts loading fails
+      // Hiển thị modal với thông tin cơ bản của trạm nếu không tải được posts
       setSelectedStation(station);
       setShowModal(true);
     }
   };
 
-  /**
-   * Handle modal close - resets selected station state
-   */
+  // ===== FUNCTION: Xử lý đóng modal - reset trạng thái trạm đã chọn =====
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedStation(null);
   };
 
-  /**
-   * ===============================
-   * RENDER COMPONENT
-   * ===============================
-   */
+  // ===== RENDER: Giao diện chính =====
   return (
     <div className="map-page-container">
+      {/* Header trang */}
       <PageHeader title="Bản đồ trạm sạc" icon={<EnvironmentOutlined />} />
+      
       <Container fluid>
-        {/* Statistics Overview Section */}
+        {/* Phần tổng quan thống kê */}
         <Row className="map-stats-section">
+          {/* Thống kê: Tổng số trạm sạc */}
           <Col lg={4} md={4} sm={12}>
             <Card className="map-stat-card total-stations">
               <BsLightning
@@ -168,6 +129,8 @@ function MapPage() {
               <div className="stat-label">Tổng số trạm sạc</div>
             </Card>
           </Col>
+
+          {/* Thống kê: Số trạm sạc trống */}
           <Col lg={4} md={4} sm={12}>
             <Card className="map-stat-card available-stations">
               <BsClock
@@ -180,6 +143,8 @@ function MapPage() {
               <div className="stat-label">Số trạm sạc trống</div>
             </Card>
           </Col>
+
+          {/* Thống kê: Số trạm đang bảo trì */}
           <Col lg={4} md={4} sm={12}>
             <Card className="map-stat-card busy-stations">
               <BsPeople
@@ -194,9 +159,9 @@ function MapPage() {
           </Col>
         </Row>
 
-        {/* Main Content Section - Map and Station List */}
+        {/* Phần nội dung chính - Bản đồ và danh sách trạm */}
         <Row className="map-main-content">
-          {/* Map Column */}
+          {/* Cột bản đồ */}
           <Col lg={8} md={7}>
             <Card className="map-content-card">
               <div className="map-container">
@@ -208,10 +173,11 @@ function MapPage() {
             </Card>
           </Col>
 
-          {/* Station List Column */}
+          {/* Cột danh sách trạm */}
           <Col lg={4} md={5}>
             <Card className="stations-list-card">
               <div className="stations-list-container">
+                {/* Header danh sách */}
                 <div className="stations-list-header">
                   <h3 className="stations-list-title">Danh sách trạm sạc</h3>
                   <div className="stations-count">
@@ -221,7 +187,9 @@ function MapPage() {
                   </div>
                 </div>
 
+                {/* Nội dung danh sách */}
                 <div className="stations-list">
+                  {/* Trạng thái: Đang tải */}
                   {loading ? (
                     <div className="stations-loading-state">
                       <LoadingSpinner
@@ -231,7 +199,8 @@ function MapPage() {
                         text="Đang tải danh sách trạm sạc..."
                       />
                     </div>
-                  ) : error ? (
+                  ) : /* Trạng thái: Lỗi */
+                  error ? (
                     <div className="stations-error-state">
                       <div className="error-message">❌ {error}</div>
                       <button
@@ -241,18 +210,21 @@ function MapPage() {
                         Thử lại
                       </button>
                     </div>
-                  ) : chargingStations.length === 0 ? (
+                  ) : /* Trạng thái: Không có trạm */
+                  chargingStations.length === 0 ? (
                     <div className="stations-empty-state">
                       <div className="empty-icon">🔍</div>
                       <div>Không có trạm sạc nào trong khu vực này</div>
                     </div>
                   ) : (
+                    /* Danh sách các trạm sạc */
                     chargingStations.map((station) => (
                       <div
                         key={station.id}
                         className="station-list-item"
                         onClick={() => handleStationClick(station)}
                       >
+                        {/* Header trạm: Tên và trạng thái */}
                         <div className="station-header">
                           <h4 className="station-name">{station.name}</h4>
                           <span className={getStatusClass(station.status)}>
@@ -260,9 +232,9 @@ function MapPage() {
                           </span>
                         </div>
 
-                        {/* Grid 2x2 for main stats */}
+                        {/* Grid 2x2 cho thông tin chính */}
                         <div className="station-stats-grid">
-                          {/* Distance - always show */}
+                          {/* Khoảng cách */}
                           <div className="station-stat-item">
                             <BsGeoAlt
                               style={{ color: "#10b981" }}
@@ -273,7 +245,7 @@ function MapPage() {
                             </span>
                           </div>
 
-                          {/* Available/Total slots */}
+                          {/* Số slot trống/tổng số */}
                           <div className="station-stat-item">
                             <BsLightning
                               style={{ color: "#10b981" }}
@@ -285,7 +257,7 @@ function MapPage() {
                             </span>
                           </div>
 
-                          {/* Charging Types - Show unique types */}
+                          {/* Loại sạc - Hiển thị nếu khác AC/DC */}
                           {station.chargingTypes &&
                             station.chargingTypes !== "AC/DC" && (
                               <div className="station-stat-item station-stat-item--type">
@@ -299,7 +271,7 @@ function MapPage() {
                               </div>
                             )}
 
-                          {/* Active sessions - only if exists */}
+                          {/* Phiên đang hoạt động - Chỉ hiển thị nếu có */}
                           {station.chargingSessionIds &&
                             station.chargingSessionIds.length > 0 && (
                               <div className="station-stat-item station-stat-item--sessions">
@@ -315,7 +287,7 @@ function MapPage() {
                             )}
                         </div>
 
-                        {/* Address - Full width at bottom */}
+                        {/* Địa chỉ - Chiều rộng đầy đủ ở dưới cùng */}
                         <div className="station-address">
                           <BsGeoAlt
                             style={{ color: "#10b981" }}

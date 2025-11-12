@@ -67,9 +67,6 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
           <Descriptions.Item label="Mã phiên sạc">
             {sessionData.sessionId}
           </Descriptions.Item>
-          <Descriptions.Item label="Thời gian sạc">
-            {sessionData.duration}
-          </Descriptions.Item>
           <Descriptions.Item label="Điện năng tiêu thụ">
             {sessionData.energyConsumed} kWh
           </Descriptions.Item>

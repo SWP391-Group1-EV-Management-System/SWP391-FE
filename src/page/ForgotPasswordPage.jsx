@@ -1,18 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
-import "../assets/styles/ForgotPassword.css"; // Thêm CSS cho trang quên mật khẩu
+import "../assets/styles/ForgotPassword.css";
 import { IoClose } from "react-icons/io5";
 
 function ForgotPasswordPage() {
+  // Quản lý trạng thái email
   const [email, setEmail] = useState("");
+  
+  // Quản lý trạng thái loading và thông báo
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
+  // Xử lý thay đổi email
   const handleEmailChange = (e) => setEmail(e.target.value);
 
+  // Xử lý submit form quên mật khẩu
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -20,15 +25,14 @@ function ForgotPasswordPage() {
     setIsLoading(true);
 
     try {
+      // Gọi API gửi OTP đến email
       const response = await axios.post(
-        "http://localhost:8080/users/forgot-password", // Đảm bảo API này tồn tại
+        "http://localhost:8080/users/forgot-password",
         { email }
       );
 
       setMessage("Mã OTP đã được gửi đến email của bạn.");
-      console.log("Response:", response.data);
     } catch (error) {
-      console.error("Error:", error);
       if (error.response) {
         setError(error.response.data.message || "Lỗi kết nối!");
       } else {
@@ -39,10 +43,12 @@ function ForgotPasswordPage() {
     }
   };
 
+  // Render: Form nhập email để nhận OTP quên mật khẩu
   return (
     <div className="forgot-password-page">
       <div className="forgot-password-container">
         <div className="forgot-password-inner">
+          {/* Nút quay lại trang đăng nhập */}
           <button
             className="back-btn"
             onClick={() => navigate("/login")}
@@ -54,9 +60,13 @@ function ForgotPasswordPage() {
           <h2>Quên Mật Khẩu</h2>
           <p>Vui lòng nhập email để nhận mã OTP xác thực.</p>
 
+          {/* Hiển thị thông báo lỗi */}
           {error && <div className="error-message">{error}</div>}
+          
+          {/* Hiển thị thông báo thành công */}
           {message && <div className="success-message">{message}</div>}
 
+          {/* Form nhập email */}
           <form onSubmit={handleSubmit} className="forgot-password-form">
             <input
               type="email"
@@ -73,6 +83,8 @@ function ForgotPasswordPage() {
               {isLoading ? "Đang gửi..." : "Gửi mã OTP"}
             </button>
           </form>
+          
+          {/* Footer copyright */}
           <div className="copyright">
             <span> © 2025 Group1SE1818. All rights reserved.</span>
           </div>

@@ -21,7 +21,7 @@ const ServicePackage = () => {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Fetch packages và active transaction khi component mount
+  // Tải danh sách gói dịch vụ và giao dịch đang hoạt động
   useEffect(() => {
     fetchAll();
     if (user?.id) {
@@ -29,7 +29,7 @@ const ServicePackage = () => {
     }
   }, [fetchAll, fetchUserTransactions, user?.id]);
 
-  // Xử lý callback từ MoMo khi thanh toán thành công
+  // Xử lý callback từ MoMo sau khi thanh toán
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const resultCode = urlParams.get('resultCode');
@@ -42,14 +42,13 @@ const ServicePackage = () => {
         message.success(`Thanh toán gói ${payment.packageName} thành công!`);
         localStorage.removeItem('pendingPayment');
         
-        // Fetch lại active transaction sau khi thanh toán thành công
+        // Tải lại giao dịch sau khi thanh toán thành công
         if (user?.id) {
           setTimeout(() => {
             fetchUserTransactions(user.id);
           }, 1000);
         }
         
-        // Xóa query params khỏi URL
         window.history.replaceState({}, '', window.location.pathname);
       }
     } else if (resultCode) {
@@ -59,26 +58,25 @@ const ServicePackage = () => {
     }
   }, [user?.id, fetchUserTransactions]);
 
-  // Cleanup expired pending payments
+  // Dọn dẹp thanh toán đã hết hạn
   useEffect(() => {
     const pendingPayment = localStorage.getItem('pendingPayment');
     if (pendingPayment) {
       const payment = JSON.parse(pendingPayment);
       const TIMEOUT = 30 * 60 * 1000; // 30 phút
       if (Date.now() - payment.timestamp > TIMEOUT) {
-        console.log('Pending payment expired, cleaning up...');
         localStorage.removeItem('pendingPayment');
       }
     }
   }, []);
 
+  // Xử lý khi người dùng nhấn đăng ký gói
   const handleSubscribeClick = (pkg) => {
     if (!user || !user.id) {
       message.error('Vui lòng đăng nhập để đăng ký gói dịch vụ!');
       return;
     }
 
-    // Kiểm tra nếu đã có gói active
     if (activeTransaction) {
       message.warning('Bạn đang có gói dịch vụ đang hoạt động. Vui lòng đợi hết hạn để đăng ký gói mới!');
       return;
@@ -88,6 +86,7 @@ const ServicePackage = () => {
     setModalVisible(true);
   };
 
+  // Xử lý xác nhận thanh toán
   const handleConfirmPayment = async () => {
     if (!selectedPackage) return;
 
@@ -99,7 +98,7 @@ const ServicePackage = () => {
     try {
       message.loading('Đang khởi tạo thanh toán...', 0);
       
-      // Step 1: Create payment packet
+      // Tạo phiên thanh toán gói
       const paymentPacketId = await createPaymentPacket(user.id, selectedPackage.packageId);
 
       if (!paymentPacketId) {
@@ -108,7 +107,7 @@ const ServicePackage = () => {
         return;
       }
 
-      // Step 2: Create MoMo payment
+      // Tạo thanh toán MoMo
       const orderInfo = `Thanh toán gói: ${selectedPackage.packageName}`;
       const response = await createMomoPayment(
         paymentPacketId,
@@ -118,7 +117,7 @@ const ServicePackage = () => {
 
       message.destroy();
 
-      // Step 3: Redirect to MoMo
+      // Chuyển hướng đến trang thanh toán MoMo
       if (response && response.payUrl) {
         message.success('Đang chuyển đến trang thanh toán MoMo...');
         
@@ -141,7 +140,6 @@ const ServicePackage = () => {
       }
     } catch (error) {
       message.destroy();
-      console.error('Payment error:', error);
       message.error(
         error?.response?.data?.message || 
         error?.message || 
@@ -150,11 +148,12 @@ const ServicePackage = () => {
     }
   };
 
+  // Lọc và sắp xếp danh sách gói
   const filteredAndSorted = useMemo(() => {
     return (packages || []).slice();
   }, [packages]);
 
-  // Check if user has active package
+  // Kiểm tra người dùng có gói đang hoạt động
   const hasActivePackage = !!activeTransaction;
 
   if (packagesLoading || transactionLoading) {
@@ -176,7 +175,7 @@ const ServicePackage = () => {
             subtitle="Chọn gói phù hợp với nhu cầu của bạn" 
           />
 
-          {/* Hiển thị thông tin gói đang active */}
+          {/* Hiển thị thông tin gói đang hoạt động */}
           {activeTransaction && (
             <Alert
               message={
@@ -226,6 +225,7 @@ const ServicePackage = () => {
             })}
           </Row>
 
+          {/* Modal xác nhận đăng ký gói */}
           <Modal 
             title={
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

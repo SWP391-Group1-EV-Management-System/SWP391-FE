@@ -7,21 +7,14 @@ const PaymentReturn = () => {
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [paymentInfo, setPaymentInfo] = useState({});
 
+  // Xử lý kết quả thanh toán từ URL params
   useEffect(() => {
-    // Get payment result from URL params
     const urlParams = new URLSearchParams(window.location.search);
     const resultCode = urlParams.get("resultCode");
     const orderId = urlParams.get("orderId");
     const amount = urlParams.get("amount");
     const orderInfo = urlParams.get("orderInfo");
     const message = urlParams.get("message");
-
-    console.log("💳 [PaymentReturn] URL params:", {
-      resultCode,
-      orderId,
-      amount,
-      orderInfo,
-    });
 
     setPaymentInfo({
       orderId,
@@ -30,35 +23,20 @@ const PaymentReturn = () => {
       message,
     });
 
-    // Check if payment was successful
+    // Kiểm tra thanh toán thành công
     if (resultCode === "0") {
       setPaymentStatus("success");
 
-      // ✅ Dispatch payment success event
-      // Kiểm tra xem có pending payment trong localStorage không
+      // Xử lý thanh toán đang chờ từ localStorage
       const pendingPaymentStr = localStorage.getItem("pendingPayment");
-      console.log(
-        "💰 [PaymentReturn] Pending payment from localStorage:",
-        pendingPaymentStr
-      );
 
       if (pendingPaymentStr) {
         try {
           const pendingPayment = JSON.parse(pendingPaymentStr);
           const { sessionId, paymentId } = pendingPayment;
 
-          console.log("💰 [PaymentReturn] Parsed pending payment:", {
-            sessionId,
-            paymentId,
-          });
-
           if (sessionId) {
-            console.log(
-              "✅ [PaymentReturn] Dispatching paymentSuccess event for session:",
-              sessionId
-            );
-
-            // Lưu vào paidSessions ngay lập tức
+            // Lưu vào danh sách phiên đã thanh toán
             const paidSessions = JSON.parse(
               localStorage.getItem("paidSessions") || "{}"
             );
@@ -69,54 +47,41 @@ const PaymentReturn = () => {
               amount,
             };
             localStorage.setItem("paidSessions", JSON.stringify(paidSessions));
-            console.log(
-              "✅ [PaymentReturn] Saved to paidSessions:",
-              paidSessions
-            );
 
-            // Dispatch event
+            // Dispatch event để thông báo thanh toán thành công
             window.dispatchEvent(
               new CustomEvent("paymentSuccess", {
                 detail: { sessionId, orderId, amount },
               })
             );
-
-            console.log("✅ [PaymentReturn] Event dispatched successfully");
-          } else {
-            console.warn("⚠️ [PaymentReturn] No sessionId in pending payment");
           }
         } catch (e) {
-          console.error(
-            "❌ [PaymentReturn] Failed to parse pendingPayment:",
-            e
-          );
+          // Xử lý lỗi parse JSON
         }
-      } else {
-        console.warn("⚠️ [PaymentReturn] No pending payment in localStorage");
       }
     } else {
       setPaymentStatus("failed");
-      console.log(
-        "❌ [PaymentReturn] Payment failed with resultCode:",
-        resultCode
-      );
     }
 
     setLoading(false);
   }, []);
 
+  // Điều hướng về trang chủ
   const handleBackToHome = () => {
     window.location.href = "/app/home";
   };
 
+  // Điều hướng đến trang gói dịch vụ
   const handleViewPackages = () => {
     window.location.href = "/app/packages";
   };
 
+  // Điều hướng đến trang lịch sử
   const handleViewHistory = () => {
     window.location.href = "/app/history";
   };
 
+  // Hiển thị trạng thái đang tải
   if (loading) {
     return (
       <div
@@ -133,7 +98,7 @@ const PaymentReturn = () => {
     );
   }
 
-  // Check if this is a package payment
+  // Kiểm tra loại thanh toán
   const isPackagePayment = paymentInfo.orderId?.startsWith("PKG_");
 
   return (

@@ -8,29 +8,31 @@ import useCar from '../hooks/useCar';
 import { useAuth } from '../hooks/useAuth';
 
 const VehicleRegistrationPage = () => {
+  // ==================== STATE MANAGEMENT ====================
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingCar, setEditingCar] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   
+  // ==================== HOOKS ====================
   const { cars, loading, fetchCarsByUser, createCar, modifyCar, removeCar } = useCar();
   const { user } = useAuth();
 
   const userId = user?.userId || user?.id || null;
 
-  // Load danh sách xe khi component mount
+  // ==================== LẤY DANH SÁCH XE THEO USER ====================
   useEffect(() => {
     if (!userId) return;
     fetchCarsByUser(userId);
   }, [userId, fetchCarsByUser]);
 
-  // Mở form tạo xe mới
+  // ==================== MỞ FORM TẠO XE MỚI ====================
   const handleOpenCreateForm = () => {
     setEditingCar(null);
     setIsEditing(false);
     setIsFormOpen(true);
   };
 
-  // Mở form chỉnh sửa xe
+  // ==================== MỞ FORM CHỈNH SỬA XE ====================
   const handleEdit = (car) => {
     setEditingCar({
       carID: car.carID,
@@ -43,7 +45,7 @@ const VehicleRegistrationPage = () => {
     setIsFormOpen(true);
   };
 
-  // Xóa xe
+  // ==================== XÓA XE ====================
   const handleDelete = async (carId) => {
     try {
       await removeCar(carId);
@@ -54,7 +56,7 @@ const VehicleRegistrationPage = () => {
     }
   };
 
-  // Submit form (tạo mới hoặc cập nhật)
+  // ==================== SUBMIT FORM (TẠO MỚI / CẬP NHẬT) ====================
   const handleFormSubmit = async (values) => {
     try {
       const payload = {
@@ -84,14 +86,14 @@ const VehicleRegistrationPage = () => {
     }
   };
 
-  // Đóng form
+  // ==================== ĐÓNG FORM ====================
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setEditingCar(null);
     setIsEditing(false);
   };
 
-  // Loading khi chưa có user
+  // ==================== TRẠNG THÁI LOADING KHI CHƯA CÓ USER ====================
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -100,7 +102,7 @@ const VehicleRegistrationPage = () => {
     );
   }
 
-  // Loading khi đang fetch cars lần đầu
+  // ==================== TRẠNG THÁI LOADING KHI ĐANG FETCH DANH SÁCH XE ====================
   if (loading && (!cars || cars.length === 0)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -109,9 +111,11 @@ const VehicleRegistrationPage = () => {
     );
   }
 
+  // ==================== GIAO DIỆN CHÍNH ====================
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-6xl mx-auto">
+        {/* Header với nút đăng ký xe */}
         <PageHeader
           title="Quản lý đăng ký xe"
           icon={<CarOutlined />}
@@ -124,6 +128,7 @@ const VehicleRegistrationPage = () => {
           }}
         />
 
+        {/* Danh sách xe đã đăng ký */}
         <VehicleRegistrationCard 
           vehicles={cars || []}
           loading={loading}
@@ -132,6 +137,7 @@ const VehicleRegistrationPage = () => {
         />
       </div>
 
+      {/* Form tạo mới / chỉnh sửa xe */}
       <VehicleRegistrationForm
         isOpen={isFormOpen}
         onClose={handleCloseForm}

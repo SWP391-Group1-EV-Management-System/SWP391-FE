@@ -8,9 +8,13 @@ import { FaUserAlt } from 'react-icons/fa';
 import ReportList from '../components/ReportList';
 
 const UserManagementPage = () => {
+  // ==================== STATE MANAGEMENT ====================
   const [search, setSearch] = useState('');
+
+  // ==================== XỬ LÝ TÌM KIẾM ====================
   const handleSearch = (e) => setSearch(e.target.value);
 
+  // ==================== CẤU HÌNH CÁC TAB ====================
   const tabItems = [
     {
       key: 'user',
@@ -20,8 +24,18 @@ const UserManagementPage = () => {
           defaultActiveKey="1"
           tabBarStyle={{ color: '#166534', fontWeight: 600 }}
           items={[
-            { key: '1', label: <span className="tab-animate">Driver</span>, children: <DriverTable search={search} /> },
-            { key: '2', label: <span className="tab-animate">Staff</span>, children: <StaffTable search={search} /> },
+            // Tab danh sách Driver
+            { 
+              key: '1', 
+              label: <span className="tab-animate">Driver</span>, 
+              children: <DriverTable search={search} /> 
+            },
+            // Tab danh sách Staff
+            { 
+              key: '2', 
+              label: <span className="tab-animate">Staff</span>, 
+              children: <StaffTable search={search} /> 
+            },
           ]}
         />
       )
@@ -44,8 +58,10 @@ const UserManagementPage = () => {
     }
   ];
 
+  // ==================== GIAO DIỆN CHÍNH ====================
   return (
     <div className="user-management-fadein" style={{ background: '#fff', borderRadius: 12, padding: 32, minHeight: 500 }}>
+      {/* Header trang */}
       <PageHeader
         title={
           <span style={{
@@ -63,6 +79,8 @@ const UserManagementPage = () => {
         }
         customStyle={{ fontSize: '40px', fontWeight: 900, letterSpacing: '1px', level: 1 }}
       />
+
+      {/* Thanh tìm kiếm */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         <Col span={12}>
           <Input
@@ -74,6 +92,8 @@ const UserManagementPage = () => {
           />
         </Col>
       </Row>
+
+      {/* Tabs điều hướng chính */}
       <Tabs defaultActiveKey="user" items={tabItems} />
     </div>
   );
