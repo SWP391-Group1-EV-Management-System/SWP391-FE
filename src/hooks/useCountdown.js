@@ -10,7 +10,8 @@ import { cleanupAllCountdowns } from "../utils/countdownUtils";
 export const useCountdown = (
   minutes,
   enabled = true,
-  storageKey = "countdownEndTime"
+  storageKey = "countdownEndTime",
+  explicitEndTime = null // optional ISO string to use as the exact end time
 ) => {
   const [countdown, setCountdown] = useState(null);
   const [status, setStatus] = useState("IDLE"); // IDLE, RUNNING, COMPLETED, ERROR
@@ -43,31 +44,59 @@ export const useCountdown = (
       );
     }
 
-    // ✅ CHECK localStorage xem đã có endTime chưa
+    // ✅ Prefer explicitEndTime from server if provided (server is source of truth)
     let endTime = null;
-    try {
-      const savedEndTime = localStorage.getItem(storageKey);
-      if (savedEndTime) {
-        endTime = new Date(savedEndTime);
-        console.log("📦 [useCountdown] Found saved endTime:", endTime);
-
-        // Kiểm tra endTime còn valid không
-        const now = new Date();
-        if (endTime > now) {
-          console.log("✅ [useCountdown] Using saved endTime (not expired)");
+    if (explicitEndTime) {
+      try {
+        const explicitDate = new Date(explicitEndTime);
+        if (!isNaN(explicitDate.getTime())) {
+          endTime = explicitDate;
+          try {
+            localStorage.setItem(storageKey, endTime.toISOString());
+            console.log(
+              "� [useCountdown] Using explicit endTime and saved to localStorage:",
+              endTime
+            );
+          } catch (e) {
+            console.error(
+              "❌ [useCountdown] Error saving explicit endTime:",
+              e
+            );
+          }
         } else {
-          console.log(
-            "⚠️ [useCountdown] Saved endTime expired, creating new one"
+          console.warn(
+            "⚠️ [useCountdown] explicitEndTime provided but invalid:",
+            explicitEndTime
           );
-          endTime = null;
-          localStorage.removeItem(storageKey);
         }
+      } catch (err) {
+        console.error("❌ [useCountdown] Error parsing explicitEndTime:", err);
       }
-    } catch (err) {
-      console.error("❌ [useCountdown] Error reading localStorage:", err);
     }
 
-    // ✅ Nếu chưa có endTime → Tính endTime mới và LƯU vào localStorage
+    // ✅ If explicitEndTime not provided/valid, fall back to saved localStorage endTime
+    if (!endTime) {
+      try {
+        const savedEndTime = localStorage.getItem(storageKey);
+        if (savedEndTime) {
+          const savedDate = new Date(savedEndTime);
+          console.log("📦 [useCountdown] Found saved endTime:", savedDate);
+          const now = new Date();
+          if (savedDate > now) {
+            endTime = savedDate;
+            console.log("✅ [useCountdown] Using saved endTime (not expired)");
+          } else {
+            console.log(
+              "⚠️ [useCountdown] Saved endTime expired, creating new one"
+            );
+            localStorage.removeItem(storageKey);
+          }
+        }
+      } catch (err) {
+        console.error("❌ [useCountdown] Error reading localStorage:", err);
+      }
+    }
+
     if (!endTime) {
       endTime = new Date();
       endTime.setMinutes(endTime.getMinutes() + minutes);
@@ -187,7 +216,7 @@ export const useCountdown = (
         clearInterval(intervalRef.current);
       }
     };
-  }, [minutes, enabled, storageKey]);
+  }, [minutes, enabled, storageKey, explicitEndTime]);
 
   return {
     countdown,
