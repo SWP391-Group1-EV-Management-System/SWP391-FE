@@ -7,7 +7,7 @@ const { Title, Text } = Typography;
 
 /**
  * Tính số phút chờ
- * - Nếu maxWaitingTime là STRING (ISO datetime) → Tính maxWaitingTime - createdAt
+ * - Nếu maxWaitingTime là STRING (ISO datetime) → Tính maxWaitingTime - now (thời gian còn lại)
  * - Nếu maxWaitingTime là NUMBER (phút) → Dùng trực tiếp
  */
 const calculateWaitingMinutes = (maxWaitingTime, createdAt) => {
@@ -20,23 +20,28 @@ const calculateWaitingMinutes = (maxWaitingTime, createdAt) => {
     }
 
     // ✅ Case 2: maxWaitingTime là string datetime → Tính chênh lệch
-    if (typeof maxWaitingTime === "string" && createdAt) {
+    if (typeof maxWaitingTime === "string") {
       const endTime = new Date(maxWaitingTime);
-      const startTime = new Date(createdAt);
 
-      // Kiểm tra valid dates
-      if (isNaN(endTime.getTime()) || isNaN(startTime.getTime())) {
-        console.warn("⚠️ [WaitingTime] Invalid datetime format");
+      // Kiểm tra valid endTime
+      if (isNaN(endTime.getTime())) {
+        console.warn(
+          "⚠️ [WaitingTime] Invalid datetime format for maxWaitingTime"
+        );
         return 0;
       }
 
-      // Tính số milliseconds chênh lệch
-      const diffMs = endTime - startTime;
+      // Tính thời gian còn lại từ now -> endTime (phút)
+      const now = new Date();
+      const diffMs = endTime - now;
 
-      // Convert sang phút
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      // Nếu đã quá hạn, trả 0
+      if (diffMs <= 0) return 0;
 
-      return diffMinutes > 0 ? diffMinutes : 0;
+      // Convert sang phút (làm tròn lên để hiển thị ít nhất 1 phút nếu còn 30s)
+      const diffMinutes = Math.ceil(diffMs / (1000 * 60));
+
+      return diffMinutes;
     }
 
     console.warn(

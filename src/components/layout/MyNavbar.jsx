@@ -103,7 +103,7 @@ function MyNavbar({ collapsed }) {
     } catch (error) {
       console.error("Lỗi khi đăng xuất:", error);
       // Vẫn redirect về login nếu có lỗi để đảm bảo user được đăng xuất
-      window.location.href = "/login";
+      window.location.href = "/welcome";
     }
   };
 

@@ -18,7 +18,7 @@ import { LoadingSpinner } from "../common";
 const ProtectedRoute = ({
   children,
   requiredRoles = null,
-  redirectTo = "/login",
+  redirectTo = "/welcome",
   fallback = (
     <LoadingSpinner
       type="pulse"

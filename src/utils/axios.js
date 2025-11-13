@@ -113,10 +113,32 @@ api.interceptors.response.use(
 
         // Redirect về login nếu refresh token hết hạn
         if (refreshError.response?.status === 401) {
-          console.warn('🚨 Refresh token hết hạn → Redirect về login');
-         
-          // Redirect về login
-          window.location.href = "/login";
+          console.warn("🚨 Refresh token hết hạn → Redirect về login");
+
+          // Nếu đang ở các trang public (welcome, about, login, register,...)
+          // thì không ép redirect để tránh đẩy user khỏi trang public.
+          const clientPublicPaths = [
+            "/login",
+            "/register",
+            "/forgot-password",
+            "/welcome",
+            "/about",
+          ];
+
+          const isOnPublicPath =
+            typeof window !== "undefined" &&
+            clientPublicPaths.some((p) =>
+              window.location.pathname.startsWith(p)
+            );
+
+          if (!isOnPublicPath) {
+            // Redirect về login nếu không ở trang public
+            window.location.href = "/login";
+          } else {
+            console.log(
+              "📌 On public page, skipping automatic redirect to /login"
+            );
+          }
         }
 
         return Promise.reject(refreshError);

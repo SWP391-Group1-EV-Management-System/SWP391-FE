@@ -1,4 +1,8 @@
-/* StationModal Styles */
+/* StationModal Styles - Sử dụng z-index system có sẵn */
+
+.station-modal-backdrop .modal {
+  display: block !important;
+}
 
 .station-modal-backdrop {
   position: fixed;
@@ -10,7 +14,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--z-modal-backdrop);
+  z-index: var(--z-modal-backdrop); /* Sử dụng từ z-index system */
 }
 
 .station-modal {
@@ -69,14 +73,27 @@
 
 .station-info__item {
   display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  color: #666;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.station-info__item:last-child {
+  border-bottom: none;
 }
 
 .station-info__icon {
-  margin-right: 8px;
-  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 1.2rem;
+  color: #4a90e2;
+}
+
+.station-info__item span {
+  flex: 1;
+  color: #555;
+  line-height: 1.5;
 }
 
 .station-info__icon--star {
@@ -119,52 +136,72 @@
 .statistics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 10px;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .statistics-item {
-  padding: 8px 12px;
+  padding: 16px;
   border-radius: 8px;
   text-align: center;
+  background: white;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.statistics-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .statistics-item--available {
-  background-color: #d4edda;
+  border-color: #28a745;
+  background: linear-gradient(135deg, #f0fff4 0%, #e8f5e9 100%);
 }
 
 .statistics-item--busy {
-  background-color: #fff3cd;
+  border-color: #ffc107;
+  background: linear-gradient(135deg, #fffbf0 0%, #fff9e6 100%);
 }
 
 .statistics-item--inactive {
-  background-color: #f8d7da;
+  border-color: #dc3545;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffebee 100%);
 }
 
 .statistics-item--total {
-  background-color: #e2e3e5;
+  border-color: #4a90e2;
+  background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
 }
 
 .statistics-number {
-  font-size: 2.25rem;
-  font-weight: bold;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 4px;
 }
 
 .statistics-number--available {
-  color: #155724;
+  color: #28a745;
 }
 
 .statistics-number--busy {
-  color: #856404;
+  color: #ffc107;
 }
 
 .statistics-number--inactive {
-  color: #721c24;
+  color: #dc3545;
 }
 
 .statistics-number--total {
-  color: #383d41;
+  color: #4a90e2;
 }
 
+.statistics-label {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
 
 /* Amenities */
 .amenities-list {
@@ -389,7 +426,7 @@
   }
 }
 
-/* ⭐ NEW: Station Status Section */
+/* Station Status Section */
 .station-status-section {
   margin: 16px 0;
   padding: 12px;
@@ -437,101 +474,4 @@
   background: rgba(255, 255, 255, 0.7);
   padding: 6px 12px;
   border-radius: 4px;
-}
-
-/* ⭐ Enhanced Station Info Items */
-.station-info__item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.station-info__item:last-child {
-  border-bottom: none;
-}
-
-.station-info__icon {
-  flex-shrink: 0;
-  margin-top: 2px;
-  font-size: 1.2rem;
-  color: #4a90e2;
-}
-
-.station-info__item span {
-  flex: 1;
-  color: #555;
-  line-height: 1.5;
-}
-
-/* ⭐ Enhanced Statistics Grid */
-.statistics-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.statistics-item {
-  padding: 16px;
-  border-radius: 8px;
-  text-align: center;
-  background: white;
-  border: 2px solid transparent;
-  transition: all 0.3s ease;
-}
-
-.statistics-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.statistics-item--available {
-  border-color: #28a745;
-  background: linear-gradient(135deg, #f0fff4 0%, #e8f5e9 100%);
-}
-
-.statistics-item--busy {
-  border-color: #ffc107;
-  background: linear-gradient(135deg, #fffbf0 0%, #fff9e6 100%);
-}
-
-.statistics-item--inactive {
-  border-color: #dc3545;
-  background: linear-gradient(135deg, #fff5f5 0%, #ffebee 100%);
-}
-
-.statistics-item--total {
-  border-color: #4a90e2;
-  background: linear-gradient(135deg, #f0f7ff 0%, #e3f2fd 100%);
-}
-
-.statistics-number {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.statistics-number--available {
-  color: #28a745;
-}
-
-.statistics-number--busy {
-  color: #ffc107;
-}
-
-.statistics-number--inactive {
-  color: #dc3545;
-}
-
-.statistics-number--total {
-  color: #4a90e2;
-}
-
-.statistics-label {
-  font-size: 1.2rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 600;
 }

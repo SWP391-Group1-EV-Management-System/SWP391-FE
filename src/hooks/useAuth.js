@@ -111,7 +111,7 @@ export const useAuth = () => {
       setUser(null);
       hasFetchedRef.current = false;
       setLoading(false);
-      window.location.href = "/login";
+      window.location.href = "/welcome";
     }
   }, []);
 

@@ -37,10 +37,12 @@
   --z-loading: 430; /* Loading indicators */
 
   /* ===== LAYER 5: MODALS & DIALOGS (500-599) ===== */
-  --z-modal-backdrop: 500; /* Modal backdrop */
-  --z-modal: 510; /* Modal content */
-  --z-dialog: 520; /* Dialog boxes */
-  --z-alert: 530; /* Alert messages */
+  --z-modal-backdrop: 500; /* Modal backdrop (level 1) */
+  --z-modal: 510; /* Modal content (level 1) */
+  --z-modal-backdrop-nested: 520; /* Nested modal backdrop (level 2) */
+  --z-modal-nested: 530; /* Nested modal content (level 2) */
+  --z-dialog: 540; /* Dialog boxes */
+  --z-alert: 550; /* Alert messages */
 
   /* ===== LAYER 6: NOTIFICATIONS (600-699) ===== */
   --z-toast: 600; /* Toast notifications */
@@ -121,6 +123,12 @@
 }
 .z-modal {
   z-index: var(--z-modal);
+}
+.z-modal-backdrop-nested {
+  z-index: var(--z-modal-backdrop-nested);
+}
+.z-modal-nested {
+  z-index: var(--z-modal-nested);
 }
 .z-dialog {
   z-index: var(--z-dialog);
