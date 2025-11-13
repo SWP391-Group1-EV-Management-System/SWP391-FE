@@ -1,31 +1,36 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router"; // Thay react-router-dom bằng react-router
+import { useNavigate, useLocation } from "react-router";
 import "../assets/styles/Login.css";
 import { CgMail } from "react-icons/cg";
-import { TbLock } from "react-icons/tb"; // Sửa từ TbLockPassword
+import { TbLock } from "react-icons/tb";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { IoClose } from "react-icons/io5";
 import { useLogin } from "../hooks/useAuth";
 
 function Login() {
-  console.log("Login component rendered");
+  // ===== STATE MANAGEMENT =====
   const [showPassword, setShowPassword] = useState(false);
+  
+  // ===== HOOKS =====
   const { login, loading, error } = useLogin();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Lấy intended destination từ protected route redirect
+  // ===== Lấy trang đích từ protected route redirect =====
   const from = location.state?.from || "/app/home";
 
+  // ===== FUNCTION: Toggle hiển thị/ẩn mật khẩu =====
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
+  // ===== FUNCTION: Điều hướng về trang Welcome =====
   const handleBackToWelcome = () => {
     navigate("/welcome");
   };
 
+  // ===== FUNCTION: Xử lý submit form đăng nhập =====
   const handleLogin = async (e) => {
     e.preventDefault();
     const email = e.target.username.value;
@@ -33,19 +38,20 @@ function Login() {
     try {
       const success = await login(email, password, from);
       if (!success) {
-        // login hook exposes error which will be displayed; nothing else needed here
-        console.warn("Login failed");
+        // Login hook sẽ hiển thị lỗi
       }
     } catch (err) {
-      console.error("Login error", err);
+      // Xử lý lỗi đăng nhập
     }
   };
 
+  // ===== RENDER UI =====
   return (
     <>
       <div className="login-page">
         <div className="login-container">
           <div className="login-inner">
+            {/* Nút quay lại trang Welcome */}
             <button
               className="back-to-welcome-btn"
               onClick={handleBackToWelcome}
@@ -53,8 +59,13 @@ function Login() {
             >
               <IoClose size={24} />
             </button>
+            
+            {/* Tiêu đề trang */}
             <h2>Đăng nhập</h2>
+            
+            {/* Form đăng nhập */}
             <form onSubmit={handleLogin} aria-busy={loading}>
+              {/* Trường nhập email */}
               <div>
                 <label htmlFor="username">
                   <CgMail size={28} />
@@ -68,6 +79,8 @@ function Login() {
                   placeholder="email@example.com"
                 />
               </div>
+              
+              {/* Trường nhập mật khẩu với nút hiển thị/ẩn */}
               <div className="password-field">
                 <label htmlFor="password">
                   <TbLock size={24} />
@@ -95,6 +108,8 @@ function Login() {
                   </button>
                 </div>
               </div>
+              
+              {/* Checkbox nhớ mật khẩu và link quên mật khẩu */}
               <div className="form-options">
                 <label className="checkbox-label">
                   <input type="checkbox" id="remember-password" />
@@ -105,6 +120,8 @@ function Login() {
                   Quên mật khẩu?
                 </a>
               </div>
+              
+              {/* Nút submit form đăng nhập */}
               <button
                 type="submit"
                 disabled={loading}
@@ -126,6 +143,7 @@ function Login() {
                 )}
               </button>
 
+              {/* Hiển thị thông báo lỗi nếu có */}
               {error && (
                 <div
                   className="form-error"
@@ -136,6 +154,7 @@ function Login() {
                 </div>
               )}
 
+              {/* Link chuyển đến trang đăng ký */}
               <div className="register-prompt">
                 <div>Không có tài khoản?</div>
                 <a
@@ -152,6 +171,8 @@ function Login() {
                 </a>
               </div>
             </form>
+            
+            {/* Footer copyright */}
             <div className="copyright">
               <span> © 2025 Group1SE1818. All rights reserved.</span>
             </div>

@@ -15,24 +15,28 @@ const { Title, Text } = Typography;
 const HistoryPage = () => {
   const { user } = useAuth();
   const { history, loading, error, fetchHistory } = useHistory();
+  
+  // Quản lý session đang được xem chi tiết
   const [selectedSession, setSelectedSession] = useState(null);
 
-  // filter state
+  // Quản lý trạng thái filter
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('desc');
 
+  // Tải lịch sử sạc khi component mount hoặc user thay đổi
   useEffect(() => {
     if (user?.id) {
       fetchHistory(user.id);
     }
   }, [user?.id, fetchHistory]);
 
+  // Lọc và sắp xếp danh sách lịch sử
   const filteredHistory = useMemo(() => {
     if (!history || history.length === 0) return [];
 
     let filtered = [...history];
 
-    // 1. Filter theo query (tìm theo sessionId, tên trạm, địa chỉ)
+    // Filter theo query (tìm theo sessionId, tên trạm, địa chỉ)
     if (query.trim()) {
       const searchLower = query.toLowerCase().trim();
       filtered = filtered.filter(item => 
@@ -42,7 +46,7 @@ const HistoryPage = () => {
       );
     }
 
-    // 2. Sort theo thời gian
+    // Sắp xếp theo thời gian
     filtered.sort((a, b) => {
       const timeA = new Date(a.startTime).getTime();
       const timeB = new Date(b.startTime).getTime();
@@ -52,23 +56,26 @@ const HistoryPage = () => {
     return filtered;
   }, [history, query, sort]);
 
+  // Xử lý xem chi tiết session
   const handleViewDetail = (session) => {
     setSelectedSession(session);
     // Scroll to top khi xem chi tiết
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Xử lý quay lại danh sách
   const handleBackToList = () => {
     setSelectedSession(null);
   };
 
+  // Xử lý làm mới danh sách
   const handleRefresh = () => {
     if (user?.id) {
       fetchHistory(user.id);
     }
   };
 
-  // Nếu đang xem chi tiết
+  // Render: Chi tiết session được chọn
   if (selectedSession) {
     return (
       <HistorySessionDetail 
@@ -78,7 +85,7 @@ const HistoryPage = () => {
     );
   }
 
-  // Loading state
+  // Render: Trạng thái đang tải
   if (loading) {
     return (
       <div style={{ 
@@ -100,7 +107,7 @@ const HistoryPage = () => {
     );
   }
 
-  // Error state
+  // Render: Trạng thái lỗi
   if (error) {
     return (
       <div style={{ 
@@ -129,27 +136,28 @@ const HistoryPage = () => {
     );
   }
 
-  // Main view
+  // Render: Danh sách lịch sử sạc với filter
   return (
     <div style={{ 
       padding: '2rem', 
       background: 'white', 
       minHeight: '100vh' 
     }}>
+      {/* Header trang */}
       <PageHeader
         title="Lịch sử sạc"
         icon={<ThunderboltOutlined style={{ fontSize: 24 }} />}
       />
 
-      {/* Summary Cards */}
+      {/* Tổng quan thống kê lịch sử */}
       {history && history.length > 0 && (
         <HistorySummary history={history} />
       )}
       
-      {/* History List hoặc No Data */}
+      {/* Danh sách lịch sử với bộ lọc hoặc thông báo không có dữ liệu */}
       {history && history.length > 0 ? (
         <HistoryList 
-          history={filteredHistory} // Dùng data đã filter
+          history={filteredHistory}
           onViewDetail={handleViewDetail}
           filterComponent={
             <HistoryFilters
@@ -157,7 +165,6 @@ const HistoryPage = () => {
               sort={sort}
               onChangeQuery={setQuery}
               onChangeSort={setSort}
-              // onApply removed — filtering is applied automatically
             />
           }
         />

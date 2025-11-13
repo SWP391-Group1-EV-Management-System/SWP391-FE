@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "react-bootstrap";
+import { notification } from "antd";
 import { useNavigate } from "react-router";
 import {
   IoClose,
   IoLocationOutline,
   IoTimeOutline,
   IoPeopleOutline,
-  IoStarSharp,
   IoFlashOutline,
   IoCheckmarkCircle,
   IoCloseCircle,
@@ -20,42 +20,51 @@ import {
   IoSpeedometerOutline,
   IoCardOutline,
 } from "react-icons/io5";
+import { Select } from "antd";
 import { useStationPosts } from "../../hooks/useStationPosts";
 import useBooking from "../../hooks/useBooking";
 import useCar from "../../hooks/useCar";
 import { useAuth } from "../../hooks/useAuth";
+import BookingConfirmModal from "./BookingConfirmModal";
 import "../../assets/styles/StationModal.css";
 
+// Component: Modal hiển thị thông tin chi tiết trạm sạc và các trụ sạc
 const StationModal = ({ isOpen, onClose, station }) => {
-  const { posts, loading, error, statistics } = useStationPosts(station?.id);
+  // Hooks: Lấy dữ liệu trụ sạc, booking, xe và user
+  const { posts, loading, error } = useStationPosts(station?.id);
   const { createBooking: createBookingApi, loading: bookingLoading } =
     useBooking();
-  const { getCarsByUser, loading: carLoading } = useCar();
+  const { getCarsByUser } = useCar();
   const { user: currentUser } = useAuth();
 
+  // State: Quản lý xe được chọn và trạng thái xử lý
   const [selectedCar, setSelectedCar] = useState(null);
   const [userCars, setUserCars] = useState([]);
   const [bookingProcessingId, setBookingProcessingId] = useState(null);
+  const [confirmModal, setConfirmModal] = useState({
+    isOpen: false,
+    post: null,
+  });
+  // Map charging type ids to display names (shared with service mapping)
+  const CHARGING_TYPE_NAMES = { 1: "CCS", 2: "CHAdeMO", 3: "AC" };
   const navigate = useNavigate();
 
-  // ⭐ Merge trạng thái thực tế từ chargingPostsAvailable map vào posts array
+  // Chức năng: Merge trạng thái thực tế từ API vào danh sách trụ sạc
   const mergedPosts = posts.map((post) => {
-    // Nếu có chargingPostsAvailable map từ station data
     if (
       station?.chargingPostsAvailable &&
       post.id in station.chargingPostsAvailable
     ) {
-      // Lấy trạng thái thật từ map (true/false)
       const actualAvailability = station.chargingPostsAvailable[post.id];
       return {
         ...post,
-        isAvailable: actualAvailability, // ⭐ Ghi đè với trạng thái thật từ map
+        isAvailable: actualAvailability,
       };
     }
-    return post; // Giữ nguyên nếu không có trong map
+    return post;
   });
 
-  // ⭐ Tính statistics từ chargingPostsAvailable map (từ API /all)
+  // Chức năng: Tính toán thống kê từ chargingPostsAvailable map
   const calculateStatsFromMap = (chargingPostsAvailable) => {
     if (!chargingPostsAvailable || typeof chargingPostsAvailable !== "object") {
       return { available: 0, busy: 0, total: 0 };
@@ -66,18 +75,10 @@ const StationModal = ({ isOpen, onClose, station }) => {
     const available = postStatuses.filter((status) => status === true).length;
     const busy = total - available;
 
-    console.log("📊 [StationModal] Calculating stats from map:", {
-      chargingPostsAvailable,
-      postStatuses,
-      total,
-      available,
-      busy,
-    });
-
     return { available, busy, total, inactive: 0 };
   };
 
-  // Sử dụng stats từ posts API hoặc fallback sang map từ station data
+  // Chức năng: Tính toán và hiển thị thống kê trụ sạc
   const displayStats =
     mergedPosts.length > 0
       ? {
@@ -88,23 +89,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
         }
       : calculateStatsFromMap(station?.chargingPostsAvailable);
 
-  // Debug logging
-  useEffect(() => {
-    if (station) {
-      console.log("🏢 [StationModal] Station data:", {
-        id: station.id,
-        name: station.name,
-        chargingPostsAvailable: station.chargingPostsAvailable,
-        totalSlots: station.totalSlots,
-        availableSlots: station.availableSlots,
-        chargingSessionIds: station.chargingSessionIds,
-        postsLoaded: posts.length,
-        mergedPostsCount: mergedPosts.length,
-        displayStats,
-      });
-    }
-  }, [station, posts, mergedPosts, displayStats]);
-
+  // Chức năng: Tải danh sách xe của người dùng khi mở modal
   useEffect(() => {
     if (isOpen && currentUser) {
       const loadUserCars = async () => {
@@ -112,7 +97,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
           const userId = currentUser.id || currentUser.userID;
           const result = await getCarsByUser(userId);
 
-          // Xử lý response
+          // Xử lý response từ API (có thể trả về nhiều format khác nhau)
           let cars = [];
 
           if (Array.isArray(result)) {
@@ -131,131 +116,199 @@ const StationModal = ({ isOpen, onClose, station }) => {
 
           setUserCars(cars);
 
+          // Tự động chọn xe đầu tiên nếu có
           if (cars.length > 0) {
             const firstCar = cars[0];
             const carId = firstCar.carID || firstCar.carId || firstCar.id;
             setSelectedCar(carId);
           }
         } catch (err) {
-          console.error("Error loading user cars:", err);
+          // Silent error handling
         }
       };
 
       loadUserCars();
     }
 
-    // Reset khi đóng modal
+    // Reset state khi đóng modal
     if (!isOpen) {
       setUserCars([]);
       setSelectedCar(null);
+      setConfirmModal({ isOpen: false, post: null });
     }
   }, [isOpen, currentUser]);
 
   if (!isOpen || !station) return null;
 
-  // Chỉ cần update hàm handleBookCharger trong StationModal.jsx
+  // Compute selected car object and its charging type display name
+  const selectedCarObj = userCars.find(
+    (c) => (c.carID || c.carId || c.id) === selectedCar
+  );
+  const selectedCarChargingType = selectedCarObj
+    ? CHARGING_TYPE_NAMES[selectedCarObj.chargingType] ||
+      (selectedCarObj.chargingType || "N/A").toString()
+    : null;
 
-  const handleBookCharger = async (postId) => {
+  // Chức năng: Mở modal xác nhận đặt chỗ
+  const handleBookCharger = (postId) => {
+    // Kiểm tra đăng nhập
+    if (!currentUser) {
+      notification.warning({
+        message: "Yêu cầu đăng nhập",
+        description: "Vui lòng đăng nhập trước khi đặt chỗ.",
+        duration: 3,
+      });
+      return;
+    }
+
+    // Kiểm tra xe đã chọn
+    if (!selectedCar) {
+      notification.warning({
+        message: "Chưa có xe",
+        description: "Bạn chưa có xe. Vui lòng thêm xe để đặt chỗ.",
+        duration: 3,
+      });
+      return;
+    }
+
+    // Tìm thông tin trụ sạc (nếu có)
+    const post = mergedPosts.find((p) => p.id === postId);
+
+    // Lấy thông tin xe đã chọn
+    const carObj = userCars.find(
+      (c) => (c.carID || c.carId || c.id) === selectedCar
+    );
+
+    // Nếu không tìm thấy object xe, thông báo
+    if (!carObj) {
+      notification.warning({
+        message: "Xe không hợp lệ",
+        description: "Không tìm thấy thông tin xe đã chọn. Vui lòng thử lại.",
+        duration: 3,
+      });
+      return;
+    }
+
+    // Nếu có post cụ thể, kiểm tra tính tương thích giữa loại sạc xe và trụ
+    if (post) {
+      // Map id -> tên (giống mapping trong service)
+      const CHARGING_TYPE_NAMES = { 1: "CCS", 2: "CHAdeMO", 3: "AC" };
+
+      const carTypeName = CHARGING_TYPE_NAMES[carObj.chargingType] ||
+        (carObj.chargingType || "").toString();
+
+      const supported = (post.supportedTypes || []).map((t) =>
+        t.toString().toUpperCase()
+      );
+
+      if (
+        carTypeName &&
+        !supported.includes(carTypeName.toString().toUpperCase())
+      ) {
+        notification.error({
+          message: "Đầu sạc không phù hợp",
+          description: `Đầu sạc xe (${carTypeName}) không phù hợp với trụ (hỗ trợ: ${
+            post.supportedTypes ? post.supportedTypes.join(", ") : "N/A"
+          }).`,
+          duration: 5,
+        });
+        return;
+      }
+    }
+
+    // Mở modal xác nhận
+    setConfirmModal({ isOpen: true, post: post });
+  };
+
+  // Chức năng: Xử lý xác nhận đặt chỗ từ modal
+  const handleConfirmBooking = async () => {
+    if (!confirmModal.post) return;
+
+    const postId = confirmModal.post.id;
+
     try {
-      // mark this specific post as processing so only its button shows loading
       setBookingProcessingId(postId);
-      if (!currentUser) {
-        setBookingProcessingId(null);
-        alert("Vui lòng đăng nhập trước khi đặt chỗ.");
-        return;
-      }
 
-      if (!selectedCar) {
-        alert("Bạn chưa có xe. Vui lòng thêm xe để đặt chỗ.");
-        return;
-      }
-
+      // Tạo payload cho API booking
       const payload = {
         user: currentUser.id || currentUser.userID,
         chargingPost: postId,
         car: selectedCar,
       };
 
-      // ✅ createBooking sẽ tự động lưu status vào localStorage
       const res = await createBookingApi(payload);
 
-      console.log("📦 [StationModal] Booking response:", res);
-      console.log("   - status:", res?.status);
-      console.log("   - rank:", res?.rank);
-      console.log("   - idAction:", res?.idAction);
-
       if (res?.success || res?.status) {
-        // ✅ Kiểm tra status từ response
         const status = res.status?.toLowerCase();
 
+        // Xử lý trường hợp: Trụ đầy - thêm vào danh sách chờ
         if (status === "waiting") {
-          // ✅ Lưu thông tin waiting vào localStorage
           if (res.idAction) {
-            console.log("💾 [StationModal] Saving waiting info:");
-            localStorage.setItem("waitingListId", res.idAction); // idAction = waitingListId
+            localStorage.setItem("waitingListId", res.idAction);
             localStorage.setItem("bookingStatus", "waiting");
 
-            // Vẫn lưu rank nếu có (để hiển thị ngay)
             if (res.rank !== undefined && res.rank !== null && res.rank > 0) {
               localStorage.setItem("initialQueueRank", res.rank.toString());
             }
 
             localStorage.setItem("queuePostId", postId);
-            console.log("✅ [StationModal] Saved to localStorage:");
-            console.log(
-              "   - waitingListId:",
-              localStorage.getItem("waitingListId")
-            );
-            console.log(
-              "   - bookingStatus:",
-              localStorage.getItem("bookingStatus")
-            );
-            console.log(
-              "   - initialQueueRank:",
-              localStorage.getItem("initialQueueRank")
-            );
-          } else {
-            console.warn("⚠️ [StationModal] No idAction in response:", res);
           }
 
-          alert(`Trụ ${postId} đang đầy. Bạn đã được thêm vào danh sách chờ.`);
+          notification.info({
+            message: "Đã thêm vào danh sách chờ",
+            description: `Trụ ${postId} đang đầy. Bạn đã được thêm vào danh sách chờ.`,
+            duration: 3,
+          });
+          setConfirmModal({ isOpen: false, post: null });
           onClose();
           navigate("/app/waiting");
         } else if (status === "booking") {
-          // ✅ Lưu thông tin booking vào localStorage
           if (res.idAction) {
-            console.log("💾 [StationModal] Saving booking info:");
-            localStorage.setItem("bookingId", res.idAction); // idAction = bookingId
+            localStorage.setItem("bookingId", res.idAction);
             localStorage.setItem("bookingStatus", "booking");
-            console.log("✅ [StationModal] Saved to localStorage:");
-            console.log("   - bookingId:", localStorage.getItem("bookingId"));
-            console.log(
-              "   - bookingStatus:",
-              localStorage.getItem("bookingStatus")
-            );
           }
 
-          alert(`Đặt chỗ thành công cho trụ ${postId}!`);
+          notification.success({
+            message: "Đặt chỗ thành công",
+            description: `Đặt chỗ thành công cho trụ ${postId}!`,
+            duration: 2,
+          });
+          setConfirmModal({ isOpen: false, post: null });
           onClose();
           navigate("/app/booking");
         } else {
-          alert(`Đặt chỗ thành công!`);
+          notification.success({
+            message: "Đặt chỗ thành công",
+            description: "Đặt chỗ thành công!",
+            duration: 2,
+          });
+          setConfirmModal({ isOpen: false, post: null });
           onClose();
           navigate("/app/booking");
         }
       } else {
         const msg = res?.error || "Không thành công";
-        alert(`Đặt chỗ thất bại: ${msg}`);
+        notification.error({
+          message: "Đặt chỗ thất bại",
+          description: msg,
+          duration: 3,
+        });
       }
     } catch (err) {
-      console.error("Booking error:", err);
-      alert("Lỗi khi đặt chỗ, vui lòng thử lại sau.");
+      notification.error({
+        message: "Lỗi đặt chỗ",
+        description:
+          err.response?.data?.message ||
+          err.message ||
+          "Lỗi khi đặt chỗ, vui lòng thử lại sau.",
+        duration: 3,
+      });
     } finally {
-      // clear per-post processing flag
       setBookingProcessingId(null);
     }
   };
 
+  // Chức năng: Lấy icon tiện ích theo tên
   const getAmenityIcon = (amenity) => {
     const amenityLower = amenity.toLowerCase();
     if (amenityLower.includes("wifi")) return IoWifiOutline;
@@ -269,9 +322,11 @@ const StationModal = ({ isOpen, onClose, station }) => {
     return IoStorefrontOutline;
   };
 
+  // Hiển thị: Nội dung modal
   const modalContent = (
     <div className="station-modal-backdrop" onClick={onClose}>
       <div className="station-modal" onClick={(e) => e.stopPropagation()}>
+        {/* Header: Tiêu đề và nút đóng */}
         <div className="station-modal__header">
           <h4 className="station-modal__title">{station.name}</h4>
           <button onClick={onClose} className="station-modal__close-btn">
@@ -279,7 +334,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
           </button>
         </div>
 
-        {/* ⭐ NEW: Station Status Badge */}
+        {/* Section: Trạng thái trạm sạc */}
         <div className="station-status-section">
           <div className="station-status-badge-large">
             {station.active ? (
@@ -295,7 +350,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
             )}
           </div>
 
-          {/* ⭐ NEW: Show coordinates for debugging/admin */}
+          {/* Hiển thị tọa độ GPS */}
           {station.lat && station.lng && (
             <div className="station-coordinates">
               📍 {station.lat.toFixed(6)}, {station.lng.toFixed(6)}
@@ -303,8 +358,9 @@ const StationModal = ({ isOpen, onClose, station }) => {
           )}
         </div>
 
+        {/* Section: Thông tin chi tiết trạm sạc */}
         <div className="station-info">
-          {/* Địa chỉ - Có từ API */}
+          {/* Địa chỉ */}
           {station.address && (
             <div className="station-info__item">
               <IoLocationOutline
@@ -315,7 +371,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
             </div>
           )}
 
-          {/* Manager - Có từ API */}
+          {/* Người quản lý */}
           {station.userManagerName && station.userManagerName !== "N/A" && (
             <div className="station-info__item">
               <IoPeopleOutline
@@ -326,7 +382,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
             </div>
           )}
 
-          {/* Active Sessions - Có từ API */}
+          {/* Số phiên sạc đang hoạt động */}
           {station.chargingSessionIds &&
             station.chargingSessionIds.length > 0 && (
               <div className="station-info__item">
@@ -340,7 +396,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
               </div>
             )}
 
-          {/* Distance - Chỉ có từ /available API */}
+          {/* Khoảng cách */}
           {station.distance && station.distance !== "N/A" && (
             <div className="station-info__item">
               <IoLocationOutline
@@ -351,7 +407,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
             </div>
           )}
 
-          {/* Established Time - Có từ API */}
+          {/* Ngày thành lập */}
           {station.establishedTime && (
             <div className="station-info__item">
               <IoTimeOutline
@@ -364,15 +420,59 @@ const StationModal = ({ isOpen, onClose, station }) => {
               </span>
             </div>
           )}
+
+          {/* Chọn xe của người dùng (bắt buộc khi đặt chỗ) */}
+          {userCars && userCars.length > 0 && (
+            <div className="station-info__item">
+              <IoCarOutline
+                className="station-info__icon"
+                style={{ fontSize: "24px", color: "#10b981" }}
+              />
+              <div style={{ flex: 1 }}>
+                <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>
+                  Chọn xe <span style={{ color: "#ff4d4f" }}>*</span>
+                </label>
+                <Select
+                  value={selectedCar}
+                  onChange={(val) => setSelectedCar(val)}
+                  placeholder="Chọn xe để đặt chỗ"
+                  style={{ width: "100%" }}
+                >
+                  {userCars.map((car) => {
+                    const id = car.carID || car.carId || car.id;
+                    const label = car.licensePlate
+                      ? `${car.licensePlate} — ${car.typeCar || ""}`
+                      : id;
+                    return (
+                      <Select.Option key={id} value={id}>
+                        {label}
+                      </Select.Option>
+                    );
+                  })}
+                </Select>
+
+                {/* Hiển thị loại sạc của xe đã chọn */}
+                {selectedCar && (
+                  <div style={{ marginTop: 8, color: "#374151" }}>
+                    <strong>Loại sạc của xe:</strong>{" "}
+                    <span style={{ fontFamily: "monospace" }}>
+                      {selectedCarChargingType || "N/A"}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
+        {/* Section: Thống kê trụ sạc */}
         <div className="station-details">
-          {/* ⭐ Statistics - Always show from displayStats */}
           <div className="station-details__section">
             <div className="station-details__section-title">
               {posts.length > 0 ? "Thông tin chi tiết" : "Tổng quan trạm sạc"}
             </div>
             <div className="statistics-grid">
+              {/* Thống kê: Trụ sẵn sàng */}
               <div className="statistics-item statistics-item--available">
                 <div className="statistics-number statistics-number--available">
                   {displayStats.available}
@@ -381,6 +481,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                   {posts.length > 0 ? "Sẵn sàng" : "Trụ trống"}
                 </div>
               </div>
+              {/* Thống kê: Trụ đang bận */}
               <div className="statistics-item statistics-item--busy">
                 <div className="statistics-number statistics-number--busy">
                   {displayStats.busy}
@@ -390,7 +491,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 </div>
               </div>
 
-              {/* Only show inactive if we have detailed posts data */}
+              {/* Thống kê: Trụ không hoạt động */}
               {posts.length > 0 && displayStats.inactive > 0 && (
                 <div className="statistics-item statistics-item--inactive">
                   <div className="statistics-number statistics-number--inactive">
@@ -402,6 +503,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 </div>
               )}
 
+              {/* Thống kê: Tổng số trụ */}
               <div className="statistics-item statistics-item--total">
                 <div className="statistics-number statistics-number--total">
                   {displayStats.total}
@@ -411,7 +513,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 </div>
               </div>
 
-              {/* Show active sessions if available */}
+              {/* Thống kê: Số phiên sạc */}
               {station.chargingSessionIds &&
                 station.chargingSessionIds.length > 0 && (
                   <div className="statistics-item statistics-item--busy">
@@ -427,6 +529,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
           </div>
         </div>
 
+        {/* Section: Danh sách trụ sạc */}
         <div>
           <h5 className="chargers-section__title">
             Danh sách trụ sạc (
@@ -439,9 +542,11 @@ const StationModal = ({ isOpen, onClose, station }) => {
           {error && <div className="chargers-error">{error}</div>}
 
           <div className="chargers-grid">
+            {/* Hiển thị: Danh sách trụ sạc chi tiết từ API */}
             {mergedPosts.length > 0 ? (
               mergedPosts.map((post) => (
                 <div key={post.id} className="charger-item">
+                  {/* Header trụ sạc: Tên và trạng thái */}
                   <div className="charger-item__header">
                     <div className="charger-item__title">
                       <IoPowerOutline
@@ -476,6 +581,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                       </span>
                     </div>
                   </div>
+                  {/* Content trụ sạc: Thông tin và nút đặt chỗ */}
                   <div className="charger-item__content">
                     <div className="charger-item__details">
                       <div>
@@ -524,6 +630,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 </div>
               ))
             ) : loading ? (
+              // Hiển thị: Loading state
               <div className="charger-empty-state">
                 <div>
                   <IoPowerOutline className="charger-empty-state__icon charger-empty-state__icon--loading" />
@@ -532,7 +639,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
               </div>
             ) : station.chargingPostsAvailable &&
               Object.keys(station.chargingPostsAvailable).length > 0 ? (
-              // ⭐ Render posts from chargingPostsAvailable map
+              // Hiển thị: Danh sách trụ sạc từ chargingPostsAvailable map (fallback)
               Object.entries(station.chargingPostsAvailable).map(
                 ([postId, isAvailable]) => (
                   <div key={postId} className="charger-item">
@@ -596,6 +703,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 )
               )
             ) : (
+              // Hiển thị: Empty state khi không có dữ liệu chi tiết
               <div className="charger-empty-state">
                 <div>
                   <IoPowerOutline className="charger-empty-state__icon" />
@@ -643,7 +751,29 @@ const StationModal = ({ isOpen, onClose, station }) => {
     </div>
   );
 
-  return createPortal(modalContent, document.body);
+  return (
+    <>
+      {/* Nếu confirm modal đang mở thì ẩn station modal để tránh chồng modal */}
+      {!confirmModal.isOpen && createPortal(modalContent, document.body)}
+
+      {confirmModal.isOpen &&
+        createPortal(
+          <BookingConfirmModal
+            isOpen={confirmModal.isOpen}
+            onClose={() => setConfirmModal({ isOpen: false, post: null })}
+            onConfirm={handleConfirmBooking}
+            post={confirmModal.post}
+            station={station}
+            selectedCar={selectedCar}
+            userCars={userCars}
+            isProcessing={
+              bookingLoading && bookingProcessingId === confirmModal.post?.id
+            }
+          />,
+          document.body
+        )}
+    </>
+  );
 };
 
 export default StationModal;

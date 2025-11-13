@@ -6,7 +6,7 @@ import { usePaymentData } from '../hooks/usePayment';
 import PaymentHistorySummary from '../components/history/PaymentHistorySummary';
 import PaymentHistoryList from '../components/history/PaymentHistoryList';
 import PaymentHistoryNoData from '../components/history/NoDataMessage';
-import { ThunderboltOutlined, ReloadOutlined } from '@ant-design/icons';
+import { ThunderboltOutlined } from '@ant-design/icons';
 import PageHeader from '../components/PageHeader';
 const { Title, Text } = Typography;
 
@@ -15,15 +15,14 @@ const PaymentHistoryPage = () => {
   const { user } = useAuth();
   const { payments, loading, error, fetchPaymentsByUserId, fetchUnpaidPaymentsByUserId } = usePaymentData();
 
-  // Fetch payments khi component mount hoặc user thay đổi
+  // Tải danh sách thanh toán khi component mount hoặc user thay đổi
   useEffect(() => {
     if (user?.id) {
-      console.log('🔍 [PaymentHistoryPage] Fetching payments for user:', user.id);
       fetchPaymentsByUserId(user.id);
     }
   }, [user?.id, fetchPaymentsByUserId]);
 
-  // ✅ Handler thanh toán - Lấy payment và navigate
+  // Xử lý thanh toán - Lấy payment chưa thanh toán và chuyển đến trang thanh toán
   const handlePayment = async (payment) => {
     if (!user?.id) {
       notification.error({
@@ -34,15 +33,11 @@ const PaymentHistoryPage = () => {
     }
 
     try {
-      console.log('💳 [PaymentHistoryPage] Processing payment for session:', payment.sessionId);
-
-      // ✅ Gọi API lấy danh sách payment chưa thanh toán
+      // Gọi API lấy danh sách payment chưa thanh toán
       const unpaidPayments = await fetchUnpaidPaymentsByUserId(user.id);
-      
-      console.log('✅ [PaymentHistoryPage] Unpaid payments:', unpaidPayments);
 
       if (unpaidPayments && unpaidPayments.length > 0) {
-        // ✅ Tìm payment tương ứng với session được chọn
+        // Tìm payment tương ứng với session được chọn
         let targetPayment = unpaidPayments.find(
           p => p.sessionId === payment.sessionId || 
                p.chargingSessionId === payment.sessionId ||
@@ -59,23 +54,18 @@ const PaymentHistoryPage = () => {
         // Nếu vẫn không tìm thấy, lấy payment đầu tiên
         if (!targetPayment) {
           targetPayment = unpaidPayments[0];
-          console.log('⚠️ [PaymentHistoryPage] Exact payment not found, using first unpaid payment');
         }
 
-        // Lấy paymentId (có thể là paymentId hoặc id)
+        // Lấy paymentId và chuyển đến trang thanh toán
         const paymentId = targetPayment.paymentId || targetPayment.id;
-        
-        console.log('✅ [PaymentHistoryPage] Navigating to payment:', paymentId);
         navigate(`/app/payment/${paymentId}`);
       } else {
-        console.warn('⚠️ [PaymentHistoryPage] No unpaid payments found');
         notification.info({
           message: 'Không có thanh toán',
           description: 'Bạn không có thanh toán nào cần hoàn thành.',
         });
       }
     } catch (error) {
-      console.error('❌ [PaymentHistoryPage] Error fetching payments:', error);
       notification.error({
         message: 'Lỗi tải dữ liệu',
         description: 'Không thể tải thông tin thanh toán. Vui lòng thử lại.',
@@ -83,14 +73,14 @@ const PaymentHistoryPage = () => {
     }
   };
 
+  // Xử lý làm mới danh sách thanh toán
   const handleRefresh = () => {
     if (user?.id) {
-      console.log('🔄 [PaymentHistoryPage] Refreshing payments...');
       fetchPaymentsByUserId(user.id);
     }
   };
 
-  // Loading state (kèm PageHeader)
+  // Render: Trạng thái đang tải
   if (loading) {
     return (
       <div style={{ 
@@ -104,7 +94,6 @@ const PaymentHistoryPage = () => {
         justifyContent: 'flex-start',
         background: 'white'
       }}>
-
         <Space direction="vertical" size="large" align="center" style={{ marginTop: '1rem' }}>
           <Spin size="large" />
           <Text style={{ fontSize: '1.4rem', color: '#666' }}>
@@ -115,7 +104,7 @@ const PaymentHistoryPage = () => {
     );
   }
 
-  // Error state
+  // Render: Trạng thái lỗi
   if (error) {
     return (
       <div style={{ 
@@ -156,24 +145,25 @@ const PaymentHistoryPage = () => {
     );
   }
 
+  // Render: Danh sách lịch sử thanh toán
   return (
     <div style={{ 
       padding: '2rem', 
       background: 'white', 
       minHeight: '100vh' 
     }}>
+      {/* Header trang */}
       <PageHeader
         title="Lịch sử thanh toán"
         icon={<ThunderboltOutlined style={{ fontSize: 24 }} />}
-
       />
 
-      {/* Summary Cards */}
+      {/* Tổng quan thống kê thanh toán */}
       {payments && payments.length > 0 && (
         <PaymentHistorySummary payments={payments} />
       )}
       
-      {/* Payment List hoặc No Data */}
+      {/* Danh sách thanh toán hoặc thông báo không có dữ liệu */}
       {payments && payments.length > 0 ? (
         <PaymentHistoryList 
           payments={payments}

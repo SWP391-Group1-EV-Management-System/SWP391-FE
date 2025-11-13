@@ -1,17 +1,13 @@
 ﻿import { useState, useCallback } from "react";
 
-/**
- * Custom hook để fetch random pin data từ backend
- * API mới: /api/car/random_pin?userId={userId}
- * Backend sẽ lưu currentPin vào Redis
- * @returns {Object} { pinData, maxChargingTime, loading, error, fetchRandomPin }
- */
+// Hook lấy random pin từ backend
 export const useRandomPin = () => {
   const [pinData, setPinData] = useState(null);
-  const [maxChargingTime, setMaxChargingTime] = useState(240); // Default value
+  const [maxChargingTime, setMaxChargingTime] = useState(240);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Lấy random pin
   const fetchRandomPin = useCallback(async (userId) => {
     try {
       setLoading(true);
@@ -21,7 +17,6 @@ export const useRandomPin = () => {
         throw new Error("userId is required");
       }
 
-      console.log("🔋 [useRandomPin] Fetching random pin for userId:", userId);
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
       const response = await fetch(
         `${apiUrl}/api/car/random_pin?userId=${userId}`,
@@ -39,9 +34,7 @@ export const useRandomPin = () => {
       }
 
       const data = await response.json();
-      console.log("✅ [useRandomPin] Random pin data:", data);
 
-      // ✅ API mới trả về: { currentPin, minuteMax }
       const formattedData = {
         pinNow: data.currentPin,
         minuteMax: data.minuteMax,
@@ -52,9 +45,7 @@ export const useRandomPin = () => {
 
       return formattedData;
     } catch (err) {
-      console.error("❌ [useRandomPin] Error fetching random pin:", err);
       setError(err.message);
-      // Giữ nguyên maxChargingTime mặc định nếu lỗi
       setMaxChargingTime(240);
       return null;
     } finally {

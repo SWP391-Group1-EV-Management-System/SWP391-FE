@@ -16,35 +16,31 @@ import {
 } from "@ant-design/icons";
 
 const BookingPage = () => {
+  // ===== HOOKS =====
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  console.log("👤 [BookingPage] Current user:", user);
-  console.log("⏳ [BookingPage] Auth loading:", authLoading);
-
-  // State quản lý booking data
+  // ===== STATE MANAGEMENT =====
   const [bookingData, setBookingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [chargingPostData, setChargingPostData] = useState(null); // ✅ Thêm state cho charging post details
+  const [chargingPostData, setChargingPostData] = useState(null);
 
-  // ✅ Sử dụng useBooking hook (chỉ cho cancel function)
+  // ===== CUSTOM HOOKS =====
   const { cancelBooking } = useBooking();
 
-  // ✅ Fetch CHI TIẾT booking từ localStorage (giống WaitingListPage)
+  // ===== EFFECT: Lấy chi tiết booking từ localStorage =====
   useEffect(() => {
     const fetchDetail = async () => {
       try {
         const bookingId = localStorage.getItem("bookingId");
 
         if (bookingId) {
-          console.log("� [BookingPage] Fetching booking detail:", bookingId);
           setDetailLoading(true);
 
           const detail = await getBookingById(bookingId);
-          console.log("✅ [BookingPage] Booking detail:", detail);
 
-          // Map BookingResponseDTO to display format
+          // Map BookingResponseDTO sang format hiển thị
           const mappedData = {
             bookingId: detail.bookingId,
             stationName: detail.stationName || "Trạm sạc",
@@ -60,30 +56,19 @@ const BookingPage = () => {
 
           setBookingData(mappedData);
 
-          // ✅ Fetch charging post details
+          // Lấy thông tin chi tiết charging post
           if (detail.chargingPostId) {
             try {
-              console.log(
-                "🔌 [BookingPage] Fetching charging post details:",
-                detail.chargingPostId
-              );
               const postDetail = await chargingStationService.getPostById(
                 detail.chargingPostId
               );
-              console.log(
-                "✅ [BookingPage] Charging post details:",
-                postDetail
-              );
               setChargingPostData(postDetail);
             } catch (postError) {
-              console.error(
-                "❌ [BookingPage] Error fetching charging post:",
-                postError
-              );
+              // Không hiển thị lỗi nếu không lấy được thông tin charging post
             }
           }
 
-          // Determine status config based on booking status
+          // Xác định cấu hình trạng thái dựa trên booking status
           const status = detail.status?.toLowerCase();
           let config = null;
 
@@ -124,12 +109,10 @@ const BookingPage = () => {
           setStatusConfig(config);
           setDetailLoading(false);
         } else {
-          console.log("⚠️ [BookingPage] No bookingId in localStorage");
           setBookingData(null);
           setStatusConfig(null);
         }
       } catch (error) {
-        console.error("❌ [BookingPage] Error fetching detail:", error);
         setDetailLoading(false);
       }
     };
@@ -138,7 +121,8 @@ const BookingPage = () => {
       fetchDetail();
     }
   }, [user?.id]);
-  // ✅ Handler hủy booking
+
+  // ===== FUNCTION: Hủy booking =====
   const handleCancelBooking = async () => {
     if (!bookingData?.bookingId) {
       notification.error({
@@ -149,7 +133,7 @@ const BookingPage = () => {
     }
 
     try {
-      // ✅ LƯU thời gian countdown hiện tại TRƯỚC KHI hủy
+      // Lưu thời gian countdown hiện tại trước khi hủy
       const countdownKey = `countdown_${bookingData.bookingId}`;
       const frozenKey = `countdown_frozen_${bookingData.bookingId}`;
 
@@ -169,42 +153,34 @@ const BookingPage = () => {
               mins
             ).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
-            // ✅ LƯU thời gian đóng băng
+            // Lưu thời gian đóng băng
             localStorage.setItem(frozenKey, frozenTime);
-            console.log("🧊 [BookingPage] Frozen countdown time:", frozenTime);
           }
         }
       } catch (err) {
-        console.error("❌ [BookingPage] Error freezing countdown:", err);
+        // Không xử lý lỗi nếu không thể đóng băng countdown
       }
 
       await cancelBooking(bookingData.bookingId);
 
-      // ✅ Xóa TẤT CẢ localStorage (trừ frozen time)
+      // Xóa tất cả localStorage (trừ frozen time)
       try {
-        // Xóa booking info
         localStorage.removeItem("bookingId");
         localStorage.removeItem("bookingStatus");
         localStorage.removeItem("maxWaitingTime");
-
-        // ✅ XÓA COUNTDOWN endTime (để dừng countdown)
         localStorage.removeItem(countdownKey);
-
-        console.log(
-          "🗑️ [BookingPage] Cleared all localStorage after cancel (frozen time preserved)"
-        );
       } catch (error) {
-        console.error("❌ [BookingPage] Error clearing localStorage:", error);
+        // Không xử lý lỗi nếu không thể xóa localStorage
       }
 
-      // ✅ Update local state immediately
+      // Cập nhật state local ngay lập tức
       const updatedBookingData = {
         ...bookingData,
         status: "cancelled",
       };
       setBookingData(updatedBookingData);
 
-      // ✅ Update status config
+      // Cập nhật cấu hình trạng thái
       setStatusConfig({
         color: "error",
         icon: "✕",
@@ -219,7 +195,6 @@ const BookingPage = () => {
         description: "Hủy booking thành công.",
       });
     } catch (error) {
-      console.error("❌ Error canceling booking:", error);
       notification.error({
         message: "Lỗi",
         description: "Không thể hủy booking. Vui lòng thử lại.",
@@ -227,7 +202,7 @@ const BookingPage = () => {
     }
   };
 
-  // ==================== LOADING STATE ====================
+  // ===== RENDER: Trạng thái đang tải =====
   if (detailLoading || authLoading) {
     return (
       <div
@@ -247,7 +222,7 @@ const BookingPage = () => {
     );
   }
 
-  // ==================== FORBIDDEN STATE (403) ====================
+  // ===== RENDER: Trạng thái không có quyền truy cập (403) =====
   const isForbidden =
     !user ||
     (bookingData &&
@@ -267,6 +242,7 @@ const BookingPage = () => {
           alignItems: "center",
         }}
       >
+        {/* Thông báo không có quyền truy cập */}
         <div style={{ textAlign: "center", maxWidth: "500px" }}>
           <LockOutlined
             style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }}
@@ -286,6 +262,7 @@ const BookingPage = () => {
             showIcon={false}
             style={{ marginBottom: "20px" }}
           />
+          {/* Các nút điều hướng */}
           <Space>
             <Button
               type="primary"
@@ -303,7 +280,7 @@ const BookingPage = () => {
     );
   }
 
-  // ==================== NO BOOKING STATE ====================
+  // ===== RENDER: Trạng thái không có booking =====
   if (!bookingData) {
     return (
       <div
@@ -313,6 +290,7 @@ const BookingPage = () => {
           minHeight: "100vh",
         }}
       >
+        {/* Thông báo không có booking */}
         <Alert
           message="Không có booking"
           description="Hiện tại không có booking nào đang hoạt động"
@@ -333,7 +311,7 @@ const BookingPage = () => {
     );
   }
 
-  // ==================== MAIN CONTENT ====================
+  // ===== RENDER: Nội dung chính =====
   return (
     <div
       style={{
@@ -349,7 +327,7 @@ const BookingPage = () => {
         }}
       >
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
-          {/* Header */}
+          {/* Header trang */}
           <PageHeader
             title={bookingData.post?.station?.stationName || "Booking"}
             icon={<CalendarOutlined />}
@@ -365,12 +343,14 @@ const BookingPage = () => {
             }
           />
 
-          {/* Row 1: Session Info & Waiting Time */}
+          {/* Hàng 1: Thông tin phiên và thời gian chờ */}
           <Row gutter={[16, 16]}>
+            {/* Thông tin phiên */}
             <Col xs={24} lg={12}>
               <SessionInfo sessionData={bookingData} />
             </Col>
 
+            {/* Thời gian chờ */}
             <Col xs={24} lg={12}>
               <WaitingTime
                 sessionData={bookingData}
@@ -380,7 +360,7 @@ const BookingPage = () => {
             </Col>
           </Row>
 
-          {/* Row 2: Technical Details & Booking Info */}
+          {/* Hàng 2: Chi tiết kỹ thuật */}
           <Row gutter={16}>
             <Col xs={24} lg={24}>
               <TechnicalDetails

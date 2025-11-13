@@ -87,7 +87,6 @@ export default function useWaitingList() {
         () => waitingListService.getWaitingListByUser(userId),
         setWaitingLists
       );
-      console.log("✅ [useWaitingList] Waiting list fetched:", result);
       return result;
     },
     [wrap]
@@ -131,7 +130,6 @@ export default function useWaitingList() {
    */
   const acceptEarlyChargingOffer = useCallback(
     async (userId, chargingPostId) => {
-      console.log("🔋 [useWaitingList] Accepting early charging offer");
       return wrap(() =>
         waitingListService.acceptEarlyCharging(userId, chargingPostId)
       );

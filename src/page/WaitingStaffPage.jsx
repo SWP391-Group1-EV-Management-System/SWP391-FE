@@ -32,10 +32,7 @@ const STATUS_CONFIG = {
 };
 
 const WaitingStaffPage = () => {
-  const [chargingSessions, setChargingSessions] = useState([]);
-  const [filteredSessions, setFilteredSessions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState('');
 
   // Updated stats data - bỏ growth
   const statsData = useMemo(() => [
