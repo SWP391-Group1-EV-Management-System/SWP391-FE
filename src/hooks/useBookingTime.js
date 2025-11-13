@@ -1,16 +1,18 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { getBookingTime } from '../services/userService';
+import { useState, useEffect, useCallback, useRef } from "react";
+import { getBookingTime } from "../services/userService";
 
 const calculateWaitingMinutes = (maxWaitingTimeValue) => {
-  if (maxWaitingTimeValue === null || maxWaitingTimeValue === undefined) return null;
+  if (maxWaitingTimeValue === null || maxWaitingTimeValue === undefined)
+    return null;
 
   try {
-    if (typeof maxWaitingTimeValue === 'number') return maxWaitingTimeValue;
+    if (typeof maxWaitingTimeValue === "number") return maxWaitingTimeValue;
 
     // If backend returns numeric string
-    if (typeof maxWaitingTimeValue === 'string') {
+    if (typeof maxWaitingTimeValue === "string") {
       const numeric = Number(maxWaitingTimeValue);
-      if (!Number.isNaN(numeric) && maxWaitingTimeValue.trim() !== '') return numeric;
+      if (!Number.isNaN(numeric) && maxWaitingTimeValue.trim() !== "")
+        return numeric;
 
       const endTime = new Date(maxWaitingTimeValue);
       if (isNaN(endTime.getTime())) return null;

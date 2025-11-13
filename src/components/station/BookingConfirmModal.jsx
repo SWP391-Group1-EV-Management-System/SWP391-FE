@@ -42,7 +42,6 @@ const BookingConfirmModal = ({
     }
   };
 
-
   const calculateWaitingMinutes = (maxWaitingTimeValue) => {
     if (!maxWaitingTimeValue) return null;
 
@@ -72,8 +71,12 @@ const BookingConfirmModal = ({
   const storedMaxWaiting = getMaxWaitingTimeFromStorage();
 
   // Use the reusable hook to fetch bookingTime
-  const { raw: bookingRaw, minutes: bookingMinutes, loading: bookingLoading, error: bookingError } =
-    useBookingTime(userId);
+  const {
+    raw: bookingRaw,
+    minutes: bookingMinutes,
+    loading: bookingLoading,
+    error: bookingError,
+  } = useBookingTime(userId);
 
   const computedWaitingMinutes =
     bookingMinutes !== null && bookingMinutes !== undefined
