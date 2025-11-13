@@ -1,7 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { cleanupAllCountdowns } from "../utils/countdownUtils";
 
-// Hook kết nối SSE countdown từ backend
+/**
+ * Hook để kết nối SSE countdown từ backend
+ * @param {number} minutes - Số phút cần đếm ngược
+ * @param {boolean} enabled - Có bật countdown không
+ * @param {string} storageKey - Key để lưu endTime vào localStorage (unique per booking/waiting)
+ */
 export const useCountdown = (
   minutes,
   enabled = true,
@@ -9,20 +14,35 @@ export const useCountdown = (
   explicitEndTime = null // optional ISO string to use as the exact end time
 ) => {
   const [countdown, setCountdown] = useState(null);
-  const [status, setStatus] = useState("IDLE");
+  const [status, setStatus] = useState("IDLE"); // IDLE, RUNNING, COMPLETED, ERROR
   const [error] = useState(null);
   const intervalRef = useRef(null);
 
   useEffect(() => {
     if (!enabled || !minutes || minutes <= 0) {
+      console.log(
+        "⏱️ [useCountdown] Countdown not enabled or invalid minutes:",
+        minutes
+      );
       return;
     }
 
-    // Xóa tất cả countdown keys cũ trừ key hiện tại
+    console.log(
+      "🚀 [useCountdown] Initializing countdown for",
+      minutes,
+      "minutes"
+    );
+
+    // ✅ XÓA TẤT CẢ countdown keys cũ (trừ key hiện tại) khi tạo countdown mới
     const cleanedCount = cleanupAllCountdowns([
       storageKey,
       storageKey.replace("countdown_", "countdown_frozen_"),
     ]);
+    if (cleanedCount > 0) {
+      console.log(
+        `🧹 [useCountdown] Cleaned ${cleanedCount} old countdown keys`
+      );
+    }
 
     // ✅ Prefer explicitEndTime from server if provided (server is source of truth)
     let endTime = null;
@@ -83,17 +103,27 @@ export const useCountdown = (
 
       try {
         localStorage.setItem(storageKey, endTime.toISOString());
+        console.log(
+          "💾 [useCountdown] Saved new endTime to localStorage:",
+          endTime
+        );
       } catch (err) {
-        // Bỏ qua lỗi
+        console.error("❌ [useCountdown] Error saving to localStorage:", err);
       }
     }
 
+    // ✅ Đếm ngược LOCAL (không cần gọi backend SSE nữa!)
     setStatus("RUNNING");
 
-    // Cập nhật countdown mỗi giây
     const updateCountdown = () => {
+      // ✅ CHECK localStorage mỗi lần update - nếu bị xóa = đã cancel
       const savedEndTime = localStorage.getItem(storageKey);
       if (!savedEndTime) {
+        console.log(
+          "🛑 [useCountdown] localStorage key removed - countdown cancelled!"
+        );
+
+        // ✅ KIỂM TRA frozen time - nếu có thì hiển thị thời gian đóng băng
         const frozenKey = `${storageKey.replace(
           "countdown_",
           "countdown_frozen_"
@@ -101,6 +131,7 @@ export const useCountdown = (
         const frozenTime = localStorage.getItem(frozenKey);
 
         if (frozenTime) {
+          console.log("🧊 [useCountdown] Found frozen time:", frozenTime);
           setCountdown({
             remainingSeconds: 0,
             remainingMinutes: 0,
@@ -125,6 +156,7 @@ export const useCountdown = (
       const remainingMs = endTime - now;
 
       if (remainingMs <= 0) {
+        // ✅ Hết thời gian
         setCountdown({
           remainingSeconds: 0,
           remainingMinutes: 0,
@@ -133,10 +165,17 @@ export const useCountdown = (
         });
         setStatus("COMPLETED");
 
+        // Xóa localStorage
         try {
           localStorage.removeItem(storageKey);
+          console.log(
+            "🗑️ [useCountdown] Removed endTime from localStorage (completed)"
+          );
         } catch (err) {
-          // Bỏ qua lỗi
+          console.error(
+            "❌ [useCountdown] Error removing from localStorage:",
+            err
+          );
         }
 
         if (intervalRef.current) {
@@ -145,6 +184,7 @@ export const useCountdown = (
         return;
       }
 
+      // ✅ Tính toán countdown
       const remainingSeconds = Math.floor(remainingMs / 1000);
       const remainingMinutes = Math.floor(remainingSeconds / 60);
 
@@ -163,10 +203,15 @@ export const useCountdown = (
       });
     };
 
+    // ✅ Update ngay lập tức
     updateCountdown();
+
+    // ✅ Update mỗi giây
     intervalRef.current = setInterval(updateCountdown, 1000);
 
+    // Cleanup khi unmount
     return () => {
+      console.log("🔚 [useCountdown] Cleaning up countdown");
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
       }

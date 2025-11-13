@@ -33,8 +33,8 @@ const calculateWaitingMinutes = (maxWaitingTime, createdAt) => {
       // Tính số milliseconds chênh lệch
       const diffMs = endTime - startTime;
 
-      // Convert sang phút
-      const diffMinutes = Math.floor(diffMs / (1000 * 60));
+      // Convert sang phút, dùng ceil để tránh báo ít phút hơn thực tế (vd 9:40 -> 10 phút)
+      const diffMinutes = Math.ceil(diffMs / (1000 * 60));
 
       return diffMinutes > 0 ? diffMinutes : 0;
     }
@@ -70,11 +70,22 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled }) => {
     return `countdown_${id}`;
   }, [sessionData.waitingListId, sessionData.bookingId]);
 
+  // ✅ Nếu có maxWaitingTime là datetime ISO, truyền explicitEndTime để countdown chính xác
+  const explicitEndTime = useMemo(() => {
+    const maybe = sessionData.maxWaitingTime || sessionData.expectedWaitingTime;
+    if (typeof maybe === "string") {
+      const d = new Date(maybe);
+      if (!isNaN(d.getTime())) return d.toISOString();
+    }
+    return null;
+  }, [sessionData.maxWaitingTime, sessionData.expectedWaitingTime]);
+
   // ✅ Sử dụng local countdown (không cần backend SSE nữa!)
   const { countdown, status } = useCountdown(
     waitingMinutes,
     waitingMinutes > 0,
-    storageKey
+    storageKey,
+    explicitEndTime
   );
 
   // ✅ Ref để track việc đã auto-cancel chưa (tránh gọi nhiều lần)
