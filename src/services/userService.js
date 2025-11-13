@@ -79,3 +79,13 @@ export const getUserStatus = async (userId) => {
     throw error;
   }
 };
+
+export const getBookingTime = async (userId) => {
+  try {
+    const response = await api.get(`/api/users/bookingTime/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching bookingTime:', error);
+    throw error;
+  }
+};

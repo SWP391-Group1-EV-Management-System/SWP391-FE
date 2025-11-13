@@ -12,6 +12,8 @@ import {
   IoLocationOutline,
 } from "react-icons/io5";
 import "../../assets/styles/BookingConfirmModal.css";
+import { useRole } from "../../hooks/useAuth";
+import useBookingTime from "../../hooks/useBookingTime";
 
 const BookingConfirmModal = ({
   isOpen,
@@ -40,6 +42,7 @@ const BookingConfirmModal = ({
     }
   };
 
+
   const calculateWaitingMinutes = (maxWaitingTimeValue) => {
     if (!maxWaitingTimeValue) return null;
 
@@ -63,8 +66,19 @@ const BookingConfirmModal = ({
     }
   };
 
+  // Prefer value from API if available, otherwise fallback to localStorage
+  const { userId } = useRole();
+
   const storedMaxWaiting = getMaxWaitingTimeFromStorage();
-  const computedWaitingMinutes = calculateWaitingMinutes(storedMaxWaiting);
+
+  // Use the reusable hook to fetch bookingTime
+  const { raw: bookingRaw, minutes: bookingMinutes, loading: bookingLoading, error: bookingError } =
+    useBookingTime(userId);
+
+  const computedWaitingMinutes =
+    bookingMinutes !== null && bookingMinutes !== undefined
+      ? bookingMinutes
+      : calculateWaitingMinutes(storedMaxWaiting);
   // Tìm thông tin xe được chọn
   const car = userCars.find(
     (c) => (c.carID || c.carId || c.id) === selectedCar
