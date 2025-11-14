@@ -4,14 +4,21 @@ import DriverTable from '../components/user/DriverTable';
 import StaffTable from '../components/user/StaffTable';
 import PageHeader from '../components/PageHeader';
 import ServicePackageManagement from '../components/service/ServicePackageManagement';
+import ReputationManagement from '../components/reputations/ReputationManagement';
 import { FaUserAlt } from 'react-icons/fa';
 
 const UserManagementPage = () => {
   // ==================== STATE MANAGEMENT ====================
   const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState('user');
 
   // ==================== XỬ LÝ TÌM KIẾM ====================
   const handleSearch = (e) => setSearch(e.target.value);
+
+  // ==================== XỬ LÝ THAY ĐỔI TAB ====================
+  const handleTabChange = (key) => {
+    setActiveTab(key);
+  };
 
   // ==================== CẤU HÌNH CÁC TAB ====================
   const tabItems = [
@@ -46,6 +53,13 @@ const UserManagementPage = () => {
         <ServicePackageManagement />
       )
     },
+    {
+      key: 'reputation',
+      label: <span className="tab-animate">Quản lý uy tín</span>,
+      children: (
+        <ReputationManagement />
+      )
+    },
   ];
 
   // ==================== GIAO DIỆN CHÍNH ====================
@@ -70,21 +84,27 @@ const UserManagementPage = () => {
         customStyle={{ fontSize: '40px', fontWeight: 900, letterSpacing: '1px', level: 1 }}
       />
 
-      {/* Thanh tìm kiếm */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col span={12}>
-          <Input
-            placeholder="Tìm kiếm người dùng..."
-            value={search}
-            onChange={handleSearch}
-            size="large"
-            style={{ borderRadius: 8 }}
-          />
-        </Col>
-      </Row>
+      {/* Thanh tìm kiếm - chỉ hiển thị khi đang ở tab user */}
+      {activeTab === 'user' && (
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          <Col span={12}>
+            <Input
+              placeholder="Tìm kiếm người dùng..."
+              value={search}
+              onChange={handleSearch}
+              size="large"
+              style={{ borderRadius: 8 }}
+            />
+          </Col>
+        </Row>
+      )}
 
       {/* Tabs điều hướng chính */}
-      <Tabs defaultActiveKey="user" items={tabItems} />
+      <Tabs 
+        activeKey={activeTab}
+        onChange={handleTabChange}
+        items={tabItems} 
+      />
     </div>
   );
 };
