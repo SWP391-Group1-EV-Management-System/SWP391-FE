@@ -9,11 +9,7 @@ import useBooking from "../hooks/useBooking";
 import { useAuth } from "../hooks/useAuth";
 import { getBookingById } from "../services/bookingService";
 import chargingStationService from "../services/chargingStationService";
-import {
-  CalendarOutlined,
-  LockOutlined,
-  HomeOutlined,
-} from "@ant-design/icons";
+import { CalendarOutlined, LockOutlined, HomeOutlined } from "@ant-design/icons";
 
 const BookingPage = () => {
   // ===== HOOKS =====
@@ -59,9 +55,7 @@ const BookingPage = () => {
           // Lấy thông tin chi tiết charging post
           if (detail.chargingPostId) {
             try {
-              const postDetail = await chargingStationService.getPostById(
-                detail.chargingPostId
-              );
+              const postDetail = await chargingStationService.getPostById(detail.chargingPostId);
               setChargingPostData(postDetail);
             } catch (postError) {
               // Không hiển thị lỗi nếu không lấy được thông tin charging post
@@ -149,9 +143,9 @@ const BookingPage = () => {
             const hours = Math.floor(remainingSeconds / 3600);
             const mins = Math.floor((remainingSeconds % 3600) / 60);
             const secs = remainingSeconds % 60;
-            const frozenTime = `${String(hours).padStart(2, "0")}:${String(
-              mins
-            ).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(
+              secs
+            ).padStart(2, "0")}`;
 
             // Lưu thời gian đóng băng
             localStorage.setItem(frozenKey, frozenTime);
@@ -224,11 +218,7 @@ const BookingPage = () => {
 
   // ===== RENDER: Trạng thái không có quyền truy cập (403) =====
   const isForbidden =
-    !user ||
-    (bookingData &&
-      user.id !== bookingData.userId &&
-      user.role !== "ADMIN" &&
-      user.role !== "MANAGER");
+    !user || (bookingData && user.id !== bookingData.userId && user.role !== "ADMIN" && user.role !== "MANAGER");
 
   if (isForbidden) {
     return (
@@ -244,17 +234,14 @@ const BookingPage = () => {
       >
         {/* Thông báo không có quyền truy cập */}
         <div style={{ textAlign: "center", maxWidth: "500px" }}>
-          <LockOutlined
-            style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }}
-          />
+          <LockOutlined style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }} />
           <Alert
             message="Không có quyền truy cập"
             description={
               <div>
                 <p>Bạn không có quyền truy cập booking này.</p>
                 <p style={{ marginTop: "10px", color: "#666" }}>
-                  Booking này có thể thuộc về người dùng khác hoặc bạn không có
-                  quyền xem.
+                  Booking này có thể thuộc về người dùng khác hoặc bạn không có quyền xem.
                 </p>
               </div>
             }
@@ -363,10 +350,7 @@ const BookingPage = () => {
           {/* Hàng 2: Chi tiết kỹ thuật */}
           <Row gutter={16}>
             <Col xs={24} lg={24}>
-              <TechnicalDetails
-                sessionData={bookingData}
-                chargingPostData={chargingPostData}
-              />
+              <TechnicalDetails sessionData={bookingData} chargingPostData={chargingPostData} />
             </Col>
           </Row>
         </Space>

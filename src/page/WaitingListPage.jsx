@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Row,
-  Col,
-  Space,
-  Spin,
-  Alert,
-  Button,
-  notification,
-  Modal,
-} from "antd";
+import { Row, Col, Space, Spin, Alert, Button, notification, Modal } from "antd";
 import { useNavigate } from "react-router";
 import PageHeader from "../components/PageHeader";
 import TechnicalDetails from "../components/energy/TechnicalDetails";
@@ -19,12 +10,7 @@ import useWaitingList from "../hooks/useWaitingList";
 import useBooking from "../hooks/useBooking";
 import { useAuth } from "../hooks/useAuth";
 import { useWebSocket } from "../hooks/useWebSocket";
-import {
-  ClockCircleOutlined,
-  LockOutlined,
-  HomeOutlined,
-  WifiOutlined,
-} from "@ant-design/icons";
+import { ClockCircleOutlined, LockOutlined, HomeOutlined, WifiOutlined } from "@ant-design/icons";
 import { getWaitingListById } from "../services/waitingListService";
 import { getBookingById } from "../services/bookingService";
 import chargingStationService from "../services/chargingStationService";
@@ -70,10 +56,9 @@ const WaitingListPage = () => {
   // Khởi tạo max waiting time từ localStorage
   const [localMaxWaitingTime, setLocalMaxWaitingTime] = useState(() => {
     try {
-      const savedTime = localStorage.getItem("maxWaitingTime");
-      if (savedTime) {
-        return savedTime;
-      }
+      // ✅ KHÔNG đọc từ localStorage vì có thể là của user khác
+      // Sẽ lấy từ API detail thay thế
+      return null;
     } catch (error) {
       console.error("Error reading maxWaitingTime:", error);
     }
@@ -81,11 +66,7 @@ const WaitingListPage = () => {
   });
 
   // ==================== HOOKS ====================
-  const {
-    cancelWaitingList,
-    acceptEarlyChargingOffer,
-    declineEarlyChargingOffer,
-  } = useWaitingList();
+  const { cancelWaitingList, acceptEarlyChargingOffer, declineEarlyChargingOffer } = useWaitingList();
   const { fetchBookingsByUser } = useBooking();
 
   // Kết nối WebSocket để nhận cập nhật real-time
@@ -121,7 +102,8 @@ const WaitingListPage = () => {
               outedAt: detail.outedAt,
               userId: detail.userId,
               carId: detail.carId,
-              maxWaitingTime: localMaxWaitingTime || detail.expectedWaitingTime,
+              // ✅ CHỈ dùng expectedWaitingTime từ backend, KHÔNG dùng localStorage
+              maxWaitingTime: detail.expectedWaitingTime,
             };
 
             setWaitingData(mappedData);
@@ -130,9 +112,7 @@ const WaitingListPage = () => {
             // Lấy thông tin chi tiết charging post
             if (detail.chargingPostId) {
               try {
-                const postDetail = await chargingStationService.getPostById(
-                  detail.chargingPostId
-                );
+                const postDetail = await chargingStationService.getPostById(detail.chargingPostId);
                 setChargingPostData(postDetail);
               } catch (postError) {
                 console.error("Error fetching charging post:", postError);
@@ -174,9 +154,7 @@ const WaitingListPage = () => {
             // Lấy thông tin chi tiết charging post
             if (detail.chargingPostId) {
               try {
-                const postDetail = await chargingStationService.getPostById(
-                  detail.chargingPostId
-                );
+                const postDetail = await chargingStationService.getPostById(detail.chargingPostId);
                 setChargingPostData(postDetail);
               } catch (postError) {
                 console.error("Error fetching charging post:", postError);
@@ -253,7 +231,10 @@ const WaitingListPage = () => {
 
   // ==================== CẬP NHẬT THỜI GIAN CHỜ TỪ WEBSOCKET ====================
   useEffect(() => {
-    if (wsMaxWaitingTime) {
+    // ✅ CHỈ CẬP NHẬT NẾU USER ĐANG Ở VỊ TRÍ #1 TRONG HÀNG CHỜ
+    // User thứ 2 trở đi KHÔNG được cập nhật thời gian chờ từ WebSocket
+    if (wsMaxWaitingTime && queueRank === 1) {
+      console.log("⏰ [WaitingListPage] Updating maxWaitingTime for position #1");
       setLocalMaxWaitingTime(wsMaxWaitingTime);
 
       setWaitingData((oldData) => {
@@ -273,8 +254,12 @@ const WaitingListPage = () => {
         placement: "topRight",
         duration: 3,
       });
+    } else if (wsMaxWaitingTime && queueRank > 1) {
+      console.log(
+        `⚠️ [WaitingListPage] Ignoring maxWaitingTime update for position #${queueRank} (not first in queue)`
+      );
     }
-  }, [wsMaxWaitingTime]);
+  }, [wsMaxWaitingTime, queueRank]);
 
   // ==================== XỬ LÝ CHUYỂN TỪ WAITING -> BOOKING ====================
   useEffect(() => {
@@ -293,9 +278,7 @@ const WaitingListPage = () => {
 
       notification.success({
         message: "Chuyển sang Booking!",
-        description:
-          bookingConfirmed.message ||
-          "Bạn đã được chuyển vào booking. Đang chuyển trang...",
+        description: bookingConfirmed.message || "Bạn đã được chuyển vào booking. Đang chuyển trang...",
         placement: "topRight",
         duration: 3,
       });
@@ -316,10 +299,7 @@ const WaitingListPage = () => {
       // Parse thời gian dự kiến
       let expectedTime = "không xác định";
       try {
-        const timeValue =
-          earlyChargingOffer.expectedEndTime ||
-          earlyChargingOffer.expectedTime ||
-          wsMaxWaitingTime;
+        const timeValue = earlyChargingOffer.expectedEndTime || earlyChargingOffer.expectedTime || wsMaxWaitingTime;
 
         if (timeValue) {
           const dateObj = new Date(timeValue);
@@ -355,8 +335,7 @@ const WaitingListPage = () => {
               }}
             >
               <p style={{ margin: 0, fontSize: "14px", color: "#ad6800" }}>
-                ⏰ Nếu từ chối, bạn sẽ tự động vào booking lúc:{" "}
-                <strong>{expectedTime}</strong>
+                ⏰ Nếu từ chối, bạn sẽ tự động vào booking lúc: <strong>{expectedTime}</strong>
               </p>
             </div>
           </div>
@@ -379,8 +358,7 @@ const WaitingListPage = () => {
 
             notification.success({
               message: "Đã chuyển vào booking!",
-              description:
-                "Bạn đã được chuyển vào booking. Vui lòng đến trạm sạc ngay!",
+              description: "Bạn đã được chuyển vào booking. Vui lòng đến trạm sạc ngay!",
               placement: "topRight",
               duration: 5,
             });
@@ -416,13 +394,7 @@ const WaitingListPage = () => {
         },
       });
     }
-  }, [
-    earlyChargingOffer,
-    user?.id,
-    wsMaxWaitingTime,
-    acceptEarlyChargingOffer,
-    declineEarlyChargingOffer,
-  ]);
+  }, [earlyChargingOffer, user?.id, wsMaxWaitingTime, acceptEarlyChargingOffer, declineEarlyChargingOffer]);
 
   // ==================== POLLING: KIỂM TRA CHUYỂN TRẠNG THÁI ====================
   useEffect(() => {
@@ -444,9 +416,7 @@ const WaitingListPage = () => {
       try {
         // Kiểm tra waiting list còn tồn tại không
         try {
-          const waitingDetail = await getWaitingListById(
-            waitingData.waitingListId
-          );
+          const waitingDetail = await getWaitingListById(waitingData.waitingListId);
 
           if (!waitingDetail || waitingDetail.status === "cancelled") {
             const bookings = await fetchBookingsByUser(user.id);
@@ -454,8 +424,7 @@ const WaitingListPage = () => {
             if (bookings && bookings.length > 0) {
               const activeBooking = bookings.find(
                 (b) =>
-                  (b.status === "booking" || b.status === "active") &&
-                  b.chargingPostId === waitingData.chargingPostId
+                  (b.status === "booking" || b.status === "active") && b.chargingPostId === waitingData.chargingPostId
               );
 
               if (activeBooking) {
@@ -469,8 +438,7 @@ const WaitingListPage = () => {
 
                 notification.success({
                   message: "Chuyển sang Booking!",
-                  description:
-                    "Bạn đã được chuyển vào booking. Đang chuyển trang...",
+                  description: "Bạn đã được chuyển vào booking. Đang chuyển trang...",
                   placement: "topRight",
                   duration: 3,
                 });
@@ -484,17 +452,13 @@ const WaitingListPage = () => {
           }
         } catch (waitingError) {
           // Nếu waiting list bị xóa (404), kiểm tra booking
-          if (
-            waitingError.response?.status === 404 ||
-            waitingError.message?.includes("404")
-          ) {
+          if (waitingError.response?.status === 404 || waitingError.message?.includes("404")) {
             const bookings = await fetchBookingsByUser(user.id);
 
             if (bookings && bookings.length > 0) {
               const activeBooking = bookings.find(
                 (b) =>
-                  (b.status === "booking" || b.status === "active") &&
-                  b.chargingPostId === waitingData.chargingPostId
+                  (b.status === "booking" || b.status === "active") && b.chargingPostId === waitingData.chargingPostId
               );
 
               if (activeBooking) {
@@ -508,8 +472,7 @@ const WaitingListPage = () => {
 
                 notification.success({
                   message: "Chuyển sang Booking!",
-                  description:
-                    "Bạn đã được chuyển vào booking. Đang chuyển trang...",
+                  description: "Bạn đã được chuyển vào booking. Đang chuyển trang...",
                   placement: "topRight",
                   duration: 3,
                 });
@@ -528,9 +491,7 @@ const WaitingListPage = () => {
 
         if (bookings && bookings.length > 0) {
           const activeBooking = bookings.find(
-            (b) =>
-              (b.status === "booking" || b.status === "active") &&
-              b.chargingPostId === waitingData.chargingPostId
+            (b) => (b.status === "booking" || b.status === "active") && b.chargingPostId === waitingData.chargingPostId
           );
 
           if (activeBooking) {
@@ -544,8 +505,7 @@ const WaitingListPage = () => {
 
             notification.success({
               message: "Chuyển sang Booking!",
-              description:
-                "Bạn đã được chuyển vào booking. Đang chuyển trang...",
+              description: "Bạn đã được chuyển vào booking. Đang chuyển trang...",
               placement: "topRight",
               duration: 3,
             });
@@ -616,9 +576,9 @@ const WaitingListPage = () => {
             const hours = Math.floor(remainingSeconds / 3600);
             const mins = Math.floor((remainingSeconds % 3600) / 60);
             const secs = remainingSeconds % 60;
-            const frozenTime = `${String(hours).padStart(2, "0")}:${String(
-              mins
-            ).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(
+              secs
+            ).padStart(2, "0")}`;
 
             localStorage.setItem(frozenWaitingKey, frozenTime);
           }
@@ -635,9 +595,9 @@ const WaitingListPage = () => {
             const hours = Math.floor(remainingSeconds / 3600);
             const mins = Math.floor((remainingSeconds % 3600) / 60);
             const secs = remainingSeconds % 60;
-            const frozenTime = `${String(hours).padStart(2, "0")}:${String(
-              mins
-            ).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+            const frozenTime = `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(
+              secs
+            ).padStart(2, "0")}`;
 
             localStorage.setItem(frozenBookingKey, frozenTime);
           }
@@ -718,11 +678,7 @@ const WaitingListPage = () => {
 
   // ==================== TRẠNG THÁI KHÔNG CÓ QUYỀN ====================
   const isForbidden =
-    !user ||
-    (waitingData &&
-      user.id !== waitingData.userId &&
-      user.role !== "ADMIN" &&
-      user.role !== "MANAGER");
+    !user || (waitingData && user.id !== waitingData.userId && user.role !== "ADMIN" && user.role !== "MANAGER");
 
   if (isForbidden) {
     return (
@@ -737,17 +693,14 @@ const WaitingListPage = () => {
         }}
       >
         <div style={{ textAlign: "center", maxWidth: "500px" }}>
-          <LockOutlined
-            style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }}
-          />
+          <LockOutlined style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }} />
           <Alert
             message="Không có quyền truy cập"
             description={
               <div>
                 <p>Bạn không có quyền truy cập hàng đợi này.</p>
                 <p style={{ marginTop: "10px", color: "#666" }}>
-                  Hàng đợi này có thể thuộc về người dùng khác hoặc bạn không có
-                  quyền xem.
+                  Hàng đợi này có thể thuộc về người dùng khác hoặc bạn không có quyền xem.
                 </p>
               </div>
             }
@@ -824,11 +777,7 @@ const WaitingListPage = () => {
               message={
                 <Space>
                   <WifiOutlined style={{ fontSize: "16px" }} />
-                  <span>
-                    {connected
-                      ? "Kết nối thời gian thực đang hoạt động"
-                      : "Đang kết nối lại WebSocket..."}
-                  </span>
+                  <span>{connected ? "Kết nối thời gian thực đang hoạt động" : "Đang kết nối lại WebSocket..."}</span>
                 </Space>
               }
               type={connected ? "success" : "warning"}
@@ -860,17 +809,14 @@ const WaitingListPage = () => {
             </Col>
 
             <Col xs={24} lg={12}>
-              <WaitingTime sessionData={waitingData} />
+              <WaitingTime sessionData={waitingData} queueRank={queueRank} />
             </Col>
           </Row>
 
           {/* Hàng 2: Chi tiết kỹ thuật & Thông tin hàng đợi */}
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <TechnicalDetails
-                sessionData={waitingData}
-                chargingPostData={chargingPostData}
-              />
+              <TechnicalDetails sessionData={waitingData} chargingPostData={chargingPostData} />
             </Col>
 
             <Col xs={24} lg={12}>

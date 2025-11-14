@@ -39,10 +39,7 @@ const calculateWaitingMinutes = (maxWaitingTime, createdAt) => {
       return diffMinutes > 0 ? diffMinutes : 0;
     }
 
-    console.warn(
-      "⚠️ [WaitingTime] Unexpected maxWaitingTime format:",
-      maxWaitingTime
-    );
+    console.warn("⚠️ [WaitingTime] Unexpected maxWaitingTime format:", maxWaitingTime);
     return 0;
   } catch (error) {
     console.error("❌ [WaitingTime] Error calculating waiting time:", error);
@@ -51,17 +48,37 @@ const calculateWaitingMinutes = (maxWaitingTime, createdAt) => {
 };
 
 // Component 2: Waiting Time (maxWaitingTime)
-export const WaitingTime = ({ sessionData, onCancel, isCancelled }) => {
+export const WaitingTime = ({ sessionData, onCancel, isCancelled, queueRank }) => {
+  // ✅ Logic:
+  // - Nếu có onCancel (BookingPage) → luôn hiển thị thời gian (đã được booking)
+  // - Nếu không có onCancel (WaitingPage) → chỉ hiển thị nếu queueRank === 1
+  const isBookingPage = !!onCancel;
+  const isFirstInQueue = queueRank === 1;
+  const shouldShowTime = isBookingPage || isFirstInQueue;
+
   // ✅ Tính số phút cần chờ
   const waitingMinutes = useMemo(() => {
-    return calculateWaitingMinutes(
-      sessionData.maxWaitingTime || sessionData.expectedWaitingTime,
-      sessionData.createdAt
-    );
+    if (!shouldShowTime) {
+      // User thứ 2 trở đi trong waiting list không có thời gian chờ cụ thể
+      return 0;
+    }
+
+    const timeValue = sessionData.maxWaitingTime || sessionData.expectedWaitingTime;
+    console.log("🕐 [WaitingTime] Calculate waiting minutes:", {
+      isBookingPage,
+      maxWaitingTime: sessionData.maxWaitingTime,
+      expectedWaitingTime: sessionData.expectedWaitingTime,
+      createdAt: sessionData.createdAt,
+      timeValue,
+    });
+
+    return calculateWaitingMinutes(timeValue, sessionData.createdAt);
   }, [
     sessionData.maxWaitingTime,
     sessionData.expectedWaitingTime,
     sessionData.createdAt,
+    shouldShowTime,
+    isBookingPage,
   ]);
 
   // ✅ Tạo unique storage key dựa vào waitingListId hoặc bookingId
@@ -83,7 +100,7 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled }) => {
   // ✅ Sử dụng local countdown (không cần backend SSE nữa!)
   const { countdown, status } = useCountdown(
     waitingMinutes,
-    waitingMinutes > 0,
+    waitingMinutes > 0 && shouldShowTime, // ✅ CHỈ chạy countdown khi shouldShowTime = true
     storageKey,
     explicitEndTime
   );
@@ -98,27 +115,21 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled }) => {
     // 2. Có callback onCancel
     // 3. Chưa bị cancelled
     // 4. Chưa auto-cancel trước đó
-    if (
-      status === "COMPLETED" &&
-      onCancel &&
-      !isCancelled &&
-      !autoCancelledRef.current
-    ) {
-      console.log(
-        "⏰ [WaitingTime] Countdown completed, auto-cancelling booking..."
-      );
+    if (status === "COMPLETED" && onCancel && !isCancelled && !autoCancelledRef.current) {
+      console.log("⏰ [WaitingTime] Countdown completed, auto-cancelling booking...");
       autoCancelledRef.current = true; // ✅ Đánh dấu đã auto-cancel
       onCancel(); // ✅ Gọi API cancel booking
     }
   }, [status, onCancel, isCancelled]);
 
   // ✅ Display time: Ưu tiên countdown, fallback về tính toán local
-  const displayTime = countdown?.displayTime || `${waitingMinutes} phút`;
+  const displayTime = shouldShowTime ? countdown?.displayTime || `${waitingMinutes} phút` : "Chưa tính toán được";
+
   const waitingSpecs = [
     {
       label: "Thời gian chờ tối đa",
       value: displayTime,
-      highlight: status === "RUNNING" || status === "CANCELLED",
+      highlight: shouldShowTime && (status === "RUNNING" || status === "CANCELLED"),
     },
   ];
 
@@ -161,9 +172,7 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled }) => {
                 padding: "16px 20px",
                 backgroundColor: spec.highlight ? "#d1fae5" : "#f8fafc",
                 borderRadius: "12px",
-                border: spec.highlight
-                  ? "2px solid #10b981"
-                  : "1px solid #e2e8f0",
+                border: spec.highlight ? "2px solid #10b981" : "1px solid #e2e8f0",
                 transition: "all 0.3s ease",
               }}
             >
@@ -184,7 +193,7 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled }) => {
                     color: spec.highlight ? "#10b981" : "#1f2937",
                     fontSize: "16px",
                     fontWeight: spec.highlight ? 700 : 600,
-                    fontFamily: "monospace",
+                    fontFamily: shouldShowTime ? "monospace" : "inherit",
                   }}
                 >
                   {spec.value}
@@ -193,11 +202,27 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled }) => {
             </Row>
 
             {/* Add divider between items except last one */}
-            {index < waitingSpecs.length - 1 && (
-              <Divider style={{ margin: "8px 0", borderColor: "#e2e8f0" }} />
-            )}
+            {index < waitingSpecs.length - 1 && <Divider style={{ margin: "8px 0", borderColor: "#e2e8f0" }} />}
           </div>
         ))}
+
+        {/* ✅ Hiển thị thông báo cho user thứ 2 trở đi - CHỈ TRONG WAITING PAGE */}
+        {!isBookingPage && !shouldShowTime && queueRank && (
+          <div
+            style={{
+              marginTop: "8px",
+              padding: "12px 16px",
+              backgroundColor: "#fef3c7",
+              borderRadius: "8px",
+              border: "1px solid #fbbf24",
+            }}
+          >
+            <Text style={{ fontSize: "13px", color: "#92400e", lineHeight: "1.5" }}>
+              ⏳ Bạn đang ở vị trí #{queueRank} trong hàng chờ. Thời gian chờ dự kiến sẽ được cập nhật khi bạn lên vị
+              trí #1.
+            </Text>
+          </div>
+        )}
       </Space>
 
       {/* Cancel Button (chỉ hiển thị cho booking) */}
@@ -235,8 +260,7 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled }) => {
               }}
             >
               <Text style={{ fontSize: "12px", color: "#1e40af" }}>
-                💡 Bạn có thể hủy booking trước khi đến trạm. Vui lòng đến đúng
-                giờ để tránh bị hủy tự động.
+                💡 Bạn có thể hủy booking trước khi đến trạm. Vui lòng đến đúng giờ để tránh bị hủy tự động.
               </Text>
             </div>
           )}
@@ -252,8 +276,7 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled }) => {
               }}
             >
               <Text style={{ fontSize: "12px", color: "#991b1b" }}>
-                ❌ Booking đã bị hủy. Vui lòng đặt lại nếu muốn tiếp tục sử
-                dụng.
+                ❌ Booking đã bị hủy. Vui lòng đặt lại nếu muốn tiếp tục sử dụng.
               </Text>
             </div>
           )}
