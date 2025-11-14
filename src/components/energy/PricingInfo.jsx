@@ -169,7 +169,7 @@ const PricingInfo = ({
         }
       }
     } catch (e) {
-      console.warn('Failed to compute early-stop percentage:', e);
+      console.warn("Failed to compute early-stop percentage:", e);
     }
 
     confirm({
