@@ -155,6 +155,23 @@ const PricingInfo = ({
     const totalEnergy = calculateEnergyChargedAt(freezeTime);
     const frozenRemaining = formatRemainingAt(freezeTime);
 
+    // Determine whether the user is stopping before 90% of scheduled session duration
+    let showEarlyStopWarning = false;
+    try {
+      if (sessionData?.startTime && sessionData?.expectedEndTime) {
+        const start = new Date(sessionData.startTime);
+        const end = new Date(sessionData.expectedEndTime);
+        const totalDuration = end.getTime() - start.getTime();
+        const elapsed = Math.max(0, freezeTime.getTime() - start.getTime());
+        if (totalDuration > 0) {
+          const percentElapsed = elapsed / totalDuration; // 0..1
+          showEarlyStopWarning = percentElapsed < 0.9; // show if before 90%
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to compute early-stop percentage:', e);
+    }
+
     confirm({
       title: "Xác nhận dừng sạc",
       icon: <ExclamationCircleOutlined />,
@@ -162,6 +179,13 @@ const PricingInfo = ({
       content: (
         <div>
           <p>Bạn có chắc chắn muốn dừng sạc không?</p>
+          {showEarlyStopWarning && (
+            <p style={{ color: "red", fontSize: "14px", marginTop: "8px" }}>
+              <strong>LƯU Ý: </strong>Nếu dừng sạc trước 90% của tổng năng lượng
+              đã đặt, bạn sẽ bị trừ điểm uy tín, sẽ rút ngắn thời gian đặt chỗ
+              trong tương lai.
+            </p>
+          )}
           <p style={{ color: "#6b7280", fontSize: "14px", marginTop: "8px" }}>
             Phiên sạc sẽ kết thúc và chuyển sang thanh toán.
           </p>
