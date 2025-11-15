@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Row, Col, Statistic, Typography, Spin, Alert, Badge, Divider } from "antd";
+import { Card, Row, Col, Typography, Spin, Alert, Badge, Divider } from "antd";
 import {
   ThunderboltOutlined,
   DollarOutlined,
@@ -7,8 +7,6 @@ import {
   UserOutlined,
   AppstoreOutlined,
   CalendarOutlined,
-  CheckCircleOutlined,
-  CloseCircleOutlined,
 } from "@ant-design/icons";
 import PageHeader from "../components/PageHeader";
 import Map from '../components/map/Map';
@@ -52,7 +50,7 @@ function DashboardContent() {
     <div style={{ minHeight: '100vh', background: 'white', padding: '24px' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <PageHeader
-          title="Bảng điều khiển tổng quan"
+          title="Thống kê"
           icon={<ThunderboltOutlined />}
         />
 
