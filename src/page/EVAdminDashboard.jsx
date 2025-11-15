@@ -49,7 +49,7 @@ function DashboardContent() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f0f2f5', padding: '24px' }}>
+    <div style={{ minHeight: '100vh', background: 'white', padding: '24px' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <PageHeader
           title="Bảng điều khiển tổng quan"
