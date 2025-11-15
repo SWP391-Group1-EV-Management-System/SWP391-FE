@@ -36,13 +36,13 @@ const menuItemsByRole = {
     { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
     {
       id: "evadmindashboard",
-      label: "Dashboard",
+      label: "Thống kê",
       icon: MdDashboard,
       path: "/app/evadmindashboard",
     },
     {
       id: "usermanagement",
-      label: "User Management",
+      label: "Quản lý người dùng",
       icon: BsPeopleFill,
       path: "/app/usermanagement",
     },
@@ -51,30 +51,15 @@ const menuItemsByRole = {
     { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
     {
       id: "sessionstaff",
-      label: "Session Staff",
+      label: "Phiên sạc",
       icon: BsClipboardData,
       path: "/app/sessionstaff",
     },
     {
       id: "waitingstaff",
-      label: "Waiting Staff",
+      label: "Hàng đợi",
       icon: BsHourglassSplit,
       path: "/app/waitingstaff",
-    },
-  ],
-  MANAGER: [
-    { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
-    {
-      id: "usermanagement",
-      label: "User Manager",
-      icon: BsPeopleFill,
-      path: "/app/usermanagement",
-    },
-    {
-      id: "evadmindashboard",
-      label: "Dashboard",
-      icon: MdDashboard,
-      path: "/app/evadmindashboard",
     },
   ],
 };
