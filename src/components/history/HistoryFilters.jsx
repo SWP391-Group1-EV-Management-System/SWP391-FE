@@ -1,9 +1,6 @@
 import React from 'react';
-import { Input, Select, Button, DatePicker, Space } from 'antd';
+import { Input, Select, Space } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
-
-const { RangePicker } = DatePicker;
-
 const HistoryFilters = ({
   query,
   sort,

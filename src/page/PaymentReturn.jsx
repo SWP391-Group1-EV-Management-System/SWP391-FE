@@ -33,7 +33,7 @@ const PaymentReturn = () => {
       if (pendingPaymentStr) {
         try {
           const pendingPayment = JSON.parse(pendingPaymentStr);
-          const { sessionId, paymentId } = pendingPayment;
+          const { sessionId } = pendingPayment;
 
           if (sessionId) {
             // Lưu vào danh sách phiên đã thanh toán
@@ -57,6 +57,7 @@ const PaymentReturn = () => {
           }
         } catch (e) {
           // Xử lý lỗi parse JSON
+          console.error("Error parsing pending payment:", e);
         }
       }
     } else {
@@ -69,16 +70,6 @@ const PaymentReturn = () => {
   // Điều hướng về trang chủ
   const handleBackToHome = () => {
     window.location.href = "/app/home";
-  };
-
-  // Điều hướng đến trang gói dịch vụ
-  const handleViewPackages = () => {
-    window.location.href = "/app/packages";
-  };
-
-  // Điều hướng đến trang lịch sử
-  const handleViewHistory = () => {
-    window.location.href = "/app/history";
   };
 
   // Hiển thị trạng thái đang tải
@@ -146,15 +137,6 @@ const PaymentReturn = () => {
               <Button type="primary" key="home" onClick={handleBackToHome}>
                 Về trang chủ
               </Button>,
-              isPackagePayment ? (
-                <Button key="packages" onClick={handleViewPackages}>
-                  Xem gói dịch vụ
-                </Button>
-              ) : (
-                <Button key="history" onClick={handleViewHistory}>
-                  Lịch sử
-                </Button>
-              ),
             ]}
           />
         ) : (
@@ -178,9 +160,6 @@ const PaymentReturn = () => {
               </div>
             }
             extra={[
-              <Button type="primary" key="retry" onClick={handleViewPackages}>
-                Thử lại
-              </Button>,
               <Button key="home" onClick={handleBackToHome}>
                 Về trang chủ
               </Button>,
