@@ -55,12 +55,6 @@ const menuItemsByRole = {
       icon: BsClipboardData,
       path: "/app/sessionstaff",
     },
-    {
-      id: "waitingstaff",
-      label: "Hàng đợi",
-      icon: BsHourglassSplit,
-      path: "/app/waitingstaff",
-    },
   ],
 };
 
