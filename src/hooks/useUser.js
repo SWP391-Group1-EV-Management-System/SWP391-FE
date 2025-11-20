@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { getDrivers, getStaff, updateUser, deleteUser } from '../services/userService';
+import api from '../utils/axios';
 
-const mapApiUser = (apiUser) => {;
-  
+const mapApiUser = (apiUser) => {
   // ✅ Backend dùng LocalDate → luôn trả string "YYYY-MM-DD" hoặc null
   const birthDate = apiUser.birthDate && apiUser.birthDate !== '' ? apiUser.birthDate : null;
-  
   
   return {
     id: apiUser.userID || apiUser.id || apiUser.userId || apiUser.ID,
@@ -90,6 +89,63 @@ const useUser = (role) => {
   };
 
   return { users, loading, error, refresh, update, remove };
+};
+
+// ===== HOOK MỚI: useDashboard =====
+export const useDashboard = (userId) => {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const mounted = useRef(true);
+
+  const fetchDashboard = useCallback(async () => {
+    if (!userId) {
+      setDashboardData(null);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      console.log('Đang tải dữ liệu dashboard cho user:', userId);
+      const response = await api.get(`/api/driver/dashboard/information/${userId}`);
+      
+      if (!mounted.current) return;
+      
+      console.log('Dữ liệu dashboard nhận được:', response.data);
+      setDashboardData(response.data);
+    } catch (err) {
+      if (!mounted.current) return;
+      
+      console.error('Lỗi khi tải dữ liệu dashboard:', err.response?.status, err.message);
+      setError(err);
+      
+      // Fallback về dữ liệu mặc định
+      setDashboardData({
+        totalPriceIsPaid: 0,
+        totalKwHBeCharged: 0,
+        totalChargingSessionCompleted: 0,
+        reputationPoint: 0,
+      });
+    } finally {
+      if (!mounted.current) return;
+      setLoading(false);
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    mounted.current = true;
+    fetchDashboard();
+    return () => {
+      mounted.current = false;
+    };
+  }, [fetchDashboard]);
+
+  const refresh = () => fetchDashboard();
+
+  return { dashboardData, loading, error, refresh };
 };
 
 export default useUser;

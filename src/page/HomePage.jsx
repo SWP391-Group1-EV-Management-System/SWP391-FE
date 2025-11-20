@@ -1,17 +1,9 @@
 /**
- * HOMEPAGE COMPONENT
- * 
- * Trang chính hiển thị dashboard hệ thống quản lý trạm sạc xe điện
- * 
- * Tính năng:
- * - Hiển thị thống kê hệ thống với animation
- * - Danh sách hoạt động gần đây
- * - Trạm sạc nổi bật
- * - Thành tích người dùng
- * - Thông tin hỗ trợ và ưu đãi
+ * HOMEPAGE COMPONENT - FIXED VERSION
+ * ✅ Sửa mapping đúng với API response structure
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Row,
@@ -40,44 +32,57 @@ import {
 } from "react-icons/bs";
 import "../assets/styles/HomePage.css";
 import useAuth from "../hooks/useAuth";
+import { useDashboard } from "../hooks/useUser";
+import { useHistory } from "../hooks/useHistory";
+import { useChargingStations } from "../hooks/useChargingStations";
 
 function HomePage() {
   // ===== STATE: Giá trị animation cho các thống kê =====
   const [animatedValues, setAnimatedValues] = useState({
-    stations: 0,
+    totalPaid: 0,
+    totalKwh: 0,
     sessions: 0,
-    users: 0,
-    reliability: 0,
+    reputation: 0,
   });
 
   // ===== HOOK: Lấy thông tin người dùng =====
   const { user, loading, fetchUserProfile } = useAuth();
 
+  // ===== HOOK: Lấy dữ liệu dashboard =====
+  const { dashboardData, loading: dashboardLoading } = useDashboard(user?.id);
+
   // ===== EFFECT: Tải profile người dùng khi component mount =====
   useEffect(() => {
-    fetchUserProfile().catch(() => {});
+    fetchUserProfile().catch(() => { });
   }, [fetchUserProfile]);
 
   // ===== Xác định tên hiển thị người dùng =====
   const userName = loading
     ? "Đang tải..."
     : user
-    ? `${(user.firstName || "").trim()} ${(user.lastName || "").trim()}`.trim() || (user.email ? user.email.split("@")[0] : "Guest User")
-    : "Guest User";
-  
-  // ===== EFFECT: Animation đếm số liệu thống kê =====
+      ? `${(user.firstName || "").trim()} ${(user.lastName || "").trim()}`.trim() ||
+      (user.email ? user.email.split("@")[0] : "Guest User")
+      : "Guest User";
+
+  // ===== EFFECT: Animation đếm số liệu thống kê - ĐÃ SỬA =====
   useEffect(() => {
-    const duration = 2000; // Thời gian animation: 2 giây
-    const steps = 60; // Số bước animation
+    if (!dashboardData || dashboardLoading) return;
+
+    console.log('🎯 Starting animation with data:', dashboardData);
+
+    const duration = 2000; // 2 giây
+    const steps = 60;
     const increment = duration / steps;
 
-    // Giá trị mục tiêu
+    // ✅ MAPPING ĐÚNG TỪ API RESPONSE
     const targets = {
-      stations: 248,
-      sessions: 1247,
-      users: 8932,
-      reliability: 99.8,
+      totalPaid: dashboardData.totalPriceIsPaid || 0,
+      totalKwh: dashboardData.totalKwHBeCharged || 0,
+      sessions: dashboardData.totalChargingSessionCompleted || 0,
+      reputation: dashboardData.reputationPoint || 0,
     };
+
+    console.log('🎯 Animation targets:', targets);
 
     let currentStep = 0;
 
@@ -85,36 +90,41 @@ function HomePage() {
       currentStep++;
       const progress = currentStep / steps;
 
-      // Cập nhật giá trị animation theo tỷ lệ tiến độ
+      // ✅ CẬP NHẬT ĐÚNG CẤU TRÚC
       setAnimatedValues({
-        stations: Math.floor(targets.stations * progress),
+        totalPaid: Math.floor(targets.totalPaid * progress),
+        totalKwh: Math.floor(targets.totalKwh * progress),
         sessions: Math.floor(targets.sessions * progress),
-        users: Math.floor(targets.users * progress),
-        reliability: (targets.reliability * progress).toFixed(1),
+        reputation: parseFloat((targets.reputation * progress).toFixed(1)),
       });
 
-      // Kết thúc animation
       if (currentStep >= steps) {
         clearInterval(timer);
-        setAnimatedValues(targets);
+        // Set giá trị cuối cùng chính xác
+        setAnimatedValues({
+          totalPaid: targets.totalPaid,
+          totalKwh: targets.totalKwh,
+          sessions: targets.sessions,
+          reputation: targets.reputation,
+        });
       }
     }, increment);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [dashboardData, dashboardLoading]);
 
-  // ===== DATA: Thống kê hệ thống =====
+  // ===== DATA: Thống kê hệ thống - ĐÃ SỬA LABEL =====
   const stats = [
     {
-      label: "Trạm sạc hoạt động",
-      value: animatedValues.stations,
+      label: "Tổng chi phí đã thanh toán",
+      value: animatedValues.totalPaid.toLocaleString('vi-VN') + " VNĐ",
       icon: BsLightning,
       gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       change: "+12%",
       trend: "up",
     },
     {
-      label: "Phiên sạc tháng này",
+      label: "Tổng phiên sạc hoàn thành",
       value: animatedValues.sessions.toLocaleString(),
       icon: BsLightning,
       gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
@@ -122,16 +132,16 @@ function HomePage() {
       trend: "up",
     },
     {
-      label: "Người dùng active",
-      value: animatedValues.users.toLocaleString(),
+      label: "Tổng năng lượng đã sạc (kWh)",
+      value: animatedValues.totalKwh.toLocaleString(),
       icon: BsGlobe,
       gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
       change: "+15%",
       trend: "up",
     },
     {
-      label: "Độ tin cậy",
-      value: `${animatedValues.reliability}%`,
+      label: "Điểm uy tín",
+      value: `${animatedValues.reputation}`,
       icon: BsShield,
       gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
       change: "+0.2%",
@@ -140,63 +150,74 @@ function HomePage() {
   ];
 
   // ===== DATA: Hoạt động gần đây =====
-  const recentActivities = [
-    {
-      icon: BsCheck2Circle,
-      text: "Trạm #A-234 hoàn thành sạc",
-      time: "2 phút trước",
-      color: "#43e97b",
-    },
-    {
-      icon: BsLightning,
-      text: "Trạm sạc nhanh mới tại Trung tâm Thành phố",
-      time: "15 phút trước",
-      color: "#667eea",
-    },
-    {
-      icon: BsPeople,
-      text: "1,000+ người dùng tham gia tháng này",
-      time: "1 giờ trước",
-      color: "#4facfe",
-    },
-    {
-      icon: BsTrophy,
-      text: "Bạn đã nhận huy hiệu 'Eco Warrior'!",
-      time: "2 giờ trước",
-      color: "#f5576c",
-    },
-    {
-      icon: BsGraphUp,
-      text: "Tiết kiệm năng lượng tăng 23%",
-      time: "5 giờ trước",
-      color: "#38f9d7",
-    },
-  ];
+  const { history, loading: historyLoading, error: historyError, fetchHistory } = useHistory();
 
-  // ===== DATA: Trạm sạc nổi bật =====
-  const featuredStations = [
-    {
-      name: "Downtown Central Hub",
-      rating: 4.9,
-      charging: 12,
-      available: 8,
-      distance: "0.5 km",
-    },
-    {
-      name: "Airport Express Station",
-      rating: 4.8,
-      charging: 8,
-      available: 4,
-      distance: "2.3 km",
-    },
-    {
-      name: "Shopping Mall Complex",
-      rating: 4.7,
-      charging: 15,
-      available: 10,
-      distance: "1.2 km",
-    },
-  ];
+  // Fetch history when user is available (reuse same pattern as HistoryPage)
+  useEffect(() => {
+    if (user?.id) {
+      fetchHistory(user.id);
+    }
+  }, [user?.id, fetchHistory]);
+
+  // Map recent history sessions into activity items for the home dashboard
+  const recentActivities = useMemo(() => {
+    if (!history || history.length === 0) {
+      return [
+        {
+          icon: BsCheck2Circle,
+          text: "Chưa có hoạt động gần đây",
+          time: "",
+          color: "#999",
+        },
+      ];
+    }
+
+    // Sort by startTime desc and take up to 5
+    const sorted = [...history].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+    const items = sorted.slice(0, 5).map((s, idx) => {
+      const stationName = s.station?.name || s.station?.address || 'Trạm không xác định';
+      const sessionId = s.sessionId || s.id || '';
+      const time = s.startTime ? new Date(s.startTime).toLocaleString('vi-VN') : '';
+      // Pick color based on index for visual variety
+      const colors = ['#43e97b', '#667eea', '#4facfe', '#f5576c', '#38f9d7'];
+      const color = colors[idx % colors.length];
+
+      return {
+        icon: s.status === 'COMPLETED' ? BsCheck2Circle : BsLightning,
+        text: `${sessionId ? `${sessionId} - ` : ''}${stationName}`,
+        time,
+        color,
+      };
+    });
+
+    return items;
+  }, [history]);
+
+  // ===== DATA: Trạm sạc nổi bật (lấy từ API giống MapPage) =====
+  const {
+    stations: chargingStations,
+    statistics: stationsStats,
+    loading: stationsLoading,
+    error: stationsError,
+    refresh: refreshStations,
+  } = useChargingStations({ autoFetch: true, useLocation: true });
+
+  const featuredStations = useMemo(() => {
+    if (!Array.isArray(chargingStations) || chargingStations.length === 0) {
+      return [];
+    }
+
+    // Take first 3 stations (MapPage sorts by distance when useLocation=true,
+    // here we assume backend returns a useful ordering; you can change to nearest)
+    return chargingStations.slice(0, 3).map((station) => ({
+      name: station.name || station.address || "Trạm không tên",
+      rating: station.rating || 0,
+      charging: station.totalSlots || station.numberOfPosts || 0,
+      available: station.availableSlots || 0,
+      distance: station.distance || "N/A",
+      raw: station, // keep raw station in case modal/detail is needed later
+    }));
+  }, [chargingStations]);
 
   // ===== DATA: Thành tích người dùng =====
   const achievements = [
@@ -233,7 +254,9 @@ function HomePage() {
             <Col lg={9}>
               <div className="d-flex align-items-center mb-2">
                 <div>
-                  <h1 className="hero-title mb-1">Chào mừng {userName} đến với Eco-Z</h1>
+                  <h1 className="hero-title mb-1">
+                    Chào mừng {userName} đến với Eco-Z
+                  </h1>
                   <p className="hero-subtitle mb-0">
                     Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và
                     thân thiện môi trường
@@ -250,22 +273,33 @@ function HomePage() {
           </Row>
         </div>
 
-        {/* Các card thống kê */}
-        <div className="info-card-container">
-          {stats.map((stat, index) => (
-            <div key={index} className="info-card">
-              <div className="card-icon">
-                <stat.icon size={32} />
-              </div>
-              <h4 className="card-title">{stat.label}</h4>
-              <div className="card-value">{stat.value}</div>
-              <div className="card-sub">
-                <BsGraphUp className="me-1" size={12} />
-                {stat.change}
-              </div>
+        {/* Loading State */}
+        {dashboardLoading && (
+          <div className="text-center py-5">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Đang tải...</span>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {/* Các card thống kê */}
+        {!dashboardLoading && (
+          <div className="info-card-container">
+            {stats.map((stat, index) => (
+              <div key={index} className="info-card">
+                <div className="card-icon">
+                  <stat.icon size={32} />
+                </div>
+                <h4 className="card-title">{stat.label}</h4>
+                <div className="card-value">{stat.value}</div>
+                <div className="card-sub">
+                  <BsGraphUp className="me-1" size={12} />
+                  {stat.change}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Hoạt động gần đây và Trạm sạc nổi bật */}
         <Row className="g-4 mb-4">
@@ -318,7 +352,6 @@ function HomePage() {
               <Card.Body className="p-4">
                 {featuredStations.map((station, index) => (
                   <div key={index} className="featured-station-item mb-3">
-                    {/* Header: Tên trạm và đánh giá */}
                     <div className="d-flex justify-content-between align-items-start mb-2">
                       <h6 className="station-name mb-1">{station.name}</h6>
                       <Badge className="rating-badge">
@@ -326,7 +359,6 @@ function HomePage() {
                         {station.rating}
                       </Badge>
                     </div>
-                    {/* Thông tin trạm: số trạm đang sạc, trống, khoảng cách */}
                     <div className="station-info">
                       <span className="info-item">
                         <BsLightning size={14} className="me-1 text-warning" />
@@ -349,91 +381,6 @@ function HomePage() {
                     )}
                   </div>
                 ))}
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Phần thành tích người dùng */}
-        <h3 className="section-title mb-3">
-          <BsTrophy className="me-2 text-warning" />
-          Thành tích của bạn
-        </h3>
-        <Row className="g-4 mb-4">
-          {achievements.map((achievement, index) => (
-            <Col key={index} lg={4} md={6}>
-              <Card className="info-detail-card border-0 shadow-sm">
-                <Card.Body className="p-4">
-                  {/* Header thành tích: icon và tiêu đề */}
-                  <div className="d-flex align-items-center mb-3">
-                    <div className="achievement-icon me-3">
-                      <achievement.icon size={24} />
-                    </div>
-                    <div>
-                      <h6 className="achievement-title mb-0">
-                        {achievement.title}
-                      </h6>
-                      <small className="achievement-desc">
-                        {achievement.description}
-                      </small>
-                    </div>
-                  </div>
-                  {/* Progress bar hiển thị tiến độ */}
-                  <ProgressBar
-                    now={achievement.progress}
-                    variant="primary"
-                    style={{ height: "8px" }}
-                  />
-                  <div>
-                    <small className="progress-text">
-                      {achievement.progress}%
-                    </small>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-
-        {/* Phần thông tin hỗ trợ và ưu đãi */}
-        <Row className="g-4 mb-4">
-          {/* Card hỗ trợ 24/7 */}
-          <Col lg={6}>
-            <Card className="info-detail-card border-0 shadow">
-              <Card.Body className="p-4 text-center">
-                <div className="text-primary mb-3">
-                  <BsShield size={48} />
-                </div>
-                <h5 className="fw-semibold mb-3">Hỗ trợ 24/7</h5>
-                <p className="text-muted mb-4">
-                  Đội ngũ hỗ trợ chuyên nghiệp luôn sẵn sàng giúp đỡ bạn mọi
-                  lúc, mọi nơi.
-                </p>
-                <Button
-                  variant="primary"
-                  className="d-flex align-items-center justify-content-center gap-2"
-                >
-                  Liên hệ ngay
-                  <BsArrowRight size={18} />
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-          
-          {/* Card ưu đãi đặc biệt */}
-          <Col lg={6}>
-            <Card className="info-detail-card border-0 shadow">
-              <Card.Body className="p-4 text-center">
-                <div className="text-warning mb-3">
-                  <BsBookmarkStar size={40} />
-                </div>
-                <h6 className="fw-semibold mb-3">Ưu đãi đặc biệt</h6>
-                <p className="text-muted mb-3">
-                  Giảm 20% cho 10 lần sạc đầu tiên
-                </p>
-                <Button variant="warning" size="sm">
-                  Nhận ngay
-                </Button>
               </Card.Body>
             </Card>
           </Col>
