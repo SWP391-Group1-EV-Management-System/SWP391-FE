@@ -211,7 +211,6 @@ function HomePage() {
     // here we assume backend returns a useful ordering; you can change to nearest)
     return chargingStations.slice(0, 3).map((station) => ({
       name: station.name || station.address || "Trạm không tên",
-      rating: station.rating || 0,
       charging: station.totalSlots || station.numberOfPosts || 0,
       available: station.availableSlots || 0,
       distance: station.distance || "N/A",
@@ -354,15 +353,11 @@ function HomePage() {
                   <div key={index} className="featured-station-item mb-3">
                     <div className="d-flex justify-content-between align-items-start mb-2">
                       <h6 className="station-name mb-1">{station.name}</h6>
-                      <Badge className="rating-badge">
-                        <BsStarFill size={10} className="me-1" />
-                        {station.rating}
-                      </Badge>
                     </div>
                     <div className="station-info">
                       <span className="info-item">
                         <BsLightning size={14} className="me-1 text-warning" />
-                        {station.charging} đang sạc
+                        {station.charging} phiên đã sạc
                       </span>
                       <span className="info-item ms-3">
                         <BsCheck2Circle
