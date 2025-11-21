@@ -47,7 +47,6 @@ const menuItemsByRole = {
     },
   ],
   STAFF: [
-    { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
     {
       id: "sessionstaff",
       label: "Phiên sạc",

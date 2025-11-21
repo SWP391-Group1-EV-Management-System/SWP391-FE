@@ -37,6 +37,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
 import { AdminRoute, StaffRoute, ManagerRoute, DriverRoute } from "./components/auth/AdminRoute.jsx";
 import RootRedirect from "./components/auth/RootRedirect.jsx";
 import ChatBox from "./components/chat/ChatBox.jsx";
+import UserProfile from "./components/layout/UserProfile.jsx";
 
 function App() {
   // ✅ Cleanup frozen countdown keys cũ khi app khởi động
@@ -78,7 +79,7 @@ function App() {
             }
           >
             <Route path="home" element={<HomePage />} />
-
+            <Route path="profile" element={<UserProfile />} />
             {/* Driver Routes - Accessible to Driver role */}
             <Route path="home" element={<HomePage />} />
             {/* User Routes - Accessible to all authenticated users */}

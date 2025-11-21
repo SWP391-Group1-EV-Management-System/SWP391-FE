@@ -1,0 +1,170 @@
+/* Container chính */
+.profile-container {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  /* Card profile */
+  .profile-card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  /* Header với avatar */
+  .profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: white;
+  }
+  
+  .profile-avatar-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin: 0 auto 1rem;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+  }
+  
+  .profile-name {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+  }
+  
+  .profile-status {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  
+  .profile-status.active {
+    background: rgba(72, 187, 120, 0.2);
+    color: #fff;
+  }
+  
+  .profile-status.inactive {
+    background: rgba(245, 101, 101, 0.2);
+    color: #fff;
+  }
+  
+  /* Body với thông tin */
+  .profile-body {
+    padding: 2rem;
+  }
+  
+  .profile-section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0 0 1.5rem 0;
+  }
+  
+  /* Item thông tin */
+  .profile-info-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: #f7fafc;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+  
+  .profile-info-item:hover {
+    background: #edf2f7;
+    transform: translateX(4px);
+  }
+  
+  .profile-info-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border-radius: 8px;
+    color: #667eea;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+  
+  .profile-info-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  
+  .profile-info-label {
+    font-size: 0.75rem;
+    color: #718096;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+  }
+  
+  .profile-info-value {
+    font-size: 1rem;
+    color: #2d3748;
+    font-weight: 500;
+  }
+  
+  .profile-role {
+    color: #667eea;
+    font-weight: 600;
+  }
+  
+  /* Loading và error states */
+  .profile-loading,
+  .profile-error {
+    text-align: center;
+    padding: 3rem;
+    font-size: 1.125rem;
+    color: #718096;
+  }
+  
+  .profile-error {
+    color: #e53e3e;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .profile-container {
+      padding: 1rem;
+    }
+  
+    .profile-header {
+      padding: 2rem 1rem;
+    }
+  
+    .profile-avatar-large {
+      width: 80px;
+      height: 80px;
+      font-size: 2rem;
+    }
+  
+    .profile-name {
+      font-size: 1.5rem;
+    }
+  
+    .profile-body {
+      padding: 1.5rem;
+    }
+  
+    .profile-info-item {
+      padding: 0.875rem;
+    }
+  }
