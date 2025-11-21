@@ -85,7 +85,7 @@ function DashboardContent() {
                 <div style={{ fontSize: 36, fontWeight: 700, color: "#faad14", marginBottom: 8 }}>
                   {formatCurrency(dashboardData?.amountUserPaidByMoney || 0)}
                 </div>
-                <Text style={{ fontSize: 14, color: '#8c8c8c' }}>Thanh toán bằng tiền</Text>
+                <Text style={{ fontSize: 14, color: '#8c8c8c' }}>Số lượng thanh toán Momo</Text>
               </div>
             </Card>
           </Col>
@@ -96,7 +96,7 @@ function DashboardContent() {
                 <div style={{ fontSize: 36, fontWeight: 700, color: "#722ed1", marginBottom: 8 }}>
                   {formatCurrency(dashboardData?.amountUserPaidByPackage || 0)}
                 </div>
-                <Text style={{ fontSize: 14, color: '#8c8c8c' }}>Thanh toán bằng gói</Text>
+                <Text style={{ fontSize: 14, color: '#8c8c8c' }}>Số lượng thanh toán bằng gói</Text>
               </div>
             </Card>
           </Col>

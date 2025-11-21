@@ -72,7 +72,7 @@ const ServicePackageTable = ({
       sorter: (a, b) => (a.price || 0) - (b.price || 0),
     },
     {
-      title: 'Quota',
+      title: 'Dung lượng (kWh)',
       dataIndex: 'quota',
       key: 'quota',
       width: 120,
