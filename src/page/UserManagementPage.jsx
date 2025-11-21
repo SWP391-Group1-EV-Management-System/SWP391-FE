@@ -33,13 +33,13 @@ const UserManagementPage = () => {
             // Tab danh sách Driver
             { 
               key: '1', 
-              label: <span className="tab-animate">Driver</span>, 
+              label: <span className="tab-animate">Tài xế</span>, 
               children: <DriverTable search={search} /> 
             },
             // Tab danh sách Staff
             { 
               key: '2', 
-              label: <span className="tab-animate">Staff</span>, 
+              label: <span className="tab-animate">Nhân viên</span>, 
               children: <StaffTable search={search} /> 
             },
           ]}
@@ -78,7 +78,7 @@ const UserManagementPage = () => {
             transition: 'font-size 0.3s cubic-bezier(.4,2,.6,1)',
             display: 'inline-block',
           }}>
-            <FaUserAlt style={{ marginRight: 8, color: '#10b981' }} /> Management Page
+            <FaUserAlt style={{ marginRight: 8, color: '#10b981' }} /> Quản lý
           </span>
         }
         customStyle={{ fontSize: '40px', fontWeight: 900, letterSpacing: '1px', level: 1 }}

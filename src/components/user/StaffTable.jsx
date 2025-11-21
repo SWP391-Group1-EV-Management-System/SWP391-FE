@@ -8,7 +8,7 @@ import { getUserById } from '../../services/userService';
 const StaffTable = ({ search }) => {
   const [modal, setModal] = useState({ visible: false, mode: 'view', user: null });
   const [loadingUser, setLoadingUser] = useState(false);
-  const { users, loading, error, refresh, update, remove } = useUser('Staff');
+  const { users, loading, refresh, update, remove } = useUser('Staff');
 
   const data = (users || []).filter(
     u =>
@@ -29,13 +29,9 @@ const StaffTable = ({ search }) => {
 
   const handleViewEdit = async (record, mode) => {
     try {
-      setLoadingUser(true);
-      console.log('🟦 Fetching full user data for ID:', record.id);
-      
+      setLoadingUser(true);      
       // Gọi API để lấy full user data kèm birthDate
       const fullUserData = await getUserById(record.id);
-      console.log('🟦 Full user data from API:', fullUserData);
-      console.log('🟦 birthDate from API:', fullUserData.birthDate);
       
       // Map lại user data đúng format
       const mappedUser = {
@@ -64,9 +60,10 @@ const StaffTable = ({ search }) => {
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 60 },
-    { title: 'Name', key: 'name', render: (_, r) => `${r.firstName} ${r.lastName}` },
+    { title: 'Họ & Tên', key: 'name', render: (_, r) => `${r.firstName} ${r.lastName}` },
     { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Gender', dataIndex: 'gender', key: 'gender', width: 90 },
+    { title: 'Giới tính', dataIndex: 'gender', key: 'gender', width: 90 },
+    { title: 'Trạng thái', dataIndex: 'status', key: 'status', width: 100 },
     {
       title: 'Actions',
       key: 'actions',

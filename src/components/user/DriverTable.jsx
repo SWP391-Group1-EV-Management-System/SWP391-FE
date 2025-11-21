@@ -8,7 +8,7 @@ import { getUserById } from '../../services/userService';
 const DriverTable = ({ search }) => {
   const [modal, setModal] = useState({ visible: false, mode: 'view', user: null });
   const [loadingUser, setLoadingUser] = useState(false);
-  const { users, loading, error, refresh, update, remove } = useUser('Driver');
+  const { users, loading, refresh, update, remove } = useUser('Driver');
 
   const data = (users || []).filter(
     u =>
@@ -36,17 +36,17 @@ const DriverTable = ({ search }) => {
       
       // Map lại user data đúng format
       const mappedUser = {
-        id: fullUserData.id || record.id,
-        firstName: fullUserData.firstName || record.firstName,
-        lastName: fullUserData.lastName || record.lastName,
-        email: fullUserData.email || record.email,
-        gender: fullUserData.gender === true ? 'Male' : fullUserData.gender === false ? 'Female' : record.gender,
-        phone: fullUserData.phone || fullUserData.phoneNumber || record.phone,
-        role: (fullUserData.role || record.role || '').toLowerCase(),
-        status: fullUserData.active === true || fullUserData.status === true ? 'Active' : 'Inactive',
-        birthDate: fullUserData.birthDate || null,
-        password: fullUserData.password || record.password || '',
-        createdAt: fullUserData.createdAt || record.createdAt || '',
+        id: fullUserData?.id || record.id,
+        firstName: fullUserData?.firstName || record.firstName,
+        lastName: fullUserData?.lastName || record.lastName,
+        email: fullUserData?.email || record.email,
+        gender: fullUserData?.gender === true ? 'Male' : fullUserData?.gender === false ? 'Female' : record.gender,
+        phone: fullUserData?.phone || fullUserData?.phoneNumber || record.phone,
+        role: (fullUserData?.role || record.role || '').toLowerCase(),
+        status: fullUserData?.active === true || fullUserData?.status === true ? 'Active' : 'Inactive',
+        birthDate: fullUserData?.birthDate || null,
+        password: fullUserData?.password || record.password || '',
+        createdAt: fullUserData?.createdAt || record.createdAt || '',
       };
       
       setModal({ visible: true, mode, user: mappedUser });
@@ -60,9 +60,10 @@ const DriverTable = ({ search }) => {
 
   const columns = [
     { title: 'ID', dataIndex: 'id', key: 'id', width: 60 },
-    { title: 'Name', key: 'name', render: (_, r) => `${r.firstName} ${r.lastName}` },
+    { title: 'Họ & Tên', key: 'name', render: (_, r) => `${r.firstName} ${r.lastName}` },
     { title: 'Email', dataIndex: 'email', key: 'email' },
-    { title: 'Gender', dataIndex: 'gender', key: 'gender', width: 90 },
+    { title: 'Giới tính', dataIndex: 'gender', key: 'gender', width: 90 },
+    { title: 'Trạng thái', dataIndex: 'status', key: 'status', width: 100 },
     {
       title: 'Actions',
       key: 'actions',
