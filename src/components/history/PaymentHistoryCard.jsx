@@ -13,6 +13,7 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
     const methodMap = {
       'PMT_MOMO': 'MoMo',
       'PMT_PACKAGE': 'Gói dịch vụ',
+      'PMT_CASH': 'Tiền mặt'
     };
     return methodMap[method] || method || 'N/A';
   };
