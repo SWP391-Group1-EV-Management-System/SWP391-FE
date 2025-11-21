@@ -33,7 +33,6 @@ import "../../assets/styles/Menu.css";
 // Định nghĩa menu items cho từng role (non-driver)
 const menuItemsByRole = {
   ADMIN: [
-    { id: "home", label: "Trang chủ", icon: BsHouse, path: "/app/home" },
     {
       id: "evadmindashboard",
       label: "Thống kê",
@@ -42,7 +41,7 @@ const menuItemsByRole = {
     },
     {
       id: "usermanagement",
-      label: "Quản lý người dùng",
+      label: "Quản lý",
       icon: BsPeopleFill,
       path: "/app/usermanagement",
     },
