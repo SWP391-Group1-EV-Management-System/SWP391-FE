@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  Modal,
-  Card,
-  Descriptions,
-  Typography,
-  Divider,
-  Space,
-  Button,
-} from "antd";
+import { Modal, Card, Descriptions, Typography, Divider, Space, Button } from "antd";
 import { useAuth } from "../../hooks/useAuth";
 
 const { Text, Title } = Typography;
@@ -31,11 +23,11 @@ const packageInfo = {
 const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
   const { user } = useAuth(); // Lấy user để biết gói đã đăng ký
   // Chọn 1 trong 2 phương thức: 'momo' hoặc 'package'
+  // Now support 'momo', 'package', and 'cash'
   const [paymentMethod, setPaymentMethod] = useState("momo");
 
   // Lấy gói đăng ký của user (fallback 'basic' nếu không có)
-  const registeredPackage =
-    user?.servicePackage || user?.package || user?.registeredPackage || "basic";
+  const registeredPackage = user?.servicePackage || user?.package || user?.registeredPackage || "basic";
 
   // Tính tổng tiền (luôn bằng giá gốc, không giảm)
   const calculateTotal = () => {
@@ -61,15 +53,9 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
       <Card title="💳 Thanh toán phiên sạc" style={{ border: "none" }}>
         {/* Thông tin phiên sạc */}
         <Descriptions column={1} size="small" style={{ marginBottom: "24px" }}>
-          <Descriptions.Item label="Tên trạm sạc">
-            {sessionData.stationName}
-          </Descriptions.Item>
-          <Descriptions.Item label="Mã phiên sạc">
-            {sessionData.sessionId}
-          </Descriptions.Item>
-          <Descriptions.Item label="Điện năng tiêu thụ">
-            {sessionData.energyConsumed} kWh
-          </Descriptions.Item>
+          <Descriptions.Item label="Tên trạm sạc">{sessionData.stationName}</Descriptions.Item>
+          <Descriptions.Item label="Mã phiên sạc">{sessionData.sessionId}</Descriptions.Item>
+          <Descriptions.Item label="Điện năng tiêu thụ">{sessionData.energyConsumed} kWh</Descriptions.Item>
           {/* Không hiển thị chi tiết giảm giá */}
           <Descriptions.Item label="Tổng tiền thanh toán">
             <Text strong style={{ fontSize: "18px", color: "#ff4d4f" }}>
@@ -78,7 +64,7 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
           </Descriptions.Item>
         </Descriptions>
 
-        {/* Phương thức thanh toán - CHỌN 1 TRONG 2 (bỏ nút tròn) */}
+        {/* Phương thức thanh toán - CHỌN 1 TRONG 3 */}
         <Space direction="vertical" style={{ width: "100%" }} size="large">
           <Button
             type={paymentMethod === "momo" ? "primary" : "default"}
@@ -96,6 +82,15 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
             aria-pressed={paymentMethod === "package"}
           >
             Gói dịch vụ
+          </Button>
+
+          <Button
+            type={paymentMethod === "cash" ? "primary" : "default"}
+            block
+            onClick={() => setPaymentMethod("cash")}
+            aria-pressed={paymentMethod === "cash"}
+          >
+            Thanh toán tiền mặt (tại quầy)
           </Button>
         </Space>
 

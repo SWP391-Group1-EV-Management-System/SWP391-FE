@@ -43,6 +43,7 @@ import {
   DollarOutlined,
 } from "@ant-design/icons";
 import PageHeader from "../components/PageHeader";
+import StaffPayments from "../components/staff/StaffPayments";
 import "../assets/styles/SessionStaff.css";
 import "../assets/styles/utilities.css";
 
@@ -67,6 +68,7 @@ const SessionStaffPage = () => {
   const [filteredSessions, setFilteredSessions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [showPaymentsModal, setShowPaymentsModal] = useState(false);
 
   // Memoized stats data với màu chính #43e97b
   const statsData = useMemo(
@@ -159,9 +161,7 @@ const SessionStaffPage = () => {
             okType: "danger",
             cancelText: "Hủy",
             onOk: () => {
-              const updatedSessions = chargingSessions.filter(
-                (session) => session.key !== record.key
-              );
+              const updatedSessions = chargingSessions.filter((session) => session.key !== record.key);
               setChargingSessions(updatedSessions);
               setFilteredSessions(updatedSessions);
               message.success("Đã xóa phiên sạc thành công!");
@@ -214,9 +214,7 @@ const SessionStaffPage = () => {
         render: (text) => (
           <Space>
             <span>👤</span>
-            <Typography.Text className="session-text-dark">
-              {text}
-            </Typography.Text>
+            <Typography.Text className="session-text-dark">{text}</Typography.Text>
           </Space>
         ),
       },
@@ -232,11 +230,7 @@ const SessionStaffPage = () => {
         dataIndex: "date",
         key: "date",
         width: 120,
-        render: (text) => (
-          <Typography.Text className="session-text-dark">
-            {text}
-          </Typography.Text>
-        ),
+        render: (text) => <Typography.Text className="session-text-dark">{text}</Typography.Text>,
       },
       {
         title: "Trạng thái",
@@ -262,9 +256,7 @@ const SessionStaffPage = () => {
         render: (time) => (
           <Space>
             <span>🕐</span>
-            <Typography.Text className="session-text-dark">
-              {time}
-            </Typography.Text>
+            <Typography.Text className="session-text-dark">{time}</Typography.Text>
           </Space>
         ),
       },
@@ -344,12 +336,7 @@ const SessionStaffPage = () => {
             )}
 
             <Tooltip title="Xóa phiên sạc">
-              <Button
-                size="small"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => handleAction("delete", record)}
-              />
+              <Button size="small" danger icon={<DeleteOutlined />} onClick={() => handleAction("delete", record)} />
             </Tooltip>
           </Space>
         ),
@@ -411,15 +398,11 @@ const SessionStaffPage = () => {
           key: index + 1,
           sessionId: session.id,
           userDriver: session.user?.name || "N/A",
-          post: `${session.chargingPost?.name || "N/A"} (${
-            session.chargingPost?.power || 0
-          }kW)`,
+          post: `${session.chargingPost?.name || "N/A"} (${session.chargingPost?.power || 0}kW)`,
           date: new Date(session.startTime).toLocaleDateString("vi-VN"),
           status: session.status,
           startTime: new Date(session.startTime).toLocaleTimeString("vi-VN"),
-          endTime: session.endTime
-            ? new Date(session.endTime).toLocaleTimeString("vi-VN")
-            : null,
+          endTime: session.endTime ? new Date(session.endTime).toLocaleTimeString("vi-VN") : null,
           kwh: session.energyConsumed || 0,
           totalAmount: session.totalAmount || 0,
         }));
@@ -456,33 +439,30 @@ const SessionStaffPage = () => {
         }}
       />
 
+      {/* Quick payments button on header */}
+      <div style={{ position: "absolute", left: 20, top: 20 }}>
+        <Button type="primary" icon={<DollarOutlined />} onClick={() => setShowPaymentsModal(true)}>
+          Thanh toán
+        </Button>
+      </div>
+
       {/* Statistics Cards với phong cách mới */}
       <Row gutter={[24, 24]} className="session-margin-bottom-32">
         {statsData.map((stat, index) => (
           <Col xs={24} sm={12} md={6} lg={6} xl={6} key={index}>
-            <Card
-              hoverable
-              className="session-stats-card"
-              styles={{ body: { padding: "24px" } }}
-            >
+            <Card hoverable className="session-stats-card" styles={{ body: { padding: "24px" } }}>
               <div className="session-text-center">
                 {/* Icon */}
                 <div className="session-margin-bottom-16">
-                  <span className="session-text-large session-text-gray">
-                    {stat.icon}
-                  </span>
+                  <span className="session-text-large session-text-gray">{stat.icon}</span>
                 </div>
 
                 {/* Title */}
-                <Typography.Text className="session-stats-card-title">
-                  {stat.title}
-                </Typography.Text>
+                <Typography.Text className="session-stats-card-title">{stat.title}</Typography.Text>
 
                 {/* Value */}
                 <Title level={2} className="session-stats-card-value">
-                  {stat.formatter === "currency"
-                    ? `${stat.value?.toLocaleString()} VND`
-                    : stat.value}
+                  {stat.formatter === "currency" ? `${stat.value?.toLocaleString()} VND` : stat.value}
                 </Title>
               </div>
             </Card>
@@ -545,18 +525,26 @@ const SessionStaffPage = () => {
           pagination={{
             showSizeChanger: true,
             showQuickJumper: true,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} của ${total} phiên sạc`,
+            showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} phiên sạc`,
             pageSize: 10,
             pageSizeOptions: ["10", "20", "50", "100"],
           }}
           scroll={{ x: 1300 }}
           bordered
-          rowClassName={(record, index) =>
-            index % 2 === 0 ? "table-row-light" : "table-row-dark"
-          }
+          rowClassName={(record, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
         />
       </Card>
+
+      <Modal
+        title="Yêu cầu thanh toán bằng tiền mặt"
+        visible={showPaymentsModal}
+        onCancel={() => setShowPaymentsModal(false)}
+        footer={null}
+        width={900}
+        destroyOnClose
+      >
+        <StaffPayments onClose={() => setShowPaymentsModal(false)} />
+      </Modal>
     </div>
   );
 };

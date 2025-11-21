@@ -186,7 +186,40 @@ const ChatBox = () => {
       setInputMessage("");
       setIsLoading(true);
 
+      // Send current GPS to server when user sends a chat message
+      const sendLocationForMessage = async () => {
+        if (!userLocation) return; // no location available
+        try {
+          console.log("[ChatBox] Sending current location before message:", userLocation);
+          // Explicitly log latitude and longitude for easier debugging
+          try {
+            console.log(
+              `[ChatBox] latitude=${userLocation.latitude.toFixed(6)}, longitude=${userLocation.longitude.toFixed(6)}`
+            );
+          } catch (e) {
+            // toFixed may fail if values are undefined - fallback
+            console.log("[ChatBox] latitude=", userLocation.latitude, "longitude=", userLocation.longitude);
+          }
+
+          await fetch("http://localhost:8000/update_location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              latitude: userLocation.latitude,
+              longitude: userLocation.longitude,
+            }),
+          });
+          console.log("[ChatBox] Location sent");
+        } catch (err) {
+          console.warn("[ChatBox] Failed to send location before message:", err);
+        }
+      };
+
       try {
+        // attempt to send location first (non-blocking failures are caught)
+        await sendLocationForMessage();
+
         const response = await fetch("http://localhost:8000/send_message", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

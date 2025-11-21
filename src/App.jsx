@@ -14,6 +14,7 @@ import Register from "./page/Register.jsx";
 import WelcomePage from "./page/WelcomePage.jsx";
 import SessionStaffPage from "./page/SessionStaffPage.jsx";
 import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
+import StaffPaymentsPage from "./page/StaffPaymentsPage.jsx";
 import OTPVerification from "./page/OTPVerification.jsx";
 import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
 import UserManagementPage from "./page/UserManagementPage.jsx";
@@ -34,12 +35,7 @@ import PaymentHistory from "./page/PaymentHistoryPage.jsx";
 import { cleanupExpiredFrozenCountdowns } from "./utils/countdownUtils.js";
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
-import {
-  AdminRoute,
-  StaffRoute,
-  ManagerRoute,
-  DriverRoute,
-} from "./components/auth/AdminRoute.jsx";
+import { AdminRoute, StaffRoute, ManagerRoute, DriverRoute } from "./components/auth/AdminRoute.jsx";
 import RootRedirect from "./components/auth/RootRedirect.jsx";
 import ChatBox from "./components/chat/ChatBox.jsx";
 
@@ -48,9 +44,7 @@ function App() {
   useEffect(() => {
     const cleanedCount = cleanupExpiredFrozenCountdowns();
     if (cleanedCount > 0) {
-      console.log(
-        `🧹 [App] Cleaned ${cleanedCount} expired frozen countdown keys on startup`
-      );
+      console.log(`🧹 [App] Cleaned ${cleanedCount} expired frozen countdown keys on startup`);
     }
   }, []);
 
@@ -134,10 +128,7 @@ function App() {
             />
 
             {/* Legacy Energy Page - Redirect to session for backward compatibility */}
-            <Route
-              path="energy"
-              element={<Navigate to="/app/session" replace />}
-            />
+            <Route path="energy" element={<Navigate to="/app/session" replace />} />
 
             <Route
               path="history"
@@ -215,13 +206,18 @@ function App() {
                 </StaffRoute>
               }
             />
+            <Route
+              path="staff-payments"
+              element={
+                <StaffRoute>
+                  <StaffPaymentsPage />
+                </StaffRoute>
+              }
+            />
           </Route>
 
           {/* Virtual Station - Public access (no login required) */}
-          <Route
-            path="virtualstation/:postId"
-            element={<VirtualStationPage />}
-          />
+          <Route path="virtualstation/:postId" element={<VirtualStationPage />} />
 
           {/* 404 Page */}
           <Route path="*" element={<NotFoundPage />} />
