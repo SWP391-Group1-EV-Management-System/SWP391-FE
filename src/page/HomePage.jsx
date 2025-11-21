@@ -56,6 +56,14 @@ function HomePage() {
     fetchUserProfile().catch(() => { });
   }, [fetchUserProfile]);
 
+  // Format lại tiền 
+  const formatCurrency = (amount) => {
+    if (!amount && amount !== 0) return '0 VND';
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
   // ===== Xác định tên hiển thị người dùng =====
   const userName = loading
     ? "Đang tải..."
@@ -117,7 +125,7 @@ function HomePage() {
   const stats = [
     {
       label: "Tổng chi phí đã thanh toán",
-      value: animatedValues.totalPaid.toLocaleString('vi-VN') + " VNĐ",
+      value: formatCurrency(animatedValues.totalPaid),
       icon: BsLightning,
       gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       change: "+12%",
