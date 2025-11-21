@@ -1,5 +1,6 @@
 // Import các thư viện React và component cần thiết
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 // Import các icon từ react-icons
 import { FaRegBell, FaRegEnvelope } from "react-icons/fa";
 import { BsQrCodeScan } from "react-icons/bs";
@@ -17,6 +18,7 @@ import "../../assets/styles/MyNavbar.css";
  * @param {boolean} collapsed - Trạng thái thu gọn của sidebar
  */
 function MyNavbar({ collapsed }) {
+  const navigate = useNavigate();
   // === Các state quản lý trạng thái modal và dropdown ===
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false); // Trạng thái mở/đóng modal quét QR
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false); // Trạng thái mở/đóng dropdown user
@@ -91,6 +93,14 @@ function MyNavbar({ collapsed }) {
    * Toggle trạng thái mở/đóng dropdown user
    */
   const handleUserClick = () => setIsUserDropdownOpen(!isUserDropdownOpen);
+
+  /**
+   * Navigate đến trang user profile
+   */
+  const handleProfileClick = () => {
+    setIsUserDropdownOpen(false);
+    navigate("/app/profile");
+  };
 
   /**
    * Xử lý đăng xuất người dùng
@@ -174,7 +184,7 @@ function MyNavbar({ collapsed }) {
             {isUserDropdownOpen && (
               <div className="user-dropdown">
                 {/* Menu item: Tài khoản */}
-                <div className="dropdown-item">
+                <div className="dropdown-item" onClick={handleProfileClick}>
                   <TbUser size={18} />
                   <span>Tài khoản</span>
                 </div>
