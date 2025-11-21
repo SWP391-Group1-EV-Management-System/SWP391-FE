@@ -1,5 +1,20 @@
 import React, { useState, useMemo, useCallback, useEffect } from "react";
-import { Table, Tag, Space, Card, Statistic, Badge, Typography, Row, Col, Input, Button, Modal } from "antd";
+import {
+  Table,
+  Tag,
+  Space,
+  Card,
+  Statistic,
+  Badge,
+  Typography,
+  Row,
+  Col,
+  Input,
+  Button,
+  Modal,
+  Popconfirm,
+  message,
+} from "antd";
 import {
   SearchOutlined,
   ThunderboltOutlined,
@@ -11,6 +26,7 @@ import PageHeader from "../components/PageHeader";
 import StaffPayments from "../components/staff/StaffPayments";
 import { useStaff } from "../hooks/useStaff";
 import { useRole } from "../hooks/useAuth";
+import api from "../utils/axios";
 import "../assets/styles/SessionStaff.css";
 import "../assets/styles/utilities.css";
 
@@ -38,10 +54,14 @@ const formatCurrency = (amount) => {
 
 const SessionStaffPage = () => {
   const { userId } = useRole();
-  const { dashboardInfo, sessions, loading } = useStaff(userId);
+  const { dashboardInfo, sessions, loading, fetchSessions } = useStaff(userId);
   const [filteredSessions, setFilteredSessions] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
+  const [loadingIds, setLoadingIds] = useState([]); // session ids currently processing
+
+  const addLoadingId = (id) => setLoadingIds((s) => (s.includes(id) ? s : [...s, id]));
+  const removeLoadingId = (id) => setLoadingIds((s) => s.filter((x) => x !== id));
 
   const statsData = useMemo(() => {
     if (!dashboardInfo) return [];
@@ -78,7 +98,14 @@ const SessionStaffPage = () => {
   const tableData = useMemo(() => {
     if (!sessions || sessions.length === 0) return [];
 
-    return sessions.map((session, index) => ({
+    // Sort sessions by startedTime descending so newest start time appears first
+    const sorted = sessions.slice().sort((a, b) => {
+      const ta = a.startedTime ? new Date(a.startedTime).getTime() : 0;
+      const tb = b.startedTime ? new Date(b.startedTime).getTime() : 0;
+      return tb - ta;
+    });
+
+    return sorted.map((session, index) => ({
       key: index + 1,
       sessionId: session.chargingSessionId,
       userDriver: session.userName || "N/A",
@@ -119,6 +146,71 @@ const SessionStaffPage = () => {
 
   const columns = useMemo(
     () => [
+      {
+        title: "Thao tác",
+        dataIndex: "action",
+        key: "action",
+        fixed: "left",
+        width: 120,
+        render: (_, record) => {
+          const isProcessing = record.status === false || record.status === "charging";
+
+          const handleStop = async (sessionId) => {
+            try {
+              addLoadingId(sessionId);
+              // Send finish request with default energy 0 (backend expects BigDecimal body)
+              await api.post(`/api/charging/session/finish/${sessionId}`, 0, {
+                headers: { "Content-Type": "application/json" },
+              });
+              message.success("Đã gửi yêu cầu dừng sạc");
+              // Refresh table data
+              if (typeof fetchSessions === "function") fetchSessions();
+            } catch (err) {
+              console.error("Error stopping session:", err);
+              message.error("Không thể dừng sạc, vui lòng thử lại");
+            } finally {
+              removeLoadingId(sessionId);
+            }
+          };
+
+          return (
+            <div style={{ display: "inline-flex", gap: 8 }}>
+              {isProcessing ? (
+                <Popconfirm
+                  title="Bạn có chắc muốn dừng sạc phiên này?"
+                  onConfirm={() => handleStop(record.sessionId)}
+                  okText="Có"
+                  cancelText="Không"
+                >
+                  <Button
+                    size="small"
+                    loading={loadingIds.includes(record.sessionId)}
+                    style={{
+                      background: "#ff4d4f",
+                      borderColor: "#ff4d4f",
+                      color: "#fff",
+                    }}
+                  >
+                    Dừng sạc
+                  </Button>
+                </Popconfirm>
+              ) : (
+                <Button
+                  size="small"
+                  style={{
+                    background: "#f5f5f5",
+                    borderColor: "#f5f5f5",
+                    color: "#999",
+                  }}
+                  disabled
+                >
+                  -
+                </Button>
+              )}
+            </div>
+          );
+        },
+      },
       {
         title: "Mã phiên",
         dataIndex: "sessionId",
@@ -227,7 +319,7 @@ const SessionStaffPage = () => {
         ),
       },
     ],
-    []
+    [fetchSessions, loadingIds]
   );
 
   return (
@@ -279,7 +371,7 @@ const SessionStaffPage = () => {
             justifyContent: "space-between",
           }}
         >
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, display: "flex", gap: 12, alignItems: "center" }}>
             <Search
               placeholder="Tìm kiếm theo mã phiên sạc hoặc tên người dùng..."
               allowClear
@@ -293,6 +385,18 @@ const SessionStaffPage = () => {
               onChange={(e) => setSearchText(e.target.value)}
               className="session-search-input"
             />
+
+            <Button
+              onClick={() => {
+                if (typeof fetchSessions === "function") {
+                  fetchSessions();
+                  message.success("Đang làm mới danh sách...");
+                }
+              }}
+              size="large"
+            >
+              Làm mới
+            </Button>
           </div>
         </div>
 

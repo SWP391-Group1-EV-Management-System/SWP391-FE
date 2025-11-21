@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Row, Col, Space, Spin, Alert, Button, notification } from "antd";
 import { useNavigate } from "react-router";
 import PageHeader from "../components/PageHeader";
@@ -10,34 +10,27 @@ import PricingInfo from "../components/energy/PricingInfo";
 import { useEnergySession } from "../hooks/useEnergySession";
 import { useAuth } from "../hooks/useAuth";
 import { usePaymentData } from "../hooks/usePayment";
-import {
-  ThunderboltOutlined,
-  LockOutlined,
-  HomeOutlined,
-} from "@ant-design/icons";
+import { ThunderboltOutlined, LockOutlined, HomeOutlined } from "@ant-design/icons";
 
 const EnergyPage = ({ userID }) => {
   const navigate = useNavigate();
-  
+
   // ==================== HOOKS ====================
   const { user, loading: authLoading } = useAuth();
   const { fetchUnpaidPaymentsByUserId } = usePaymentData();
-  const {
-    sessionData,
-    currentTime,
-    statusConfig,
-    isLoading,
-    isFinishing,
-    error,
-    errorCode,
-    finishSession,
-    refetch,
-  } = useEnergySession(userID);
+  const { sessionData, currentTime, statusConfig, isLoading, isFinishing, error, errorCode, finishSession, refetch } =
+    useEnergySession(userID);
 
   // ==================== STATE MANAGEMENT ====================
   const [realtimeProgress, setRealtimeProgress] = useState(null);
   const [isPaid, setIsPaid] = useState(false);
-  const [batteryCountdownInfo, setBatteryCountdownInfo] = useState(null);
+  const [_batteryCountdownInfo, setBatteryCountdownInfo] = useState(null);
+  // Refs for SSE repeat-detection auto-finish
+  const lastSseStringRef = useRef(null);
+  const repeatCountRef = useRef(0);
+  const sseAutoFinishTriggeredRef = useRef(false);
+  const eventSourceRef = useRef(null);
+  const preventReconnectRef = useRef(false);
 
   // ==================== LẤY THÔNG TIN BATTERY COUNTDOWN TỪ LOCALSTORAGE ====================
   useEffect(() => {
@@ -80,16 +73,155 @@ const EnergyPage = ({ userID }) => {
 
     const connectSSE = () => {
       try {
+        console.log("connectSSE: attempting to connect SSE for sessionId=", sessionId);
+        // initialize global flag used to prevent repeated auto-refetch across QR scans
+        try {
+          if (typeof window !== "undefined" && typeof window.__sessionAutoRefetchHandled === "undefined") {
+            window.__sessionAutoRefetchHandled = false;
+            // helper to reset the flag (call this when scanning QR)
+            window.resetSessionAutoRefetchFlag = () => {
+              window.__sessionAutoRefetchHandled = false;
+            };
+          }
+        } catch {
+          // ignore
+        }
+
+        // reset repeat detection when (re)connecting
+        try {
+          lastSseStringRef.current = null;
+          repeatCountRef.current = 0;
+          sseAutoFinishTriggeredRef.current = false;
+          preventReconnectRef.current = false;
+        } catch {
+          /* ignore */
+        }
         const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
-        eventSource = new EventSource(
-          `${apiUrl}/api/charging/session/progress/${sessionId}`,
-          { withCredentials: true }
-        );
+        const sseUrl = `${apiUrl}/api/charging/session/progress/${sessionId}`;
+        console.log("connectSSE: opening EventSource ->", sseUrl);
+        eventSource = new EventSource(sseUrl, { withCredentials: true });
+        eventSourceRef.current = eventSource;
+
+        console.log("connectSSE: EventSource created", { readyState: eventSource.readyState });
+
+        eventSource.onopen = () => {
+          console.log("SSE open for sessionId=", sessionId, "readyState=", eventSource.readyState);
+        };
+
+        // Generic message listener to catch any server-sent events
+        eventSource.addEventListener("message", (ev) => {
+          try {
+            console.log("SSE generic message:", ev.data);
+          } catch (err) {
+            console.warn("Error logging generic SSE message", err);
+          }
+        });
 
         // Lắng nghe sự kiện "chargingProgress"
         eventSource.addEventListener("chargingProgress", (event) => {
           try {
-            const progress = JSON.parse(event.data);
+            // Raw SSE payload string
+            const raw = String(event.data || "");
+
+            // If the session is already marked completed, stop processing and close SSE
+            try {
+              if (sessionData && sessionData.isCompleted) {
+                console.log("Session already completed; closing SSE and skipping processing");
+                preventReconnectRef.current = true;
+                if (eventSourceRef.current) {
+                  try {
+                    eventSourceRef.current.close();
+                  } catch {
+                    /* ignore */
+                  }
+                  eventSourceRef.current = null;
+                }
+                return;
+              }
+            } catch {
+              // ignore and continue processing
+            }
+            // detect repeated identical payloads
+            if (lastSseStringRef.current === raw) {
+              repeatCountRef.current = (repeatCountRef.current || 0) + 1;
+            } else {
+              lastSseStringRef.current = raw;
+              repeatCountRef.current = 1;
+              sseAutoFinishTriggeredRef.current = false; // reset trigger on new payload
+            }
+
+            // If repeated many times, assume backend stopped and SSE is pinging old data
+            const REPEAT_THRESHOLD = 4;
+            if (!sseAutoFinishTriggeredRef.current && repeatCountRef.current >= REPEAT_THRESHOLD) {
+              sseAutoFinishTriggeredRef.current = true;
+              console.log(`Detected ${repeatCountRef.current} repeated SSE pings -> attempting auto-finish`);
+
+              // Prevent further reconnects and close the EventSource immediately to stop more pings
+              try {
+                preventReconnectRef.current = true;
+                if (eventSourceRef.current) {
+                  try {
+                    eventSourceRef.current.close();
+                  } catch {
+                    /* ignore */
+                  }
+                  eventSourceRef.current = null;
+                }
+              } catch {
+                /* ignore */
+              }
+
+              // If a global flag says we've already handled auto-refetch for this flow, skip refetch/finish
+              const globalHandled = typeof window !== "undefined" && !!window.__sessionAutoRefetchHandled;
+              if (globalHandled) {
+                console.log("Global auto-refetch flag is true — skipping auto-finish/refetch");
+                return;
+              }
+
+              // Attempt to parse progress and auto-finish using chargedEnergy_kWh
+              (async () => {
+                try {
+                  const progress = JSON.parse(raw);
+                  const energyStr = progress.chargedEnergy_kWh || progress.chargedEnergy || "0";
+                  const energy = parseFloat(String(energyStr).replace(",", ".")) || 0;
+
+                  // Don't attempt auto-finish if the session is already completed
+                  if (sessionData && !sessionData.isCompleted && typeof finishSession === "function") {
+                    console.log("Auto-finish: calling finishSession with energy", energy);
+                    const res = await finishSession(sessionData.chargingSessionId || sessionData.sessionId, energy);
+                    console.log("Auto-finish result:", res);
+                    try {
+                      await refetch();
+                      // mark global flag so we don't auto-refetch again until reset (e.g., next QR)
+                      try {
+                        if (typeof window !== "undefined") window.__sessionAutoRefetchHandled = true;
+                      } catch {
+                        /* ignore */
+                      }
+                    } catch (e) {
+                      console.warn("Error refetching after auto-finish:", e);
+                    }
+                    return;
+                  }
+
+                  // If cannot call finishSession, at least refetch to pick server state
+                  try {
+                    await refetch();
+                    try {
+                      if (typeof window !== "undefined") window.__sessionAutoRefetchHandled = true;
+                    } catch {
+                      /* ignore */
+                    }
+                  } catch (e) {
+                    console.warn("Error refetching after repeated SSE detection:", e);
+                  }
+                } catch (err) {
+                  console.warn("Error parsing repeated SSE payload for auto-finish", err);
+                }
+              })();
+            }
+
+            const progress = JSON.parse(raw);
             reconnectAttempts = 0;
 
             const energyStr = progress.chargedEnergy_kWh || "0";
@@ -107,7 +239,10 @@ const EnergyPage = ({ userID }) => {
 
             const timeElapsed =
               hours > 0
-                ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+                ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+                    2,
+                    "0"
+                  )}`
                 : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
             setRealtimeProgress({
@@ -127,9 +262,23 @@ const EnergyPage = ({ userID }) => {
         eventSource.onerror = (error) => {
           console.error("SSE connection error:", error);
 
+          // If auto-finish triggered, don't attempt to reconnect
+          if (preventReconnectRef.current) {
+            try {
+              if (eventSourceRef.current) {
+                eventSourceRef.current.close();
+                eventSourceRef.current = null;
+              }
+            } catch {
+              // ignore
+            }
+            return;
+          }
+
           if (eventSource) {
             eventSource.close();
             eventSource = null;
+            eventSourceRef.current = null;
           }
 
           if (reconnectAttempts < maxReconnectAttempts) {
@@ -147,11 +296,33 @@ const EnergyPage = ({ userID }) => {
     connectSSE();
 
     return () => {
-      if (eventSource) {
-        eventSource.close();
+      try {
+        if (eventSourceRef.current) {
+          eventSourceRef.current.close();
+          eventSourceRef.current = null;
+        }
+      } catch {
+        /* ignore */
       }
+      preventReconnectRef.current = true;
     };
+    // We intentionally do NOT include `finishSession` and `refetch` here to avoid
+    // re-creating the EventSource on every render (those functions change identity
+    // across renders). The effect should re-run when `sessionData` changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionData?.chargingSessionId, sessionData?.sessionId, sessionData]);
+
+  // ==================== RESET GLOBAL AUTO-REFETCH FLAG WHEN ENTERING A NEW SESSION ====
+  useEffect(() => {
+    try {
+      // If we have a new active session that is not completed, reset the global flag
+      if (typeof window !== "undefined" && sessionData?.chargingSessionId && !sessionData?.isCompleted) {
+        window.__sessionAutoRefetchHandled = false;
+      }
+    } catch {
+      // ignore
+    }
+  }, [sessionData?.chargingSessionId, sessionData?.isCompleted]);
 
   // ==================== KIỂM TRA SESSION KẾT THÚC ====================
   useEffect(() => {
@@ -162,7 +333,7 @@ const EnergyPage = ({ userID }) => {
 
   // ==================== LẮNG NGHE SỰ KIỆN SESSION CREATED ====================
   useEffect(() => {
-    const handleSessionCreated = (e) => {
+    const handleSessionCreated = () => {
       try {
         refetch();
       } catch (err) {
@@ -280,10 +451,7 @@ const EnergyPage = ({ userID }) => {
   // ==================== TRẠNG THÁI KHÔNG CÓ QUYỀN ====================
   const isForbidden =
     !user ||
-    (sessionData &&
-      user.id !== sessionData.userId &&
-      user.role !== "ADMIN" &&
-      user.role !== "MANAGER") ||
+    (sessionData && user.id !== sessionData.userId && user.role !== "ADMIN" && user.role !== "MANAGER") ||
     errorCode === 403;
 
   if (isForbidden) {
@@ -300,10 +468,8 @@ const EnergyPage = ({ userID }) => {
       >
         <div style={{ textAlign: "center", maxWidth: "500px" }}>
           {/* Icon khóa */}
-          <LockOutlined
-            style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }}
-          />
-          
+          <LockOutlined style={{ fontSize: "64px", color: "#ff4d4f", marginBottom: "20px" }} />
+
           {/* Thông báo lỗi */}
           <Alert
             message="Không có quyền truy cập"
@@ -319,7 +485,7 @@ const EnergyPage = ({ userID }) => {
             showIcon={false}
             style={{ marginBottom: "20px" }}
           />
-          
+
           {/* Các nút hành động */}
           <Space>
             <Button
@@ -362,11 +528,7 @@ const EnergyPage = ({ userID }) => {
           description={
             <div>
               <p>{error}</p>
-              {errorCode && (
-                <p style={{ fontSize: "12px", color: "#999", marginTop: "5px" }}>
-                  Mã lỗi: {errorCode}
-                </p>
-              )}
+              {errorCode && <p style={{ fontSize: "12px", color: "#999", marginTop: "5px" }}>Mã lỗi: {errorCode}</p>}
             </div>
           }
           type="error"
@@ -449,11 +611,7 @@ const EnergyPage = ({ userID }) => {
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
               <BatteryProgress
-                batteryLevel={
-                  realtimeProgress?.batteryLevel ||
-                  sessionData.batteryLevel ||
-                  0
-                }
+                batteryLevel={realtimeProgress?.batteryLevel || sessionData.batteryLevel || 0}
                 isCharging={statusConfig?.isCharging || false}
                 isCompleted={statusConfig?.isCompleted || false}
               />
@@ -461,11 +619,7 @@ const EnergyPage = ({ userID }) => {
 
             <Col xs={24} lg={12}>
               <CurrentTime
-                currentTime={
-                  sessionData.expectedEndTime
-                    ? new Date(sessionData.expectedEndTime)
-                    : currentTime
-                }
+                currentTime={sessionData.expectedEndTime ? new Date(sessionData.expectedEndTime) : currentTime}
                 sessionData={{
                   ...sessionData,
                   secondRemaining: realtimeProgress?.secondRemaining,
@@ -476,10 +630,7 @@ const EnergyPage = ({ userID }) => {
           </Row>
 
           {/* Thống kê năng lượng */}
-          <EnergyStats
-            sessionData={sessionData}
-            realtimeProgress={realtimeProgress}
-          />
+          <EnergyStats sessionData={sessionData} realtimeProgress={realtimeProgress} />
 
           {/* Hàng 2: Chi tiết kỹ thuật & Thông tin giá */}
           <Row gutter={[16, 16]}>
