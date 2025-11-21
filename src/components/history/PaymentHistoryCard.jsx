@@ -8,14 +8,13 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
 
   const isPaid = payment.paid === true;
 
-  // Map payment method to display text and color
+  // Map payment method to display text
   const getPaymentMethodDisplay = (method) => {
     const methodMap = {
-      'PMT_MOMO': { text: 'MoMo', color: '#d82d8b' },
-      'PMT_PACKAGE': { text: 'Gói dịch vụ', color: '#1890ff' },
-      'PMT_CASH': { text: 'Tiền mặt', color: '#52c41a' },
+      'PMT_MOMO': 'MoMo',
+      'PMT_PACKAGE': 'Gói dịch vụ',
     };
-    return methodMap[method] || { text: method || 'N/A', color: '#999' };
+    return methodMap[method] || method || 'N/A';
   };
 
   const paymentMethodInfo = getPaymentMethodDisplay(payment.paymentMethod);
@@ -135,7 +134,7 @@ const PaymentHistoryCard = ({ payment, onPayment }) => {
                   Phương thức:
                 </Text>
                 <Text style={{ fontSize: '1.5rem', fontWeight: 500, color: '#000' }}>
-                  {paymentMethodInfo.text}
+                  {paymentMethodInfo}
                 </Text>
               </div>
             </Col>

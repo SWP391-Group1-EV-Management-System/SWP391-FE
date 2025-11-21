@@ -1,12 +1,17 @@
 import React from "react";
+import { Link } from "react-router";
 import "../assets/styles/WelcomePageBody.css";
 import {
   MdOutlineLocationOn,
   MdPhoneIphone,
   MdOutlineMailOutline,
   MdOutlineContactPage,
+  MdArrowForward,
 } from "react-icons/md";
+import { GiCheckMark } from "react-icons/gi";
 import SocialFooter from "../components/welcome/SocialFooter";
+import usePackage from "../hooks/usePackage";
+import { useEffect } from "react";
 
 function WelcomePageBody() {
   return (
@@ -56,54 +61,99 @@ function WelcomePageBody() {
               </div>
             </div>
 
-            {/* Package Cards Section */}
+            {/* Package Cards Section (from API) */}
             <div className="package-section">
-              <div className="package-card">
-                <div className="package-header">
-                  <div className="package-badge">Gói 1</div>
-                  <div className="package-subtitle">Dành cho gia đình</div>
-                </div>
-                <div className="package-price">50.000vnđ</div>
-                <button className="package-btn">Mua ngay</button>
-                <div className="package-features">
-                  <div className="feature">✓ Sạc 300kWh</div>
-                  <div className="feature">✓ Ưu tiên sạc ưu tiên</div>
-                </div>
-              </div>
+              {/* Hook to load packages */}
+              {/* We'll render loading state or mapped packages */}
+              {(() => {
+                const { packages, loading, error, fetchAll } = usePackage();
 
-              <div className="package-card">
-                <div className="package-header">
-                  <div className="package-badge">Gói 1</div>
-                  <div className="package-subtitle">Dành cho gia đình</div>
-                </div>
-                <div className="package-price">50.000vnđ</div>
-                <button className="package-btn">Mua ngay</button>
-                <div className="package-features">
-                  <div className="feature">✓ Sạc 300kWh</div>
-                  <div className="feature">✓ Ưu tiên sạc ưu tiên</div>
-                </div>
-              </div>
+                useEffect(() => {
+                  fetchAll().catch(() => { });
+                }, [fetchAll]);
 
-              <div className="package-card box">
-                <div className="package-header">
-                  <div className="package-badge">Gói 1</div>
-                  <div className="package-subtitle">Dành cho gia đình</div>
-                </div>
-                <div className="package-price">50.000vnđ</div>
-                <button className="package-btn">Mua ngay</button>
-                <div className="package-features">
-                  <div className="feature">✓ Sạc 300kWh</div>
-                  <div className="feature">✓ Ưu tiên sạc ưu tiên</div>
-                </div>
-              </div>
+                if (loading) {
+                  return (
+                    <>
+                      <div className="package-card placeholder">Đang tải...</div>
+                      <div className="package-card placeholder">Đang tải...</div>
+                      <div className="package-card placeholder">Đang tải...</div>
+                    </>
+                  );
+                }
+
+                if (error) {
+                  return (
+                    <div className="package-error">Không thể tải gói dịch vụ</div>
+                  );
+                }
+
+                if (!packages || packages.length === 0) {
+                  return (
+                    <div className="package-empty">Chưa có gói dịch vụ nào</div>
+                  );
+                }
+
+                return packages.map((p, idx) => {
+                  const title = p.name || p.title || p.packageName || `Gói ${idx + 1}`;
+                  const priceRaw = p.price ?? p.servicePrice ?? p.amount ?? p.cost ?? 0;
+                  const price = typeof priceRaw === 'number' ? priceRaw.toLocaleString('vi-VN') + ' VNĐ' : String(priceRaw);
+
+                  // Normalize features: accept array, or string with newlines, or description string
+                  let features = [];
+                  if (Array.isArray(p.features)) {
+                    features = p.features;
+                  } else if (typeof p.features === 'string' && p.features.trim() !== '') {
+                    // Split by newlines (backend may return a single string with line breaks)
+                    features = p.features.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+                  } else if (typeof p.description === 'string' && p.description.trim() !== '') {
+                    features = p.description.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
+                  } else {
+                    features = [];
+                  }
+
+                  return (
+                    <div key={p.packageId || p.id || idx} className={`package-card ${idx === 2 ? 'box' : ''}`}>
+                      <div className="package-header">
+                        <div className="package-badge">{p.packageId || `Gói ${idx + 1}`}</div>
+                        <div className="package-subtitle">{title}</div>
+                      </div>
+                      <div className="package-price">{price}</div>
+                      <button className="package-btn">Mua ngay</button>
+                      <div className="package-features">
+                        {features.length > 0 ? features.map((f, i) => (
+                          <div key={i} className="feature"><GiCheckMark size={18} style={{ marginRight: 8, color: '#008E4A' }} /> {f}</div>
+                        )) : (
+                          <div className="feature"><GiCheckMark size={20} style={{ marginRight: 8, color: '#008E4A' }} /> Không có thông tin tính năng</div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
 
-            {/* Bottom Section */}
-            <div className="bottom-section">
+            {/* Bottom Section — centered CTA */}
+            <div
+              className="bottom-section"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "1rem",
+                textAlign: "center",
+              }}
+            >
               <div className="main-title">
                 SẠC NHANH - XANH - AN TOÀN CÙNG ECO-Z
               </div>
-              <button className="register-btn">Đăng ký miễn phí →</button>
+              <Link to="/register" style={{ textDecoration: "none" }}>
+                <button className="register-btn">
+                  <span>Đăng ký miễn phí</span>
+                  <MdArrowForward size={24} />
+                </button>
+              </Link>
             </div>
 
             {/* Footer Section */}

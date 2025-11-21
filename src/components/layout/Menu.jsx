@@ -56,12 +56,6 @@ const menuItemsByRole = {
       path: "/app/sessionstaff",
     },
     {
-      id: "waitingstaff",
-      label: "Hàng đợi",
-      icon: BsHourglassSplit,
-      path: "/app/waitingstaff",
-    },
-    {
       id: "staff-payments",
       label: "Thanh toán",
       icon: BsCreditCard,

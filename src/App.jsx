@@ -13,7 +13,6 @@ import Login from "./page/Login.jsx";
 import Register from "./page/Register.jsx";
 import WelcomePage from "./page/WelcomePage.jsx";
 import SessionStaffPage from "./page/SessionStaffPage.jsx";
-import WaitingStaffPage from "./page/WaitingStaffPage.jsx";
 import StaffPaymentsPage from "./page/StaffPaymentsPage.jsx";
 import OTPVerification from "./page/OTPVerification.jsx";
 import EVAdminDashboard from "./page/EVAdminDashboard.jsx";
@@ -198,14 +197,7 @@ function App() {
                 </StaffRoute>
               }
             />
-            <Route
-              path="waitingstaff"
-              element={
-                <StaffRoute>
-                  <WaitingStaffPage />
-                </StaffRoute>
-              }
-            />
+
             <Route
               path="staff-payments"
               element={

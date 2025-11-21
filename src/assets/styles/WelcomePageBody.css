@@ -226,6 +226,8 @@
 }
 
 .register-btn {
+    display: flex;
+    align-items: center;
     background: linear-gradient(45deg, #4DF366, #00B152, #04ffc0, #02e674);
     background-size: 400% 400%;
     color: black;
@@ -238,7 +240,7 @@
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
-
+    text-align: center;
     /* Animated rotating shadow */
     box-shadow:
         0 0 20px rgba(77, 243, 102, 0.6),
@@ -246,6 +248,10 @@
         0 0 60px rgba(77, 243, 102, 0.2);
 
     animation: rotatingShadow 3s linear infinite, rotatingBackground 4s ease-in-out infinite;
+}
+
+.register-btn span {
+    margin-right: 10px;
 }
 
 @keyframes rotatingBackground {

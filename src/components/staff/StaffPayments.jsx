@@ -47,7 +47,14 @@ const StaffPayments = () => {
       setData(normalized);
     } catch (err) {
       console.error("Error fetching cash payment requests:", err);
-      message.error("Không thể tải yêu cầu thanh toán");
+      // If the server returned 404/204 or no response body, treat as empty list
+      const status = err?.response?.status;
+      if (status === 404 || status === 204) {
+        setData([]);
+      } else {
+        // Use a stable message key so repeated errors replace the same toast
+        message.error({ content: "Không thể tải yêu cầu thanh toán", key: "staffPaymentsFetch", duration: 3 });
+      }
     } finally {
       setLoading(false);
     }
@@ -69,7 +76,8 @@ const StaffPayments = () => {
         try {
           await confirmCashPayment(paymentId);
           message.success("Đã xác nhận thanh toán");
-          fetchData();
+          // Refresh the list after successful confirmation
+          await fetchData();
         } catch (error) {
           console.error(error);
           message.error("Xác nhận thất bại");
@@ -130,7 +138,13 @@ const StaffPayments = () => {
           Làm mới
         </Button>
       </div>
-      <Table columns={columns} dataSource={data} loading={loading} rowKey={(r) => r.paymentId} />
+      <Table
+        columns={columns}
+        dataSource={data}
+        loading={loading}
+        rowKey={(r) => r.paymentId}
+        locale={{ emptyText: "Không có dữ liệu" }}
+      />
     </div>
   );
 };
