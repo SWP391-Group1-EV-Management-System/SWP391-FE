@@ -11,11 +11,17 @@ const PaymentHistorySummary = ({ payments }) => {
   const totalKwh = paidPayments.reduce((sum, item) => sum + item.kwh, 0);
   const avgPrice = paidPayments.length > 0 ? totalPrice / paidPayments.length : 0;
   const unpaidCount = payments.filter(p => p.paid === false).length;
-
+  const formatCurrency = (amount) => {
+    if (!amount && amount !== 0) return '0 VND';
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount);
+  };
   const summaryCards = [
     {
       icon: <DollarOutlined style={{ fontSize: '3.5rem', color: '#28a745' }} />,
-      value: `${totalPrice.toLocaleString('vi-VN')} VNĐ`,
+      value: formatCurrency(totalPrice),
       label: 'Tổng chi phí',
       bgGradient: 'linear-gradient(135deg, #e6f7ff, #91d5ff)'
     },
