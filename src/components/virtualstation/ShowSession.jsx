@@ -16,6 +16,7 @@ export default function ShowSession({
   sessionId: propSessionId,
   isPublic = false,
   userId = null, // ✅ Pass userId từ parent component khi authenticated
+  onSessionFinished = null, // callback fired when session is finished (public mode)
 }) {
   // ✅ Chọn hook phù hợp dựa vào chế độ
   const { sessionData: authSessionData, isLoading: authLoading } =
@@ -123,8 +124,18 @@ export default function ShowSession({
 
     if (result.success) {
       alert("✅ Đã dừng phiên sạc thành công!");
-      // Reload hoặc navigate về trang chủ
-      window.location.reload();
+      // Fire parent callback if provided (used by VirtualStationPage to avoid reload prompt)
+      if (typeof onSessionFinished === "function") {
+        try {
+          onSessionFinished();
+        } catch (err) {
+          // fallback to reload if callback fails
+          window.location.reload();
+        }
+      } else {
+        // Reload hoặc navigate về trang chủ khi không có callback
+        window.location.reload();
+      }
     } else {
       alert(`❌ Lỗi: ${result.message}`);
     }

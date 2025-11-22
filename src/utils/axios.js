@@ -123,6 +123,8 @@ api.interceptors.response.use(
             "/forgot-password",
             "/welcome",
             "/about",
+            // Virtual station page is public and should not be forced to /login
+            "/virtualstation",
           ];
 
           const isOnPublicPath =
