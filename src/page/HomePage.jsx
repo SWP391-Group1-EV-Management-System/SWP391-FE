@@ -128,7 +128,6 @@ function HomePage() {
       value: formatCurrency(animatedValues.totalPaid),
       icon: BsLightning,
       gradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-      change: "+12%",
       trend: "up",
     },
     {
@@ -136,7 +135,6 @@ function HomePage() {
       value: animatedValues.sessions.toLocaleString(),
       icon: BsLightning,
       gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-      change: "+8%",
       trend: "up",
     },
     {
@@ -144,7 +142,6 @@ function HomePage() {
       value: animatedValues.totalKwh.toLocaleString(),
       icon: BsGlobe,
       gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-      change: "+15%",
       trend: "up",
     },
     {
@@ -152,7 +149,6 @@ function HomePage() {
       value: `${animatedValues.reputation}`,
       icon: BsShield,
       gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
-      change: "+0.2%",
       trend: "up",
     },
   ];
@@ -299,10 +295,6 @@ function HomePage() {
                 </div>
                 <h4 className="card-title">{stat.label}</h4>
                 <div className="card-value">{stat.value}</div>
-                <div className="card-sub">
-                  <BsGraphUp className="me-1" size={12} />
-                  {stat.change}
-                </div>
               </div>
             ))}
           </div>
