@@ -123,7 +123,15 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled, queueRank }) =
   }, [status, onCancel, isCancelled]);
 
   // ✅ Display time: Ưu tiên countdown, fallback về tính toán local
-  const displayTime = shouldShowTime ? countdown?.displayTime || `${waitingMinutes} phút` : "Chưa tính toán được";
+  let displayTime;
+  if (!shouldShowTime) {
+    displayTime = "Chưa tính toán được";
+  } else if (waitingMinutes === 0) {
+    // Khi giá trị tính ra = 0 → đồng nghĩa backend chưa cung cấp được thời gian
+    displayTime = "Chưa tính toán được";
+  } else {
+    displayTime = countdown?.displayTime || `${waitingMinutes} phút`;
+  }
 
   const waitingSpecs = [
     {
@@ -205,6 +213,23 @@ export const WaitingTime = ({ sessionData, onCancel, isCancelled, queueRank }) =
             {index < waitingSpecs.length - 1 && <Divider style={{ margin: "8px 0", borderColor: "#e2e8f0" }} />}
           </div>
         ))}
+
+        {/* ✅ Nếu là trang Waiting và thời gian chờ tính ra = 0, hiển thị thông báo vàng cụ thể */}
+        {shouldShowTime && waitingMinutes === 0 && (
+          <div
+            style={{
+              marginTop: "8px",
+              padding: "12px 16px",
+              backgroundColor: "#fef3c7",
+              borderRadius: "8px",
+              border: "1px solid #fbbf24",
+            }}
+          >
+            <Text style={{ fontSize: "13px", color: "#92400e", lineHeight: "1.5" }}>
+              Driver trước bạn chưa đến trụ, thời gian chưa thể tính toán được vui lòng chờ
+            </Text>
+          </div>
+        )}
 
         {/* ✅ Hiển thị thông báo cho user thứ 2 trở đi - CHỈ TRONG WAITING PAGE */}
         {!isBookingPage && !shouldShowTime && queueRank && (
