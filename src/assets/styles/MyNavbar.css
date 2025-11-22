@@ -232,3 +232,28 @@
     font-size: 12px;
   }
 }
+
+/* ==================== ADMIN / STAFF LAYOUT OVERRIDES ==================== */
+/* When left-side icons are hidden for ADMIN/STAFF, align content to the right
+   and reduce empty space so the top bar remains balanced. */
+.top-navbar.no-left-items .navbar-content {
+  justify-content: flex-end;
+  padding: 10px 28px 0 20px;
+}
+
+.top-navbar.no-left-items .navbar-right {
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .top-navbar.no-left-items .navbar-content {
+    justify-content: space-between; /* keep responsive behaviour */
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-navbar.no-left-items .navbar-content {
+    padding: 0 12px;
+  }
+}

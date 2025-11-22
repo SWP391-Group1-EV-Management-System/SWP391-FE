@@ -30,6 +30,16 @@ function MyNavbar({ collapsed }) {
   // Lấy thông tin user và các hàm xác thực từ hook
   const { user, logout, loading } = useAuth();
 
+  // Kiểm tra role của user để ẩn/hiện một số nút
+  const userRoles = user?.role;
+  const hasRoleLocal = (role) => {
+    if (!userRoles) return false;
+    return Array.isArray(userRoles)
+      ? userRoles.includes(role)
+      : userRoles === role;
+  };
+  const hideLeftItems = hasRoleLocal("ADMIN") || hasRoleLocal("STAFF");
+
   // Tên hiển thị của user (nếu có firstName thì hiển thị, không thì hiển thị "Guest User")
   const userName = user && user.firstName ? `${user.firstName}` : "Guest User";
 
@@ -139,30 +149,36 @@ function MyNavbar({ collapsed }) {
 
   // === Render giao diện ===
   return (
-    <nav className={`top-navbar ${collapsed ? "collapsed" : ""}`}>
+    <nav
+      className={`top-navbar ${collapsed ? "collapsed" : ""} ${
+        hideLeftItems ? "no-left-items" : ""
+      }`}
+    >
       <div className="navbar-content">
-        {/* Phần bên trái - Nút QR và các icon chức năng */}
-        <div className="navbar-left">
-          {/* Nút quét QR Code */}
-          <div
-            className="icon-item qr-button"
-            onClick={handleQRClick}
-            title="Quét QR Code"
-          >
-            <BsQrCodeScan className="nav-icon" />
-            <span className="btn-label">Quét mã</span>
-          </div>
+        {/* Phần bên trái - Nút QR và các icon chức năng (ẩn cho ADMIN/STAFF) */}
+        {!hideLeftItems && (
+          <div className="navbar-left">
+            {/* Nút quét QR Code */}
+            <div
+              className="icon-item qr-button"
+              onClick={handleQRClick}
+              title="Quét QR Code"
+            >
+              <BsQrCodeScan className="nav-icon" />
+              <span className="btn-label">Quét mã</span>
+            </div>
 
-          {/* Icon thông báo */}
-          <div className="icon-item" title="Thông báo">
-            <FaRegBell className="nav-icon" />
-          </div>
+            {/* Icon thông báo */}
+            <div className="icon-item" title="Thông báo">
+              <FaRegBell className="nav-icon" />
+            </div>
 
-          {/* Icon tin nhắn */}
-          <div className="icon-item" title="Tin nhắn">
-            <FaRegEnvelope className="nav-icon" />
+            {/* Icon tin nhắn */}
+            <div className="icon-item" title="Tin nhắn">
+              <FaRegEnvelope className="nav-icon" />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Phần bên phải - Thông tin user */}
         <div className="navbar-right">

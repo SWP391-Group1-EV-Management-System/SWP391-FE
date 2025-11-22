@@ -13,7 +13,7 @@
  * @component
  */
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 
 // UI Framework Components
 import { Container, Row, Col, Card } from "react-bootstrap";
@@ -106,6 +106,45 @@ function MapPage() {
     setShowModal(false);
     setSelectedStation(null);
   };
+
+  // ===== Derived: Sắp xếp danh sách trạm - active trước, rồi theo khoảng cách gần nhất =====
+  const sortedStations = useMemo(() => {
+    if (!chargingStations || chargingStations.length === 0) return chargingStations;
+
+    const parseDistance = (d) => {
+      if (d == null) return Infinity;
+      if (typeof d === "number") return d;
+      if (typeof d === "string") {
+        const trimmed = d.trim();
+        if (trimmed === "N/A" || trimmed === "Đang tính..." || trimmed === "") return Infinity;
+        const normalized = trimmed.replace(/,/g, ".");
+        const num = parseFloat(normalized);
+        if (isNaN(num)) return Infinity;
+        if (/km/i.test(trimmed)) return num * 1000;
+        return num; // assume meters
+      }
+      return Infinity;
+    };
+
+    const isActive = (s) => {
+      if (!s) return false;
+      if (Array.isArray(s.chargingSessionIds) && s.chargingSessionIds.length > 0) return true;
+      if (typeof s.active === "boolean") return s.active === true;
+      if (s.status === "busy" || s.status === "in_use") return true;
+      return false;
+    };
+
+    return [...chargingStations].sort((a, b) => {
+      const aActive = isActive(a);
+      const bActive = isActive(b);
+      if (aActive !== bActive) return aActive ? -1 : 1;
+
+      const da = parseDistance(a.distance);
+      const db = parseDistance(b.distance);
+      if (da === db) return 0;
+      return da - db;
+    });
+  }, [chargingStations]);
 
   // ===== RENDER: Giao diện chính =====
   return (
@@ -218,7 +257,7 @@ function MapPage() {
                     </div>
                   ) : (
                     /* Danh sách các trạm sạc */
-                    chargingStations.map((station) => (
+                    sortedStations.map((station) => (
                       <div
                         key={station.id}
                         className="station-list-item"
