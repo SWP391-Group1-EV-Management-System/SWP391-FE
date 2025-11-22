@@ -2,7 +2,15 @@ import React, { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useLocation } from "react-router";
 import { message as staticMessage, ConfigProvider, App } from "antd";
-import { ThunderboltOutlined, ClockCircleOutlined, WarningOutlined } from "@ant-design/icons";
+import { IoMdBatteryCharging } from "react-icons/io";
+import { FaRegClock } from "react-icons/fa";
+import {
+  ThunderboltOutlined,
+  ClockCircleOutlined,
+  WarningOutlined,
+  CloseOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
 import "../../assets/styles/QRResultModal.css";
 import ElasticSlider from "./ElasticSlider";
 import { energySessionService } from "../../services/energySessionService";
@@ -58,7 +66,10 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
       const postInfo = await fetchPostById(qrResult); // ✅ Sử dụng hook thay vì service
       setPostData(postInfo);
 
-      const stationId = postInfo.chargingStationId || postInfo.chargingStation || postInfo.stationId;
+      const stationId =
+        postInfo.chargingStationId ||
+        postInfo.chargingStation ||
+        postInfo.stationId;
 
       if (stationId) {
         const stationDetails = await fetchStationById(stationId); // ✅ Sử dụng hook thay vì service
@@ -110,7 +121,9 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         await fetchRandomPin(userId); // ✅ Truyền userId vào API
         console.log("🔋 [QRResultModal] Fetched random pin for user:", userId);
       } else {
-        console.warn("⚠️ [QRResultModal] No userId found, skipping random pin fetch");
+        console.warn(
+          "⚠️ [QRResultModal] No userId found, skipping random pin fetch"
+        );
       }
     };
 
@@ -156,7 +169,11 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
 
       // ✅ Bước 1: Cập nhật preference (targetPin và maxSecond)
       if (pinData?.pinNow && selectedChargingTime) {
-        const preferenceResult = await updatePreference(userId, pinData.pinNow, selectedChargingTime);
+        const preferenceResult = await updatePreference(
+          userId,
+          pinData.pinNow,
+          selectedChargingTime
+        );
 
         if (!preferenceResult.success) {
           message.error("Không thể cập nhật thông tin sạc");
@@ -187,7 +204,10 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         // ✅ Lấy status và sessionId từ response
         // Hỗ trợ nhiều dạng BE có thể trả: top-level fields hoặc nằm trong data.message
         const status =
-          response.data?.status || response.data?.message?.status || response.message?.status || response.status;
+          response.data?.status ||
+          response.data?.message?.status ||
+          response.message?.status ||
+          response.status;
 
         let sessionId =
           response.data?.sessionId ||
@@ -198,14 +218,19 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           null;
 
         // ✅ CHECK: Nếu trụ đang bận (backend trả về status đặc biệt)
-        if (status === "trụ đang bận" || status === "bạn đang có đặt chỗ khác hoặc trong hàng đợi") {
+        if (
+          status === "trụ đang bận" ||
+          status === "bạn đang có đặt chỗ khác hoặc trong hàng đợi"
+        ) {
           console.warn("⚠️ [QRResultModal] Trụ đang bận:", status);
 
           const isStationBusy = status === "trụ đang bận";
 
           message.warning({
             content: (
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "12px" }}
+              >
                 <div>
                   <div
                     style={{
@@ -214,7 +239,9 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                       fontSize: "15px",
                     }}
                   >
-                    {isStationBusy ? "Trụ đang bận" : "Bạn đang có đặt chỗ khác"}
+                    {isStationBusy
+                      ? "Trụ đang bận"
+                      : "Bạn đang có đặt chỗ khác"}
                   </div>
                   <div
                     style={{
@@ -234,7 +261,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
             style: {
               marginTop: "20vh",
             },
-            // icon: <WarningOutlined style={{ color: '#faad14' }} />,
+            icon: <WarningOutlined style={{ color: "#faad14" }} />,
           });
 
           onClose();
@@ -244,7 +271,8 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         // Nếu data.message là string và chưa có sessionId, thử lấy string nếu nó trông giống id
         if (!sessionId && typeof response?.data?.message === "string") {
           const maybe = response.data.message.trim();
-          if (maybe && !maybe.includes(" ") && maybe.length > 3) sessionId = maybe;
+          if (maybe && !maybe.includes(" ") && maybe.length > 3)
+            sessionId = maybe;
         }
 
         // ✅ Lưu status vào localStorage (sử dụng helper)
@@ -299,7 +327,9 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
 
           // Dispatch a global event so the session page (if mounted) can refresh
           try {
-            window.dispatchEvent(new CustomEvent("sessionCreated", { detail: { sessionId } }));
+            window.dispatchEvent(
+              new CustomEvent("sessionCreated", { detail: { sessionId } })
+            );
           } catch (e) {
             console.warn("Failed to dispatch sessionCreated event:", e);
           }
@@ -313,7 +343,9 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
 
           if (isVirtualStation) {
             // Don't navigate - VirtualStationPage will handle showing session via event
-            console.log("🎯 [QRResultModal] On VirtualStationPage, not navigating. Event dispatched.");
+            console.log(
+              "🎯 [QRResultModal] On VirtualStationPage, not navigating. Event dispatched."
+            );
           } else if (locPath !== "/app/session") {
             // Navigate to session page if not already there and not on virtual station
             navigate("/app/session");
@@ -322,7 +354,9 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           console.warn("⚠️ Không nhận được sessionId từ BE");
           console.warn("⚠️ Response:", response);
 
-          message.warning("Phiên sạc đã được tạo nhưng không nhận được ID. Vui lòng kiểm tra lại.");
+          message.warning(
+            "Phiên sạc đã được tạo nhưng không nhận được ID. Vui lòng kiểm tra lại."
+          );
           onClose();
           navigate("/app/home");
         }
@@ -375,14 +409,23 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         <div className="qr-result-modal" onClick={(e) => e.stopPropagation()}>
           <div className="qr-result-modal-header">
             <h3>Kết quả quét QR</h3>
-            <button className="qr-result-close-btn" onClick={onClose}>
-              ×
+            <button
+              className="qr-result-close-btn"
+              onClick={onClose}
+              aria-label="Đóng"
+            >
+              <CloseOutlined />
             </button>
           </div>
 
           <div className="qr-result-modal-content">
             {dataLoading ? (
-              <LoadingSpinner type="pulse" size="medium" color="primary" text="Đang tải thông tin trụ sạc..." />
+              <LoadingSpinner
+                type="pulse"
+                size="medium"
+                color="primary"
+                text="Đang tải thông tin trụ sạc..."
+              />
             ) : (
               <>
                 <div className="qr-result-info">
@@ -391,11 +434,14 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                     <strong>Mã trụ:</strong> {qrResult}
                   </p>
                   <p>
-                    <strong>Tên trụ:</strong> {postData?.name || `Trụ ${qrResult}`}
+                    <strong>Tên trụ:</strong>{" "}
+                    {postData?.name || `Trụ ${qrResult}`}
                   </p>
                   <p>
-                    <strong>Trạm:</strong> {stationInfo?.name || "Đang tải thông tin trạm..."}
-                    {(postData?.chargingStation || postData?.chargingStationId) && (
+                    <strong>Trạm:</strong>{" "}
+                    {stationInfo?.name || "Đang tải thông tin trạm..."}
+                    {(postData?.chargingStation ||
+                      postData?.chargingStationId) && (
                       <span
                         style={{
                           fontSize: "12px",
@@ -403,16 +449,22 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                           marginLeft: "8px",
                         }}
                       >
-                        (ID: {postData.chargingStation || postData.chargingStationId})
+                        (ID:{" "}
+                        {postData.chargingStation || postData.chargingStationId}
+                        )
                       </span>
                     )}
                   </p>
                   <p>
                     <strong>Địa chỉ:</strong>{" "}
-                    {stationInfo?.address || stationInfo?.location || "Chưa có thông tin địa chỉ"}
+                    {stationInfo?.address ||
+                      stationInfo?.location ||
+                      "Chưa có thông tin địa chỉ"}
                   </p>
                   <p>
-                    <strong>Công suất:</strong> {postData?.powerDisplay || `${postData?.maxPower || "N/A"} kW`}
+                    <strong>Công suất:</strong>{" "}
+                    {postData?.powerDisplay ||
+                      `${postData?.maxPower || "N/A"} kW`}
                   </p>
                   <p>
                     <strong>Trạng thái:</strong>{" "}
@@ -448,7 +500,8 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                         style={{
                           marginTop: "12px",
                           padding: "10px 14px",
-                          background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                          background:
+                            "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
                           border: "1px solid #fbbf24",
                           borderRadius: "8px",
                           fontSize: "13px",
@@ -456,9 +509,15 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                           boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
                         }}
                       >
-                        <strong>🔋 Mức pin hiện tại:</strong> {pinData.pinNow}%
+                        <strong>
+                          <IoMdBatteryCharging /> Mức pin hiện tại:
+                        </strong>{" "}
+                        {pinData.pinNow}%
                         <br />
-                        <strong>⏱️ Thời gian sạc tối đa:</strong> {pinData.minuteMax} phút
+                        <strong>
+                          <FaRegClock /> Thời gian sạc tối đa:
+                        </strong>{" "}
+                        {pinData.minuteMax} phút
                       </div>
                     )}
 
@@ -467,7 +526,8 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                         style={{
                           marginTop: "12px",
                           padding: "10px 14px",
-                          background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+                          background:
+                            "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
                           border: "1px solid #bae6fd",
                           borderRadius: "8px",
                           fontSize: "14px",
@@ -475,7 +535,9 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                           boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
                         }}
                       >
-                        <div style={{ fontWeight: "600", marginBottom: "4px" }}>⏰ Thời gian hoàn thành dự kiến</div>
+                        <div style={{ fontWeight: "600", marginBottom: "4px" }}>
+                          <FaRegClock /> Thời gian hoàn thành dự kiến
+                        </div>
                         <div
                           style={{
                             fontSize: "16px",

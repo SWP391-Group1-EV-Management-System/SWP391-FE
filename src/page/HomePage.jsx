@@ -53,30 +53,32 @@ function HomePage() {
 
   // ===== EFFECT: Tải profile người dùng khi component mount =====
   useEffect(() => {
-    fetchUserProfile().catch(() => { });
+    fetchUserProfile().catch(() => {});
   }, [fetchUserProfile]);
 
-  // Format lại tiền 
+  // Format lại tiền
   const formatCurrency = (amount) => {
-    if (!amount && amount !== 0) return '0 VND';
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
+    if (!amount && amount !== 0) return "0 VND";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(amount);
   };
   // ===== Xác định tên hiển thị người dùng =====
   const userName = loading
     ? "Đang tải..."
     : user
-      ? `${(user.firstName || "").trim()} ${(user.lastName || "").trim()}`.trim() ||
+    ? `${(user.firstName || "").trim()} ${(
+        user.lastName || ""
+      ).trim()}`.trim() ||
       (user.email ? user.email.split("@")[0] : "Guest User")
-      : "Guest User";
+    : "Guest User";
 
   // ===== EFFECT: Animation đếm số liệu thống kê - ĐÃ SỬA =====
   useEffect(() => {
     if (!dashboardData || dashboardLoading) return;
 
-    console.log('🎯 Starting animation with data:', dashboardData);
+    console.log("🎯 Starting animation with data:", dashboardData);
 
     const duration = 2000; // 2 giây
     const steps = 60;
@@ -90,7 +92,7 @@ function HomePage() {
       reputation: dashboardData.reputationPoint || 0,
     };
 
-    console.log('🎯 Animation targets:', targets);
+    console.log("🎯 Animation targets:", targets);
 
     let currentStep = 0;
 
@@ -132,14 +134,14 @@ function HomePage() {
     },
     {
       label: "Tổng phiên sạc hoàn thành",
-      value: animatedValues.sessions.toLocaleString(),
+      value: animatedValues.sessions.toLocaleString() + " phiên",
       icon: BsLightning,
       gradient: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
       trend: "up",
     },
     {
-      label: "Tổng năng lượng đã sạc (kWh)",
-      value: animatedValues.totalKwh.toLocaleString(),
+      label: "Tổng năng lượng đã sạc",
+      value: animatedValues.totalKwh.toLocaleString() + " kWh",
       icon: BsGlobe,
       gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
       trend: "up",
@@ -154,7 +156,12 @@ function HomePage() {
   ];
 
   // ===== DATA: Hoạt động gần đây =====
-  const { history, loading: historyLoading, error: historyError, fetchHistory } = useHistory();
+  const {
+    history,
+    loading: historyLoading,
+    error: historyError,
+    fetchHistory,
+  } = useHistory();
 
   // Fetch history when user is available (reuse same pattern as HistoryPage)
   useEffect(() => {
@@ -177,18 +184,23 @@ function HomePage() {
     }
 
     // Sort by startTime desc and take up to 5
-    const sorted = [...history].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+    const sorted = [...history].sort(
+      (a, b) => new Date(b.startTime) - new Date(a.startTime)
+    );
     const items = sorted.slice(0, 5).map((s, idx) => {
-      const stationName = s.station?.name || s.station?.address || 'Trạm không xác định';
-      const sessionId = s.sessionId || s.id || '';
-      const time = s.startTime ? new Date(s.startTime).toLocaleString('vi-VN') : '';
+      const stationName =
+        s.station?.name || s.station?.address || "Trạm không xác định";
+      const sessionId = s.sessionId || s.id || "";
+      const time = s.startTime
+        ? new Date(s.startTime).toLocaleString("vi-VN")
+        : "";
       // Pick color based on index for visual variety
-      const colors = ['#43e97b', '#667eea', '#4facfe', '#f5576c', '#38f9d7'];
+      const colors = ["#43e97b", "#667eea", "#4facfe", "#f5576c", "#38f9d7"];
       const color = colors[idx % colors.length];
 
       return {
-        icon: s.status === 'COMPLETED' ? BsCheck2Circle : BsLightning,
-        text: `${sessionId ? `${sessionId} - ` : ''}${stationName}`,
+        icon: s.status === "COMPLETED" ? BsCheck2Circle : BsLightning,
+        text: `${sessionId ? `${sessionId} - ` : ""}${stationName}`,
         time,
         color,
       };
@@ -291,10 +303,12 @@ function HomePage() {
             {stats.map((stat, index) => (
               <div key={index} className="info-card">
                 <div className="card-icon">
-                  <stat.icon size={32} />
+                  <stat.icon size={32} color="#0b9459" />
+                </div>
+                <div className="card-value" style={{ color: "#0b9459" }}>
+                  {stat.value}
                 </div>
                 <h4 className="card-title">{stat.label}</h4>
-                <div className="card-value">{stat.value}</div>
               </div>
             ))}
           </div>

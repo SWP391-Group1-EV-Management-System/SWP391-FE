@@ -89,6 +89,12 @@ const StationModal = ({ isOpen, onClose, station }) => {
         }
       : calculateStatsFromMap(station?.chargingPostsAvailable);
 
+  // Kiểm tra xem có thông tin trụ sạc chi tiết hay không
+  const hasDetailedPosts =
+    mergedPosts.length > 0 ||
+    (station?.chargingPostsAvailable &&
+      Object.keys(station.chargingPostsAvailable).length > 0);
+
   // Chức năng: Tải danh sách xe của người dùng khi mở modal
   useEffect(() => {
     if (isOpen && currentUser) {
@@ -194,7 +200,8 @@ const StationModal = ({ isOpen, onClose, station }) => {
       // Map id -> tên (giống mapping trong service)
       const CHARGING_TYPE_NAMES = { 1: "CCS", 2: "CHAdeMO", 3: "AC" };
 
-      const carTypeName = CHARGING_TYPE_NAMES[carObj.chargingType] ||
+      const carTypeName =
+        CHARGING_TYPE_NAMES[carObj.chargingType] ||
         (carObj.chargingType || "").toString();
 
       const supported = (post.supportedTypes || []).map((t) =>
@@ -421,15 +428,17 @@ const StationModal = ({ isOpen, onClose, station }) => {
             </div>
           )}
 
-          {/* Chọn xe của người dùng (bắt buộc khi đặt chỗ) */}
-          {userCars && userCars.length > 0 && (
+          {/* Chọn xe của người dùng (chỉ hiển thị khi có trụ sạc chi tiết) */}
+          {hasDetailedPosts && userCars && userCars.length > 0 && (
             <div className="station-info__item">
               <IoCarOutline
                 className="station-info__icon"
                 style={{ fontSize: "24px", color: "#10b981" }}
               />
               <div style={{ flex: 1 }}>
-                <label style={{ display: "block", marginBottom: 6, fontWeight: 600 }}>
+                <label
+                  style={{ display: "block", marginBottom: 6, fontWeight: 600 }}
+                >
                   Chọn xe <span style={{ color: "#ff4d4f" }}>*</span>
                 </label>
                 <Select
@@ -703,7 +712,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 )
               )
             ) : (
-              // Hiển thị: Empty state khi không có dữ liệu chi tiết
+              // Hiển thị: Empty state khi không có dữ liệu chi tiết - ẨN NÚT ĐẶT CHỖ
               <div className="charger-empty-state">
                 <div>
                   <IoPowerOutline className="charger-empty-state__icon" />
@@ -717,32 +726,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
                 <div className="charger-empty-state__info">
                   Khả dụng: {station.availableSlots || 0} trụ
                 </div>
-                {(() => {
-                  const isGeneralProcessing =
-                    bookingLoading && bookingProcessingId === "general";
-                  return (
-                    <Button
-                      variant={
-                        station.status === "available" ? "success" : "secondary"
-                      }
-                      disabled={
-                        station.status !== "available" ||
-                        !selectedCar ||
-                        isGeneralProcessing
-                      }
-                      onClick={() => handleBookCharger("general")}
-                      className="charger-empty-state__btn"
-                    >
-                      {isGeneralProcessing
-                        ? "Đang xử lý..."
-                        : station.status === "available"
-                        ? "Đặt chỗ"
-                        : station.status === "maintenance"
-                        ? "Bảo trì"
-                        : "Đầy chỗ"}
-                    </Button>
-                  );
-                })()}
+                {/* ĐÃ XÓA NÚT ĐẶT CHỖ Ở ĐÂY */}
               </div>
             )}
           </div>

@@ -205,12 +205,6 @@ function MyNavbar({ collapsed }) {
                   <span>Tài khoản</span>
                 </div>
 
-                {/* Menu item: Cài đặt */}
-                <div className="dropdown-item">
-                  <TbSettings size={18} />
-                  <span>Cài đặt</span>
-                </div>
-
                 {/* Đường phân cách */}
                 <div className="dropdown-divider"></div>
 
