@@ -109,7 +109,8 @@ function VirtualStationPage() {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed) {
-          if (parsed.currentSessionId) setCurrentSessionId(parsed.currentSessionId);
+          if (parsed.currentSessionId)
+            setCurrentSessionId(parsed.currentSessionId);
           if (parsed.showSession) setShowSession(true);
           if (parsed.showQR) setShowQR(true);
         }
@@ -141,7 +142,8 @@ function VirtualStationPage() {
     const handleBeforeUnload = (e) => {
       if (!allowUnloadRef.current) return undefined;
       e.preventDefault();
-      e.returnValue = "Bạn có chắc muốn rời trang? Phiên public này có thể bị gián đoạn.";
+      e.returnValue =
+        "Bạn có chắc muốn rời trang? Phiên public này có thể bị gián đoạn.";
       return e.returnValue;
     };
 
@@ -182,7 +184,8 @@ function VirtualStationPage() {
       if (!allowUnloadRef.current) return undefined;
       // Chuẩn: set returnValue để kích hoạt cảnh báo xác nhận reload
       e.preventDefault();
-      e.returnValue = "Bạn có chắc muốn rời trang? Phiên public này có thể bị gián đoạn.";
+      e.returnValue =
+        "Bạn có chắc muốn rời trang? Phiên public này có thể bị gián đoạn.";
       return e.returnValue;
     };
 
