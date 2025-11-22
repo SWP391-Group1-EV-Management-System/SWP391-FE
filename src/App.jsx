@@ -1,5 +1,11 @@
 import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router";
 import { App as AntdApp } from "antd";
 import Layout from "./components/layout/Layout.jsx";
 import HomePage from "./page/HomePage.jsx";
@@ -34,9 +40,15 @@ import PaymentHistory from "./page/PaymentHistoryPage.jsx";
 import { cleanupExpiredFrozenCountdowns } from "./utils/countdownUtils.js";
 // Protected Route Components
 import ProtectedRoute from "./components/auth/ProtectedRoute.jsx";
-import { AdminRoute, StaffRoute, ManagerRoute, DriverRoute } from "./components/auth/AdminRoute.jsx";
+import {
+  AdminRoute,
+  StaffRoute,
+  ManagerRoute,
+  DriverRoute,
+} from "./components/auth/AdminRoute.jsx";
 import RootRedirect from "./components/auth/RootRedirect.jsx";
 import ChatBox from "./components/chat/ChatBox.jsx";
+import { useRole } from "./hooks/useAuth";
 import UserProfile from "./components/layout/UserProfile.jsx";
 
 function App() {
@@ -44,15 +56,17 @@ function App() {
   useEffect(() => {
     const cleanedCount = cleanupExpiredFrozenCountdowns();
     if (cleanedCount > 0) {
-      console.log(`🧹 [App] Cleaned ${cleanedCount} expired frozen countdown keys on startup`);
+      console.log(
+        `🧹 [App] Cleaned ${cleanedCount} expired frozen countdown keys on startup`
+      );
     }
   }, []);
 
   return (
     <AntdApp>
       <BrowserRouter>
-        {/* ChatBox component - hiển thị trên tất cả các trang */}
-        <ChatBox />
+        {/* ChatBox component - only show for drivers on /app routes */}
+        <ConditionalChat />
         <Routes>
           {/* Smart root redirect based on authentication */}
           <Route path="/" element={<RootRedirect />} />
@@ -128,7 +142,10 @@ function App() {
             />
 
             {/* Legacy Energy Page - Redirect to session for backward compatibility */}
-            <Route path="energy" element={<Navigate to="/app/session" replace />} />
+            <Route
+              path="energy"
+              element={<Navigate to="/app/session" replace />}
+            />
 
             <Route
               path="history"
@@ -210,7 +227,10 @@ function App() {
           </Route>
 
           {/* Virtual Station - Public access (no login required) */}
-          <Route path="virtualstation/:postId" element={<VirtualStationPage />} />
+          <Route
+            path="virtualstation/:postId"
+            element={<VirtualStationPage />}
+          />
 
           {/* 404 Page */}
           <Route path="*" element={<NotFoundPage />} />
@@ -218,6 +238,20 @@ function App() {
       </BrowserRouter>
     </AntdApp>
   );
+}
+
+function ConditionalChat() {
+  // This component is rendered inside BrowserRouter so hooks that depend on router are safe
+  const { hasRole } = useRole();
+  const location = useLocation();
+
+  const isDriver = hasRole("DRIVER");
+  const isAppRoute = location?.pathname?.startsWith("/app");
+
+  if (isDriver && isAppRoute) {
+    return <ChatBox />;
+  }
+  return null;
 }
 
 export default App;
