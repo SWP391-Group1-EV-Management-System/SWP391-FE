@@ -33,7 +33,7 @@ const PaymentHistorySummary = ({ payments }) => {
     },
     {
       icon: <FireOutlined style={{ fontSize: '3.5rem', color: '#28a745' }} />,
-      value: `${avgPrice.toLocaleString('vi-VN', { maximumFractionDigits: 0 })} VNĐ`,
+      value: formatCurrency(avgPrice),
       label: 'Chi phí TB',
       bgGradient: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)'
     },

@@ -68,9 +68,7 @@ export const useEnergySession = (userID = null) => {
         }
 
         if (sessionResult.errorCode) {
-          setError(
-            sessionResult.message || "Không thể lấy thông tin phiên sạc"
-          );
+          setError(sessionResult.message || "Không thể lấy thông tin phiên sạc");
           setErrorCode(sessionResult.errorCode);
           setIsLoading(false);
           return;
@@ -80,9 +78,7 @@ export const useEnergySession = (userID = null) => {
       if (!userID) {
         setIsLoading(false);
         setError("Vui lòng đăng nhập để xem phiên sạc");
-        console.log(
-          "⚠️ [useEnergySession] userID is null or undefined, skipping fetch"
-        );
+        console.log("⚠️ [useEnergySession] userID is null or undefined, skipping fetch");
         return;
       }
 
@@ -144,14 +140,9 @@ export const useEnergySession = (userID = null) => {
 
           const totalEnergy = calculateEnergyCharged(sessionData);
 
-          message.info(
-            "Đã đến thời gian kết thúc dự kiến, đang kết thúc phiên sạc..."
-          );
+          message.info("Đã đến thời gian kết thúc dự kiến, đang kết thúc phiên sạc...");
 
-          const result = await finishSession(
-            sessionData.chargingSessionId,
-            totalEnergy
-          );
+          const result = await finishSession(sessionData.chargingSessionId, totalEnergy);
 
           if (result.success) {
             message.success("Phiên sạc đã kết thúc tự động");
@@ -185,10 +176,7 @@ export const useEnergySession = (userID = null) => {
       }
 
       const now = new Date();
-      const diffSeconds = Math.max(
-        0,
-        Math.floor((now.getTime() - startTime.getTime()) / 1000)
-      );
+      const diffSeconds = Math.max(0, Math.floor((now.getTime() - startTime.getTime()) / 1000));
       const hours = diffSeconds / 3600;
       const energyCharged = maxPower * hours;
 
@@ -208,6 +196,8 @@ export const useEnergySession = (userID = null) => {
     try {
       const response = await api.get(`/api/charging/session/show/${sessionId}`);
 
+      console.log("useEnergySession.fetchBySessionId - raw response.data:", response.data);
+
       if (response.data) {
         console.log("✅ Đã lấy session từ sessionId");
 
@@ -221,19 +211,13 @@ export const useEnergySession = (userID = null) => {
           if (finishedRaw) {
             const finished = JSON.parse(finishedRaw);
             if (finished && String(finished.sessionId) === String(sessionId)) {
-              console.log(
-                "ℹ️ Applying local finished marker for session",
-                sessionId
-              );
+              console.log("ℹ️ Applying local finished marker for session", sessionId);
               const overridden = {
                 ...mapped,
                 isDone: true,
                 status: "completed",
                 endTime: finished.endTime || mapped.endTime,
-                energyCharged:
-                  finished.energyCharged !== undefined
-                    ? finished.energyCharged
-                    : mapped.energyCharged,
+                energyCharged: finished.energyCharged !== undefined ? finished.energyCharged : mapped.energyCharged,
                 rawData: {
                   ...(mapped.rawData || {}),
                   done: true,
@@ -247,6 +231,8 @@ export const useEnergySession = (userID = null) => {
         } catch (e) {
           console.warn("Failed to apply finished marker:", e);
         }
+
+        console.log("useEnergySession.fetchBySessionId - mapped:", mapped);
 
         return {
           success: true,
@@ -319,16 +305,13 @@ export const useEnergySession = (userID = null) => {
       console.log("✅ Response từ finish session:", response);
 
       if (response.status === 200) {
-        const resultMessage =
-          response.data || "Hoàn thành phiên sạc thành công";
+        const resultMessage = response.data || "Hoàn thành phiên sạc thành công";
 
         // If backend returns a new session id, update stored id.
         // Otherwise keep the existing `currentSessionId` until a new session starts.
         try {
           const returnedId =
-            response.data?.newSessionId ||
-            response.data?.sessionId ||
-            response.data?.chargingSessionId;
+            response.data?.newSessionId || response.data?.sessionId || response.data?.chargingSessionId;
 
           // If backend returns a new session id, update stored id.
           if (returnedId) {
@@ -349,19 +332,22 @@ export const useEnergySession = (userID = null) => {
           const finishedMarker = {
             sessionId: sessionId,
             endTime: nowIso,
-            energyCharged:
-              typeof totalEnergy === "number"
-                ? String(totalEnergy)
-                : totalEnergy,
+            energyCharged: typeof totalEnergy === "number" ? String(totalEnergy) : totalEnergy,
           };
 
           try {
-            localStorage.setItem(
-              "currentSessionFinished",
-              JSON.stringify(finishedMarker)
-            );
+            localStorage.setItem("currentSessionFinished", JSON.stringify(finishedMarker));
           } catch (e) {
             console.warn("Failed to write currentSessionFinished:", e);
+          }
+
+          // Mark global auto-refetch handled so client won't auto-refetch again
+          try {
+            if (typeof window !== "undefined") {
+              window.__sessionAutoRefetchHandled = true;
+            }
+          } catch (err) {
+            /* ignore */
           }
 
           // Update sessionData to reflect finished state so the user stays on the
@@ -388,10 +374,7 @@ export const useEnergySession = (userID = null) => {
             return updated;
           });
         } catch (e) {
-          console.warn(
-            "Failed to inspect/modify currentSessionId in localStorage:",
-            e
-          );
+          console.warn("Failed to inspect/modify currentSessionId in localStorage:", e);
         }
 
         return {
@@ -423,9 +406,7 @@ export const useEnergySession = (userID = null) => {
         errorMessage = error.response?.data || "Dữ liệu không hợp lệ";
       } else if (error.response?.data) {
         errorMessage =
-          typeof error.response.data === "string"
-            ? error.response.data
-            : error.response.data.message || errorMessage;
+          typeof error.response.data === "string" ? error.response.data : error.response.data.message || errorMessage;
       }
 
       return {
@@ -450,30 +431,24 @@ export const useEnergySession = (userID = null) => {
 
       if (storedSessionId) {
         console.log("🔄 Refetch session từ sessionId:", storedSessionId);
-        const response = await api.get(
-          `/api/charging/session/show/${storedSessionId}`
-        );
+        const response = await api.get(`/api/charging/session/show/${storedSessionId}`);
+        console.log("useEnergySession.refetch - raw response.data:", response.data);
 
         if (response.data) {
           // Map and apply finished marker if present so reload keeps finished state
           const mapped = mapSessionResponseFromApi(response.data);
+          console.log("useEnergySession.refetch - mapped:", mapped);
           try {
             const finishedRaw = localStorage.getItem("currentSessionFinished");
             if (finishedRaw) {
               const finished = JSON.parse(finishedRaw);
-              if (
-                finished &&
-                String(finished.sessionId) === String(storedSessionId)
-              ) {
+              if (finished && String(finished.sessionId) === String(storedSessionId)) {
                 const overridden = {
                   ...mapped,
                   isDone: true,
                   status: "completed",
                   endTime: finished.endTime || mapped.endTime,
-                  energyCharged:
-                    finished.energyCharged !== undefined
-                      ? finished.energyCharged
-                      : mapped.energyCharged,
+                  energyCharged: finished.energyCharged !== undefined ? finished.energyCharged : mapped.energyCharged,
                   rawData: {
                     ...(mapped.rawData || {}),
                     done: true,
