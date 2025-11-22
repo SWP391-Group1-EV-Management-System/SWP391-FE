@@ -56,7 +56,7 @@ function MapPage() {
     error,
     refresh: refreshStations,
     fetchStationPosts,
-    } = useChargingStations({
+  } = useChargingStations({
     autoFetch: true, // Tự động tải dữ liệu khi component mount
     useLocation: true, // Tự động lấy vị trí người dùng và tính khoảng cách
   });
@@ -109,14 +109,16 @@ function MapPage() {
 
   // ===== Derived: Sắp xếp danh sách trạm - active trước, rồi theo khoảng cách gần nhất =====
   const sortedStations = useMemo(() => {
-    if (!chargingStations || chargingStations.length === 0) return chargingStations;
+    if (!chargingStations || chargingStations.length === 0)
+      return chargingStations;
 
     const parseDistance = (d) => {
       if (d == null) return Infinity;
       if (typeof d === "number") return d;
       if (typeof d === "string") {
         const trimmed = d.trim();
-        if (trimmed === "N/A" || trimmed === "Đang tính..." || trimmed === "") return Infinity;
+        if (trimmed === "N/A" || trimmed === "Đang tính..." || trimmed === "")
+          return Infinity;
         const normalized = trimmed.replace(/,/g, ".");
         const num = parseFloat(normalized);
         if (isNaN(num)) return Infinity;
@@ -128,7 +130,11 @@ function MapPage() {
 
     const isActive = (s) => {
       if (!s) return false;
-      if (Array.isArray(s.chargingSessionIds) && s.chargingSessionIds.length > 0) return true;
+      if (
+        Array.isArray(s.chargingSessionIds) &&
+        s.chargingSessionIds.length > 0
+      )
+        return true;
       if (typeof s.active === "boolean") return s.active === true;
       if (s.status === "busy" || s.status === "in_use") return true;
       return false;
@@ -151,7 +157,7 @@ function MapPage() {
     <div className="map-page-container">
       {/* Header trang */}
       <PageHeader title="Bản đồ trạm sạc" icon={<EnvironmentOutlined />} />
-      
+
       <Container fluid>
         {/* Phần tổng quan thống kê */}
         <Row className="map-stats-section">
