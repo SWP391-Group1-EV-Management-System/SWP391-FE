@@ -5,6 +5,8 @@ import StaffTable from '../components/user/StaffTable';
 import PageHeader from '../components/PageHeader';
 import ServicePackageManagement from '../components/service/ServicePackageManagement';
 import ReputationManagement from '../components/reputations/ReputationManagement';
+import StationManagement from '../components/station/StationManagement';
+import PostManagement from '../components/station/PostManagement';
 import { FaUserAlt } from 'react-icons/fa';
 
 const UserManagementPage = () => {
@@ -58,6 +60,30 @@ const UserManagementPage = () => {
       label: <span className="tab-animate">Quản lý uy tín</span>,
       children: (
         <ReputationManagement />
+      )
+    },
+    {
+      key: 'station',
+      label: <span className="tab-animate">Quản lý trạm</span>,
+      children: (
+        <Tabs
+          defaultActiveKey="1"
+          tabBarStyle={{ color: '#166534', fontWeight: 600 }}
+          items={[
+            // Tab danh sách Driver
+            { 
+              key: '1', 
+              label: <span className="tab-animate">Trạm</span>, 
+              children: <StationManagement /> 
+            },
+            // Tab danh sách Staff
+            { 
+              key: '2', 
+              label: <span className="tab-animate">Trụ</span>, 
+              children: <PostManagement /> 
+            },
+          ]}
+        />
       )
     },
   ];
