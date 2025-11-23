@@ -59,3 +59,13 @@ export const getAllCars = async () => {
     throw error;
   }
 };
+
+export const getAllCarData = async () => {
+  try {
+    const response = await api.get('/api/car_data/all'); 
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all car data:', error);
+    throw error;
+  }
+};
