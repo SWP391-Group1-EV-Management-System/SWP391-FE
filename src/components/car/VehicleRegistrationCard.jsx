@@ -6,29 +6,34 @@ const CHARGING_TYPE_NAMES = {
   1: 'CCS',
   2: 'CHAdeMO',
   3: 'AC',
+  4: 'NACS',
 };
 
 const VehicleRegistrationCard = ({ vehicles = [], onEdit, onDelete, loading }) => {
   const columns = [
     {
+      title: 'Tên xe',
+      dataIndex: 'typeCar',
+      key: 'typeCar',
+      width: '25%',
+    },
+    {
       title: 'Biển số xe',
       dataIndex: 'licensePlate',
       key: 'licensePlate',
-    },
-    {
-      title: 'Loại xe',
-      dataIndex: 'typeCar',
-      key: 'typeCar',
+      width: '20%',
     },
     {
       title: 'Số khung',
       dataIndex: 'chassisNumber',
       key: 'chassisNumber',
+      width: '20%',
     },
     {
       title: 'Loại cổng sạc',
       dataIndex: 'chargingType',
       key: 'chargingType',
+      width: '15%',
       render: (chargingTypeId) => {
         const name = CHARGING_TYPE_NAMES[chargingTypeId] || 'N/A';
         return <Tag color="green">{name}</Tag>;
@@ -37,6 +42,7 @@ const VehicleRegistrationCard = ({ vehicles = [], onEdit, onDelete, loading }) =
     {
       title: 'Thao tác',
       key: 'action',
+      width: '20%',
       render: (_, record) => (
         <div className="space-x-2">
           <Button 

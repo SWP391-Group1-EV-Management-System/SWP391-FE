@@ -42,7 +42,6 @@ function HomePage() {
     totalPaid: 0,
     totalKwh: 0,
     sessions: 0,
-    reputation: 0,
   });
 
   // ===== HOOK: Lấy thông tin người dùng =====
@@ -89,7 +88,6 @@ function HomePage() {
       totalPaid: dashboardData.totalPriceIsPaid || 0,
       totalKwh: dashboardData.totalKwHBeCharged || 0,
       sessions: dashboardData.totalChargingSessionCompleted || 0,
-      reputation: dashboardData.reputationPoint || 0,
     };
 
     console.log("🎯 Animation targets:", targets);
@@ -105,7 +103,6 @@ function HomePage() {
         totalPaid: Math.floor(targets.totalPaid * progress),
         totalKwh: Math.floor(targets.totalKwh * progress),
         sessions: Math.floor(targets.sessions * progress),
-        reputation: parseFloat((targets.reputation * progress).toFixed(1)),
       });
 
       if (currentStep >= steps) {
@@ -115,7 +112,6 @@ function HomePage() {
           totalPaid: targets.totalPaid,
           totalKwh: targets.totalKwh,
           sessions: targets.sessions,
-          reputation: targets.reputation,
         });
       }
     }, increment);
@@ -144,13 +140,6 @@ function HomePage() {
       value: animatedValues.totalKwh.toLocaleString() + " kWh",
       icon: BsGlobe,
       gradient: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-      trend: "up",
-    },
-    {
-      label: "Điểm uy tín",
-      value: `${animatedValues.reputation}`,
-      icon: BsShield,
-      gradient: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
       trend: "up",
     },
   ];

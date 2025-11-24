@@ -4,6 +4,7 @@ import * as carService from '../services/carService';
 const useCar = () => {
   const [cars, setCars] = useState([]);
   const [car, setCar] = useState(null);
+  const [carDataList, setCarDataList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -62,6 +63,22 @@ const useCar = () => {
     }
   }, []);
 
+  // Lấy danh sách xe có sẵn từ database (car_data)
+  const fetchAllCarData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await carService.getAllCarData();
+      setCarDataList(data);
+      return data;
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Tạo xe mới
   const createCar = useCallback(async (carData) => {
     setLoading(true);
@@ -110,12 +127,14 @@ const useCar = () => {
   return {
     cars,
     car,
+    carDataList,
     loading,
     error,
     fetchAllCars,
     fetchCarsByUser,
     getCarsByUser: fetchCarsByUser,
     fetchCar,
+    fetchAllCarData,
     createCar,
     modifyCar,
     removeCar,
