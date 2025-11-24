@@ -4,7 +4,6 @@ import DriverTable from '../components/user/DriverTable';
 import StaffTable from '../components/user/StaffTable';
 import PageHeader from '../components/PageHeader';
 import ServicePackageManagement from '../components/service/ServicePackageManagement';
-import ReputationManagement from '../components/reputations/ReputationManagement';
 import StationManagement from '../components/station/StationManagement';
 import PostManagement from '../components/station/PostManagement';
 import { FaUserAlt } from 'react-icons/fa';
@@ -53,13 +52,6 @@ const UserManagementPage = () => {
       label: <span className="tab-animate">Quản lý gói dịch vụ</span>,
       children: (
         <ServicePackageManagement />
-      )
-    },
-    {
-      key: 'reputation',
-      label: <span className="tab-animate">Quản lý uy tín</span>,
-      children: (
-        <ReputationManagement />
       )
     },
     {
