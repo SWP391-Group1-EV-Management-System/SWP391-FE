@@ -245,6 +245,22 @@ const StationModal = ({ isOpen, onClose, station }) => {
 
       const res = await createBookingApi(payload);
 
+      // Handle 'overpaying' response from backend: block booking
+      if (
+        res?.idAction === "overpaying" ||
+        String(res?.status).toLowerCase().includes("overpay")
+      ) {
+        notification.error({
+          message: "Không thể đặt chỗ",
+          description:
+            "Tài khoản của bạn đang có khoản nợ trên 100.000 VND. Vui lòng thanh toán trước khi đặt chỗ.",
+          duration: 5,
+        });
+        setConfirmModal({ isOpen: false, post: null });
+        setBookingProcessingId(null);
+        return;
+      }
+
       if (res?.success || res?.status) {
         const status = res.status?.toLowerCase();
 

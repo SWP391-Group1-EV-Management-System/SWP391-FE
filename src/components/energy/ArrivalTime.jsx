@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Card, Typography, Space, Progress, Tag, Button, message } from "antd";
-import { ClockCircleOutlined, PlayCircleOutlined, PauseCircleOutlined } from "@ant-design/icons";
+import {
+  ClockCircleOutlined,
+  PlayCircleOutlined,
+  PauseCircleOutlined,
+} from "@ant-design/icons";
 import { energySessionService } from "../../services/energySessionService.js";
 import "../../assets/styles/ArrivalTime.css";
 
@@ -29,7 +33,9 @@ const ArrivalTime = ({
   const formatTime = useCallback((seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${mins.toString().padStart(2, "0")}:${secs
+      .toString()
+      .padStart(2, "0")}`;
   }, []);
 
   // Tự động bắt đầu session khi có sessionData từ booking
@@ -51,7 +57,39 @@ const ArrivalTime = ({
     setIsCreating(true);
     try {
       // Sử dụng energySessionService để tạo session
-      const sessionResponse = await energySessionService.createSession(bookingData);
+      const sessionResponse = await energySessionService.createSession(
+        bookingData
+      );
+      // Handle backend signal that user is overpaying
+      const statusStr = (
+        sessionResponse?.data?.status ||
+        sessionResponse?.message ||
+        ""
+      )
+        .toString()
+        .toLowerCase();
+      const sessionIdStr = (
+        sessionResponse?.data?.sessionId ||
+        sessionResponse?.sessionId ||
+        ""
+      )
+        .toString()
+        .toLowerCase();
+      if (
+        statusStr.includes("overpay") ||
+        sessionIdStr === "overpaying" ||
+        sessionResponse?.data?.idAction === "overpaying"
+      ) {
+        console.warn(
+          "⚠️ [ArrivalTime] User overpaying - block create session",
+          sessionResponse
+        );
+        message.error(
+          "Tài khoản của bạn đang có khoản nợ trên 100.000 VND. Vui lòng thanh toán trước khi bắt đầu phiên sạc."
+        );
+        setIsCreating(false);
+        return;
+      }
 
       if (sessionResponse.success) {
         const sessionInfo = sessionResponse.data;
@@ -150,15 +188,18 @@ const ArrivalTime = ({
   const getProgressStrokeColor = () => {
     const colorType = getColorByTime();
     switch (colorType) {
-      case "danger": return "#ff4d4f";
-      case "warning": return "#faad14";
-      default: return "#10b981";
+      case "danger":
+        return "#ff4d4f";
+      case "warning":
+        return "#faad14";
+      default:
+        return "#10b981";
     }
   };
 
   return (
     <Card className="arrival-time-container">
-      <div >
+      <div>
         {/* Header */}
         <div className="arrival-time-header">
           <ClockCircleOutlined className="arrival-time-icon" />
@@ -186,9 +227,7 @@ const ArrivalTime = ({
           <div className={getCountdownTimeClass()}>
             {formatTime(timeRemaining)}
           </div>
-          <Text className="countdown-label">
-            Thời gian còn lại
-          </Text>
+          <Text className="countdown-label">Thời gian còn lại</Text>
         </div>
 
         {/* Progress Bar */}

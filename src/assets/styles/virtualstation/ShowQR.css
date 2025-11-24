@@ -4,12 +4,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #0e0e0e;
   padding: 20px;
 }
 
 .qr-wrapper {
   position: relative;
   display: inline-block;
+
 }
 
 /* Icon overlay in the center of QR */

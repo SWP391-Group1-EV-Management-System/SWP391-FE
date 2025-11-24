@@ -19,7 +19,8 @@ export default function ShowQR() {
         <QRCodeSVG
           value={qrData}
           size={420}
-          fgColor="#0b9459"
+          fgColor="#10b981"
+          bgColor="#0e0e0e"
         />
 
         <div className="qr-overlay-icon" aria-hidden>

@@ -41,9 +41,15 @@ const menuItemsByRole = {
     },
     {
       id: "usermanagement",
-      label: "Quản lý",
+      label: "Quản lý người dùng",
       icon: BsPeopleFill,
       path: "/app/usermanagement",
+    },
+    {
+      id: "carmanagement",
+      label: "Quản lý xe",
+      icon: BsPeopleFill,
+      path: "/app/carmanagement",
     },
   ],
   STAFF: [
@@ -124,7 +130,9 @@ const getDriverMenuItems = (status) => {
   ];
 
   // Chỉ thêm statusMenuItem nếu có status
-  return statusMenuItem ? [...baseItems, statusMenuItem, ...endItems] : [...baseItems, ...endItems];
+  return statusMenuItem
+    ? [...baseItems, statusMenuItem, ...endItems]
+    : [...baseItems, ...endItems];
 };
 
 const Menu = ({ collapsed, onToggleCollapse }) => {
@@ -136,7 +144,9 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
   const { driverStatus, loading: statusLoading } = useDriverStatus();
 
   // Xác định role hiện tại
-  const currentRole = Array.isArray(userRole) ? userRole[0] : userRole || "DRIVER";
+  const currentRole = Array.isArray(userRole)
+    ? userRole[0]
+    : userRole || "DRIVER";
 
   // Lấy menu items dựa trên role
   const menuItems =
@@ -152,7 +162,9 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
   };
 
   // State quản lý menu item hiện tại được chọn
-  const [activeMenuItem, setActiveMenuItem] = useState(menuItems[0]?.id || "home");
+  const [activeMenuItem, setActiveMenuItem] = useState(
+    menuItems[0]?.id || "home"
+  );
 
   // State quản lý animation khi chuyển đổi active item
   const [isAnimating, setIsAnimating] = useState(false);
@@ -198,7 +210,8 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
   /**
    * Tìm index của menu item hiện tại
    */
-  const getActiveIndex = () => menuItems.findIndex((item) => item.id === activeMenuItem);
+  const getActiveIndex = () =>
+    menuItems.findIndex((item) => item.id === activeMenuItem);
 
   /**
    * Tính toán vị trí top cho active indicator
@@ -217,12 +230,22 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
   };
 
   return (
-    <nav className={`sidebar${collapsed ? " sidebar-collapsed" : ""}`} role="navigation" aria-label="Main navigation">
+    <nav
+      className={`sidebar${collapsed ? " sidebar-collapsed" : ""}`}
+      role="navigation"
+      aria-label="Main navigation"
+    >
       <div className="sidebar-inner">
         {/* Header chứa logo */}
-        <header className={`sidebar-header${collapsed ? " sidebar-header-collapsed" : ""}`}>
+        <header
+          className={`sidebar-header${
+            collapsed ? " sidebar-header-collapsed" : ""
+          }`}
+        >
           <img
-            className={`sidebar-logo${collapsed ? " sidebar-logo-collapsed" : ""}`}
+            className={`sidebar-logo${
+              collapsed ? " sidebar-logo-collapsed" : ""
+            }`}
             alt="Eco-Z Logo"
             src={Logo}
             onClick={() => navigate(menuItems[0]?.path || "/app/home")}
@@ -245,7 +268,9 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
           }}
         >
           <MdMenuOpen
-            className={`sidebar-toggle-icon${collapsed ? "" : " sidebar-toggle-icon-open"}`}
+            className={`sidebar-toggle-icon${
+              collapsed ? "" : " sidebar-toggle-icon-open"
+            }`}
             aria-hidden="true"
           />
         </Button>
@@ -287,22 +312,36 @@ const Menu = ({ collapsed, onToggleCollapse }) => {
               key={item.id}
               variant="ghost"
               className={`sidebar-menu-item d-flex align-items-center${
-                collapsed ? " sidebar-menu-item-collapsed justify-content-center" : " justify-content-start"
+                collapsed
+                  ? " sidebar-menu-item-collapsed justify-content-center"
+                  : " justify-content-start"
               }`}
               onClick={() => handleMenuItemClick(item.id, item.path)}
               aria-current={activeMenuItem === item.id ? "page" : undefined}
               tabIndex="-1"
             >
               <item.icon className="sidebar-menu-icon" aria-hidden="true" />
-              {!collapsed && <div className="sidebar-menu-label">{item.label}</div>}
+              {!collapsed && (
+                <div className="sidebar-menu-label">{item.label}</div>
+              )}
             </Button>
           ))}
         </div>
 
         {/* Footer */}
-        <footer className={`sidebar-footer${collapsed ? " sidebar-footer-collapsed" : ""}`}>
-          <BsCCircle className="sidebar-footer-icon" style={{ color: "#00000073" }} aria-hidden="true" />
-          {!collapsed && <div className="sidebar-footer-text">2025 Group 1 SE1818</div>}
+        <footer
+          className={`sidebar-footer${
+            collapsed ? " sidebar-footer-collapsed" : ""
+          }`}
+        >
+          <BsCCircle
+            className="sidebar-footer-icon"
+            style={{ color: "#00000073" }}
+            aria-hidden="true"
+          />
+          {!collapsed && (
+            <div className="sidebar-footer-text">2025 Group 1 SE1818</div>
+          )}
         </footer>
       </div>
     </nav>

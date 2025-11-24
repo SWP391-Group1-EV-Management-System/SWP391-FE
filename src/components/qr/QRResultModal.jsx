@@ -12,36 +12,33 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import "../../assets/styles/QRResultModal.css";
-import ElasticSlider from "./ElasticSlider";
 import { energySessionService } from "../../services/energySessionService";
 import { useAuth } from "../../hooks/useAuth";
 import { useRandomPin } from "../../hooks/useRandomPin";
 import { useChargingStations } from "../../hooks/useChargingStations";
 import { useChargingPreference } from "../../hooks/useChargingPreference";
 import { LoadingSpinner } from "../../components/common";
-import { setDriverStatus } from "../../utils/statusUtils"; // ← IMPORT HELPER
+import { setDriverStatus } from "../../utils/statusUtils";
 
 function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
   const navigate = useNavigate();
   const { user, fetchUserProfile } = useAuth();
   const { message } = App.useApp();
-  const { pinData, maxChargingTime, fetchRandomPin } = useRandomPin();
+  const { pinData, fetchRandomPin } = useRandomPin();
   const { fetchPostById, fetchStationById } = useChargingStations({
     autoFetch: false,
-  }); // ✅ Sử dụng hook
-  const { updatePreference } = useChargingPreference(); // ✅ Hook mới
-  const [selectedChargingTime, setSelectedChargingTime] = useState(2);
+  });
+  const { updatePreference } = useChargingPreference();
+
+  // ✅ State cho thời gian sạc - KHÔNG còn slider, chỉ hiển thị
+  const [chargingTimeMinutes, setChargingTimeMinutes] = useState(0);
+  const [chargingTimeSeconds, setChargingTimeSeconds] = useState(0);
+
   const [isLoading, setIsLoading] = useState(false);
   const [postData, setPostData] = useState(null);
   const [stationInfo, setStationInfo] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [expectedEndTime, setExpectedEndTime] = useState(null);
-
-  const chargingConfig = {
-    minChargingTime: 2,
-    defaultChargingTime: 10,
-    stepSize: 1,
-  };
 
   const formatLocalDateTime = useCallback((date) => {
     const year = date.getFullYear();
@@ -53,17 +50,10 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
   }, []);
 
-  const handleChargingTimeChange = useCallback((chargingMinutes) => {
-    setSelectedChargingTime(chargingMinutes);
-    const now = new Date();
-    const endTime = new Date(now.getTime() + chargingMinutes * 60 * 1000);
-    setExpectedEndTime(endTime);
-  }, []);
-
   const fetchPostData = useCallback(async () => {
     try {
       setDataLoading(true);
-      const postInfo = await fetchPostById(qrResult); // ✅ Sử dụng hook thay vì service
+      const postInfo = await fetchPostById(qrResult);
       setPostData(postInfo);
 
       const stationId =
@@ -72,7 +62,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         postInfo.stationId;
 
       if (stationId) {
-        const stationDetails = await fetchStationById(stationId); // ✅ Sử dụng hook thay vì service
+        const stationDetails = await fetchStationById(stationId);
         setStationInfo(stationDetails);
       } else {
         setStationInfo({
@@ -81,7 +71,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         });
       }
     } catch (error) {
-      console.error("Lỗi khi lấy thông tin trụ sạc:", error);
+      console.error("❌ Error fetching post data:", error);
       message.error("Không thể lấy thông tin trụ sạc. Vui lòng thử lại!");
       setPostData({
         id: qrResult,
@@ -97,16 +87,15 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     } finally {
       setDataLoading(false);
     }
-  }, [qrResult, message, fetchPostById, fetchStationById]); // ✅ Thêm dependencies
+  }, [qrResult, message, fetchPostById, fetchStationById]);
 
-  // ✅ Fetch data khi modal mở - FIXED: Loại bỏ dependencies gây infinite loop
+  // ✅ Fetch data khi modal mở
   useEffect(() => {
     const fetchData = async () => {
       if (!isOpen || !qrResult) return;
 
       await fetchPostData();
 
-      // ✅ Lấy userId để gọi fetchRandomPin
       let userProfile = user;
       if (!userProfile) {
         try {
@@ -117,30 +106,35 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
       }
 
       const userId = userProfile?.userId || userProfile?.id;
-      if (userId) {
-        await fetchRandomPin(userId); // ✅ Truyền userId vào API
-        console.log("🔋 [QRResultModal] Fetched random pin for user:", userId);
+      if (userId && qrResult) {
+        // ✅ Gọi API với userId và postId
+        const result = await fetchRandomPin(userId, qrResult);
+        console.log("🔋 [QRResultModal] Fetched pin data:", result);
+
+        if (result) {
+          // ✅ Set thời gian sạc = maxSecond (thời gian đầy pin)
+          setChargingTimeSeconds(result.maxSecond);
+          setChargingTimeMinutes(result.maxMinute);
+
+          // ✅ Tính expectedEndTime
+          const now = new Date();
+          const endTime = new Date(now.getTime() + result.maxSecond * 1000);
+          setExpectedEndTime(endTime);
+
+          console.log("⏱️ [QRResultModal] Charging time set to:", {
+            seconds: result.maxSecond,
+            minutes: result.maxMinute,
+            endTime: endTime.toLocaleString("vi-VN"),
+          });
+        }
       } else {
-        console.warn(
-          "⚠️ [QRResultModal] No userId found, skipping random pin fetch"
-        );
+        console.warn("⚠️ [QRResultModal] Missing userId or postId");
       }
     };
 
     fetchData();
-  }, [isOpen, qrResult]); // ❌ CHỈ dependency isOpen và qrResult để tránh loop
+  }, [isOpen, qrResult]);
 
-  // ✅ Set giá trị mặc định khi nhận maxChargingTime từ API
-  useEffect(() => {
-    if (maxChargingTime && isOpen) {
-      // Set giá trị mặc định là giá trị tối thiểu (2 phút)
-      const defaultValue = chargingConfig.minChargingTime;
-      setSelectedChargingTime(defaultValue);
-      handleChargingTimeChange(defaultValue);
-    }
-  }, [maxChargingTime, isOpen, handleChargingTimeChange]);
-
-  // ✅ UPDATED: Xử lý response có status và sessionId
   const handleStartCharging = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -167,12 +161,12 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         return;
       }
 
-      // ✅ Bước 1: Cập nhật preference (targetPin và maxSecond)
-      if (pinData?.pinNow && selectedChargingTime) {
+      // ✅ Bước 1: Cập nhật preference với maxSecond (giây)
+      if (pinData?.pinNow && chargingTimeSeconds) {
         const preferenceResult = await updatePreference(
           userId,
           pinData.pinNow,
-          selectedChargingTime
+          chargingTimeSeconds // ✅ Gửi giây, không phải phút
         );
 
         if (!preferenceResult.success) {
@@ -180,7 +174,10 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           return;
         }
 
-        console.log("✅ Preference updated successfully");
+        console.log(
+          "✅ Preference updated with maxSecond:",
+          chargingTimeSeconds
+        );
       }
 
       // ✅ Bước 2: Tạo session
@@ -198,11 +195,50 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
 
       const response = await energySessionService.createSession(sessionData);
 
+      // Robustly check for backend 'overpay' signals in many possible wrapper shapes
+      const checkOverpay = (obj) => {
+        if (!obj) return false;
+        try {
+          const s = (obj.status || obj.message || obj.msg || "")
+            .toString()
+            .toLowerCase();
+          const sid = (obj.sessionId || obj.chargingSessionId || "")
+            .toString()
+            .toLowerCase();
+          if (s.includes("overpay") || sid === "overpaying") return true;
+          if (obj.idAction && obj.idAction === "overpaying") return true;
+        } catch (e) {
+          // ignore
+        }
+        return false;
+      };
+
+      // Possible places where the backend payload may be stored after service normalization
+      const candidates = [
+        response?.data,
+        response?.data?.message,
+        response?.message,
+        response?.errorDetails?.data,
+        response?.data?.data,
+      ];
+
+      const isOverpay = candidates.some((c) => checkOverpay(c));
+
+      if (isOverpay) {
+        console.warn(
+          "⚠️ [QRResultModal] User overpaying - blocking success message",
+          response
+        );
+        message.error(
+          "Tài khoản đang có khoản nợ trên 100.000 VND. Vui lòng thanh toán trước khi bắt đầu phiên sạc."
+        );
+        onClose();
+        return;
+      }
+
       if (response.success) {
         console.log("✅ Create session response:", response);
 
-        // ✅ Lấy status và sessionId từ response
-        // Hỗ trợ nhiều dạng BE có thể trả: top-level fields hoặc nằm trong data.message
         const status =
           response.data?.status ||
           response.data?.message?.status ||
@@ -217,7 +253,6 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           response.sessionId ||
           null;
 
-        // ✅ CHECK: Nếu trụ đang bận (backend trả về status đặc biệt)
         if (
           status === "trụ đang bận" ||
           status === "bạn đang có đặt chỗ khác hoặc trong hàng đợi"
@@ -258,58 +293,47 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
               </div>
             ),
             duration: 5,
-            style: {
-              marginTop: "20vh",
-            },
+            style: { marginTop: "20vh" },
             icon: <WarningOutlined style={{ color: "#faad14" }} />,
           });
 
           onClose();
-          return; // ← Dừng không xử lý tiếp
+          return;
         }
 
-        // Nếu data.message là string và chưa có sessionId, thử lấy string nếu nó trông giống id
         if (!sessionId && typeof response?.data?.message === "string") {
           const maybe = response.data.message.trim();
           if (maybe && !maybe.includes(" ") && maybe.length > 3)
             sessionId = maybe;
         }
 
-        // ✅ Lưu status vào localStorage (sử dụng helper)
         if (status) {
           setDriverStatus(status);
           console.log("✅ Saved status to localStorage:", status);
         }
 
-        // ✅ Lưu sessionId vào localStorage
         if (sessionId) {
           localStorage.setItem("currentSessionId", sessionId);
           console.log("✅ Saved sessionId to localStorage:", sessionId);
 
-          // ✅ Lưu thông tin pin và thời gian để sử dụng cho battery countdown
-          if (pinData?.pinNow && selectedChargingTime) {
+          if (pinData?.pinNow && chargingTimeMinutes) {
             localStorage.setItem(
               "batteryCountdown",
               JSON.stringify({
                 currentBattery: pinData.pinNow,
-                remainingMinutes: selectedChargingTime,
+                remainingMinutes: chargingTimeMinutes,
                 startTime: new Date().toISOString(),
               })
             );
-            console.log("✅ Saved battery countdown info:", {
-              currentBattery: pinData.pinNow,
-              remainingMinutes: selectedChargingTime,
-            });
+            console.log("✅ Saved battery countdown info");
           }
 
-          // Clear finished marker
           try {
             localStorage.removeItem("currentSessionFinished");
           } catch (e) {
             console.warn("Failed to remove currentSessionFinished:", e);
           }
 
-          // Reset global auto-refetch flag so the new session can run its auto-refetch once
           try {
             if (typeof window !== "undefined") {
               if (typeof window.resetSessionAutoRefetchFlag === "function") {
@@ -325,7 +349,6 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
 
           message.success("Bắt đầu phiên sạc thành công!");
 
-          // Dispatch a global event so the session page (if mounted) can refresh
           try {
             window.dispatchEvent(
               new CustomEvent("sessionCreated", { detail: { sessionId } })
@@ -334,47 +357,28 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
             console.warn("Failed to dispatch sessionCreated event:", e);
           }
 
-          // Close modal
           onClose();
 
-          // ✅ Check if we're on VirtualStationPage (public route)
           const locPath = window.location.pathname || location.pathname;
           const isVirtualStation = locPath.includes("/virtualstation/");
 
           if (isVirtualStation) {
-            // Don't navigate - VirtualStationPage will handle showing session via event
             console.log(
-              "🎯 [QRResultModal] On VirtualStationPage, not navigating. Event dispatched."
+              "🎯 [QRResultModal] On VirtualStationPage, not navigating."
             );
           } else if (locPath !== "/app/session") {
-            // Navigate to session page if not already there and not on virtual station
             navigate("/app/session");
           }
         } else {
           console.warn("⚠️ Không nhận được sessionId từ BE");
-          console.warn("⚠️ Response:", response);
-
-          message.warning(
-            "Phiên sạc đã được tạo nhưng không nhận được ID. Vui lòng kiểm tra lại."
-          );
+          message.warning("Phiên sạc đã được tạo nhưng không nhận được ID.");
           onClose();
           navigate("/app/home");
         }
       } else {
         const errorMsg = response.message || "Không thể bắt đầu phiên sạc";
-        const errorStatus = response.errorDetails?.status;
-
-        console.error("❌ Failed to create session:", {
-          message: errorMsg,
-          status: errorStatus,
-          details: response.errorDetails,
-        });
-
-        if (errorStatus) {
-          message.error(`${errorMsg} (Status: ${errorStatus})`);
-        } else {
-          message.error(errorMsg);
-        }
+        console.error("❌ Failed to create session:", errorMsg);
+        message.error(errorMsg);
       }
     } catch (error) {
       console.error("❌ Unexpected Error in handleStartCharging:", error);
@@ -392,19 +396,37 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     navigate,
     message,
     pinData,
-    selectedChargingTime,
+    chargingTimeSeconds,
+    chargingTimeMinutes,
   ]);
+
+  // ✅ Format thời gian hiển thị
+  const formatChargingTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (minutes < 60) {
+      return remainingSeconds > 0
+        ? `${minutes} phút ${remainingSeconds} giây`
+        : `${minutes} phút`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+
+    if (remainingMinutes === 0) {
+      return `${hours} giờ`;
+    }
+
+    return remainingSeconds > 0
+      ? `${hours}h ${remainingMinutes}m ${remainingSeconds}s`
+      : `${hours}h ${remainingMinutes}m`;
+  };
 
   if (!isOpen) return null;
 
   return createPortal(
-    <ConfigProvider
-      theme={{
-        token: {
-          zIndexPopupBase: 10010,
-        },
-      }}
-    >
+    <ConfigProvider theme={{ token: { zIndexPopupBase: 10010 } }}>
       <div className="qr-result-modal-overlay" onClick={onClose}>
         <div className="qr-result-modal" onClick={(e) => e.stopPropagation()}>
           <div className="qr-result-modal-header">
@@ -438,8 +460,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                     {postData?.name || `Trụ ${qrResult}`}
                   </p>
                   <p>
-                    <strong>Trạm:</strong>{" "}
-                    {stationInfo?.name || "Đang tải thông tin trạm..."}
+                    <strong>Trạm:</strong> {stationInfo?.name || "Đang tải..."}
                     {(postData?.chargingStation ||
                       postData?.chargingStationId) && (
                       <span
@@ -459,7 +480,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                     <strong>Địa chỉ:</strong>{" "}
                     {stationInfo?.address ||
                       stationInfo?.location ||
-                      "Chưa có thông tin địa chỉ"}
+                      "Chưa có thông tin"}
                   </p>
                   <p>
                     <strong>Công suất:</strong>{" "}
@@ -481,87 +502,151 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                   )}
                 </div>
 
+                {/* ✅ Hiển thị thông tin pin và thời gian SẠC ĐẦY (không có slider) */}
                 <div className="charging-controls">
-                  <h4>Cài đặt thời gian sạc</h4>
-                  <div className="slider-section">
-                    <label>Thời gian sạc mong muốn</label>
-                    <ElasticSlider
-                      defaultValue={selectedChargingTime}
-                      minTime={chargingConfig.minChargingTime}
-                      maxTime={maxChargingTime} // ✅ Sử dụng maxChargingTime từ API
-                      stepSize={chargingConfig.stepSize}
-                      onTimeChange={handleChargingTimeChange}
-                      currentBattery={pinData?.pinNow || 0} // ✅ Truyền % pin hiện tại
-                    />
+                  <h4>Thông tin sạc pin</h4>
 
-                    {/* ✅ Hiển thị thông tin pin nếu có */}
-                    {pinData && (
+                  {pinData && chargingTimeSeconds > 0 ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "16px",
+                      }}
+                    >
+                      {/* Pin hiện tại */}
                       <div
                         style={{
-                          marginTop: "12px",
-                          padding: "10px 14px",
+                          padding: "14px 16px",
                           background:
                             "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
                           border: "1px solid #fbbf24",
-                          borderRadius: "8px",
-                          fontSize: "13px",
+                          borderRadius: "10px",
+                          fontSize: "14px",
                           color: "#78350f",
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
                         }}
                       >
-                        <strong>
-                          <IoMdBatteryCharging /> Mức pin hiện tại:
-                        </strong>{" "}
-                        {pinData.pinNow}%
-                        <br />
-                        <strong>
-                          <FaRegClock /> Thời gian sạc tối đa:
-                        </strong>{" "}
-                        {pinData.minuteMax} phút
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          <IoMdBatteryCharging size={20} />
+                          <strong>Mức pin hiện tại:</strong>
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "18px",
+                            fontWeight: "700",
+                            color: "#92400e",
+                          }}
+                        >
+                          {pinData.pinNow}%
+                        </div>
                       </div>
-                    )}
 
-                    {expectedEndTime && (
+                      {/* Thời gian sạc đầy */}
                       <div
                         style={{
-                          marginTop: "12px",
-                          padding: "10px 14px",
+                          padding: "14px 16px",
                           background:
-                            "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
-                          border: "1px solid #bae6fd",
-                          borderRadius: "8px",
+                            "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
+                          border: "1px solid #3b82f6",
+                          borderRadius: "10px",
                           fontSize: "14px",
-                          color: "#0c4a6e",
-                          boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                          color: "#1e3a8a",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
                         }}
                       >
-                        <div style={{ fontWeight: "600", marginBottom: "4px" }}>
-                          <FaRegClock /> Thời gian hoàn thành dự kiến
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            marginBottom: "8px",
+                          }}
+                        >
+                          <FaRegClock size={18} />
+                          <strong>Thời gian sạc đầy pin:</strong>
                         </div>
                         <div
                           style={{
                             fontSize: "16px",
                             fontWeight: "700",
-                            color: "#0369a1",
+                            color: "#1e40af",
                           }}
                         >
-                          {expectedEndTime.toLocaleTimeString("vi-VN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}{" "}
-                          <span style={{ fontSize: "13px", fontWeight: "500" }}>
-                            (
-                            {expectedEndTime.toLocaleDateString("vi-VN", {
-                              day: "2-digit",
-                              month: "2-digit",
-                              year: "numeric",
-                            })}
-                            )
-                          </span>
+                          {formatChargingTime(chargingTimeSeconds)}
                         </div>
                       </div>
-                    )}
-                  </div>
+
+                      {/* Thời gian hoàn thành dự kiến */}
+                      {expectedEndTime && (
+                        <div
+                          style={{
+                            padding: "14px 16px",
+                            background:
+                              "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+                            border: "1px solid #0ea5e9",
+                            borderRadius: "10px",
+                            fontSize: "14px",
+                            color: "#0c4a6e",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontWeight: "600",
+                              marginBottom: "8px",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                            }}
+                          >
+                            <ClockCircleOutlined />
+                            Thời gian hoàn thành dự kiến
+                          </div>
+                          <div
+                            style={{
+                              fontSize: "16px",
+                              fontWeight: "700",
+                              color: "#0369a1",
+                            }}
+                          >
+                            {expectedEndTime.toLocaleTimeString("vi-VN", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}{" "}
+                            <span
+                              style={{ fontSize: "14px", fontWeight: "500" }}
+                            >
+                              (
+                              {expectedEndTime.toLocaleDateString("vi-VN", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                              })}
+                              )
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        textAlign: "center",
+                        padding: "20px",
+                        color: "#666",
+                      }}
+                    >
+                      Đang tải thông tin pin...
+                    </div>
+                  )}
                 </div>
               </>
             )}
@@ -578,9 +663,9 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
             <button
               className="qr-result-btn qr-result-btn-primary"
               onClick={handleStartCharging}
-              disabled={isLoading || dataLoading || !postData}
+              disabled={isLoading || dataLoading || !postData || !pinData}
             >
-              {isLoading ? "Đang xử lý..." : "Bắt đầu sạc"}
+              {isLoading ? "Đang xử lý..." : "Bắt đầu sạc đầy pin"}
             </button>
           </div>
         </div>
