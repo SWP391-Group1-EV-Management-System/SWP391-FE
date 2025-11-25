@@ -19,16 +19,16 @@ const ServicePackageSchema = Yup.object().shape({
   price: Yup.number()
     .typeError('Giá phải là số')
     .required('Vui lòng nhập giá')
-    .min(0, 'Giá phải là số dương'),
+    .min(10000, 'Giá phải lớn hơn 10,000 VNĐ'),
   billingCycle: Yup.number()
     .typeError('Chu kỳ phải là số (tháng)')
     .required('Vui lòng nhập chu kỳ thanh toán')
-    .min(0, 'Chu kỳ phải >= 0'),
+    .min(1, 'Chu kỳ phải >= 1'),
   unit: Yup.string().required('Vui lòng chọn đơn vị'),
   quota: Yup.number()
-    .typeError('Quota phải là số')
-    .required('Vui lòng nhập quota')
-    .min(0, 'Quota phải >= 0'),
+    .typeError('Dung lượng phải là số')
+    .required('Vui lòng nhập dung lượng')
+    .min(1000, 'Dung lượng phải >= 1000'),
 });
 
 const ServicePackageForm = ({
@@ -90,12 +90,12 @@ const ServicePackageForm = ({
             <div style={{ marginTop: 6 }}>{Number(data.price || 0).toLocaleString('vi-VN')} VNĐ</div>
           </Col>
           <Col span={8}>
-            <Text strong>Quota</Text>
+            <Text strong>Dung lượng</Text>
             <div style={{ marginTop: 6 }}>{Number(data.quota || 0)}</div>
           </Col>
         </Row>
         <div style={{ marginTop: 12 }}>
-          <Text strong>Đơn vị</Text>
+          <Text strong>Số tháng</Text>
           <div style={{ marginTop: 6 }}>{String(data.unit || '')}</div>
         </div>
       </Modal>
@@ -204,7 +204,7 @@ const ServicePackageForm = ({
 
               <Col span={8}>
               <div style={{ marginBottom: 12 }}>
-              <label htmlFor="quota">Quota</label>
+              <label htmlFor="quota">Dung lượng(kWh)</label>
               <Field name="quota">
                 {({ field }) => (
                   <input
@@ -258,10 +258,7 @@ const ServicePackageForm = ({
                     <Text>Chu kỳ: </Text><Text>{confirmValues.billingCycle} tháng</Text>
                   </div>
                   <div style={{ marginTop: 8 }}>
-                    <Text>Đơn vị: </Text><Text>{confirmValues.unit}</Text>
-                  </div>
-                  <div style={{ marginTop: 8 }}>
-                    <Text>Quota: </Text><Text>{confirmValues.quota}</Text>
+                    <Text>Dung lượng: </Text><Text>{confirmValues.quota} kWh</Text>
                   </div>
                   <div style={{ marginTop: 12 }}>
                     <Text type="secondary">{confirmValues.description}</Text>

@@ -70,7 +70,7 @@ function DashboardContent() {
           <Col xs={24} sm={12} lg={6}>
             <Card
               variant="outlined"
-              style={{ borderRadius: 8, padding: "8px 0" }}
+              style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
             >
               <div style={{ textAlign: "center" }}>
                 <DollarOutlined
@@ -95,7 +95,7 @@ function DashboardContent() {
           <Col xs={24} sm={12} lg={6}>
             <Card
               variant="outlined"
-              style={{ borderRadius: 8, padding: "8px 0" }}
+              style={{ borderRadius: 8, padding: "8px 0", height: "230px"}}
             >
               <div style={{ textAlign: "center" }}>
                 <DollarOutlined
@@ -120,7 +120,7 @@ function DashboardContent() {
           <Col xs={24} sm={12} lg={6}>
             <Card
               variant="outlined"
-              style={{ borderRadius: 8, padding: "8px 0" }}
+              style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
             >
               <div style={{ textAlign: "center" }}>
                 <FaChartLine
@@ -145,7 +145,7 @@ function DashboardContent() {
           <Col xs={24} sm={12} lg={6}>
             <Card
               variant="outlined"
-              style={{ borderRadius: 8, padding: "8px 0" }}
+              style={{ borderRadius: 8, padding: "8px 0" , height: "230px" }}
             >
               <div style={{ textAlign: "center" }}>
                 <FaChartLine
@@ -169,7 +169,7 @@ function DashboardContent() {
           </Col>
         </Row>
 
-        {/* Hàng 2: Danh sách trạm và Thống kê hệ thống */}
+        {/* Hàng 2: Danh sách trạm và Phiên sạc */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
           {/* Danh sách trạm sạc */}
           <Col xs={24} lg={18}>
@@ -180,11 +180,11 @@ function DashboardContent() {
                 </Text>
               }
               variant="outlined"
-              style={{ borderRadius: 8, height: "100%" }}
+              style={{ borderRadius: 8, height: "450px" }}
               styles={{
                 body: {
                   padding: "16px",
-                  maxHeight: "440px",
+                  height: "calc(100% - 57px)", // Trừ đi chiều cao của header
                   overflowY: "auto",
                 },
               }}
@@ -285,7 +285,60 @@ function DashboardContent() {
             </Card>
           </Col>
 
-          {/* Thống kê hệ thống */}
+          {/* Phiên sạc */}
+          <Col xs={24} lg={6}>
+            <Card
+              title={
+                <Text style={{ fontSize: 16, fontWeight: 600 }}>Phiên sạc</Text>
+              }
+              variant="outlined"
+              style={{ borderRadius: 8, height: "450px" }}
+              styles={{ body: { padding: "20px 16px" } }}
+            >
+              <div style={{ marginBottom: 32, textAlign: "center" }}>
+                <FaChartLine
+                  style={{ color: "#eb2f96", fontSize: 32, marginBottom: 12 }}
+                />
+                <div
+                  style={{
+                    fontSize: 36,
+                    fontWeight: 700,
+                    color: "#eb2f96",
+                    marginBottom: 8,
+                  }}
+                >
+                  {dashboardData?.totalSessions || 0}
+                </div>
+                <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
+                  Tổng số phiên sạc
+                </Text>
+              </div>
+              <Divider style={{ margin: "20px 0" }} />
+              <div style={{ textAlign: "center" }}>
+                <FaChartLine
+                  style={{ color: "#fa8c16", fontSize: 32, marginBottom: 12 }}
+                />
+                <div
+                  style={{
+                    fontSize: 36,
+                    fontWeight: 700,
+                    color: "#fa8c16",
+                    marginBottom: 8,
+                  }}
+                >
+                  {dashboardData?.totalSessionsInMonth || 0}
+                </div>
+                <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
+                  Phiên sạc trong tháng
+                </Text>
+              </div>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Hàng 3: Thống kê hệ thống và Bản đồ */}
+        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+          {/* Thống kê hệ thống - Moved from row 2 */}
           <Col xs={24} lg={6}>
             <Card
               title={
@@ -355,73 +408,20 @@ function DashboardContent() {
               </div>
             </Card>
           </Col>
-        </Row>
-
-        {/* Hàng 3: Phiên sạc và Bản đồ */}
-        <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          {/* Phiên sạc */}
-          <Col xs={24} lg={6}>
-            <Card
-              title={
-                <Text style={{ fontSize: 16, fontWeight: 600 }}>Phiên sạc</Text>
-              }
-              variant="outlined"
-              style={{ borderRadius: 8, height: "100%" }}
-              styles={{ body: { padding: "20px 16px" } }}
-            >
-              <div style={{ marginBottom: 32, textAlign: "center" }}>
-                <FaChartLine
-                  style={{ color: "#eb2f96", fontSize: 32, marginBottom: 12 }}
-                />
-                <div
-                  style={{
-                    fontSize: 36,
-                    fontWeight: 700,
-                    color: "#eb2f96",
-                    marginBottom: 8,
-                  }}
-                >
-                  {dashboardData?.totalSessions || 0}
-                </div>
-                <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
-                  Tổng số phiên sạc
-                </Text>
-              </div>
-              <Divider style={{ margin: "20px 0" }} />
-              <div style={{ textAlign: "center" }}>
-                <FaChartLine
-                  style={{ color: "#fa8c16", fontSize: 32, marginBottom: 12 }}
-                />
-                <div
-                  style={{
-                    fontSize: 36,
-                    fontWeight: 700,
-                    color: "#fa8c16",
-                    marginBottom: 8,
-                  }}
-                >
-                  {dashboardData?.totalSessionsInMonth || 0}
-                </div>
-                <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
-                  Phiên sạc trong tháng
-                </Text>
-              </div>
-            </Card>
-          </Col>
 
           {/* Bản đồ */}
           <Col xs={24} lg={18}>
             <Card
               title={
-                <Text style={{ fontSize: 16, fontWeight: 600 }}>
+                <Text style={{ fontSize: 16, fontWeight: 610 }}>
                   Tổng quan trạm
                 </Text>
               }
               variant="outlined"
-              style={{ borderRadius: 8 }}
-              styles={{ body: { padding: "16px" } }}
+              style={{ borderRadius: 8, height: "100%" }}
+              styles={{ body: { padding: "20px" } }}
             >
-              <div style={{ height: "440px", width: "100%" }}>
+              <div style={{ height: "500px", width: "100%" }}>
                 <Map />
               </div>
             </Card>

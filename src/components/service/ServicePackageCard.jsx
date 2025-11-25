@@ -22,7 +22,7 @@ const ServicePackageCard = ({
   quota,
   type,
   isActive = false,
-  isDisabled = false, // ← THÊM PROP MỚI
+  isDisabled = false,
   onSubscribe 
 }) => {
   
@@ -166,7 +166,7 @@ const ServicePackageCard = ({
             <Text strong style={{ color: isDisabled ? disabledColor : '#000' }}>Hạn mức:</Text>
           </Space>
           <Text style={{ fontSize: '14px', fontWeight: 500, color: isDisabled ? disabledColor : '#000' }}>
-            {quota ?? 'Không giới hạn'}
+            {quota ?? 'Không giới hạn'} kWh
           </Text>
         </div>
       </Space>
