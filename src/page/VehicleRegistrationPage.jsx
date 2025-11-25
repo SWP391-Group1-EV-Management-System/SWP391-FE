@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { message, Spin } from 'antd';
+import { message, Spin, notification, Button } from 'antd';
 import { PlusOutlined, CarOutlined } from '@ant-design/icons';
 import PageHeader from '../components/PageHeader';
 import VehicleRegistrationCard from '../components/car/VehicleRegistrationCard';
@@ -81,6 +81,25 @@ const VehicleRegistrationPage = () => {
       
       if (userId) fetchCarsByUser(userId);
     } catch (error) {
+      // Nếu backend trả về lỗi 400 (thường do trùng biển số hoặc trùng số khung),
+      // hiển thị thông báo cụ thể theo yêu cầu.
+      if (error?.response?.status === 400) {
+        notification.open({
+          message: 'Lỗi đăng ký xe',
+          description: (
+            <div>
+              <div>Hệ thống phát hiện biển số hoặc số khung xe đã được đăng ký.</div>
+              <div>
+                Vui lòng liên hệ: <span style={{ display: 'inline-block', backgroundColor: '#0b9459', color: '#fff', padding: '4px 10px', borderRadius: '20px', fontWeight: 700 }}>tramsacecoz@gmail.com</span>
+              </div>
+              <div>Và cung cấp thông tin xác minh để chúng tôi hỗ trợ xử lý.</div>
+            </div>
+          ),
+          duration: 0,
+        });
+        return;
+      }
+
       const errorMsg = error.response?.data || (isEditing ? 'Cập nhật xe thất bại!' : 'Đăng ký xe thất bại!');
       message.error(errorMsg);
     }

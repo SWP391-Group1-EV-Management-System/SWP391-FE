@@ -130,7 +130,8 @@ export const useDashboard = (userId) => {
         reputationPoint: 0,
       });
     } finally {
-      if (!mounted.current) return;
+      if (!mounted.current)
+        return;
       setLoading(false);
     }
   }, [userId]);
