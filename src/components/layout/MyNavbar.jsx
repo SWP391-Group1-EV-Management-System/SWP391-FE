@@ -167,16 +167,6 @@ function MyNavbar({ collapsed }) {
               <BsQrCodeScan className="nav-icon" />
               <span className="btn-label">Quét mã</span>
             </div>
-
-            {/* Icon thông báo */}
-            <div className="icon-item" title="Thông báo">
-              <FaRegBell className="nav-icon" />
-            </div>
-
-            {/* Icon tin nhắn */}
-            <div className="icon-item" title="Tin nhắn">
-              <FaRegEnvelope className="nav-icon" />
-            </div>
           </div>
         )}
 

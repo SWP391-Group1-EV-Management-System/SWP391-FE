@@ -323,20 +323,12 @@ const SessionStaffPage = () => {
   );
 
   return (
-    <div className="session-staff-page">
+    <div className="session-staff-page" style={{ background: "white" }}>
       <PageHeader
         title="Phiên sạc nhân viên"
         icon={<ThunderboltOutlined />}
         subtitle="Hệ thống quản lý trạm sạc xe điện thông minh, bền vững và thân thiện môi trường"
       />
-
-      {/* Quick payments button on header */}
-      <div style={{ position: "absolute", left: 20, top: 20 }}>
-        <Button type="primary" icon={<DollarOutlined />} onClick={() => setShowPaymentsModal(true)}>
-          Thanh toán
-        </Button>
-      </div>
-
       {/* Statistics Cards */}
       <Row gutter={[24, 24]} className="session-margin-bottom-32">
         {statsData.map((stat, index) => (
