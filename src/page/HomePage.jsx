@@ -10,23 +10,17 @@ import {
   Col,
   Card,
   Badge,
-  Button,
-  ProgressBar,
   ListGroup,
 } from "react-bootstrap";
 import {
   BsLightning,
   BsMap,
   BsClock,
-  BsBookmarkStar,
   BsShield,
   BsGlobe,
   BsStarFill,
   BsTrophy,
-  BsGraphUp,
-  BsPeople,
   BsCheck2Circle,
-  BsArrowRight,
   BsFire,
   BsAward,
 } from "react-icons/bs";
@@ -288,19 +282,21 @@ function HomePage() {
 
         {/* Các card thống kê */}
         {!dashboardLoading && (
-          <div className="info-card-container">
+          <Row className="info-card-container">
             {stats.map((stat, index) => (
-              <div key={index} className="info-card">
-                <div className="card-icon">
-                  <stat.icon size={32} color="#0b9459" />
+              <Col lg={4} md={4} sm={12} key={index}>
+                <div className="info-card">
+                  <div className="card-icon">
+                    <stat.icon size={32} color="#0b9459" />
+                  </div>
+                  <div className="card-value" style={{ color: "black" }}>
+                    {stat.value}
+                  </div>
+                  <h4 className="card-title">{stat.label}</h4>
                 </div>
-                <div className="card-value" style={{ color: "#0b9459" }}>
-                  {stat.value}
-                </div>
-                <h4 className="card-title">{stat.label}</h4>
-              </div>
+              </Col>
             ))}
-          </div>
+          </Row>
         )}
 
         {/* Hoạt động gần đây và Trạm sạc nổi bật */}

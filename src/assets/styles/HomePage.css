@@ -112,78 +112,57 @@
 /* ==================== INFO CARD GRID SYSTEM ==================== */
 
 /**
- * Grid container for stat cards and action cards
- * Uses CSS Grid with fixed 4 columns for consistent layout
- * All cards in same row automatically have equal heights
+ * Grid container for stat cards - uses Bootstrap Row/Col system like MapPage
  */
 .home-dashboard-container .info-card-container {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 3rem; /* Increased margin for consistent spacing */
-  grid-auto-rows: 1fr; /* Ensures all cards in the same row have equal height */
+  margin-bottom: 3rem;
 }
 
-/* Info Cards */
+/* Info Cards - matching MapPage stat cards style */
 .home-dashboard-container .info-card {
   background: white;
   border-radius: 16px;
   border: 1px solid #e5e7eb;
   padding: 2rem;
   position: relative;
-  overflow: auto; /* Enable scroll if content is too long */
+  overflow: auto;
   transition: all 0.3s ease;
   box-shadow: 0 2px 10px rgba(5, 119, 70, 0.08);
   display: flex;
   flex-direction: column;
-  text-align: center; /* Căn giữa text */
-  min-height: 0; /* Allow shrinking */
+  text-align: center;
+  height: 100%;
 }
 
-/* Gradient top border removed */
-
 .home-dashboard-container .info-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(5, 119, 70, 0.12);
 }
 
+/* Card Icon */
 .home-dashboard-container .card-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.25rem auto; /* Căn giữa icon */
   font-size: 3.5rem;
+  margin-bottom: 1rem;
+  display: block;
 }
 
-.home-dashboard-container .card-title {
-  font-size: 1.6rem;
-  color: #6b7280;
-  font-weight: 500;
-  margin-bottom: 0.75rem;
-}
-
+/* Card Value - Số to lên giống MapPage */
 .home-dashboard-container .card-value {
   font-size: 4rem;
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 0.5rem;
+  display: block;
+  line-height: 1;
 }
 
-.home-dashboard-container .card-sub {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 1.4rem;
-  color: #10b981;
+/* Card Title - Chữ nhỏ lại giống MapPage */
+.home-dashboard-container .card-title {
+  font-size: 1.3rem;
+  color: #6b7280;
   font-weight: 500;
+  margin-bottom: 0;
 }
-
-
-
-
 
 /* Section Title */
 .home-dashboard-container .section-title {
@@ -194,7 +173,6 @@
   align-items: center;
   margin-top: 0.5rem; /* Add top margin for section separation */
 }
-
 
 /* ==================== DETAIL CARDS ==================== */
 
@@ -452,8 +430,6 @@
     flex-direction: column;
     gap: 1rem;
   }
-
-
 
   .home-dashboard-container .card-value {
     font-size: 1.75rem;

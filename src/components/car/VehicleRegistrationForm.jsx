@@ -17,6 +17,58 @@ const VehicleRegistrationForm = ({ isOpen, onClose, onSubmit, initialValues, isE
   // Lấy danh sách xe có sẵn từ database
   const { carDataList, loading: loadingCarData, fetchAllCarData } = useCar();
 
+  // Validate biển số xe: 2 số + 1-2 chữ + tối đa 6 số
+  const validateLicensePlate = (_, value) => {
+    if (!value) {
+      return Promise.reject(new Error("Vui lòng nhập biển số xe!"));
+    }
+    
+    // Pattern: 2 số đầu + 1-2 chữ cái + 1-6 số
+    const licensePlatePattern = /^\d{2}[A-Z]{1,2}\d{1,6}$/;
+    
+    if (!licensePlatePattern.test(value.toUpperCase())) {
+      return Promise.reject(
+        new Error("Biển số xe không hợp lệ!")
+      );
+    }
+    
+    return Promise.resolve();
+  };
+
+  // Validate số khung: 17 ký tự, không chứa I, O, Q
+  const validateChassisNumber = (_, value) => {
+    if (!value) {
+      return Promise.reject(new Error("Vui lòng nhập số khung!"));
+    }
+    
+    // Kiểm tra độ dài
+    if (value.length !== 17) {
+      return Promise.reject(new Error("Số khung phải có đúng 17 ký tự!"));
+    }
+    
+    // Kiểm tra chỉ chứa chữ và số
+    const validPattern = /^[A-HJ-NPR-Z0-9]{17}$/i;
+    if (!validPattern.test(value)) {
+      return Promise.reject(
+        new Error("Số khung không hợp lệ!")
+      );
+    }
+    
+    return Promise.resolve();
+  };
+
+  // Tự động chuyển số khung thành chữ hoa
+  const handleChassisNumberChange = (e) => {
+    const upperValue = e.target.value.toUpperCase();
+    form.setFieldValue('chassisNumber', upperValue);
+  };
+
+  // Tự động chuyển biển số xe thành chữ hoa
+  const handleLicensePlateChange = (e) => {
+    const upperValue = e.target.value.toUpperCase();
+    form.setFieldValue('licensePlate', upperValue);
+  };
+
   // Load danh sách xe khi mở modal
   useEffect(() => {
     if (isOpen) {
@@ -134,17 +186,25 @@ const VehicleRegistrationForm = ({ isOpen, onClose, onSubmit, initialValues, isE
         <Form.Item
           name="licensePlate"
           label="Biển số xe"
-          rules={[{ required: true, message: "Vui lòng nhập biển số xe!" }]}
+          rules={[{ validator: validateLicensePlate }]}
         >
-          <Input placeholder="Nhập biển số xe (VD: 30A-12345)" />
+          <Input 
+            placeholder="Nhập biển số xe (VD: 12A12345 hoặc 12AA12345)" 
+            maxLength={10}
+            onChange={handleLicensePlateChange}
+          />
         </Form.Item>
 
         <Form.Item
           name="chassisNumber"
           label="Số khung"
-          rules={[{ required: true, message: "Vui lòng nhập số khung!" }]}
+          rules={[{ validator: validateChassisNumber }]}
         >
-          <Input placeholder="Nhập số khung" />
+          <Input 
+            placeholder="Nhập số khung (17 ký tự)" 
+            maxLength={17}
+            onChange={handleChassisNumberChange}
+          />
         </Form.Item>
 
         <Form.Item
