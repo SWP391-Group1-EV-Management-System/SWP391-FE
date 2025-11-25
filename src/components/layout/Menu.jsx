@@ -22,6 +22,7 @@ import {
   BsClipboardData,
   BsHourglassSplit,
   BsCalendar2Check,
+  BsFileText, // Thêm icon cho Báo cáo
 } from "react-icons/bs";
 import { MdMenuOpen, MdDashboard } from "react-icons/md";
 import { Button } from "react-bootstrap";
@@ -41,7 +42,7 @@ const menuItemsByRole = {
     },
     {
       id: "usermanagement",
-      label: "Quản lý người dùng",
+      label: "Quản lý",
       icon: BsPeopleFill,
       path: "/app/usermanagement",
     },
@@ -50,6 +51,12 @@ const menuItemsByRole = {
       label: "Quản lý xe",
       icon: BsPeopleFill,
       path: "/app/carmanagement",
+    },
+    {
+      id: "reportcar",
+      label: "Báo cáo",
+      icon: BsFileText,
+      path: "/app/reportcar",
     },
   ],
   STAFF: [

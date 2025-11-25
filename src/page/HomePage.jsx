@@ -356,7 +356,7 @@ function HomePage() {
                     <div className="station-info">
                       <span className="info-item">
                         <BsLightning size={14} className="me-1 text-warning" />
-                        {station.charging} phiên đã sạc
+                        {station.charging} chổ sạc
                       </span>
                       <span className="info-item ms-3">
                         <BsCheck2Circle

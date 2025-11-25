@@ -7,6 +7,7 @@ import {
   UserOutlined,
   AppstoreOutlined,
   CalendarOutlined,
+  WarningOutlined,
 } from "@ant-design/icons";
 import PageHeader from "../components/PageHeader";
 import { FaChartLine } from "react-icons/fa";
@@ -65,9 +66,9 @@ function DashboardContent() {
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
         <PageHeader title="Thống kê" icon={<ThunderboltOutlined />} />
 
-        {/* Hàng 1: 4 thẻ chính - Doanh thu và Thanh toán */}
+        {/* Hàng 1: 3 thẻ chính - Doanh thu và Báo cáo */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          <Col xs={24} sm={12} lg={6}>
+          <Col xs={24} sm={12} lg={8}>
             <Card
               variant="outlined"
               style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
@@ -92,7 +93,7 @@ function DashboardContent() {
               </div>
             </Card>
           </Col>
-          <Col xs={24} sm={12} lg={6}>
+          <Col xs={24} sm={12} lg={8}>
             <Card
               variant="outlined"
               style={{ borderRadius: 8, padding: "8px 0", height: "230px"}}
@@ -117,52 +118,27 @@ function DashboardContent() {
               </div>
             </Card>
           </Col>
-          <Col xs={24} sm={12} lg={6}>
-            <Card
-              variant="outlined"
-              style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
-            >
-              <div style={{ textAlign: "center" }}>
-                <FaChartLine
-                  style={{ color: "#faad14", fontSize: 32, marginBottom: 12 }}
-                />
-                <div
-                  style={{
-                    fontSize: 36,
-                    fontWeight: 700,
-                    color: "#faad14",
-                    marginBottom: 8,
-                  }}
-                >
-                  {(dashboardData?.amountUserPaidByMoney || 0) + " lượt"}
-                </div>
-                <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
-                  Số lượt thanh toán Momo
-                </Text>
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} lg={6}>
+          <Col xs={24} sm={12} lg={8}>
             <Card
               variant="outlined"
               style={{ borderRadius: 8, padding: "8px 0" , height: "230px" }}
             >
               <div style={{ textAlign: "center" }}>
-                <FaChartLine
-                  style={{ color: "#722ed1", fontSize: 32, marginBottom: 12 }}
+                <WarningOutlined
+                  style={{ color: "#ff4d4f", fontSize: 32, marginBottom: 12 }}
                 />
                 <div
                   style={{
                     fontSize: 36,
                     fontWeight: 700,
-                    color: "#722ed1",
+                    color: "#ff4d4f",
                     marginBottom: 8,
                   }}
                 >
-                  {(dashboardData?.amountUserPaidByPackage || 0) + " lượt"}
+                  {(dashboardData?.totalReports || 0) + " báo cáo"}
                 </div>
                 <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
-                  Số lượt thanh toán bằng gói
+                  Tổng số báo cáo lỗi
                 </Text>
               </div>
             </Card>
@@ -184,7 +160,7 @@ function DashboardContent() {
               styles={{
                 body: {
                   padding: "16px",
-                  height: "calc(100% - 57px)", // Trừ đi chiều cao của header
+                  height: "calc(100% - 57px)",
                   overflowY: "auto",
                 },
               }}
@@ -204,7 +180,6 @@ function DashboardContent() {
                       alignItems: "flex-start",
                     }}
                   >
-                    {/* Phần thông tin trạm */}
                     <div style={{ flex: 1 }}>
                       <div
                         style={{
@@ -241,7 +216,6 @@ function DashboardContent() {
                       </Text>
                     </div>
 
-                    {/* Phần số trụ sạc */}
                     <div
                       style={{
                         display: "flex",
@@ -338,7 +312,6 @@ function DashboardContent() {
 
         {/* Hàng 3: Thống kê hệ thống và Bản đồ */}
         <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-          {/* Thống kê hệ thống - Moved from row 2 */}
           <Col xs={24} lg={6}>
             <Card
               title={

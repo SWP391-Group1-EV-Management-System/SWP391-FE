@@ -124,12 +124,73 @@ const useCar = () => {
     }
   }, []);
 
+  //For ADMIN functions can be added here similarly
+  
+  const createReportCar = useCallback(async (reportData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const createdReport = await carService.createReportCar(reportData);
+      return createdReport;
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchLiscensePlates = useCallback(async (licensePlate) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await carService.getLiscensePlates(licensePlate);
+      return data;
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchChassisNumber = useCallback(async (chassisNumber) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await carService.getChassisNumber(chassisNumber);
+      return data;
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchAllReports = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await carService.getAllReport();
+      return data;
+    } catch (err) {
+      setError(err);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
   return {
     cars,
     car,
     carDataList,
     loading,
     error,
+    fetchAllReports,
+    createReportCar,
+    fetchLiscensePlates,
+    fetchChassisNumber,
     fetchAllCars,
     fetchCarsByUser,
     getCarsByUser: fetchCarsByUser,

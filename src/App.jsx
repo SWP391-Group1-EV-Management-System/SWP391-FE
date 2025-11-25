@@ -33,7 +33,6 @@ import PaymentPage from "./page/PaymentPage.jsx";
 // Driver Status Pages
 import WaitingPage from "./page/WaitingListPage.jsx";
 import BookingPage from "./page/BookingPage.jsx";
-
 import PaymentHistory from "./page/PaymentHistoryPage.jsx";
 
 // Utilities
@@ -50,6 +49,8 @@ import RootRedirect from "./components/auth/RootRedirect.jsx";
 import ChatBox from "./components/chat/ChatBox.jsx";
 import { useRole } from "./hooks/useAuth";
 import UserProfile from "./components/layout/UserProfile.jsx";
+import CarManagementPage from "./page/CarManagementPage.jsx";
+import ReportPage from "./page/ReportPage.jsx";
 
 function App() {
   // ✅ Cleanup frozen countdown keys cũ khi app khởi động
@@ -202,6 +203,22 @@ function App() {
               element={
                 <ManagerRoute>
                   <UserManagementPage />
+                </ManagerRoute>
+              }
+            />
+            <Route
+              path="carmanagement"
+              element={
+                <ManagerRoute>
+                  <CarManagementPage />
+                </ManagerRoute>
+              }
+            />
+            <Route
+              path="reportcar"
+              element={
+                <ManagerRoute>
+                  <ReportPage />
                 </ManagerRoute>
               }
             />
