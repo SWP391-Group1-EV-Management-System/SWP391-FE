@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Table, Button, Space, Popconfirm, message } from 'antd';
-import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Table, Button, Space, message } from 'antd';
+import { EyeOutlined, EditOutlined } from '@ant-design/icons';
 import UserModal from './UserModal';
 import useUser from '../../hooks/useUser';
 import { getUserById } from '../../services/userService';
@@ -8,24 +8,13 @@ import { getUserById } from '../../services/userService';
 const DriverTable = ({ search }) => {
   const [modal, setModal] = useState({ visible: false, mode: 'view', user: null });
   const [loadingUser, setLoadingUser] = useState(false);
-  const { users, loading, refresh, update, remove } = useUser('Driver');
+  const { users, loading, refresh, update } = useUser('Driver');
 
   const data = (users || []).filter(
     u =>
       (`${u.firstName} ${u.lastName}`.toLowerCase().includes(search?.toLowerCase() || '') ||
         u.email.toLowerCase().includes(search?.toLowerCase() || ''))
   );
-
-  const handleDelete = async (id, name) => {
-    try {
-      await remove(id);
-      message.success(`Đã xóa người dùng "${name}"`);
-      refresh();
-    } catch (err) {
-      console.error(err);
-      message.error('Xóa người dùng thất bại');
-    }
-  };
 
   const handleViewEdit = async (record, mode) => {
     try {
@@ -65,9 +54,9 @@ const DriverTable = ({ search }) => {
     { title: 'Giới tính', dataIndex: 'gender', key: 'gender', width: 90 },
     { title: 'Trạng thái', dataIndex: 'status', key: 'status', width: 100 },
     {
-      title: 'Actions',
+      title: 'Hành động',
       key: 'actions',
-      width: 200,
+      width: 150,
       render: (_, record) => (
         <Space>
           <Button 
@@ -86,15 +75,6 @@ const DriverTable = ({ search }) => {
           >
             Edit
           </Button>
-
-          <Popconfirm
-            title={`Bạn có chắc chắn muốn xóa ${record.firstName} ${record.lastName}?`}
-            onConfirm={() => handleDelete(record.id, `${record.firstName} ${record.lastName}`)}
-            okText="Xóa"
-            cancelText="Hủy"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>Delete</Button>
-          </Popconfirm>
         </Space>
       ),
     },
