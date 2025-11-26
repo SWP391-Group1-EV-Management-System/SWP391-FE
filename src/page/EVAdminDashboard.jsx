@@ -145,6 +145,60 @@ function DashboardContent() {
           </Card>
         </Col>
       </Row>
+
+      {/* Phân loại thanh toán */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24} sm={12}>
+          <Card
+            variant="outlined"
+            style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <DollarOutlined
+                style={{ color: "#722ed1", fontSize: 32, marginBottom: 12 }}
+              />
+              <div
+                style={{
+                  fontSize: 36,
+                  fontWeight: 700,
+                  color: "#722ed1",
+                  marginBottom: 8,
+                }}
+              >
+                {formatCurrency(dashboardData?.amountUserPaidByMoney || 0)}
+              </div>
+              <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
+                Thanh toán bằng tiền
+              </Text>
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} sm={12}>
+          <Card
+            variant="outlined"
+            style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <AppstoreOutlined
+                style={{ color: "#fa8c16", fontSize: 32, marginBottom: 12 }}
+              />
+              <div
+                style={{
+                  fontSize: 36,
+                  fontWeight: 700,
+                  color: "#fa8c16",
+                  marginBottom: 8,
+                }}
+              >
+                {formatCurrency(dashboardData?.amountUserPaidByPackage || 0)}
+              </div>
+              <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
+                Thanh toán bằng gói
+              </Text>
+            </div>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 
