@@ -1,31 +1,22 @@
 import React, { useState } from 'react';
-import { Table, Button, Space, Popconfirm, message } from 'antd';
-import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Table, Button, Space, message } from 'antd';
+import { EyeOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
 import UserModal from './UserModal';
+import CreateStaffModal from './CreateStaffModal';
 import useUser from '../../hooks/useUser';
 import { getUserById } from '../../services/userService';
 
 const StaffTable = ({ search }) => {
   const [modal, setModal] = useState({ visible: false, mode: 'view', user: null });
+  const [createModalVisible, setCreateModalVisible] = useState(false);
   const [loadingUser, setLoadingUser] = useState(false);
-  const { users, loading, refresh, update, remove } = useUser('Staff');
+  const { users, loading, refresh, update } = useUser('Staff');
 
   const data = (users || []).filter(
     u =>
       (`${u.firstName} ${u.lastName}`.toLowerCase().includes(search?.toLowerCase() || '') ||
         u.email.toLowerCase().includes(search?.toLowerCase() || ''))
   );
-
-  const handleDelete = async (id, name) => {
-    try {
-      await remove(id);
-      message.success(`Đã xóa người dùng "${name}"`);
-      refresh();
-    } catch (err) {
-      console.error(err);
-      message.error('Xóa người dùng thất bại');
-    }
-  };
 
   const handleViewEdit = async (record, mode) => {
     try {
@@ -65,9 +56,9 @@ const StaffTable = ({ search }) => {
     { title: 'Giới tính', dataIndex: 'gender', key: 'gender', width: 90 },
     { title: 'Trạng thái', dataIndex: 'status', key: 'status', width: 100 },
     {
-      title: 'Actions',
+      title: 'Hành động',
       key: 'actions',
-      width: 200,
+      width: 150,
       render: (_, record) => (
         <Space>
           <Button 
@@ -86,15 +77,6 @@ const StaffTable = ({ search }) => {
           >
             Edit
           </Button>
-
-          <Popconfirm
-            title={`Bạn có chắc chắn muốn xóa ${record.firstName} ${record.lastName}?`}
-            onConfirm={() => handleDelete(record.id, `${record.firstName} ${record.lastName}`)}
-            okText="Xóa"
-            cancelText="Hủy"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />}>Delete</Button>
-          </Popconfirm>
         </Space>
       ),
     },
@@ -102,6 +84,24 @@ const StaffTable = ({ search }) => {
 
   return (
     <>
+      {/* Nút tạo nhân viên mới */}
+      <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'flex-end' }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setCreateModalVisible(true)}
+          size="large"
+          style={{
+            background: 'linear-gradient(90deg, #10b981 0%, #34d399 100%)',
+            borderColor: '#10b981',
+            fontWeight: 600,
+            boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)',
+          }}
+        >
+          Tạo nhân viên mới
+        </Button>
+      </div>
+
       <Table
         rowKey="id"
         columns={columns}
@@ -111,6 +111,8 @@ const StaffTable = ({ search }) => {
         style={{ borderRadius: 12, overflow: 'hidden' }}
         loading={loading}
       />
+      
+      {/* Modal xem/chỉnh sửa user */}
       {modal.visible && (
         <UserModal
           visible={modal.visible}
@@ -123,6 +125,17 @@ const StaffTable = ({ search }) => {
           onUpdate={update}
         />
       )}
+
+      {/* Modal tạo nhân viên mới */}
+      <CreateStaffModal
+        visible={createModalVisible}
+        onClose={() => setCreateModalVisible(false)}
+        onSuccess={() => {
+          refresh(); // Refresh lại danh sách sau khi tạo thành công
+          setCreateModalVisible(false);
+        }}
+      />
+
       <style>{`
         .table-row-even { background: #f6fff4; }
         .table-row-odd { background: #fff; }
