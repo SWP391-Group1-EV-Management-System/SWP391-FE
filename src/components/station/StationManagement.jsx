@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Button, Space, Typography, Table } from "antd";
+import { Card, Button, Space, Typography, Table, Tag } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
@@ -96,7 +96,13 @@ function StationManagement() {
       title: "Trạng thái",
       dataIndex: "active",
       key: "active",
-      render: (v) => (v ? "Hoạt động" : "Ngưng"),
+      render: (v) => (
+        v ? (
+          <Tag color="green">Hoạt động</Tag>
+        ) : (
+          <Tag color="orange">Bảo trì</Tag>
+        )
+      ),
     },
     {
       title: "Hành động",
