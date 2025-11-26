@@ -1,3 +1,4 @@
+// Trang phiên sạc nhân viên - quản lý và dừng các phiên sạc tại trạm
 import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Table,
@@ -33,6 +34,7 @@ import "../assets/styles/utilities.css";
 const { Title } = Typography;
 const { Search } = Input;
 
+// Định nghĩa trạng thái phiên sạc
 const SESSION_STATUS = {
   COMPLETED: true,
   PROCESSING: false,
@@ -43,7 +45,7 @@ const STATUS_CONFIG = {
   [SESSION_STATUS.PROCESSING]: { color: "processing", text: "Đang sạc" },
 };
 
-// Format currency helper function
+// Format tiền tệ theo VND
 const formatCurrency = (amount) => {
   if (!amount && amount !== 0) return "0 ₫";
   return new Intl.NumberFormat("vi-VN", {
@@ -58,11 +60,12 @@ const SessionStaffPage = () => {
   const [filteredSessions, setFilteredSessions] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
-  const [loadingIds, setLoadingIds] = useState([]); // session ids currently processing
+  const [loadingIds, setLoadingIds] = useState([]); // IDs đang xử lý
 
   const addLoadingId = (id) => setLoadingIds((s) => (s.includes(id) ? s : [...s, id]));
   const removeLoadingId = (id) => setLoadingIds((s) => s.filter((x) => x !== id));
 
+  // Dữ liệu thống kê dashboard
   const statsData = useMemo(() => {
     if (!dashboardInfo) return [];
 
@@ -95,6 +98,7 @@ const SessionStaffPage = () => {
     ];
   }, [dashboardInfo]);
 
+  // Dữ liệu bảng phiên sạc (sắp xếp mới nhất lên đầu)
   const tableData = useMemo(() => {
     if (!sessions || sessions.length === 0) return [];
 
@@ -119,6 +123,7 @@ const SessionStaffPage = () => {
     }));
   }, [sessions]);
 
+  // Xử lý tìm kiếm phiên sạc
   const handleSearch = useCallback(
     (value) => {
       setSearchText(value);
@@ -144,6 +149,7 @@ const SessionStaffPage = () => {
     handleSearch(searchText);
   }, [searchText, handleSearch]);
 
+  // Định nghĩa các cột của bảng
   const columns = useMemo(
     () => [
       {
@@ -155,6 +161,7 @@ const SessionStaffPage = () => {
         render: (_, record) => {
           const isProcessing = record.status === false || record.status === "charging";
 
+          // Xử lý dừng phiên sạc
           const handleStop = async (sessionId) => {
             try {
               addLoadingId(sessionId);

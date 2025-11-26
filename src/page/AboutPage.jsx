@@ -1,3 +1,4 @@
+// Trang giới thiệu Eco-Z với thông tin dịch vụ và gói sạc
 import React from "react";
 import { Link } from "react-router";
 import "../assets/styles/WelcomePageBody.css";
@@ -18,7 +19,7 @@ function WelcomePageBody() {
     <>
       <div className="welcomePageBody-header">
         <div className="welcomePageBody-cover-background">
-          {/* Title Section */}
+          {/* Tiêu đề trang */}
           <div className="welcomePageBody-content">
             <div className="welcomePageBody-title-header">Eco-Z</div>
             <div className="welcomePageBody-title-subheader">
@@ -26,9 +27,8 @@ function WelcomePageBody() {
             </div>
           </div>
 
-          {/* Main Content Container - overlapping both header and body */}
           <div className="main-content-container">
-            {/* Stats Section */}
+            {/* Thống kê tổng quan hệ thống */}
             <div className="stats-section">
               <div className="stat-card">
                 <div className="stat-number green">20+</div>
@@ -61,17 +61,17 @@ function WelcomePageBody() {
               </div>
             </div>
 
-            {/* Package Cards Section (from API) */}
+            {/* Danh sách gói dịch vụ từ API */}
             <div className="package-section">
-              {/* Hook to load packages */}
-              {/* We'll render loading state or mapped packages */}
               {(() => {
                 const { packages, loading, error, fetchAll } = usePackage();
 
+                // Tải danh sách gói khi component mount
                 useEffect(() => {
                   fetchAll().catch(() => { });
                 }, [fetchAll]);
 
+                // Hiển thị trạng thái loading
                 if (loading) {
                   return (
                     <>
@@ -82,29 +82,31 @@ function WelcomePageBody() {
                   );
                 }
 
+                // Hiển thị lỗi khi không tải được
                 if (error) {
                   return (
                     <div className="package-error">Không thể tải gói dịch vụ</div>
                   );
                 }
 
+                // Hiển thị thông báo khi chưa có gói
                 if (!packages || packages.length === 0) {
                   return (
                     <div className="package-empty">Chưa có gói dịch vụ nào</div>
                   );
                 }
 
+                // Render danh sách gói dịch vụ
                 return packages.map((p, idx) => {
                   const title = p.name || p.title || p.packageName || `Gói ${idx + 1}`;
                   const priceRaw = p.price ?? p.servicePrice ?? p.amount ?? p.cost ?? 0;
                   const price = typeof priceRaw === 'number' ? priceRaw.toLocaleString('vi-VN') + ' VNĐ' : String(priceRaw);
 
-                  // Normalize features: accept array, or string with newlines, or description string
+                  // Chuẩn hóa danh sách tính năng của gói
                   let features = [];
                   if (Array.isArray(p.features)) {
                     features = p.features;
                   } else if (typeof p.features === 'string' && p.features.trim() !== '') {
-                    // Split by newlines (backend may return a single string with line breaks)
                     features = p.features.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
                   } else if (typeof p.description === 'string' && p.description.trim() !== '') {
                     features = p.description.split(/\r?\n/).map((s) => s.trim()).filter(Boolean);
@@ -133,18 +135,15 @@ function WelcomePageBody() {
               })()}
             </div>
 
-            {/* Bottom Section — centered CTA */}
-            <div
-              className="bottom-section"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "1rem",
-                textAlign: "center",
-              }}
-            >
+            {/* Khu vực call-to-action đăng ký */}
+            <div className="bottom-section" style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "1rem",
+              textAlign: "center",
+            }}>
               <div className="main-title">
                 SẠC NHANH - XANH - AN TOÀN CÙNG ECO-Z
               </div>
@@ -156,7 +155,7 @@ function WelcomePageBody() {
               </Link>
             </div>
 
-            {/* Footer Section */}
+            {/* Footer với thông tin liên hệ */}
             <div className="footer-section">
               <img src="src/assets/images/logo.png" alt="Logo" />
               <div className="contact-info">
@@ -178,7 +177,7 @@ function WelcomePageBody() {
                   <MdPhoneIphone size={20} /> Điện thoại: (028) 7300 6588
                 </div>
                 <div className="contact-detail">
-                  <MdOutlineMailOutline size={20} /> Email: kho2032@gmail.com
+                  <MdOutlineMailOutline size={20} /> Email: tramsacecoz@gmail.com
                 </div>
               </div>
               <div className="contact-info">

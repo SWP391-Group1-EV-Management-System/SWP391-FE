@@ -1,3 +1,4 @@
+// Trang quản lý hệ thống (Admin) - quản lý user, gói dịch vụ và trạm sạc
 import React, { useState } from 'react';
 import { Tabs, Input, Row, Col } from 'antd';
 import DriverTable from '../components/user/DriverTable';
@@ -9,19 +10,18 @@ import PostManagement from '../components/station/PostManagement';
 import { FaUserAlt } from 'react-icons/fa';
 
 const UserManagementPage = () => {
-  // ==================== STATE MANAGEMENT ====================
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('user');
 
-  // ==================== XỬ LÝ TÌM KIẾM ====================
+  // Xử lý tìm kiếm người dùng
   const handleSearch = (e) => setSearch(e.target.value);
 
-  // ==================== XỬ LÝ THAY ĐỔI TAB ====================
+  // Xử lý chuyển đổi tab
   const handleTabChange = (key) => {
     setActiveTab(key);
   };
 
-  // ==================== CẤU HÌNH CÁC TAB ====================
+  // Cấu hình các tab chính
   const tabItems = [
     {
       key: 'user',
@@ -62,13 +62,13 @@ const UserManagementPage = () => {
           defaultActiveKey="1"
           tabBarStyle={{ color: '#166534', fontWeight: 600 }}
           items={[
-            // Tab danh sách Driver
+            // Tab danh sách trạm
             { 
               key: '1', 
               label: <span className="tab-animate">Trạm</span>, 
               children: <StationManagement /> 
             },
-            // Tab danh sách Staff
+            // Tab danh sách trụ sạc
             { 
               key: '2', 
               label: <span className="tab-animate">Trụ</span>, 
@@ -80,7 +80,6 @@ const UserManagementPage = () => {
     },
   ];
 
-  // ==================== GIAO DIỆN CHÍNH ====================
   return (
     <div className="user-management-fadein" style={{ background: '#fff', borderRadius: 12, padding: 32, minHeight: 500 }}>
       {/* Header trang */}

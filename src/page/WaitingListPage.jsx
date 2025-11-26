@@ -1,3 +1,4 @@
+// Trang hàng đợi - hiển thị vị trí và thời gian chờ trong hàng đợi sạc
 import React, { useEffect, useState } from "react";
 import { Row, Col, Space, Spin, Alert, Button, notification, Modal } from "antd";
 import { useNavigate } from "react-router";
@@ -20,14 +21,13 @@ const WaitingListPage = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  // ==================== QUẢN LÝ STATE ====================
   const [waitingData, setWaitingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [chargingPostData, setChargingPostData] = useState(null);
   const [hasEarlyChargingOfferPending, setHasEarlyChargingOfferPending] = useState(false);
 
-  // Khởi tạo queue rank từ localStorage
+  // Khởi tạo vị trí trong hàng đợi từ localStorage
   const [queueRank, setQueueRank] = useState(() => {
     try {
       const savedRank = localStorage.getItem("initialQueueRank");
@@ -40,7 +40,7 @@ const WaitingListPage = () => {
     return null;
   });
 
-  // Khởi tạo charging post ID từ localStorage
+  // Khởi tạo ID trụ sạc từ localStorage
   const [chargingPostId, setChargingPostId] = useState(() => {
     try {
       const savedPostId = localStorage.getItem("queuePostId");
@@ -65,11 +65,10 @@ const WaitingListPage = () => {
     return null;
   });
 
-  // ==================== HOOKS ====================
   const { cancelWaitingList, acceptEarlyChargingOffer, declineEarlyChargingOffer } = useWaitingList();
   const { fetchBookingsByUser } = useBooking();
 
-  // Kết nối WebSocket để nhận cập nhật real-time
+  // Kết nối WebSocket để nhận cập nhật realtime
   const {
     connected,
     messages,
@@ -79,7 +78,7 @@ const WaitingListPage = () => {
     earlyChargingOffer,
   } = useWebSocket(user?.id, chargingPostId);
 
-  // ==================== LẤY CHI TIẾT WAITING/BOOKING ====================
+  // Tải chi tiết waiting/booking từ API
   useEffect(() => {
     const fetchDetail = async () => {
       try {
@@ -184,7 +183,7 @@ const WaitingListPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  // ==================== ĐỌC LOCALSTORAGE KHI COMPONENT MOUNT ====================
+  // Đọc localStorage khi component mount
   useEffect(() => {
     try {
       const savedRank = localStorage.getItem("initialQueueRank");
@@ -200,7 +199,7 @@ const WaitingListPage = () => {
     }
   }, []);
 
-  // ==================== CẬP NHẬT VỊ TRÍ HÀNG ĐỢI TỪ WEBSOCKET ====================
+  // Cập nhật vị trí trong hàng đợi từ WebSocket
   useEffect(() => {
     if (position !== null && position !== undefined) {
       setQueueRank((oldRank) => {
@@ -214,7 +213,7 @@ const WaitingListPage = () => {
           });
         }
 
-        // Cập nhật localStorage với vị trí mới
+        // Cập nhật localStorage
         try {
           if (chargingPostId) {
             localStorage.setItem("initialQueueRank", position.toString());
@@ -229,12 +228,12 @@ const WaitingListPage = () => {
     }
   }, [position, chargingPostId]);
 
-  // ==================== CẬP NHẬT THỜI GIAN CHỜ TỪ WEBSOCKET ====================
+  // Cập nhật thời gian chờ từ WebSocket (chỉ cho vị trí #1)
   useEffect(() => {
     // ✅ CHỈ CẬP NHẬT NẾU USER ĐANG Ở VỊ TRÍ #1 TRONG HÀNG CHỜ
     // User thứ 2 trở đi KHÔNG được cập nhật thời gian chờ từ WebSocket
     if (wsMaxWaitingTime && queueRank === 1) {
-      console.log("⏰ [WaitingListPage] Updating maxWaitingTime for position #1");
+      console.log("⏰ Updating maxWaitingTime for position #1");
       setLocalMaxWaitingTime(wsMaxWaitingTime);
 
       setWaitingData((oldData) => {
@@ -261,7 +260,7 @@ const WaitingListPage = () => {
     }
   }, [wsMaxWaitingTime, queueRank]);
 
-  // ==================== XỬ LÝ CHUYỂN TỪ WAITING -> BOOKING ====================
+  // Xử lý chuyển từ waiting sang booking
   useEffect(() => {
     if (bookingConfirmed) {
       try {
@@ -289,7 +288,7 @@ const WaitingListPage = () => {
     }
   }, [bookingConfirmed, navigate]);
 
-  // ==================== XỬ LÝ ĐỀ NGHỊ SẠC SỚM ====================
+  // Xử lý đề nghị sạc sớm từ WebSocket
   useEffect(() => {
     if (earlyChargingOffer) {
       setHasEarlyChargingOfferPending(true);
@@ -352,10 +351,8 @@ const WaitingListPage = () => {
         },
         onOk: async () => {
           setHasEarlyChargingOfferPending(false);
-
           try {
             await acceptEarlyChargingOffer(user.id, earlyChargingOffer.postId);
-
             notification.success({
               message: "Đã chuyển vào booking!",
               description: "Bạn đã được chuyển vào booking. Vui lòng đến trạm sạc ngay!",
@@ -373,18 +370,15 @@ const WaitingListPage = () => {
         },
         onCancel: async () => {
           setHasEarlyChargingOfferPending(false);
-
           try {
             await declineEarlyChargingOffer(user.id, earlyChargingOffer.postId);
-
             notification.info({
               message: "Đã từ chối",
-              description: `Bạn sẽ được thông báo khi đến giờ dự kiến (${expectedTime})`,
+              description: "Bạn sẽ được thông báo khi đến giờ dự kiến",
               placement: "topRight",
               duration: 5,
             });
           } catch (error) {
-            console.error("Error declining early charging:", error);
             notification.error({
               message: "Lỗi",
               description: "Không thể từ chối đề nghị. Vui lòng thử lại.",
@@ -396,7 +390,7 @@ const WaitingListPage = () => {
     }
   }, [earlyChargingOffer, user?.id, wsMaxWaitingTime, acceptEarlyChargingOffer, declineEarlyChargingOffer]);
 
-  // ==================== POLLING: KIỂM TRA CHUYỂN TRẠNG THÁI ====================
+  // Polling: kiểm tra chuyển trạng thái waiting -> booking
   useEffect(() => {
     if (!user?.id || !waitingData?.waitingListId) {
       return;
@@ -533,7 +527,7 @@ const WaitingListPage = () => {
     hasEarlyChargingOfferPending,
   ]);
 
-  // ==================== HIỂN THỊ THÔNG BÁO WEBSOCKET ====================
+  // Hiển thị thông báo từ WebSocket
   useEffect(() => {
     if (messages.length > 0) {
       const latestMessage = messages[messages.length - 1];
@@ -547,7 +541,7 @@ const WaitingListPage = () => {
     }
   }, [messages]);
 
-  // ==================== XỬ LÝ HỦY WAITING ====================
+  // Xử lý hủy hàng đợi
   const handleCancelWaiting = async () => {
     if (!waitingData?.waitingListId) {
       notification.error({
@@ -656,7 +650,7 @@ const WaitingListPage = () => {
     }
   };
 
-  // ==================== TRẠNG THÁI LOADING ====================
+  // Hiển thị các trạng thái: loading, forbidden, no data
   if (detailLoading || authLoading) {
     return (
       <div
@@ -676,7 +670,6 @@ const WaitingListPage = () => {
     );
   }
 
-  // ==================== TRẠNG THÁI KHÔNG CÓ QUYỀN ====================
   const isForbidden =
     !user || (waitingData && user.id !== waitingData.userId && user.role !== "ADMIN" && user.role !== "MANAGER");
 
@@ -725,7 +718,6 @@ const WaitingListPage = () => {
     );
   }
 
-  // ==================== TRẠNG THÁI KHÔNG CÓ HÀNG ĐỢI ====================
   if (!waitingData) {
     return (
       <div
@@ -755,7 +747,6 @@ const WaitingListPage = () => {
     );
   }
 
-  // ==================== GIAO DIỆN CHÍNH ====================
   return (
     <div
       style={{

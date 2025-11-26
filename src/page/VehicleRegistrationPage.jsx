@@ -1,3 +1,4 @@
+// Trang đăng ký xe - quản lý danh sách xe điện của user
 import React, { useState, useEffect } from 'react';
 import { message, Spin, notification, Button } from 'antd';
 import { PlusOutlined, CarOutlined } from '@ant-design/icons';
@@ -20,12 +21,14 @@ const VehicleRegistrationPage = () => {
   const userId = user?.userId || user?.id || null;
 
   // ==================== LẤY DANH SÁCH XE THEO USER ====================
+  // Tải danh sách xe của user khi component mount
   useEffect(() => {
     if (!userId) return;
     fetchCarsByUser(userId);
   }, [userId, fetchCarsByUser]);
 
   // ==================== MỞ FORM TẠO XE MỚI ====================
+  // Mở form tạo xe mới
   const handleOpenCreateForm = () => {
     setEditingCar(null);
     setIsEditing(false);
@@ -33,6 +36,7 @@ const VehicleRegistrationPage = () => {
   };
 
   // ==================== MỞ FORM CHỈNH SỬA XE ====================
+  // Mở form chỉnh sửa xe
   const handleEdit = (car) => {
     setEditingCar({
       carID: car.carID,
@@ -46,6 +50,7 @@ const VehicleRegistrationPage = () => {
   };
 
   // ==================== XÓA XE ====================
+  // Xóa xe khỏi danh sách
   const handleDelete = async (carId) => {
     try {
       await removeCar(carId);
@@ -57,6 +62,7 @@ const VehicleRegistrationPage = () => {
   };
 
   // ==================== SUBMIT FORM (TẠO MỚI / CẬP NHẬT) ====================
+  // Xử lý submit form (tạo mới hoặc cập nhật)
   const handleFormSubmit = async (values) => {
     try {
       const payload = {
@@ -83,6 +89,7 @@ const VehicleRegistrationPage = () => {
     } catch (error) {
       // Nếu backend trả về lỗi 400 (thường do trùng biển số hoặc trùng số khung),
       // hiển thị thông báo cụ thể theo yêu cầu.
+      // Xử lý lỗi 400 (trùng biển số hoặc số khung)
       if (error?.response?.status === 400) {
         notification.open({
           message: 'Lỗi đăng ký xe',
@@ -106,6 +113,7 @@ const VehicleRegistrationPage = () => {
   };
 
   // ==================== ĐÓNG FORM ====================
+  // Đóng form
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setEditingCar(null);
@@ -113,6 +121,7 @@ const VehicleRegistrationPage = () => {
   };
 
   // ==================== TRẠNG THÁI LOADING KHI CHƯA CÓ USER ====================
+  // Hiển thị loading khi chưa có user
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -122,6 +131,7 @@ const VehicleRegistrationPage = () => {
   }
 
   // ==================== TRẠNG THÁI LOADING KHI ĐANG FETCH DANH SÁCH XE ====================
+  // Hiển thị loading khi đang tải danh sách xe
   if (loading && (!cars || cars.length === 0)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">

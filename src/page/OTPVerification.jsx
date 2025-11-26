@@ -1,3 +1,4 @@
+// Trang xác thực OTP - nhập mã OTP 6 số để hoàn tất đăng ký
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router";
 import axios from "axios";

@@ -1,3 +1,4 @@
+// Trang lịch sử sạc - hiển thị danh sách phiên sạc đã hoàn thành
 import React, { useState, useEffect, useMemo } from 'react';
 import { Spin, Typography, Space } from 'antd';
 import { ThunderboltOutlined, ReloadOutlined } from '@ant-design/icons';
@@ -16,21 +17,18 @@ const HistoryPage = () => {
   const { user } = useAuth();
   const { history, loading, error, fetchHistory } = useHistory();
   
-  // Quản lý session đang được xem chi tiết
   const [selectedSession, setSelectedSession] = useState(null);
-
-  // Quản lý trạng thái filter
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('desc');
 
-  // Tải lịch sử sạc khi component mount hoặc user thay đổi
+  // Tải lịch sử sạc của user khi component mount
   useEffect(() => {
     if (user?.id) {
       fetchHistory(user.id);
     }
   }, [user?.id, fetchHistory]);
 
-  // Lọc và sắp xếp danh sách lịch sử
+  // Lọc và sắp xếp danh sách lịch sử theo query và sort
   const filteredHistory = useMemo(() => {
     if (!history || history.length === 0) return [];
 
@@ -56,26 +54,26 @@ const HistoryPage = () => {
     return filtered;
   }, [history, query, sort]);
 
-  // Xử lý xem chi tiết session
+  // Mở modal xem chi tiết session
   const handleViewDetail = (session) => {
     setSelectedSession(session);
     // Scroll to top khi xem chi tiết
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Xử lý quay lại danh sách
+  // Quay lại danh sách từ chi tiết
   const handleBackToList = () => {
     setSelectedSession(null);
   };
 
-  // Xử lý làm mới danh sách
+  // Làm mới danh sách lịch sử
   const handleRefresh = () => {
     if (user?.id) {
       fetchHistory(user.id);
     }
   };
 
-  // Render: Chi tiết session được chọn
+  // Hiển thị chi tiết session nếu đã chọn
   if (selectedSession) {
     return (
       <HistorySessionDetail 
@@ -85,7 +83,7 @@ const HistoryPage = () => {
     );
   }
 
-  // Render: Trạng thái đang tải
+  // Hiển thị loading
   if (loading) {
     return (
       <div style={{ 
@@ -107,7 +105,7 @@ const HistoryPage = () => {
     );
   }
 
-  // Render: Trạng thái lỗi
+  // Hiển thị lỗi
   if (error) {
     return (
       <div style={{ 
@@ -136,7 +134,7 @@ const HistoryPage = () => {
     );
   }
 
-  // Render: Danh sách lịch sử sạc với filter
+  // Hiển thị danh sách lịch sử với filter
   return (
     <div style={{ 
       padding: '2rem', 

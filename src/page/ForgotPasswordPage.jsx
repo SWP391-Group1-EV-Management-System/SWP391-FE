@@ -1,3 +1,4 @@
+// Trang quên mật khẩu - gửi OTP đến email để reset mật khẩu
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -14,10 +15,10 @@ function ForgotPasswordPage() {
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
-  // Xử lý thay đổi email
+  // Cập nhật email khi user nhập
   const handleEmailChange = (e) => setEmail(e.target.value);
 
-  // Xử lý submit form quên mật khẩu
+  // Gửi yêu cầu OTP đến email
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -43,7 +44,7 @@ function ForgotPasswordPage() {
     }
   };
 
-  // Render: Form nhập email để nhận OTP quên mật khẩu
+  // Hiển thị form nhập email
   return (
     <div className="forgot-password-page">
       <div className="forgot-password-container">

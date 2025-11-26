@@ -1,3 +1,4 @@
+// Trang quản lý booking - hiển thị thông tin và trạng thái phiên sạc đã đặt
 import React, { useEffect, useState } from "react";
 import { Row, Col, Space, Spin, Alert, Button, notification } from "antd";
 import { useNavigate } from "react-router";
@@ -12,20 +13,19 @@ import chargingStationService from "../services/chargingStationService";
 import { CalendarOutlined, LockOutlined, HomeOutlined } from "@ant-design/icons";
 
 const BookingPage = () => {
-  // ===== HOOKS =====
+  // Lấy thông tin user đã đăng nhập
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  // ===== STATE MANAGEMENT =====
+  // Quản lý state cho booking và charging post
   const [bookingData, setBookingData] = useState(null);
   const [statusConfig, setStatusConfig] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [chargingPostData, setChargingPostData] = useState(null);
 
-  // ===== CUSTOM HOOKS =====
   const { cancelBooking } = useBooking();
 
-  // ===== EFFECT: Lấy chi tiết booking từ localStorage =====
+  // Tải chi tiết booking từ localStorage khi component mount
   useEffect(() => {
     const fetchDetail = async () => {
       try {
@@ -116,7 +116,7 @@ const BookingPage = () => {
     }
   }, [user?.id]);
 
-  // ===== FUNCTION: Hủy booking =====
+  // Xử lý hủy booking và cập nhật trạng thái
   const handleCancelBooking = async () => {
     if (!bookingData?.bookingId) {
       notification.error({
@@ -196,7 +196,7 @@ const BookingPage = () => {
     }
   };
 
-  // ===== RENDER: Trạng thái đang tải =====
+  // Hiển thị loading khi đang tải dữ liệu
   if (detailLoading || authLoading) {
     return (
       <div
@@ -216,10 +216,11 @@ const BookingPage = () => {
     );
   }
 
-  // ===== RENDER: Trạng thái không có quyền truy cập (403) =====
+  // Kiểm tra quyền truy cập booking
   const isForbidden =
     !user || (bookingData && user.id !== bookingData.userId && user.role !== "ADMIN" && user.role !== "MANAGER");
 
+  // Hiển thị thông báo khi không có quyền truy cập
   if (isForbidden) {
     return (
       <div
@@ -267,7 +268,7 @@ const BookingPage = () => {
     );
   }
 
-  // ===== RENDER: Trạng thái không có booking =====
+  // Hiển thị thông báo khi không có booking
   if (!bookingData) {
     return (
       <div
@@ -298,7 +299,7 @@ const BookingPage = () => {
     );
   }
 
-  // ===== RENDER: Nội dung chính =====
+  // Hiển thị thông tin chi tiết booking
   return (
     <div
       style={{

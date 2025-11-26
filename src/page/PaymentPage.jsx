@@ -1,3 +1,4 @@
+// Trang thanh toán - xử lý thanh toán phiên sạc qua các phương thức khác nhau
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Layout, notification, Spin } from "antd";
@@ -20,12 +21,13 @@ function PaymentPage() {
   const [paymentData, setPaymentData] = useState(null);
   const [sessionData, setSessionData] = useState(null);
 
-  // Chức năng: Tải thông tin thanh toán từ API
+  // Tải thông tin thanh toán từ API khi component mount
   useEffect(() => {
     if (!paymentId) return;
 
     fetchPaymentById(paymentId)
       .then((data) => {
+        // Map dữ liệu từ API sang format hiển thị
         const mappedSessionData = {
           stationName: data.chargingStationName || "Trạm sạc",
           sessionId: data.sessionId || "N/A",
@@ -46,14 +48,14 @@ function PaymentPage() {
       });
   }, [paymentId, fetchPaymentById, navigate]);
 
-  // Chức năng: Xử lý xác nhận phương thức thanh toán
+  // Xử lý chọn phương thức thanh toán
   const handlePaymentConfirm = (data) => {
     setPaymentData(data);
     setPaymentVisible(false);
     setConfirmVisible(true);
   };
 
-  // Chức năng: Xử lý xác nhận thanh toán cuối cùng
+  // Xử lý xác nhận thanh toán cuối cùng
   const handleConfirmPayment = async () => {
     setConfirmVisible(false);
     try {
@@ -69,7 +71,7 @@ function PaymentPage() {
     }
   };
 
-  // Chức năng: Thanh toán bằng tiền mặt (gọi API để set paymentMethodId = PMT_CASH)
+  // Thanh toán bằng tiền mặt - gửi yêu cầu đến nhân viên
   const handleCashPayment = async () => {
     const paymentMethodId = "PMT_CASH";
     try {
@@ -90,7 +92,7 @@ function PaymentPage() {
     }
   };
 
-  // Chức năng: Thanh toán qua MoMo
+  // Thanh toán qua MoMo - chuyển hướng đến trang thanh toán MoMo
   const handleMomoPayment = async () => {
     const paymentMethodId = "PMT_MOMO";
     const processResult = await processPayment(paymentId, paymentMethodId);
@@ -116,7 +118,7 @@ function PaymentPage() {
     }
   };
 
-  // Chức năng: Thanh toán bằng gói dịch vụ
+  // Thanh toán bằng gói dịch vụ
   const handlePackagePayment = async () => {
     const paymentMethodId = "PMT_PACKAGE";
     const response = await processPayment(paymentId, paymentMethodId);
@@ -129,13 +131,13 @@ function PaymentPage() {
     }
   };
 
-  // Chức năng: Đóng modal thanh toán và quay về lịch sử
+  // Đóng modal và quay về lịch sử thanh toán
   const handleClosePaymentCard = () => {
     setPaymentVisible(false);
     navigate("/app/payment-history");
   };
 
-  // Hiển thị: Màn hình loading khi đang tải dữ liệu
+  // Hiển thị loading khi đang tải
   if (fetchLoading || !sessionData) {
     return (
       <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }}>
@@ -149,7 +151,7 @@ function PaymentPage() {
     );
   }
 
-  // Hiển thị: Giao diện thanh toán chính
+  // Hiển thị giao diện thanh toán
   return (
     <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }}>
       <Content style={{ padding: "24px" }}>

@@ -20,8 +20,10 @@ import PageHeader from '../PageHeader';
 
 const { Title, Text } = Typography;
 
+// Cắt ngắn văn bản dài
 const truncate = (text = '', length = 120) => text.length > length ? text.slice(0, length) + '...' : text;
 
+// Lấy ID duy nhất cho mỗi gói
 const getId = (r) => r?.packageId ?? r?.id ?? r?._id ?? `${r?.packageName || 'pkg'}-${r?.price ?? 0}-${r?.billingCycle ?? 0}`;
 
 const ServicePackageTable = ({
@@ -34,6 +36,7 @@ const ServicePackageTable = ({
 }) => {
   const [hovered, setHovered] = useState(false);
 
+  // Xử lý xóa gói dịch vụ
   const handleDelete = async (packageId) => {
     // delegate deletion to parent
     try {
@@ -97,6 +100,7 @@ const ServicePackageTable = ({
       fixed: 'right',
       render: (_, record) => (
         <Space size="small">
+          {/* Nút xem chi tiết */}
           <Tooltip title="Xem chi tiết">
             <Button
               type="text"
@@ -106,6 +110,7 @@ const ServicePackageTable = ({
             />
           </Tooltip>
 
+          {/* Nút chỉnh sửa */}
           <Tooltip title="Chỉnh sửa">
             <Button
               type="text"
@@ -115,6 +120,7 @@ const ServicePackageTable = ({
             />
           </Tooltip>
 
+          {/* Nút xóa với xác nhận */}
           <Popconfirm
             title="Xác nhận xóa"
             description={`Bạn có chắc chắn muốn xóa gói "${record.packageName}"?`}

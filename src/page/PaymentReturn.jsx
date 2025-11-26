@@ -1,3 +1,4 @@
+// Trang kết quả thanh toán - hiển thị kết quả sau khi thanh toán qua MoMo
 import React, { useEffect, useState } from "react";
 import { Result, Button, Spin, Card } from "antd";
 import { CheckCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
@@ -23,7 +24,7 @@ const PaymentReturn = () => {
       message,
     });
 
-    // Kiểm tra thanh toán thành công
+    // Kiểm tra thanh toán thành công (resultCode === "0")
     if (resultCode === "0") {
       setPaymentStatus("success");
 
@@ -56,7 +57,6 @@ const PaymentReturn = () => {
             );
           }
         } catch (e) {
-          // Xử lý lỗi parse JSON
           console.error("Error parsing pending payment:", e);
         }
       }
@@ -72,7 +72,7 @@ const PaymentReturn = () => {
     window.location.href = "/app/home";
   };
 
-  // Hiển thị trạng thái đang tải
+  // Hiển thị loading khi đang xử lý
   if (loading) {
     return (
       <div
@@ -89,7 +89,7 @@ const PaymentReturn = () => {
     );
   }
 
-  // Kiểm tra loại thanh toán
+  // Kiểm tra loại thanh toán (gói dịch vụ hay phiên sạc)
   const isPackagePayment = paymentInfo.orderId?.startsWith("PKG_");
 
   return (
@@ -104,6 +104,7 @@ const PaymentReturn = () => {
       }}
     >
       <Card style={{ maxWidth: 600, width: "100%" }}>
+        {/* Hiển thị kết quả thanh toán thành công */}
         {paymentStatus === "success" ? (
           <Result
             icon={<CheckCircleOutlined style={{ color: "#52c41a" }} />}
@@ -140,6 +141,7 @@ const PaymentReturn = () => {
             ]}
           />
         ) : (
+          /* Hiển thị kết quả thanh toán thất bại */
           <Result
             icon={<CloseCircleOutlined style={{ color: "#ff4d4f" }} />}
             status="error"
