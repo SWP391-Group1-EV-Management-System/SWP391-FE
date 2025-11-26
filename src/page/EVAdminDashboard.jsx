@@ -68,134 +68,193 @@ function DashboardContent() {
   // Tab 1: Tổng quan doanh thu
   const RevenueTab = () => (
     <div>
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={8}>
+      {/* Row 1: 3 cards trên */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        {/* Card 1: Doanh thu hôm nay */}
+        <Col xs={24} sm={12} md={8}>
           <Card
             variant="outlined"
-            style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
+            style={{ 
+              borderRadius: 12, 
+              textAlign: "center", 
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease"
+            }}
+            styles={{ body: { padding: "24px" } }}
+            hoverable
           >
-            <div style={{ textAlign: "center" }}>
-              <DollarOutlined
-                style={{ color: "#1890ff", fontSize: 32, marginBottom: 12 }}
-              />
-              <div
-                style={{
-                  fontSize: 36,
-                  fontWeight: 700,
-                  color: "#1890ff",
-                  marginBottom: 8,
-                }}
-              >
-                {formatCurrency(dashboardData?.totalPriceToday || 0)}
-              </div>
-              <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
-                Doanh thu hôm nay
-              </Text>
+            <DollarOutlined
+              style={{ color: "#1890ff", fontSize: 42, marginBottom: 16 }}
+            />
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#1890ff",
+                marginBottom: 8,
+                lineHeight: 1.2
+              }}
+            >
+              {formatCurrency(dashboardData?.totalPriceToday || 0)}
             </div>
+            <Text style={{ fontSize: 14, color: "#8c8c8c", fontWeight: 500 }}>
+              Doanh thu hôm nay
+            </Text>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={8}>
+
+        {/* Card 2: Doanh thu tháng này */}
+        <Col xs={24} sm={12} md={8}>
           <Card
             variant="outlined"
-            style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
+            style={{ 
+              borderRadius: 12, 
+              textAlign: "center", 
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease"
+            }}
+            styles={{ body: { padding: "24px" } }}
+            hoverable
           >
-            <div style={{ textAlign: "center" }}>
-              <DollarOutlined
-                style={{ color: "#52c41a", fontSize: 32, marginBottom: 12 }}
-              />
-              <div
-                style={{
-                  fontSize: 36,
-                  fontWeight: 700,
-                  color: "#52c41a",
-                  marginBottom: 8,
-                }}
-              >
-                {formatCurrency(dashboardData?.totalPriceInMonth || 0)}
-              </div>
-              <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
-                Doanh thu tháng này
-              </Text>
+            <CalendarOutlined
+              style={{ color: "#52c41a", fontSize: 42, marginBottom: 16 }}
+            />
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#52c41a",
+                marginBottom: 8,
+                lineHeight: 1.2
+              }}
+            >
+              {formatCurrency(dashboardData?.totalPriceInMonth || 0)}
             </div>
+            <Text style={{ fontSize: 14, color: "#8c8c8c", fontWeight: 500 }}>
+              Doanh thu tháng này
+            </Text>
           </Card>
         </Col>
-        <Col xs={24} sm={12} lg={8}>
+
+        {/* Card 3: Báo cáo lỗi */}
+        <Col xs={24} sm={12} md={8}>
           <Card
             variant="outlined"
-            style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
+            style={{ 
+              borderRadius: 12, 
+              textAlign: "center", 
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease"
+            }}
+            styles={{ body: { padding: "24px" } }}
+            hoverable
           >
-            <div style={{ textAlign: "center" }}>
-              <WarningOutlined
-                style={{ color: "#ff4d4f", fontSize: 32, marginBottom: 12 }}
-              />
-              <div
-                style={{
-                  fontSize: 36,
-                  fontWeight: 700,
-                  color: "#ff4d4f",
-                  marginBottom: 8,
-                }}
-              >
-                {(dashboardData?.totalReports || 0) + " báo cáo"}
-              </div>
-              <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
-                Tổng số báo cáo lỗi
-              </Text>
+            <WarningOutlined
+              style={{ color: "#ff4d4f", fontSize: 42, marginBottom: 16 }}
+            />
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#ff4d4f",
+                marginBottom: 8,
+                lineHeight: 1.2
+              }}
+            >
+              {dashboardData?.totalReports || 0}
             </div>
+            <Text style={{ fontSize: 14, color: "#8c8c8c", fontWeight: 500 }}>
+              Tổng số báo cáo lỗi
+            </Text>
           </Card>
         </Col>
       </Row>
 
-      {/* Phân loại thanh toán */}
+      {/* Row 2: 2 cards dưới - to hơn */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12}>
+        {/* Card 4: Thanh toán bằng tiền */}
+        <Col xs={24} md={12}>
           <Card
             variant="outlined"
-            style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
+            style={{ 
+              borderRadius: 12, 
+              textAlign: "center", 
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease"
+            }}
+            styles={{ body: { padding: "24px" } }}
+            hoverable
           >
-            <div style={{ textAlign: "center" }}>
-              <DollarOutlined
-                style={{ color: "#722ed1", fontSize: 32, marginBottom: 12 }}
-              />
-              <div
-                style={{
-                  fontSize: 36,
-                  fontWeight: 700,
-                  color: "#722ed1",
-                  marginBottom: 8,
-                }}
-              >
-                {formatCurrency(dashboardData?.amountUserPaidByMoney || 0)}
-              </div>
-              <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
-                Thanh toán bằng tiền
-              </Text>
+            <DollarOutlined
+              style={{ color: "#722ed1", fontSize: 42, marginBottom: 16 }}
+            />
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#722ed1",
+                marginBottom: 8,
+                lineHeight: 1.2
+              }}
+            >
+              {formatCurrency(dashboardData?.amountUserPaidByMoney || 0)}
             </div>
+            <Text style={{ fontSize: 14, color: "#8c8c8c", fontWeight: 500 }}>
+              Thanh toán bằng tiền
+            </Text>
           </Card>
         </Col>
-        <Col xs={24} sm={12}>
+
+        {/* Card 5: Thanh toán bằng gói */}
+        <Col xs={24} md={12}>
           <Card
             variant="outlined"
-            style={{ borderRadius: 8, padding: "8px 0", height: "230px" }}
+            style={{ 
+              borderRadius: 12, 
+              textAlign: "center", 
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease"
+            }}
+            styles={{ body: { padding: "24px" } }}
+            hoverable
           >
-            <div style={{ textAlign: "center" }}>
-              <AppstoreOutlined
-                style={{ color: "#fa8c16", fontSize: 32, marginBottom: 12 }}
-              />
-              <div
-                style={{
-                  fontSize: 36,
-                  fontWeight: 700,
-                  color: "#fa8c16",
-                  marginBottom: 8,
-                }}
-              >
-                {formatCurrency(dashboardData?.amountUserPaidByPackage || 0)}
-              </div>
-              <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
-                Thanh toán bằng gói
-              </Text>
+            <AppstoreOutlined
+              style={{ color: "#fa8c16", fontSize: 42, marginBottom: 16 }}
+            />
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#fa8c16",
+                marginBottom: 8,
+                lineHeight: 1.2
+              }}
+            >
+              {formatCurrency(dashboardData?.amountUserPaidByPackage || 0)}
             </div>
+            <Text style={{ fontSize: 14, color: "#8c8c8c", fontWeight: 500 }}>
+              Thanh toán bằng gói
+            </Text>
           </Card>
         </Col>
       </Row>
