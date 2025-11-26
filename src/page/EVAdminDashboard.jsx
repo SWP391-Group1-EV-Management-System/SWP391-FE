@@ -263,182 +263,310 @@ function DashboardContent() {
 
   // Tab 2: Danh sách trạm và phiên sạc
   const StationsTab = () => (
-    <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-      {/* Danh sách trạm sạc */}
-      <Col xs={24} lg={18}>
-        <Card
-          title={
-            <Text style={{ fontSize: 16, fontWeight: 600 }}>
-              Danh sách trạm sạc
-            </Text>
-          }
-          variant="outlined"
-          style={{ borderRadius: 8, height: "600px" }}
-          styles={{
-            body: {
-              padding: "16px",
-              height: "calc(100% - 57px)",
-              overflowY: "auto",
-            },
-          }}
-        >
-          {stations.map((station) => (
-            <Card
-              key={station.id}
-              size="small"
-              variant="outlined"
-              style={{ marginBottom: 12, borderRadius: 6 }}
-              styles={{ body: { padding: "16px" } }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      marginBottom: 8,
-                    }}
-                  >
-                    <EnvironmentOutlined
-                      style={{
-                        color: "#1890ff",
-                        fontSize: 18,
-                        marginRight: 8,
-                      }}
-                    />
-                    <Text strong style={{ fontSize: 15 }}>
-                      {station.name}
-                    </Text>
-                    <Badge
-                      status={station.active ? "success" : "error"}
-                      text={station.active ? "Hoạt động" : "Bảo trì"}
-                      style={{ marginLeft: 12 }}
-                    />
-                  </div>
-                  <Text
-                    type="secondary"
-                    style={{
-                      fontSize: 13,
-                      display: "block",
-                      paddingLeft: 26,
-                    }}
-                  >
-                    {station.address}
-                  </Text>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    marginLeft: 16,
-                    minWidth: 80,
-                  }}
-                >
-                  <ThunderboltOutlined
-                    style={{
-                      color: "#52c41a",
-                      fontSize: 24,
-                      marginBottom: 4,
-                    }}
-                  />
-                  <Text strong style={{ fontSize: 20 }}>
-                    {station.availableSlots}/{station.numberOfPosts}
-                  </Text>
-                  <Text type="secondary" style={{ fontSize: 12 }}>
-                    Trụ sạc
-                  </Text>
-                </div>
-              </div>
-            </Card>
-          ))}
-          {stations.length === 0 && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "60px 0",
-                color: "#8c8c8c",
-              }}
-            >
-              <EnvironmentOutlined
-                style={{ fontSize: 48, marginBottom: 16 }}
-              />
-              <div>Chưa có trạm sạc nào</div>
-            </div>
-          )}
-        </Card>
-      </Col>
-
-      {/* Phiên sạc */}
-      <Col xs={24} lg={6}>
-        <Card
-          title={
-            <Text style={{ fontSize: 16, fontWeight: 600 }}>Phiên sạc</Text>
-          }
-          variant="outlined"
-          style={{ borderRadius: 8, height: "600px" }}
-          styles={{ body: { padding: "20px 16px" } }}
-        >
-          <div style={{ marginBottom: 32, textAlign: "center" }}>
+    <div>
+      {/* Row 1: 4 cards phiên sạc */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
+        {/* Card 1: Tổng số phiên sạc */}
+        <Col xs={24} sm={12} lg={6}>
+          <Card
+            variant="outlined"
+            style={{ 
+              borderRadius: 12, 
+              textAlign: "center", 
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease"
+            }}
+            styles={{ body: { padding: "24px" } }}
+            hoverable
+          >
             <FaChartLine
-              style={{ color: "#eb2f96", fontSize: 32, marginBottom: 12 }}
+              style={{ color: "#eb2f96", fontSize: 42, marginBottom: 16 }}
             />
             <div
               style={{
-                fontSize: 36,
+                fontSize: 28,
                 fontWeight: 700,
                 color: "#eb2f96",
                 marginBottom: 8,
+                lineHeight: 1.2
               }}
             >
               {dashboardData?.totalSessions || 0}
             </div>
-            <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
+            <Text style={{ fontSize: 14, color: "#8c8c8c", fontWeight: 500 }}>
               Tổng số phiên sạc
             </Text>
-          </div>
-          <Divider style={{ margin: "20px 0" }} />
-          <div style={{ textAlign: "center" }}>
+          </Card>
+        </Col>
+
+        {/* Card 2: Phiên sạc trong tháng */}
+        <Col xs={24} sm={12} lg={6}>
+          <Card
+            variant="outlined"
+            style={{ 
+              borderRadius: 12, 
+              textAlign: "center", 
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease"
+            }}
+            styles={{ body: { padding: "24px" } }}
+            hoverable
+          >
             <FaChartLine
-              style={{ color: "#fa8c16", fontSize: 32, marginBottom: 12 }}
+              style={{ color: "#fa8c16", fontSize: 42, marginBottom: 16 }}
             />
             <div
               style={{
-                fontSize: 36,
+                fontSize: 28,
                 fontWeight: 700,
                 color: "#fa8c16",
                 marginBottom: 8,
+                lineHeight: 1.2
               }}
             >
               {dashboardData?.totalSessionsInMonth || 0}
             </div>
-            <Text style={{ fontSize: 14, color: "#8c8c8c" }}>
+            <Text style={{ fontSize: 14, color: "#8c8c8c", fontWeight: 500 }}>
               Phiên sạc trong tháng
             </Text>
-          </div>
-        </Card>
-      </Col>
-    </Row>
+          </Card>
+        </Col>
+
+        {/* Card 3: Trạm có nhiều phiên sạc nhất */}
+        <Col xs={24} sm={12} lg={6}>
+          <Card
+            variant="outlined"
+            style={{ 
+              borderRadius: 12, 
+              textAlign: "center", 
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease"
+            }}
+            styles={{ body: { padding: "20px" } }}
+            hoverable
+          >
+            <PieChartOutlined
+              style={{ color: "#52c41a", fontSize: 42, marginBottom: 12 }}
+            />
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#52c41a",
+                marginBottom: 4,
+                lineHeight: 1.2
+              }}
+            >
+              {dashboardData?.stationMostSessionCount || 0}
+            </div>
+            <Text 
+              style={{ 
+                fontSize: 13, 
+                color: "#262626", 
+                fontWeight: 500,
+                display: "block",
+                marginBottom: 4,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
+              }}
+              title={dashboardData?.stationMostSession || "N/A"}
+            >
+              {dashboardData?.stationMostSession || "N/A"}
+            </Text>
+            <Text style={{ fontSize: 12, color: "#8c8c8c" }}>
+              Trạm có nhiều phiên sạc nhất
+            </Text>
+          </Card>
+        </Col>
+
+        {/* Card 4: Trạm có ít phiên sạc nhất */}
+        <Col xs={24} sm={12} lg={6}>
+          <Card
+            variant="outlined"
+            style={{ 
+              borderRadius: 12, 
+              textAlign: "center", 
+              height: "180px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+              transition: "all 0.3s ease"
+            }}
+            styles={{ body: { padding: "20px" } }}
+            hoverable
+          >
+            <LineChartOutlined
+              style={{ color: "#ff4d4f", fontSize: 42, marginBottom: 12 }}
+            />
+            <div
+              style={{
+                fontSize: 28,
+                fontWeight: 700,
+                color: "#ff4d4f",
+                marginBottom: 4,
+                lineHeight: 1.2
+              }}
+            >
+              {dashboardData?.stationLestSessionCount || 0}
+            </div>
+            <Text 
+              style={{ 
+                fontSize: 13, 
+                color: "#262626", 
+                fontWeight: 500,
+                display: "block",
+                marginBottom: 4,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
+              }}
+              title={dashboardData?.stationLestSession || "N/A"}
+            >
+              {dashboardData?.stationLestSession || "N/A"}
+            </Text>
+            <Text style={{ fontSize: 12, color: "#8c8c8c" }}>
+              Trạm có ít phiên sạc nhất
+            </Text>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Row 2: Danh sách trạm sạc */}
+      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+        <Col xs={24}>
+          <Card
+            title={
+              <Text style={{ fontSize: 16, fontWeight: 600 }}>
+                Danh sách trạm sạc
+              </Text>
+            }
+            variant="outlined"
+            style={{ borderRadius: 8 }}
+            styles={{
+              body: {
+                padding: "16px",
+              },
+            }}
+          >
+            {stations.map((station) => (
+              <Card
+                key={station.id}
+                size="small"
+                variant="outlined"
+                style={{ marginBottom: 12, borderRadius: 6 }}
+                styles={{ body: { padding: "16px" } }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: 8,
+                      }}
+                    >
+                      <EnvironmentOutlined
+                        style={{
+                          color: "#1890ff",
+                          fontSize: 18,
+                          marginRight: 8,
+                        }}
+                      />
+                      <Text strong style={{ fontSize: 15 }}>
+                        {station.name}
+                      </Text>
+                      <Badge
+                        status={station.active ? "success" : "error"}
+                        text={station.active ? "Hoạt động" : "Bảo trì"}
+                        style={{ marginLeft: 12 }}
+                      />
+                    </div>
+                    <Text
+                      type="secondary"
+                      style={{
+                        fontSize: 13,
+                        display: "block",
+                        paddingLeft: 26,
+                      }}
+                    >
+                      {station.address}
+                    </Text>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      marginLeft: 16,
+                      minWidth: 80,
+                    }}
+                  >
+                    <ThunderboltOutlined
+                      style={{
+                        color: "#52c41a",
+                        fontSize: 24,
+                        marginBottom: 4,
+                      }}
+                    />
+                    <Text strong style={{ fontSize: 20 }}>
+                      {station.availableSlots}/{station.numberOfPosts}
+                    </Text>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      Trụ sạc
+                    </Text>
+                  </div>
+                </div>
+              </Card>
+            ))}
+            {stations.length === 0 && (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "60px 0",
+                  color: "#8c8c8c",
+                }}
+              >
+                <EnvironmentOutlined
+                  style={{ fontSize: 48, marginBottom: 16 }}
+                />
+                <div>Chưa có trạm sạc nào</div>
+              </div>
+            )}
+          </Card>
+        </Col>
+      </Row>
+    </div>
   );
 
-  
   // Tab 3: Thống kê hệ thống và bản đồ
   const SystemTab = () => {
-    const [mapKey, setMapKey] = useState(Date.now());
+    const [mapKey, setMapKey] = React.useState(Date.now());
 
     // Remount map when tab becomes active
     React.useEffect(() => {
-      if (activeTab === "3") {
-        setMapKey(Date.now());
-      }
-    }, [activeTab]);
+      setMapKey(Date.now());
+    }, []);
 
     return (
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
