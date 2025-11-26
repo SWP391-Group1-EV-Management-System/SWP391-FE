@@ -296,8 +296,11 @@ function MapPage() {
                               className="stat-icon"
                             />
                             <span className="stat-value-map">
-                              {station.availableSlots}/{station.totalSlots}{" "}
-                              trống
+                              {(
+                                (station.status === "maintenance" || station.active === false)
+                                  ? 0
+                                  : (station.availableSlots ?? 0)
+                              )}/{station.totalSlots} trống
                             </span>
                           </div>
 

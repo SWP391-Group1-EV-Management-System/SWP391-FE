@@ -60,6 +60,39 @@ export const updateUser = async (userId, userData) => {
   }
 };
 
+// Update profile for the authenticated user (new API)
+export const updateProfile = async (userId, profileData) => {
+  try {
+    // Ensure payload only contains allowed fields
+    const payload = {
+      firstName: profileData.firstName,
+      lastName: profileData.lastName,
+      // backend expects boolean for gender
+      gender: typeof profileData.gender === 'boolean' ? profileData.gender : undefined,
+      phone: profileData.phone,
+    };
+    // Remove undefined fields
+    Object.keys(payload).forEach((k) => payload[k] === undefined && delete payload[k]);
+
+    const response = await api.put(`/api/users/updateProfile/${userId}`, payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    throw error;
+  }
+};
+
+// Update password for user
+export const updatePassword = async (userId, passwordPayload) => {
+  try {
+    const response = await api.put(`/api/users/updatePassword/${userId}`, passwordPayload);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating password:", error);
+    throw error;
+  }
+};
+
 export const deleteUser = async (userId) => {
   try {
     const response = await api.delete(`/api/users/delete/${userId}`);

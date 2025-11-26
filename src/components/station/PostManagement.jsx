@@ -76,7 +76,13 @@ function PostManagement() {
       title: "Kích hoạt",
       dataIndex: "active",
       key: "active",
-      render: (v) => <Switch checked={v} disabled />,
+      render: (v) => (
+        v ? (
+          <Tag color="green">Hoạt động</Tag>
+        ) : (
+          <Tag color="orange">Bảo trì</Tag>
+        )
+      ),
       width: 120,
     },
     {
