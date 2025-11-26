@@ -124,19 +124,6 @@ function UserProfile() {
               </span>
             </div>
           </div>
-
-          {/* Role */}
-          <div className="profile-info-item">
-            <div className="profile-info-icon">
-              <TbShield size={20} />
-            </div>
-            <div className="profile-info-content">
-              <span className="profile-info-label">Vai trò</span>
-              <span className="profile-info-value profile-role">
-                {user.role}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
