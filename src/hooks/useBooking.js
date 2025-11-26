@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { message } from "antd";
 import * as bookingService from "../services/bookingService";
 
 /**
@@ -35,9 +36,17 @@ export default function useBooking() {
    */
   const createBooking = useCallback(
     async (bookingData) => {
-      const result = await wrap(() =>
-        bookingService.createBooking(bookingData)
-      );
+      const result = await wrap(() => bookingService.createBooking(bookingData));
+
+      // Detect backend signal that the post is not available and notify the user
+      if (result && result.errorCode === "POST_NOT_AVAILABLE") {
+        try {
+          console.warn("[useBooking] Booking failed - post not available:", result);
+          message.error("Trụ sạc hiện không khả dụng. Vui lòng chọn trụ khác hoặc thử lại sau.");
+        } catch (e) {
+          console.warn("Failed to show message for POST_NOT_AVAILABLE", e);
+        }
+      }
 
       // ✅ Backend tự động set Redis, frontend chỉ dispatch event để refetch
       if (result?.status) {
@@ -62,9 +71,7 @@ export default function useBooking() {
 
   const completeBooking = useCallback(
     async (bookingId) => {
-      const result = await wrap(() =>
-        bookingService.completeBooking(bookingId)
-      );
+      const result = await wrap(() => bookingService.completeBooking(bookingId));
 
       // ✅ Backend tự động xóa Redis, frontend chỉ dispatch event
       if (result?.success) {
@@ -119,10 +126,7 @@ export default function useBooking() {
 
   const fetchBookingsByStation = useCallback(
     async (stationId) => {
-      return wrap(
-        () => bookingService.getBookingsByStation(stationId),
-        setBookings
-      );
+      return wrap(() => bookingService.getBookingsByStation(stationId), setBookings);
     },
     [wrap]
   );
@@ -130,10 +134,7 @@ export default function useBooking() {
   const fetchBookingsByUser = useCallback(
     async (userId) => {
       console.log("🔍 [useBooking] Fetching bookings for userId:", userId);
-      const result = await wrap(
-        () => bookingService.getBookingsByUser(userId),
-        setBookings
-      );
+      const result = await wrap(() => bookingService.getBookingsByUser(userId), setBookings);
       console.log("✅ [useBooking] Bookings fetched:", result);
       return result;
     },
@@ -149,10 +150,7 @@ export default function useBooking() {
 
   const fetchBookingByWaitingListId = useCallback(
     async (waitingListId) => {
-      return wrap(
-        () => bookingService.getBookingByWaitingListId(waitingListId),
-        setBooking
-      );
+      return wrap(() => bookingService.getBookingByWaitingListId(waitingListId), setBooking);
     },
     [wrap]
   );
@@ -166,10 +164,7 @@ export default function useBooking() {
 
   const fetchBookingsByStatus = useCallback(
     async (statusList) => {
-      return wrap(
-        () => bookingService.getBookingsByStatus(statusList),
-        setBookings
-      );
+      return wrap(() => bookingService.getBookingsByStatus(statusList), setBookings);
     },
     [wrap]
   );

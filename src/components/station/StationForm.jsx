@@ -23,6 +23,7 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { IoLocationSharp } from "react-icons/io5";
 import { getStaff } from "../../services/userService";
+import chargingStationService from "../../services/chargingStationService";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -264,6 +265,65 @@ const StationForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [staffList, staffLoading, initialValues]);
+
+  // If a stationId is provided in initialValues, fetch canonical station data
+  useEffect(() => {
+    let mounted = true;
+    const loadCanonicalStation = async () => {
+      try {
+        if (visible && initialValues?.stationId) {
+          const st = await chargingStationService.getStationById(
+            initialValues.stationId
+          );
+          if (!mounted || !st) return;
+
+          // Coordinates
+          const lat = parseFloat(st.latitude);
+          const lng = parseFloat(st.longitude);
+          if (!isNaN(lat) && !isNaN(lng)) {
+            setMapPosition([lat, lng]);
+            setShouldRecenter(true);
+            formik.setFieldValue("latitude", lat);
+            formik.setFieldValue("longitude", lng);
+          }
+
+          // Manager - prefer explicit id if available
+          const incoming = st.userManagerId || st.userManagerName || "";
+          if (incoming) {
+            // If staff list loaded, try to resolve to a staff id
+            if (staffList && staffList.length) {
+              const foundById = staffList.find((s) => String(s.id) === String(incoming));
+              if (foundById) {
+                formik.setFieldValue("userManagerId", String(foundById.id));
+              } else {
+                const foundByName = staffList.find(
+                  (s) => `${s.firstName || ""} ${s.lastName || ""}`.trim() === String(incoming)
+                );
+                const foundByEmail = staffList.find((s) => s.email === incoming);
+                const match = foundByName || foundByEmail;
+                if (match) {
+                  formik.setFieldValue("userManagerId", String(match.id));
+                } else {
+                  // fallback to whatever the API returned (could be id string)
+                  formik.setFieldValue("userManagerId", String(incoming));
+                }
+              }
+            } else {
+              formik.setFieldValue("userManagerId", String(incoming));
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load canonical station:", err);
+      }
+    };
+
+    loadCanonicalStation();
+    return () => {
+      mounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible, initialValues?.stationId, staffList]);
 
   // ✅ FIXED: Set initial map position và KHÔNG cho phép chỉnh sửa tọa độ khi đang ở mode edit
   useEffect(() => {

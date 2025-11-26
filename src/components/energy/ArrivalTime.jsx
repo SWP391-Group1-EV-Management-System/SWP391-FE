@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Card, Typography, Space, Progress, Tag, Button, message } from "antd";
-import {
-  ClockCircleOutlined,
-  PlayCircleOutlined,
-  PauseCircleOutlined,
-} from "@ant-design/icons";
+import { ClockCircleOutlined, PlayCircleOutlined, PauseCircleOutlined } from "@ant-design/icons";
 import { energySessionService } from "../../services/energySessionService.js";
 import "../../assets/styles/ArrivalTime.css";
 
@@ -33,9 +29,7 @@ const ArrivalTime = ({
   const formatTime = useCallback((seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }, []);
 
   // Tự động bắt đầu session khi có sessionData từ booking
@@ -57,22 +51,10 @@ const ArrivalTime = ({
     setIsCreating(true);
     try {
       // Sử dụng energySessionService để tạo session
-      const sessionResponse = await energySessionService.createSession(
-        bookingData
-      );
+      const sessionResponse = await energySessionService.createSession(bookingData);
       // Handle backend signal that user is overpaying
-      const statusStr = (
-        sessionResponse?.data?.status ||
-        sessionResponse?.message ||
-        ""
-      )
-        .toString()
-        .toLowerCase();
-      const sessionIdStr = (
-        sessionResponse?.data?.sessionId ||
-        sessionResponse?.sessionId ||
-        ""
-      )
+      const statusStr = (sessionResponse?.data?.status || sessionResponse?.message || "").toString().toLowerCase();
+      const sessionIdStr = (sessionResponse?.data?.sessionId || sessionResponse?.sessionId || "")
         .toString()
         .toLowerCase();
       if (
@@ -80,10 +62,7 @@ const ArrivalTime = ({
         sessionIdStr === "overpaying" ||
         sessionResponse?.data?.idAction === "overpaying"
       ) {
-        console.warn(
-          "⚠️ [ArrivalTime] User overpaying - block create session",
-          sessionResponse
-        );
+        console.warn("⚠️ [ArrivalTime] User overpaying - block create session", sessionResponse);
         message.error(
           "Tài khoản của bạn đang có khoản nợ trên 100.000 VND. Vui lòng thanh toán trước khi bắt đầu phiên sạc."
         );
@@ -102,7 +81,18 @@ const ArrivalTime = ({
           onSessionCreate(sessionInfo);
         }
       } else {
-        message.error(sessionResponse.message || "Không thể tạo phiên sạc!");
+        // detect post-not-available responses
+        const msg = (sessionResponse?.message || sessionResponse?.data || "").toString().toLowerCase();
+        if (
+          sessionResponse?.errorCode === "POST_NOT_AVAILABLE" ||
+          msg.includes("post is not available") ||
+          msg.includes("post are not available")
+        ) {
+          console.warn("⚠️ [ArrivalTime] Backend reports post not available:", sessionResponse);
+          message.error("Trụ sạc hiện không khả dụng. Vui lòng chọn trụ khác hoặc thử lại sau.");
+        } else {
+          message.error(sessionResponse.message || "Không thể tạo phiên sạc!");
+        }
       }
     } catch (error) {
       console.error("Lỗi tạo phiên sạc:", error);
@@ -211,32 +201,22 @@ const ArrivalTime = ({
         {/* Thông tin Session nếu có */}
         {sessionData?.chargingSessionId && (
           <div className="session-info">
-            <Text className="session-info-item">
-              Phiên sạc: {sessionData.chargingSessionId}
-            </Text>
+            <Text className="session-info-item">Phiên sạc: {sessionData.chargingSessionId}</Text>
             {sessionData.chargingStation?.name && (
-              <Text className="session-info-item">
-                Trạm: {sessionData.chargingStation.name}
-              </Text>
+              <Text className="session-info-item">Trạm: {sessionData.chargingStation.name}</Text>
             )}
           </div>
         )}
 
         {/* Hiển thị thời gian đếm ngược */}
         <div className="countdown-display">
-          <div className={getCountdownTimeClass()}>
-            {formatTime(timeRemaining)}
-          </div>
+          <div className={getCountdownTimeClass()}>{formatTime(timeRemaining)}</div>
           <Text className="countdown-label">Thời gian còn lại</Text>
         </div>
 
         {/* Progress Bar */}
         <div className="progress-container">
-          <Progress
-            percent={progressPercent}
-            strokeColor={getProgressStrokeColor()}
-            showInfo={false}
-          />
+          <Progress percent={progressPercent} strokeColor={getProgressStrokeColor()} showInfo={false} />
         </div>
 
         {/* Các nút điều khiển */}
@@ -257,9 +237,7 @@ const ArrivalTime = ({
         {/* Thông báo hết thời gian */}
         {isExpired && (
           <div className="expired-warning">
-            <Text className="expired-text">
-              ⚠️ Phiên sạc đã hết thời gian cho phép!
-            </Text>
+            <Text className="expired-text">⚠️ Phiên sạc đã hết thời gian cho phép!</Text>
           </div>
         )}
       </div>

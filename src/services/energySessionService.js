@@ -68,8 +68,7 @@ export const energySessionService = {
       return {
         success: false,
         data: null,
-        message:
-          error.response?.data?.message || "Không thể lấy thông tin phiên sạc",
+        message: error.response?.data?.message || "Không thể lấy thông tin phiên sạc",
         errorCode: statusCode,
       };
     }
@@ -88,14 +87,11 @@ export const energySessionService = {
         maxSecond,
       });
 
-      const response = await api.post(
-        "/api/charging/session/update-preference",
-        {
-          userId,
-          targetPin,
-          maxSecond,
-        }
-      );
+      const response = await api.post("/api/charging/session/update-preference", {
+        userId,
+        targetPin,
+        maxSecond,
+      });
 
       console.log("✅ Update preference response:", response.data);
 
@@ -132,10 +128,32 @@ export const energySessionService = {
       console.log("📤 Gửi request tạo phiên sạc:", bookingData);
 
       // Gọi API tạo phiên sạc mới
-      const response = await api.post(
-        "/api/charging/session/create",
-        bookingData
-      );
+      const response = await api.post("/api/charging/session/create", bookingData);
+
+      // Normalize server message indicating the charging post is not available
+      const isPostUnavailable = (obj) => {
+        if (!obj) return false;
+        try {
+          const s = (obj.status || obj.message || obj.msg || "").toString().toLowerCase();
+          const sid = (obj.sessionId || obj.chargingSessionId || "").toString().toLowerCase();
+          if (s.includes("post") && s.includes("not available")) return true;
+          if (sid.includes("post is not available") || sid.includes("post are not available")) return true;
+          if (obj.idAction && obj.idAction.toString().toLowerCase().includes("post")) return true;
+        } catch (e) {
+          // ignore
+        }
+        return false;
+      };
+
+      if (isPostUnavailable(response.data) || isPostUnavailable(response.data?.data) || isPostUnavailable(response)) {
+        console.warn("[energySessionService] Backend reported post not available:", response.data || response);
+        return {
+          success: false,
+          errorCode: "POST_NOT_AVAILABLE",
+          message: "Post is not available",
+          data: response.data,
+        };
+      }
 
       console.log("📥 Response từ BE:", response);
       console.log("📥 Response.data type:", typeof response.data);
@@ -161,10 +179,7 @@ export const energySessionService = {
       // Trường hợp 2: Backend trả về object có chứa chargingSessionId
       // Format này có thể kèm theo thông tin bổ sung khác
       if (response.data?.chargingSessionId) {
-        console.log(
-          "✅ Nhận được sessionId (object):",
-          response.data.chargingSessionId
-        );
+        console.log("✅ Nhận được sessionId (object):", response.data.chargingSessionId);
         return {
           success: true,
           data: {
@@ -221,10 +236,7 @@ export const energySessionService = {
       return {
         success: false,
         data: null,
-        message:
-          error.response?.data?.message ||
-          error.response?.data ||
-          "Lỗi khi tạo phiên sạc",
+        message: error.response?.data?.message || error.response?.data || "Lỗi khi tạo phiên sạc",
         errorDetails: {
           status: error.response?.status,
           data: error.response?.data,
@@ -254,8 +266,7 @@ export const energySessionService = {
       // Tạo payload đơn giản hơn từ chargingSessionRequest
       // Chỉ lấy các field cần thiết nhất
       const simplePayload = {
-        chargingPostId:
-          chargingSessionRequest?.booking?.chargingPost?.idChargingPost,
+        chargingPostId: chargingSessionRequest?.booking?.chargingPost?.idChargingPost,
         expectedEndTime: chargingSessionRequest?.expectedEndTime,
       };
 
@@ -275,20 +286,13 @@ export const energySessionService = {
 
             // Gọi API với endpoint và payload hiện tại
             response = await api.post(endpoint, payloads[i]);
-            console.log(
-              `✅ Thành công với endpoint: ${endpoint}, payload ${i + 1}`,
-              response.data
-            );
+            console.log(`✅ Thành công với endpoint: ${endpoint}, payload ${i + 1}`, response.data);
 
             // Nếu thành công, thoát khỏi cả 2 vòng lặp (dùng break và kiểm tra response sau)
             break;
           } catch (err) {
             // Log lỗi nhưng tiếp tục thử các endpoint/payload khác
-            console.log(
-              `❌ Endpoint ${endpoint} payload ${i + 1} failed:`,
-              err.response?.status,
-              err.response?.data
-            );
+            console.log(`❌ Endpoint ${endpoint} payload ${i + 1} failed:`, err.response?.status, err.response?.data);
             lastError = err; // Lưu lại lỗi cuối cùng để throw nếu tất cả đều fail
           }
         }
@@ -332,10 +336,7 @@ export const energySessionService = {
         return {
           success: false,
           data: null,
-          message:
-            error.response.data?.message ||
-            error.response.data ||
-            "Lỗi từ server",
+          message: error.response.data?.message || error.response.data || "Lỗi từ server",
         };
       }
       // Lỗi không nhận được response (network error, timeout)
@@ -381,12 +382,9 @@ export const energySessionService = {
         normalizedStatus,
       });
       // Gọi API cập nhật trạng thái
-      const response = await api.put(
-        `/api/charging/session/${sessionId}/status`,
-        {
-          status: normalizedStatus,
-        }
-      );
+      const response = await api.put(`/api/charging/session/${sessionId}/status`, {
+        status: normalizedStatus,
+      });
 
       // Kiểm tra response thành công
       if (response.data && response.data.success) {
@@ -437,9 +435,7 @@ export const energySessionService = {
           success: false,
           message:
             error.response?.data?.message ||
-            (typeof error.response?.data === "string"
-              ? error.response.data
-              : "Không tìm thấy phiên sạc"),
+            (typeof error.response?.data === "string" ? error.response.data : "Không tìm thấy phiên sạc"),
           errorCode: 404,
         };
       }
@@ -447,10 +443,7 @@ export const energySessionService = {
       return {
         success: false,
         message:
-          error.response?.data?.message ||
-          error.response?.data ||
-          error.message ||
-          "Lỗi khi cập nhật trạng thái",
+          error.response?.data?.message || error.response?.data || error.message || "Lỗi khi cập nhật trạng thái",
         errorCode: statusCode,
       };
     }
@@ -497,8 +490,7 @@ export const energySessionService = {
       // Backend trả về String message (không phải JSON object)
       // Ví dụ: "Charging Session finish completed successfully"
       if (response.status === 200) {
-        const resultMessage =
-          response.data || "Hoàn thành phiên sạc thành công";
+        const resultMessage = response.data || "Hoàn thành phiên sạc thành công";
 
         return {
           success: true,
@@ -549,10 +541,7 @@ export const energySessionService = {
       // Lỗi chung
       return {
         success: false,
-        message:
-          error.response?.data ||
-          error.message ||
-          "Lỗi khi hoàn thành phiên sạc",
+        message: error.response?.data || error.message || "Lỗi khi hoàn thành phiên sạc",
         errorCode: statusCode,
       };
     }
@@ -651,10 +640,7 @@ export const energySessionService = {
       chargingPower: "0",
 
       // ===== Time info =====
-      timeElapsed: this.calculateElapsedTime(
-        apiData.startTime,
-        apiData.endTime
-      ),
+      timeElapsed: this.calculateElapsedTime(apiData.startTime, apiData.endTime),
       estimatedTimeLeft: this.calculateRemainingTime(apiData.expectedEndTime),
       endTime: apiData.endTime,
 
@@ -666,9 +652,7 @@ export const energySessionService = {
 
       // ===== Technical defaults =====
       socketType: apiData.chargingPost?.connectorType || "Type 2",
-      power: apiData.chargingPost?.power
-        ? `${apiData.chargingPost.power}kW`
-        : "0kW",
+      power: apiData.chargingPost?.power ? `${apiData.chargingPost.power}kW` : "0kW",
       voltage: apiData.voltage || "0V",
       current: apiData.current || "0A",
 
@@ -727,14 +711,12 @@ export const energySessionService = {
 
     // Nếu có giờ thì format hh:mm:ss
     if (hours > 0) {
-      return `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-    } else {
-      // Nếu không có giờ thì format mm:ss
-      return `${minutes.toString().padStart(2, "0")}:${secs
+      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs
         .toString()
         .padStart(2, "0")}`;
+    } else {
+      // Nếu không có giờ thì format mm:ss
+      return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
     }
   },
 
@@ -749,8 +731,7 @@ export const energySessionService = {
     }
 
     // Tính % pin còn lại cần sạc
-    const remainingBattery =
-      sessionData.targetBatteryLevel - sessionData.currentBatteryLevel;
+    const remainingBattery = sessionData.targetBatteryLevel - sessionData.currentBatteryLevel;
 
     // Lấy công suất sạc (kW), fallback về 1 để tránh chia cho 0
     const chargingRate = sessionData.chargingPower || 1;
