@@ -15,7 +15,7 @@ const ServicePackage = () => {
   const { packages = [], fetchAll, loading: packagesLoading } = usePackage();
   const { createMomoPayment, loading: paymentLoading } = usePayment();
   const { createPaymentPacket } = usePaymentPackage();
-  const { activeTransaction, fetchUserTransactions, loading: transactionLoading } = usePackageTransaction();
+  const { activeTransaction, fetchUserTransactions, cancelTransaction, loading: transactionLoading } = usePackageTransaction();
   const { user } = useAuth();
   
   const [selectedPackage, setSelectedPackage] = useState(null);
@@ -156,6 +156,43 @@ const ServicePackage = () => {
   // Kiểm tra người dùng có gói đang hoạt động
   const hasActivePackage = !!activeTransaction;
 
+  // Xử lý hủy gói
+  const handleCancelPackage = () => {
+    if (!activeTransaction) return;
+    Modal.confirm({
+      title: 'Xác nhận hủy gói',
+      icon: <ExclamationCircleOutlined />, 
+      content: 'Bạn có chắc chắn muốn hủy gói đang sử dụng? Sau khi hủy bạn có thể đăng ký gói khác.',
+      okText: 'Hủy gói',
+      okType: 'danger',
+      cancelText: 'Không',
+      onOk: async () => {
+        try {
+          message.loading('Đang hủy gói...', 0);
+          // Debug: log activeTransaction to inspect id fields
+          console.debug('Cancelling activeTransaction:', activeTransaction);
+          const txId = activeTransaction.packageTransactionId || activeTransaction.id || activeTransaction.transactionId;
+          console.debug('Using txId for cancel:', txId);
+          await cancelTransaction(txId, user?.id);
+          message.destroy();
+          message.success('Hủy gói thành công');
+          if (user?.id) {
+            fetchUserTransactions(user.id);
+          }
+        } catch (err) {
+          message.destroy();
+          // Prefer server message (string or {message}) when available
+          const serverMsg = typeof err?.response?.data === 'string'
+            ? err.response.data
+            : err?.response?.data?.message;
+
+
+          message.error(serverMsg || err?.message || 'Hủy gói thất bại');
+        }
+      }
+    });
+  };
+
   if (packagesLoading || transactionLoading) {
     return (
       <Layout style={{ minHeight: '100vh', background: 'White' }}>
@@ -192,6 +229,11 @@ const ServicePackage = () => {
                   <p style={{ marginBottom: 4 }}>
                     Hạn mức còn lại: <strong>{activeTransaction.remainingQuota} kWh</strong>
                   </p>
+                  <div style={{ marginTop: 8 }}>
+                    <Button danger onClick={handleCancelPackage} loading={transactionLoading}>
+                      Hủy gói
+                    </Button>
+                  </div>
                 </div>
               }
               type="success"

@@ -2,7 +2,8 @@
 import { useState, useCallback } from 'react';
 import { 
   getUserPackageTransactions, 
-  getActivePackageTransaction 
+  getActivePackageTransaction,
+  cancelPackageTransaction
 } from '../services/packageTransactionService';
 
 // Hook quản lý package transaction
@@ -55,6 +56,27 @@ export const usePackageTransaction = () => {
     }
   }, []);
 
+  // Hủy transaction đang hoạt động
+  const cancelTransaction = useCallback(async (packageTransactionId, userId) => {
+    if (!packageTransactionId) throw new Error('Missing packageTransactionId');
+    setLoading(true);
+    setError(null);
+    try {
+      await cancelPackageTransaction(packageTransactionId);
+      // Sau khi hủy, tải lại danh sách giao dịch nếu userId được cung cấp
+      if (userId) {
+        await fetchUserTransactions(userId);
+      }
+      setActiveTransaction(null);
+      return true;
+    } catch (err) {
+      setError(err.response?.data || err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchUserTransactions]);
+
   return {
     transactions,
     activeTransaction,
@@ -62,6 +84,7 @@ export const usePackageTransaction = () => {
     error,
     fetchUserTransactions,
     fetchActiveTransaction,
+    cancelTransaction,
   };
 };
 

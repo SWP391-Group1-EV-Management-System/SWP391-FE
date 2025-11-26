@@ -13,7 +13,11 @@ function PaymentPage() {
   const { paymentId } = useParams();
 
   const { fetchPaymentById, loading: fetchLoading } = usePaymentData();
-  const { createMomoPayment, processPayment, loading: actionLoading } = usePayment();
+  const {
+    createMomoPayment,
+    processPayment,
+    loading: actionLoading,
+  } = usePayment();
 
   const [paymentVisible, setPaymentVisible] = useState(true);
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -46,6 +50,32 @@ function PaymentPage() {
       });
   }, [paymentId, fetchPaymentById, navigate]);
 
+  useEffect(() => {
+    // Xử lý callback khi user quay lại từ MoMo
+    const urlParams = new URLSearchParams(window.location.search);
+    const resultCode = urlParams.get("resultCode");
+
+    if (!resultCode) return;
+
+    const pendingPayment = localStorage.getItem("pendingPayment");
+
+    if (resultCode === "0") {
+      notification.success({ message: "Thanh toán thành công!" });
+      if (pendingPayment) {
+        localStorage.removeItem("pendingPayment");
+      }
+      // điều hướng hoặc refresh dữ liệu
+      setTimeout(() => navigate("/app/payment-history"), 800);
+    } else {
+      notification.info({ message: "Giao dịch MoMo đã bị hủy hoặc thất bại." });
+      if (pendingPayment) {
+        localStorage.removeItem("pendingPayment");
+      }
+      // Xóa query params để user có thể thử lại
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, [navigate]);
+
   // Chức năng: Xử lý xác nhận phương thức thanh toán
   const handlePaymentConfirm = (data) => {
     setPaymentData(data);
@@ -58,12 +88,16 @@ function PaymentPage() {
     setConfirmVisible(false);
     try {
       if (paymentData?.paymentMethod === "momo") await handleMomoPayment();
-      else if (paymentData?.paymentMethod === "package") await handlePackagePayment();
+      else if (paymentData?.paymentMethod === "package")
+        await handlePackagePayment();
       else if (paymentData?.paymentMethod === "cash") await handleCashPayment();
     } catch (err) {
       notification.error({
         message: "Lỗi thanh toán",
-        description: err.response?.data?.message || err.message || "Không thể xử lý thanh toán.",
+        description:
+          err.response?.data?.message ||
+          err.message ||
+          "Không thể xử lý thanh toán.",
       });
       setPaymentVisible(true);
     }
@@ -82,7 +116,10 @@ function PaymentPage() {
       }
 
       // Success: backend should trigger websocket notify to staff. Show success and redirect to history
-      notification.success({ message: "Đã gửi yêu cầu thanh toán bằng tiền mặt. Vui lòng đến quầy để thanh toán." });
+      notification.success({
+        message:
+          "Đã gửi yêu cầu thanh toán bằng tiền mặt. Vui lòng đến quầy để thanh toán.",
+      });
       setTimeout(() => navigate("/app/payment-history"), 1200);
     } catch (err) {
       console.error("Error processing cash payment:", err);
@@ -101,14 +138,21 @@ function PaymentPage() {
 
     const orderId = `${paymentId}`;
     const amount = paymentData.totalAmount;
-    const orderInfo = `Thanh toán phiên sạc - ${sessionData?.sessionId || paymentId}`;
+    const orderInfo = `Thanh toán phiên sạc - ${
+      sessionData?.sessionId || paymentId
+    }`;
     const momoResponse = await createMomoPayment(orderId, amount, orderInfo);
 
     if (momoResponse?.payUrl) {
       notification.success({ message: "Đang chuyển đến MoMo...", duration: 2 });
       localStorage.setItem(
         "pendingPayment",
-        JSON.stringify({ paymentId: orderId, amount, sessionId: sessionData?.sessionId, timestamp: Date.now() })
+        JSON.stringify({
+          paymentId: orderId,
+          amount,
+          sessionId: sessionData?.sessionId,
+          timestamp: Date.now(),
+        })
       );
       setTimeout(() => (window.location.href = momoResponse.payUrl), 800);
     } else {
@@ -124,7 +168,10 @@ function PaymentPage() {
       notification.warning({ message: "Gói dịch vụ không đủ", duration: 5 });
       setPaymentVisible(true);
     } else {
-      notification.success({ message: "Thanh toán bằng gói thành công", duration: 2 });
+      notification.success({
+        message: "Thanh toán bằng gói thành công",
+        duration: 2,
+      });
       setTimeout(() => navigate("/app/payment-history"), 1000);
     }
   };
@@ -139,10 +186,25 @@ function PaymentPage() {
   if (fetchLoading || !sessionData) {
     return (
       <Layout style={{ minHeight: "100vh", background: "#f0f2f5" }}>
-        <Content style={{ padding: "24px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <Content
+          style={{
+            padding: "24px",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
             <Spin size="large" />
-            <div style={{ marginTop: 12, color: "#555", fontSize: 14 }}>Đang tải thông tin thanh toán...</div>
+            <div style={{ marginTop: 12, color: "#555", fontSize: 14 }}>
+              Đang tải thông tin thanh toán...
+            </div>
           </div>
         </Content>
       </Layout>
