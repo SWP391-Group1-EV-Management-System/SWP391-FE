@@ -28,7 +28,6 @@ function StationManagement() {
   const [selectedStation, setSelectedStation] = useState(null);
   const [hovered, setHovered] = useState(false);
 
-  // Note: `useChargingStations` auto-fetches by default. No explicit effect needed here.
   const handleCreate = () => {
     setFormMode("create");
     setSelectedStation(null);
@@ -36,6 +35,14 @@ function StationManagement() {
   };
 
   const handleEdit = (record) => {
+    console.log("📝 Editing station:", record);
+    console.log("🔍 Available coordinate fields:", {
+      lat: record.lat,
+      lng: record.lng,
+      latitude: record.latitude,
+      longitude: record.longitude,
+    });
+    
     setFormMode("edit");
     setSelectedStation(record);
     setModalVisible(true);
@@ -154,7 +161,7 @@ function StationManagement() {
         visible={modalVisible}
         onCancel={handleCancel}
         onSubmit={handleFormSubmit}
-        // Map the selected station into the shape expected by StationForm
+        // ⭐ FIXED: Thêm latitude và longitude vào initialValues
         initialValues={
           selectedStation
             ? {
@@ -163,11 +170,13 @@ function StationManagement() {
                   selectedStation.name ||
                   "",
                 address: selectedStation.address || "",
+                // ⭐⭐⭐ THÊM 2 FIELD NÀY:
+                latitude: selectedStation.latitude || selectedStation.lat,
+                longitude: selectedStation.longitude || selectedStation.lng,
                 numberOfPosts:
                   typeof selectedStation.numberOfPosts === "number"
                     ? selectedStation.numberOfPosts
                     : selectedStation.totalSlots || 0,
-                // userManagerId may not be provided by mapper; fall back to name or empty
                 userManagerId:
                   selectedStation.userManagerId ||
                   selectedStation.userManagerName ||

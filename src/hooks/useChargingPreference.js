@@ -7,41 +7,35 @@ export const useChargingPreference = () => {
   const [error, setError] = useState(null);
 
   // Cập nhật preference xuống backend
-  const updatePreference = useCallback(
-    async (userId, currentBattery, selectedMinutes) => {
-      try {
-        setLoading(true);
-        setError(null);
+  // NOTE: `selectedSeconds` is expected (FE will pass seconds)
+  const updatePreference = useCallback(async (userId, currentBattery, selectedSeconds) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const batteryIncrease = Math.floor(selectedMinutes * (60 / 13.25));
-        const targetPin = Math.min(100, currentBattery + batteryIncrease);
-        const maxSecond = selectedMinutes * 60;
+      // Hardcode target pin to 100 (user requested default)
+      const targetPin = 100;
+      const maxSecond = selectedSeconds; // already in seconds
 
-        const result = await energySessionService.updateChargingPreference(
-          userId,
-          targetPin,
-          maxSecond
-        );
+      const result = await energySessionService.updateChargingPreference(userId, targetPin, maxSecond);
 
-        if (!result.success) {
-          setError(result.message || "Không thể cập nhật preference");
-          return result;
-        }
-
+      if (!result.success) {
+        setError(result.message || "Không thể cập nhật preference");
         return result;
-      } catch (err) {
-        const errorMessage = err.message || "Lỗi khi cập nhật preference";
-        setError(errorMessage);
-        return {
-          success: false,
-          message: errorMessage,
-        };
-      } finally {
-        setLoading(false);
       }
-    },
-    []
-  );
+
+      return result;
+    } catch (err) {
+      const errorMessage = err.message || "Lỗi khi cập nhật preference";
+      setError(errorMessage);
+      return {
+        success: false,
+        message: errorMessage,
+      };
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   return {
     updatePreference,
