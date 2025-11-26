@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { Card, Button, Space, Typography, Table, Tag } from "antd";
-import {
-  PlusOutlined,
-  EditOutlined,
-  ThunderboltOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, EditOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import PageHeader from "../PageHeader";
 import StationForm from "./StationForm";
 import useStation from "../../hooks/useStation";
@@ -14,11 +10,7 @@ const { Title, Text } = Typography;
 
 function StationManagement() {
   // Use charging stations hook for listing and explicit fetchStations
-  const {
-    stations: listedStations,
-    loading: listLoading,
-    fetchStations,
-  } = useChargingStations();
+  const { stations: listedStations, loading: listLoading, fetchStations } = useChargingStations();
 
   // Use station hook for create/update actions
   const { createNewStation, updateExistingStation } = useStation();
@@ -42,7 +34,7 @@ function StationManagement() {
       latitude: record.latitude,
       longitude: record.longitude,
     });
-    
+
     setFormMode("edit");
     setSelectedStation(record);
     setModalVisible(true);
@@ -53,10 +45,7 @@ function StationManagement() {
       if (formMode === "create") {
         await createNewStation(values);
       } else if (formMode === "edit") {
-        const stationId =
-          selectedStation?.stationId ||
-          selectedStation?.id ||
-          selectedStation?.idChargingStation;
+        const stationId = selectedStation?.stationId || selectedStation?.id || selectedStation?.idChargingStation;
         await updateExistingStation(stationId, values);
       }
       // refresh list after change
@@ -96,13 +85,7 @@ function StationManagement() {
       title: "Trạng thái",
       dataIndex: "active",
       key: "active",
-      render: (v) => (
-        v ? (
-          <Tag color="green">Hoạt động</Tag>
-        ) : (
-          <Tag color="orange">Bảo trì</Tag>
-        )
-      ),
+      render: (v) => (v ? <Tag color="green">Hoạt động</Tag> : <Tag color="orange">Bảo trì</Tag>),
     },
     {
       title: "Hành động",
@@ -129,17 +112,14 @@ function StationManagement() {
           style={{
             borderRadius: 10,
             background: "#ffffff",
-            boxShadow: hovered
-              ? "0 6px 18px rgba(6, 27, 18, 0.12)"
-              : "0 2px 6px rgba(6, 27, 18, 0.06)",
+            boxShadow: hovered ? "0 6px 18px rgba(6, 27, 18, 0.12)" : "0 2px 6px rgba(6, 27, 18, 0.06)",
           }}
           bodyStyle={{ padding: 16 }}
         >
           <PageHeader
             title={
               <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <ThunderboltOutlined style={{ color: "#0b6b3d" }} /> Quản lý
-                trạm
+                <ThunderboltOutlined style={{ color: "#0b6b3d" }} /> Quản lý trạm
               </span>
             }
             subtitle={`Tổng số: ${listedStations.length} trạm`}
@@ -151,9 +131,7 @@ function StationManagement() {
           />
 
           <Table
-            rowKey={(r) =>
-              r.stationId || r.id || r.idChargingStation || JSON.stringify(r)
-            }
+            rowKey={(r) => r.stationId || r.id || r.idChargingStation || JSON.stringify(r)}
             columns={columns}
             dataSource={listedStations}
             loading={listLoading}
@@ -172,10 +150,8 @@ function StationManagement() {
         initialValues={
           selectedStation
             ? {
-                stationId:
-                  selectedStation.stationId || selectedStation.id || selectedStation.idChargingStation,
-                nameChargingStation:
-                  selectedStation.nameChargingStation || selectedStation.name || "",
+                stationId: selectedStation.stationId || selectedStation.id || selectedStation.idChargingStation,
+                nameChargingStation: selectedStation.nameChargingStation || selectedStation.name || "",
                 address: selectedStation.address || "",
                 latitude: selectedStation.latitude || selectedStation.lat,
                 longitude: selectedStation.longitude || selectedStation.lng,
@@ -185,10 +161,7 @@ function StationManagement() {
                     : selectedStation.totalSlots || 0,
                 // IMPORTANT: do not fall back to userManagerName here — keep it empty if id is absent
                 userManagerId: selectedStation.userManagerId || "",
-                active:
-                  typeof selectedStation.active === "boolean"
-                    ? selectedStation.active
-                    : true,
+                active: typeof selectedStation.active === "boolean" ? selectedStation.active : true,
               }
             : null
         }

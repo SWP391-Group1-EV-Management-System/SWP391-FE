@@ -1,24 +1,6 @@
 import { useEffect, useState, useRef } from "react";
-import {
-  Modal,
-  Form,
-  Input,
-  InputNumber,
-  Button,
-  Space,
-  Switch,
-  Select,
-  Row,
-  Col,
-  Card,
-} from "antd";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  useMapEvents,
-  useMap,
-} from "react-leaflet";
+import { Modal, Form, Input, InputNumber, Button, Space, Switch, Select, Row, Col, Card } from "antd";
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { IoLocationSharp } from "react-icons/io5";
@@ -30,12 +12,9 @@ import * as Yup from "yup";
 // Fix Leaflet default icon issue
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl:
-    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
 const DEFAULT_CENTER = [10.7769, 106.7009]; // Ho Chi Minh City
@@ -90,7 +69,7 @@ const StationForm = ({
   const [mapPosition, setMapPosition] = useState(DEFAULT_CENTER);
   const [shouldRecenter, setShouldRecenter] = useState(false);
   const [mapKey, setMapKey] = useState(0);
-  
+
   const isMapClickRef = useRef(false);
 
   // Load staff list
@@ -120,10 +99,7 @@ const StationForm = ({
       .required("Vui lòng nhập tên trạm")
       .min(2, "Tên phải có ít nhất 2 ký tự")
       .max(200, "Tên không được vượt quá 200 ký tự"),
-    address: Yup.string()
-      .required("Vui lòng nhập địa chỉ")
-      .min(5, "Địa chỉ quá ngắn")
-      .max(500, "Địa chỉ quá dài"),
+    address: Yup.string().required("Vui lòng nhập địa chỉ").min(5, "Địa chỉ quá ngắn").max(500, "Địa chỉ quá dài"),
     latitude: Yup.number()
       .required("Vui lòng nhập vĩ độ hoặc chọn trên bản đồ")
       .min(-90, "Vĩ độ phải từ -90 đến 90")
@@ -132,10 +108,7 @@ const StationForm = ({
       .required("Vui lòng nhập kinh độ hoặc chọn trên bản đồ")
       .min(-180, "Kinh độ phải từ -180 đến 180")
       .max(180, "Kinh độ phải từ -180 đến 180"),
-    numberOfPosts: Yup.number()
-      .min(0, "Số trụ phải >= 0")
-      .max(1000, "Số trụ quá lớn")
-      .nullable(),
+    numberOfPosts: Yup.number().min(0, "Số trụ phải >= 0").max(1000, "Số trụ quá lớn").nullable(),
     userManagerId: Yup.string().required("Vui lòng chọn người quản lý"),
     active: Yup.boolean().required("Trạng thái bắt buộc"),
   });
@@ -155,7 +128,7 @@ const StationForm = ({
     onSubmit: (values) => {
       const lat = parseFloat(values.latitude);
       const lng = parseFloat(values.longitude);
-      
+
       // Validate coordinates
       if (isNaN(lat) || isNaN(lng)) {
         alert("Vui lòng nhập tọa độ hợp lệ!");
@@ -168,14 +141,14 @@ const StationForm = ({
         address: values.address.trim(),
         latitude: lat,
         longitude: lng,
-        numberOfPosts: mode === "create" ? 0 : (parseInt(values.numberOfPosts) || 0),
+        numberOfPosts: mode === "create" ? 0 : parseInt(values.numberOfPosts) || 0,
         userManagerId: String(values.userManagerId),
         active: Boolean(values.active),
       };
 
       console.log("📤 Payload gửi lên API:", JSON.stringify(payload, null, 2));
       console.log("📤 Mode:", mode);
-      
+
       onSubmit(payload);
     },
   });
@@ -201,10 +174,10 @@ const StationForm = ({
   // Handle coordinate input change - update map VÀ recenter
   const handleCoordinateChange = (field, value) => {
     formik.setFieldValue(field, value);
-    
+
     const lat = parseFloat(field === "latitude" ? value : formik.values.latitude);
     const lng = parseFloat(field === "longitude" ? value : formik.values.longitude);
-    
+
     if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
       isMapClickRef.current = false;
       setMapPosition([lat, lng]);
@@ -238,14 +211,8 @@ const StationForm = ({
   useEffect(() => {
     if (!staffLoading && staffList.length && initialValues) {
       const incomingRaw =
-        initialValues.userManagerId ||
-        initialValues.userManagerName ||
-        initialValues.userManager ||
-        "";
-      const incoming =
-        incomingRaw !== null && incomingRaw !== undefined
-          ? String(incomingRaw).trim()
-          : "";
+        initialValues.userManagerId || initialValues.userManagerName || initialValues.userManager || "";
+      const incoming = incomingRaw !== null && incomingRaw !== undefined ? String(incomingRaw).trim() : "";
       if (!incoming) return;
 
       const foundById = staffList.find((s) => String(s.id) === incoming);
@@ -254,9 +221,7 @@ const StationForm = ({
         return;
       }
 
-      const foundByName = staffList.find(
-        (s) => `${s.firstName || ""} ${s.lastName || ""}`.trim() === incoming
-      );
+      const foundByName = staffList.find((s) => `${s.firstName || ""} ${s.lastName || ""}`.trim() === incoming);
       const foundByEmail = staffList.find((s) => s.email === incoming);
       const match = foundByName || foundByEmail;
       if (match) {
@@ -272,9 +237,7 @@ const StationForm = ({
     const loadCanonicalStation = async () => {
       try {
         if (visible && initialValues?.stationId) {
-          const st = await chargingStationService.getStationById(
-            initialValues.stationId
-          );
+          const st = await chargingStationService.getStationById(initialValues.stationId);
           if (!mounted || !st) return;
 
           // Coordinates
@@ -333,7 +296,7 @@ const StationForm = ({
       if (!isNaN(lat) && !isNaN(lng)) {
         setMapPosition([lat, lng]);
         setShouldRecenter(true);
-        
+
         // Set giá trị cho form
         formik.setFieldValue("latitude", lat);
         formik.setFieldValue("longitude", lng);
@@ -345,7 +308,7 @@ const StationForm = ({
   // Reset form and regenerate map when modal opens/closes
   useEffect(() => {
     if (visible) {
-      setMapKey(prev => prev + 1);
+      setMapKey((prev) => prev + 1);
     } else {
       formik.resetForm();
       setMapPosition(DEFAULT_CENTER);
@@ -360,13 +323,7 @@ const StationForm = ({
 
   return (
     <Modal
-      title={
-        mode === "create"
-          ? "+ Thêm trạm mới"
-          : mode === "view"
-          ? "Chi tiết trạm"
-          : "Chỉnh sửa trạm"
-      }
+      title={mode === "create" ? "+ Thêm trạm mới" : mode === "view" ? "Chi tiết trạm" : "Chỉnh sửa trạm"}
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -376,7 +333,7 @@ const StationForm = ({
       afterOpenChange={(open) => {
         if (open) {
           setTimeout(() => {
-            window.dispatchEvent(new Event('resize'));
+            window.dispatchEvent(new Event("resize"));
           }, 300);
         }
       }}
@@ -386,16 +343,8 @@ const StationForm = ({
           <Col span={24}>
             <Form.Item
               label="Tên trạm"
-              validateStatus={
-                formik.touched.nameChargingStation &&
-                formik.errors.nameChargingStation
-                  ? "error"
-                  : ""
-              }
-              help={
-                formik.touched.nameChargingStation &&
-                formik.errors.nameChargingStation
-              }
+              validateStatus={formik.touched.nameChargingStation && formik.errors.nameChargingStation ? "error" : ""}
+              help={formik.touched.nameChargingStation && formik.errors.nameChargingStation}
               required
             >
               <Input
@@ -412,9 +361,7 @@ const StationForm = ({
           <Col span={24}>
             <Form.Item
               label="Địa chỉ"
-              validateStatus={
-                formik.touched.address && formik.errors.address ? "error" : ""
-              }
+              validateStatus={formik.touched.address && formik.errors.address ? "error" : ""}
               help={formik.touched.address && formik.errors.address}
               required
             >
@@ -431,16 +378,12 @@ const StationForm = ({
           </Col>
 
           <Col span={24}>
-            <Card 
+            <Card
               title={
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span>📍 Vị trí trạm sạc</span>
                   {mode !== "view" && (
-                    <Button 
-                      size="small" 
-                      onClick={handleGetCurrentLocation}
-                      icon={<IoLocationSharp />}
-                    >
+                    <Button size="small" onClick={handleGetCurrentLocation} icon={<IoLocationSharp />}>
                       Vị trí hiện tại
                     </Button>
                   )}
@@ -453,11 +396,7 @@ const StationForm = ({
                 <Col span={12}>
                   <Form.Item
                     label="Vĩ độ (Latitude)"
-                    validateStatus={
-                      formik.touched.latitude && formik.errors.latitude
-                        ? "error"
-                        : ""
-                    }
+                    validateStatus={formik.touched.latitude && formik.errors.latitude ? "error" : ""}
                     help={formik.touched.latitude && formik.errors.latitude}
                     required
                     style={{ marginBottom: 0 }}
@@ -479,11 +418,7 @@ const StationForm = ({
                 <Col span={12}>
                   <Form.Item
                     label="Kinh độ (Longitude)"
-                    validateStatus={
-                      formik.touched.longitude && formik.errors.longitude
-                        ? "error"
-                        : ""
-                    }
+                    validateStatus={formik.touched.longitude && formik.errors.longitude ? "error" : ""}
                     help={formik.touched.longitude && formik.errors.longitude}
                     required
                     style={{ marginBottom: 0 }}
@@ -504,26 +439,30 @@ const StationForm = ({
               </Row>
 
               {mode === "edit" && (
-                <div style={{ 
-                  marginBottom: 12, 
-                  padding: "8px 12px",
-                  background: "#fff7e6",
-                  border: "1px solid #ffd591",
-                  borderRadius: "4px",
-                  fontSize: "13px",
-                  color: "#d46b08"
-                }}>
+                <div
+                  style={{
+                    marginBottom: 12,
+                    padding: "8px 12px",
+                    background: "#fff7e6",
+                    border: "1px solid #ffd591",
+                    borderRadius: "4px",
+                    fontSize: "13px",
+                    color: "#d46b08",
+                  }}
+                >
                   ⚠️ Thay đổi tọa độ có thể ảnh hưởng đến các phiên sạc đang diễn ra
                 </div>
               )}
 
-              <div style={{ 
-                height: "350px", 
-                border: "2px solid #d9d9d9", 
-                borderRadius: "8px",
-                overflow: "hidden",
-                position: "relative"
-              }}>
+              <div
+                style={{
+                  height: "350px",
+                  border: "2px solid #d9d9d9",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  position: "relative",
+                }}
+              >
                 <MapContainer
                   key={mapKey}
                   center={mapPosition}
@@ -548,14 +487,16 @@ const StationForm = ({
                   <MapController position={mapPosition} shouldRecenter={shouldRecenter} />
                 </MapContainer>
               </div>
-              
+
               {mode !== "view" && (
-                <div style={{ 
-                  marginTop: 8, 
-                  fontSize: "12px", 
-                  color: "#8c8c8c",
-                  textAlign: "center" 
-                }}>
+                <div
+                  style={{
+                    marginTop: 8,
+                    fontSize: "12px",
+                    color: "#8c8c8c",
+                    textAlign: "center",
+                  }}
+                >
                   💡 Nhấp vào bản đồ để chọn vị trí trạm sạc
                 </div>
               )}
@@ -567,11 +508,7 @@ const StationForm = ({
           {mode === "edit" && (
             <Form.Item
               label="Số trụ"
-              validateStatus={
-                formik.touched.numberOfPosts && formik.errors.numberOfPosts
-                  ? "error"
-                  : ""
-              }
+              validateStatus={formik.touched.numberOfPosts && formik.errors.numberOfPosts ? "error" : ""}
               help={formik.touched.numberOfPosts && formik.errors.numberOfPosts}
               style={{ flex: 1, minWidth: 150 }}
             >
@@ -588,11 +525,7 @@ const StationForm = ({
 
           <Form.Item
             label="Người quản lý"
-            validateStatus={
-              formik.touched.userManagerId && formik.errors.userManagerId
-                ? "error"
-                : ""
-            }
+            validateStatus={formik.touched.userManagerId && formik.errors.userManagerId ? "error" : ""}
             help={formik.touched.userManagerId && formik.errors.userManagerId}
             required
             style={{ flex: 1, minWidth: 150 }}
@@ -602,18 +535,11 @@ const StationForm = ({
               placeholder="Chọn người quản lý"
               optionFilterProp="children"
               value={formik.values.userManagerId || undefined}
-              onChange={(val) =>
-                formik.setFieldValue("userManagerId", String(val))
-              }
+              onChange={(val) => formik.setFieldValue("userManagerId", String(val))}
               onBlur={() => formik.setFieldTouched("userManagerId", true)}
               loading={staffLoading}
               disabled={mode === "view"}
-              filterOption={(input, option) =>
-                option.children
-                  .toString()
-                  .toLowerCase()
-                  .includes(input.toLowerCase())
-              }
+              filterOption={(input, option) => option.children.toString().toLowerCase().includes(input.toLowerCase())}
             >
               {staffList.map((s) => (
                 <Option key={s.id} value={String(s.id)}>
@@ -634,16 +560,9 @@ const StationForm = ({
 
         <Form.Item style={{ marginTop: 24, marginBottom: 0 }}>
           <Space style={{ width: "100%", justifyContent: "flex-end" }}>
-            <Button onClick={onCancel}>
-              {mode === "view" ? "Đóng" : "Hủy"}
-            </Button>
+            <Button onClick={onCancel}>{mode === "view" ? "Đóng" : "Hủy"}</Button>
             {mode !== "view" && (
-              <Button
-                type="primary"
-                onClick={formik.handleSubmit}
-                loading={loading}
-                disabled={!formik.isValid}
-              >
+              <Button type="primary" onClick={formik.handleSubmit} loading={loading} disabled={!formik.isValid}>
                 {mode === "create" ? "Tạo trạm" : "Cập nhật"}
               </Button>
             )}
