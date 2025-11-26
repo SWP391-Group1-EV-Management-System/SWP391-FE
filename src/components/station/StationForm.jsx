@@ -12,7 +12,6 @@ import {
   Col,
   Card,
 } from "antd";
-import { TbCurrentLocation } from "react-icons/tb";
 import {
   MapContainer,
   TileLayer,
@@ -22,8 +21,8 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { EnvironmentOutlined, InfoCircleOutlined } from '@ant-design/icons';
-import { getStaff } from "../../services/userService"; // ✅ Import đúng như bản cũ
+import { IoLocationSharp } from "react-icons/io5";
+import { getStaff } from "../../services/userService";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -93,13 +92,13 @@ const StationForm = ({
   
   const isMapClickRef = useRef(false);
 
-  // ✅ Load staff list - FIXED: Dùng getStaff() thay vì mock data
+  // Load staff list
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       setStaffLoading(true);
       try {
-        const data = await getStaff(); // ✅ Gọi API thật
+        const data = await getStaff();
         if (!mounted) return;
         setStaffList(Array.isArray(data) ? data : []);
       } catch (err) {
@@ -132,13 +131,10 @@ const StationForm = ({
       .required("Vui lòng nhập kinh độ hoặc chọn trên bản đồ")
       .min(-180, "Kinh độ phải từ -180 đến 180")
       .max(180, "Kinh độ phải từ -180 đến 180"),
-    numberOfPosts:
-      mode === "edit"
-        ? Yup.number()
-            .required("Vui lòng nhập số trụ")
-            .min(0, "Số trụ phải >= 0")
-            .max(1000, "Số trụ quá lớn")
-        : Yup.number().notRequired(),
+    numberOfPosts: Yup.number()
+      .min(0, "Số trụ phải >= 0")
+      .max(1000, "Số trụ quá lớn")
+      .nullable(),
     userManagerId: Yup.string().required("Vui lòng chọn người quản lý"),
     active: Yup.boolean().required("Trạng thái bắt buộc"),
   });
@@ -165,30 +161,39 @@ const StationForm = ({
         return;
       }
 
+      // ✅ FIXED: Đảm bảo payload đúng format với API
       const payload = {
-        nameChargingStation: values.nameChargingStation,
-        address: values.address,
+        nameChargingStation: values.nameChargingStation.trim(),
+        address: values.address.trim(),
         latitude: lat,
         longitude: lng,
-        numberOfPosts: mode === "edit" ? parseInt(values.numberOfPosts) || 0 : 0,
-        userManagerId:
-          values.userManagerId !== undefined && values.userManagerId !== null
-            ? String(values.userManagerId)
-            : "",
-        active: !!values.active,
+        numberOfPosts: mode === "create" ? 0 : (parseInt(values.numberOfPosts) || 0),
+        userManagerId: String(values.userManagerId),
+        active: Boolean(values.active),
       };
 
-      console.log("📤 Payload gửi lên API:", payload);
+      console.log("📤 Payload gửi lên API:", JSON.stringify(payload, null, 2));
+      console.log("📤 Mode:", mode);
+      
       onSubmit(payload);
     },
   });
+
+  // ⭐ DEBUG: Log initialValues khi form mở
+  useEffect(() => {
+    if (visible && initialValues) {
+      console.log("🔍 [StationForm] Initial values received:", initialValues);
+      console.log("🔍 [StationForm] Latitude:", initialValues.latitude);
+      console.log("🔍 [StationForm] Longitude:", initialValues.longitude);
+    }
+  }, [visible, initialValues]);
 
   // Handle map click - update form values NHƯNG KHÔNG recenter map
   const handleMapPositionChange = (newPosition) => {
     isMapClickRef.current = true;
     setMapPosition(newPosition);
-    formik.setFieldValue("latitude", newPosition[0].toFixed(6));
-    formik.setFieldValue("longitude", newPosition[1].toFixed(6));
+    formik.setFieldValue("latitude", parseFloat(newPosition[0].toFixed(6)));
+    formik.setFieldValue("longitude", parseFloat(newPosition[1].toFixed(6)));
     setShouldRecenter(false);
   };
 
@@ -214,8 +219,8 @@ const StationForm = ({
           const { latitude, longitude } = position.coords;
           isMapClickRef.current = false;
           setMapPosition([latitude, longitude]);
-          formik.setFieldValue("latitude", latitude.toFixed(6));
-          formik.setFieldValue("longitude", longitude.toFixed(6));
+          formik.setFieldValue("latitude", parseFloat(latitude.toFixed(6)));
+          formik.setFieldValue("longitude", parseFloat(longitude.toFixed(6)));
           setShouldRecenter(true);
         },
         (error) => {
@@ -260,7 +265,7 @@ const StationForm = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [staffList, staffLoading, initialValues]);
 
-  // Set initial map position from initialValues
+  // ✅ FIXED: Set initial map position và KHÔNG cho phép chỉnh sửa tọa độ khi đang ở mode edit
   useEffect(() => {
     if (visible && initialValues?.latitude && initialValues?.longitude) {
       const lat = parseFloat(initialValues.latitude);
@@ -268,8 +273,13 @@ const StationForm = ({
       if (!isNaN(lat) && !isNaN(lng)) {
         setMapPosition([lat, lng]);
         setShouldRecenter(true);
+        
+        // Set giá trị cho form
+        formik.setFieldValue("latitude", lat);
+        formik.setFieldValue("longitude", lng);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, initialValues]);
 
   // Reset form and regenerate map when modal opens/closes
@@ -284,6 +294,9 @@ const StationForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible]);
+
+  // ✅ FIXED: Chỉ disable khi ở mode view, cho phép edit coordinates trong mode edit và create
+  const isCoordinateDisabled = mode === "view";
 
   return (
     <Modal
@@ -327,7 +340,7 @@ const StationForm = ({
             >
               <Input
                 name="nameChargingStation"
-                placeholder="VD: Trạm A"
+                placeholder="VD: Trạm sạc Quận 1"
                 value={formik.values.nameChargingStation}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -347,7 +360,7 @@ const StationForm = ({
             >
               <Input.TextArea
                 name="address"
-                placeholder="Nhập địa chỉ trạm"
+                placeholder="Nhập địa chỉ đầy đủ của trạm sạc"
                 rows={3}
                 value={formik.values.address}
                 onChange={formik.handleChange}
@@ -358,18 +371,15 @@ const StationForm = ({
           </Col>
 
           <Col span={24}>
-              <Card 
+            <Card 
               title={
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <EnvironmentOutlined />
-                    Vị trí trạm sạc
-                  </span>
+                  <span>📍 Vị trí trạm sạc</span>
                   {mode !== "view" && (
                     <Button 
                       size="small" 
                       onClick={handleGetCurrentLocation}
-                      icon={<TbCurrentLocation />}
+                      icon={<IoLocationSharp />}
                     >
                       Vị trí hiện tại
                     </Button>
@@ -399,7 +409,7 @@ const StationForm = ({
                       value={formik.values.latitude}
                       onChange={(value) => handleCoordinateChange("latitude", value)}
                       onBlur={formik.handleBlur}
-                      disabled={mode === "view"}
+                      disabled={isCoordinateDisabled}
                       step={0.000001}
                       precision={6}
                     />
@@ -425,13 +435,27 @@ const StationForm = ({
                       value={formik.values.longitude}
                       onChange={(value) => handleCoordinateChange("longitude", value)}
                       onBlur={formik.handleBlur}
-                      disabled={mode === "view"}
+                      disabled={isCoordinateDisabled}
                       step={0.000001}
                       precision={6}
                     />
                   </Form.Item>
                 </Col>
               </Row>
+
+              {mode === "edit" && (
+                <div style={{ 
+                  marginBottom: 12, 
+                  padding: "8px 12px",
+                  background: "#fff7e6",
+                  border: "1px solid #ffd591",
+                  borderRadius: "4px",
+                  fontSize: "13px",
+                  color: "#d46b08"
+                }}>
+                  ⚠️ Thay đổi tọa độ có thể ảnh hưởng đến các phiên sạc đang diễn ra
+                </div>
+              )}
 
               <div style={{ 
                 height: "350px", 
@@ -459,7 +483,7 @@ const StationForm = ({
                   <LocationPicker
                     position={mapPosition}
                     setPosition={handleMapPositionChange}
-                    disabled={mode === "view"}
+                    disabled={isCoordinateDisabled}
                   />
                   <MapController position={mapPosition} shouldRecenter={shouldRecenter} />
                 </MapContainer>
@@ -470,14 +494,9 @@ const StationForm = ({
                   marginTop: 8, 
                   fontSize: "12px", 
                   color: "#8c8c8c",
-                  textAlign: "center",
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  gap: 6,
+                  textAlign: "center" 
                 }}>
-                  <InfoCircleOutlined style={{ color: '#8c8c8c' }} />
-                  Nhấp vào bản đồ để chọn vị trí trạm sạc
+                  💡 Nhấp vào bản đồ để chọn vị trí trạm sạc
                 </div>
               )}
             </Card>
@@ -494,7 +513,6 @@ const StationForm = ({
                   : ""
               }
               help={formik.touched.numberOfPosts && formik.errors.numberOfPosts}
-              required
               style={{ flex: 1, minWidth: 150 }}
             >
               <InputNumber
@@ -564,9 +582,9 @@ const StationForm = ({
                 type="primary"
                 onClick={formik.handleSubmit}
                 loading={loading}
-                disabled={!formik.isValid || !formik.dirty}
+                disabled={!formik.isValid}
               >
-                {mode === "create" ? "Tạo" : "Cập nhật"}
+                {mode === "create" ? "Tạo trạm" : "Cập nhật"}
               </Button>
             )}
           </Space>

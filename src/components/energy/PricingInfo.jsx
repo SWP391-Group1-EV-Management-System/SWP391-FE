@@ -179,13 +179,6 @@ const PricingInfo = ({
       content: (
         <div>
           <p>Bạn có chắc chắn muốn dừng sạc không?</p>
-          {showEarlyStopWarning && (
-            <p style={{ color: "red", fontSize: "14px", marginTop: "8px" }}>
-              <strong>LƯU Ý: </strong>Nếu dừng sạc trước 90% của tổng năng lượng
-              đã đặt, bạn sẽ bị trừ điểm uy tín, sẽ rút ngắn thời gian đặt chỗ
-              trong tương lai.
-            </p>
-          )}
           <p style={{ color: "#6b7280", fontSize: "14px", marginTop: "8px" }}>
             Phiên sạc sẽ kết thúc và chuyển sang thanh toán.
           </p>
