@@ -29,7 +29,6 @@ export const useEnergySession = (userID = null) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isFinishing, setIsFinishing] = useState(false); // Đang finish session
 
-
   // ==================== EFFECT: FETCH SESSION DATA ====================
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
@@ -113,10 +112,7 @@ export const useEnergySession = (userID = null) => {
     return () => clearInterval(timer);
   }, []);
 
-
   // ==================== HELPER FUNCTIONS ====================
-
-  
 
   /**
    * Lấy session theo sessionId
