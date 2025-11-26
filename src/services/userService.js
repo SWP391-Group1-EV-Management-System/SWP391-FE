@@ -89,3 +89,21 @@ export const getBookingTime = async (userId) => {
     throw error;
   }
 };
+
+export const createStaff = async (staffData) => {
+  try {
+    const response = await api.post("/users/register/create-staff", {
+      email: staffData.email,
+      firstName: staffData.firstName,
+      lastName: staffData.lastName,
+      birthDate: staffData.birthDate,
+      gender: staffData.gender,
+      phoneNumber: staffData.phoneNumber,
+      password: staffData.password,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating staff:", error);
+    throw error;
+  }
+};

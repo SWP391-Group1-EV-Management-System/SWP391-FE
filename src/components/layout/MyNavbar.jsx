@@ -8,8 +8,6 @@ import { TbLogout, TbUser, TbSettings } from "react-icons/tb";
 // Import các component con
 import QRScanner from "../qr/QRScanner";
 import QRResultModal from "../qr/QRResultModal";
-import { getUnpaidPaymentsByUserId } from "../../services/paymentService";
-import { message } from "antd";
 // Import hook xác thực người dùng
 import { useAuth } from "../../hooks/useAuth";
 // Import file CSS
@@ -31,7 +29,6 @@ function MyNavbar({ collapsed }) {
 
   // Lấy thông tin user và các hàm xác thực từ hook
   const { user, logout, loading } = useAuth();
-  const [notifiedUnpaid, setNotifiedUnpaid] = useState(false);
 
   // Kiểm tra role của user để ẩn/hiện một số nút
   const userRoles = user?.role;
@@ -150,34 +147,7 @@ function MyNavbar({ collapsed }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Kiểm tra khoản nợ của user khi đăng nhập / thay đổi user
-  useEffect(() => {
-    let mounted = true;
-    const checkUnpaid = async () => {
-      try {
-        if (!user || notifiedUnpaid) return;
-        const userId = user?.userId || user?.id;
-        if (!userId) return;
-        const unpaid = await getUnpaidPaymentsByUserId(userId);
-        const hasUnpaid = Array.isArray(unpaid) ? unpaid.length > 0 : !!unpaid;
-        if (mounted && hasUnpaid) {
-          console.warn("⚠️ [MyNavbar] User has unpaid payments:", unpaid);
-          message.error(
-            "Tài khoản đang có khoản nợ. Vui lòng thanh toán trước khi sử dụng dịch vụ."
-          );
-          setNotifiedUnpaid(true);
-        }
-      } catch (err) {
-        console.error("❌ [MyNavbar] Failed to check unpaid payments:", err);
-      }
-    };
-
-    checkUnpaid();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user, notifiedUnpaid]);
+  
 
   // === Render giao diện ===
   return (
