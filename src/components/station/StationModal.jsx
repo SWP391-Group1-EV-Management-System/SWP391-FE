@@ -82,11 +82,14 @@ const StationModal = ({ isOpen, onClose, station }) => {
   const displayStats =
     mergedPosts.length > 0
       ? {
-          total: mergedPosts.length,
-          available: mergedPosts.filter((p) => p.isAvailable).length,
+        total: mergedPosts.length,
+          // Only count as available when the post is available AND the post is active
+          available: mergedPosts.filter((p) => p.isAvailable && p.active).length,
+          // Busy = not available but still active
           busy: mergedPosts.filter((p) => !p.isAvailable && p.active).length,
+          // Inactive = post not active (e.g., maintenance)
           inactive: mergedPosts.filter((p) => !p.active).length,
-        }
+      }
       : calculateStatsFromMap(station?.chargingPostsAvailable);
 
   // Kiểm tra xem có thông tin trụ sạc chi tiết hay không
@@ -152,7 +155,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
   );
   const selectedCarChargingType = selectedCarObj
     ? CHARGING_TYPE_NAMES[selectedCarObj.chargingType] ||
-      (selectedCarObj.chargingType || "N/A").toString()
+    (selectedCarObj.chargingType || "N/A").toString()
     : null;
 
   // Chức năng: Mở modal xác nhận đặt chỗ
@@ -214,9 +217,8 @@ const StationModal = ({ isOpen, onClose, station }) => {
       ) {
         notification.error({
           message: "Đầu sạc không phù hợp",
-          description: `Đầu sạc xe (${carTypeName}) không phù hợp với trụ (hỗ trợ: ${
-            post.supportedTypes ? post.supportedTypes.join(", ") : "N/A"
-          }).`,
+          description: `Đầu sạc xe (${carTypeName}) không phù hợp với trụ (hỗ trợ: ${post.supportedTypes ? post.supportedTypes.join(", ") : "N/A"
+            }).`,
           duration: 5,
         });
         return;
@@ -561,38 +563,44 @@ const StationModal = ({ isOpen, onClose, station }) => {
                   <div className="charger-item__header">
                     <div className="charger-item__title">
                       <IoPowerOutline
-                        className={`charger-item__icon ${
-                          post.active
+                        className={`charger-item__icon ${post.active
                             ? "charger-item__icon--active"
                             : "charger-item__icon--inactive"
-                        }`}
+                          }`}
                       />
                       <strong>Trụ {post.id}</strong>
                     </div>
                     <div className="charger-item__status-area">
-                      {post.active ? (
+                      {/* ⭐ FIXED: Ưu tiên kiểm tra active trước */}
+                      {!post.active ? (
+                        // Trụ KHÔNG hoạt động (bảo trì)
+                        <IoCloseCircle className="charger-status-icon charger-status-icon--inactive" />
+                      ) : post.isAvailable ? (
+                        // Trụ hoạt động VÀ sẵn sàng
                         <IoCheckmarkCircle className="charger-status-icon charger-status-icon--active" />
                       ) : (
-                        <IoCloseCircle className="charger-status-icon charger-status-icon--inactive" />
+                        // Trụ hoạt động NHƯNG đang bận
+                        <IoCloseCircle className="charger-status-icon charger-status-icon--busy" />
                       )}
+
                       <span
-                        className={`charger-status-badge ${
-                          post.isAvailable
-                            ? "charger-status-badge--available"
-                            : post.active
-                            ? "charger-status-badge--busy"
-                            : "charger-status-badge--inactive"
-                        }`}
+                        className={`charger-status-badge ${!post.active
+                            ? "charger-status-badge--inactive"
+                            : post.isAvailable
+                              ? "charger-status-badge--available"
+                              : "charger-status-badge--busy"
+                          }`}
                       >
-                        {post.isAvailable
-                          ? "Sẵn sàng"
-                          : post.active
-                          ? "Đang sử dụng"
-                          : "Không hoạt động"}
+                        {!post.active
+                          ? "Bảo trì"
+                          : post.isAvailable
+                            ? "Sẵn sàng"
+                            : "Đang sử dụng"}
                       </span>
                     </div>
                   </div>
-                  {/* Content trụ sạc: Thông tin và nút đặt chỗ */}
+
+                  {/* Content trụ sạc */}
                   <div className="charger-item__content">
                     <div className="charger-item__details">
                       <div>
@@ -616,23 +624,35 @@ const StationModal = ({ isOpen, onClose, station }) => {
                         </div>
                       )}
                     </div>
+
                     <div className="charger-item__action">
                       {(() => {
-                        const isProcessing =
-                          bookingLoading && bookingProcessingId === post.id;
+                        const isProcessing = bookingLoading && bookingProcessingId === post.id;
+
+                        // ⭐ FIXED: Disable button nếu trụ không hoạt động
+                        const isDisabled = !post.active || isProcessing || !selectedCar;
+
                         return (
                           <Button
-                            variant={post.isAvailable ? "success" : "warning"}
+                            variant={
+                              !post.active
+                                ? "secondary"
+                                : post.isAvailable
+                                  ? "success"
+                                  : "warning"
+                            }
                             size="sm"
-                            disabled={isProcessing || !selectedCar}
+                            disabled={isDisabled}
                             onClick={() => handleBookCharger(post.id)}
                             className="charger-book-btn"
                           >
                             {isProcessing
                               ? "Đang xử lý..."
-                              : !selectedCar
-                              ? "Chưa có xe"
-                              : "Đặt chỗ"}
+                              : !post.active
+                                ? "Bảo trì"
+                                : !selectedCar
+                                  ? "Chưa có xe"
+                                  : "Đặt chỗ"}
                           </Button>
                         );
                       })()}
@@ -657,11 +677,10 @@ const StationModal = ({ isOpen, onClose, station }) => {
                     <div className="charger-item__header">
                       <div className="charger-item__title">
                         <IoPowerOutline
-                          className={`charger-item__icon ${
-                            isAvailable
+                          className={`charger-item__icon ${isAvailable
                               ? "charger-item__icon--active"
                               : "charger-item__icon--busy"
-                          }`}
+                            }`}
                         />
                         <strong>Trụ {postId}</strong>
                       </div>
@@ -672,11 +691,10 @@ const StationModal = ({ isOpen, onClose, station }) => {
                           <IoCloseCircle className="charger-status-icon charger-status-icon--busy" />
                         )}
                         <span
-                          className={`charger-status-badge ${
-                            isAvailable
+                          className={`charger-status-badge ${isAvailable
                               ? "charger-status-badge--available"
                               : "charger-status-badge--busy"
-                          }`}
+                            }`}
                         >
                           {isAvailable ? "Sẵn sàng" : "Đang bận"}
                         </span>
@@ -703,8 +721,8 @@ const StationModal = ({ isOpen, onClose, station }) => {
                               {isProcessing
                                 ? "Đang xử lý..."
                                 : !selectedCar
-                                ? "Chưa có xe"
-                                : "Đặt chỗ"}
+                                  ? "Chưa có xe"
+                                  : "Đặt chỗ"}
                             </Button>
                           );
                         })()}
