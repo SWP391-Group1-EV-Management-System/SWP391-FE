@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Button, Space, Typography, Table } from "antd";
+import { Card, Button, Space, Typography, Table, Tag } from "antd";
 import {
   PlusOutlined,
   EditOutlined,
@@ -96,7 +96,13 @@ function StationManagement() {
       title: "Trạng thái",
       dataIndex: "active",
       key: "active",
-      render: (v) => (v ? "Hoạt động" : "Ngưng"),
+      render: (v) => (
+        v ? (
+          <Tag color="green">Hoạt động</Tag>
+        ) : (
+          <Tag color="orange">Bảo trì</Tag>
+        )
+      ),
     },
     {
       title: "Hành động",
@@ -161,26 +167,24 @@ function StationManagement() {
         visible={modalVisible}
         onCancel={handleCancel}
         onSubmit={handleFormSubmit}
-        // ⭐ FIXED: Thêm latitude và longitude vào initialValues
+        // Provide only the canonical manager ID (no name fallback)
+        // and include stationId so the form can refetch authoritative data if needed
         initialValues={
           selectedStation
             ? {
+                stationId:
+                  selectedStation.stationId || selectedStation.id || selectedStation.idChargingStation,
                 nameChargingStation:
-                  selectedStation.nameChargingStation ||
-                  selectedStation.name ||
-                  "",
+                  selectedStation.nameChargingStation || selectedStation.name || "",
                 address: selectedStation.address || "",
-                // ⭐⭐⭐ THÊM 2 FIELD NÀY:
                 latitude: selectedStation.latitude || selectedStation.lat,
                 longitude: selectedStation.longitude || selectedStation.lng,
                 numberOfPosts:
                   typeof selectedStation.numberOfPosts === "number"
                     ? selectedStation.numberOfPosts
                     : selectedStation.totalSlots || 0,
-                userManagerId:
-                  selectedStation.userManagerId ||
-                  selectedStation.userManagerName ||
-                  "",
+                // IMPORTANT: do not fall back to userManagerName here — keep it empty if id is absent
+                userManagerId: selectedStation.userManagerId || "",
                 active:
                   typeof selectedStation.active === "boolean"
                     ? selectedStation.active
