@@ -16,9 +16,8 @@
  * @returns {Object} - Object chứa sessionData và các methods
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { getStatusConfig } from "../utils/energyUtils";
-import { message } from "antd";
 import api from "../utils/axios";
 
 export const useEnergySession = (userID = null) => {
@@ -30,81 +29,80 @@ export const useEnergySession = (userID = null) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [isFinishing, setIsFinishing] = useState(false); // Đang finish session
 
-  // Ref để tránh gọi finish nhiều lần
-  const autoFinishTriggered = useRef(false);
 
   // ==================== EFFECT: FETCH SESSION DATA ====================
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
+    const fetchSessionData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        setErrorCode(null);
+
+        const storedSessionId = localStorage.getItem("currentSessionId");
+
+        if (storedSessionId) {
+          const sessionResult = await fetchBySessionId(storedSessionId);
+
+          if (sessionResult.success) {
+            setSessionData(sessionResult.data);
+            setIsLoading(false);
+            return;
+          }
+
+          if (sessionResult.errorCode === 403) {
+            setError("Bạn không có quyền truy cập phiên sạc này");
+            setErrorCode(403);
+            setIsLoading(false);
+            return;
+          }
+
+          if (sessionResult.errorCode === 404) {
+            console.log("Session không tồn tại, xóa khỏi localStorage");
+            localStorage.removeItem("currentSessionId");
+          }
+
+          if (sessionResult.errorCode) {
+            setError(sessionResult.message || "Không thể lấy thông tin phiên sạc");
+            setErrorCode(sessionResult.errorCode);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        if (!userID) {
+          setIsLoading(false);
+          setError("Vui lòng đăng nhập để xem phiên sạc");
+          console.log("⚠️ [useEnergySession] userID is null or undefined, skipping fetch");
+          return;
+        }
+
+        const userResult = await fetchByUserId(userID);
+
+        if (userResult.success) {
+          setSessionData(userResult.data);
+        } else {
+          setSessionData(null);
+
+          if (userResult.errorCode === 403) {
+            setError("Bạn không có quyền truy cập phiên sạc");
+            setErrorCode(403);
+          } else {
+            setError(userResult.message || "Không có phiên sạc đang hoạt động");
+            setErrorCode(userResult.errorCode);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching session data:", err);
+        setError("Không thể tải thông tin phiên sạc");
+        setSessionData(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     fetchSessionData();
   }, [userID]);
-
-  const fetchSessionData = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      setErrorCode(null);
-
-      const storedSessionId = localStorage.getItem("currentSessionId");
-
-      if (storedSessionId) {
-        const sessionResult = await fetchBySessionId(storedSessionId);
-
-        if (sessionResult.success) {
-          setSessionData(sessionResult.data);
-          setIsLoading(false);
-          return;
-        }
-
-        if (sessionResult.errorCode === 403) {
-          setError("Bạn không có quyền truy cập phiên sạc này");
-          setErrorCode(403);
-          setIsLoading(false);
-          return;
-        }
-
-        if (sessionResult.errorCode === 404) {
-          console.log("Session không tồn tại, xóa khỏi localStorage");
-          localStorage.removeItem("currentSessionId");
-        }
-
-        if (sessionResult.errorCode) {
-          setError(sessionResult.message || "Không thể lấy thông tin phiên sạc");
-          setErrorCode(sessionResult.errorCode);
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      if (!userID) {
-        setIsLoading(false);
-        setError("Vui lòng đăng nhập để xem phiên sạc");
-        console.log("⚠️ [useEnergySession] userID is null or undefined, skipping fetch");
-        return;
-      }
-
-      const userResult = await fetchByUserId(userID);
-
-      if (userResult.success) {
-        setSessionData(userResult.data);
-      } else {
-        setSessionData(null);
-
-        if (userResult.errorCode === 403) {
-          setError("Bạn không có quyền truy cập phiên sạc");
-          setErrorCode(403);
-        } else {
-          setError(userResult.message || "Không có phiên sạc đang hoạt động");
-          setErrorCode(userResult.errorCode);
-        }
-      }
-    } catch (err) {
-      console.error("Error fetching session data:", err);
-      setError("Không thể tải thông tin phiên sạc");
-      setSessionData(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // ==================== EFFECT: UPDATE CURRENT TIME ====================
   useEffect(() => {
@@ -115,77 +113,10 @@ export const useEnergySession = (userID = null) => {
     return () => clearInterval(timer);
   }, []);
 
-  // ==================== EFFECT: AUTO FINISH KHI ĐẾN EXPECTED END TIME ====================
-  useEffect(() => {
-    // Chỉ chạy khi có sessionData và chưa done
-    if (!sessionData?.expectedEndTime || sessionData?.isDone) {
-      return;
-    }
-
-    // Reset flag khi session mới
-    autoFinishTriggered.current = false;
-
-    const checkAndAutoFinish = async () => {
-      try {
-        const expectedEnd = new Date(sessionData.expectedEndTime);
-        const now = new Date();
-
-        // Kiểm tra đã đến giờ kết thúc chưa
-        const shouldFinish = now >= expectedEnd;
-
-        if (shouldFinish && !autoFinishTriggered.current && !isFinishing) {
-          console.log("⏰ Đã đến expectedEndTime, tự động kết thúc phiên sạc");
-
-          autoFinishTriggered.current = true; // Đánh dấu đã trigger
-
-          const totalEnergy = calculateEnergyCharged(sessionData);
-
-          message.info("Đã đến thời gian kết thúc dự kiến, đang kết thúc phiên sạc...");
-
-          const result = await finishSession(sessionData.chargingSessionId, totalEnergy);
-
-          if (result.success) {
-            message.success("Phiên sạc đã kết thúc tự động");
-            await refetch(); // Refresh data
-          }
-        }
-      } catch (error) {
-        console.error("Error in auto finish:", error);
-      }
-    };
-
-    // Check mỗi giây
-    const interval = setInterval(checkAndAutoFinish, 1000);
-
-    return () => clearInterval(interval);
-  }, [sessionData?.expectedEndTime, sessionData?.isDone, isFinishing]);
 
   // ==================== HELPER FUNCTIONS ====================
 
-  /**
-   * Tính tổng năng lượng đã sạc
-   * Công thức: energy (kWh) = maxPower (kW) × time (hours)
-   */
-  const calculateEnergyCharged = (session) => {
-    try {
-      const startTime = session?.startTime ? new Date(session.startTime) : null;
-      const maxPower = session?.maxPower;
-
-      if (!startTime || !maxPower) {
-        return 0;
-      }
-
-      const now = new Date();
-      const diffSeconds = Math.max(0, Math.floor((now.getTime() - startTime.getTime()) / 1000));
-      const hours = diffSeconds / 3600;
-      const energyCharged = maxPower * hours;
-
-      return Number(energyCharged.toFixed(2));
-    } catch (error) {
-      console.error("Error calculating energy charged:", error);
-      return 0;
-    }
-  };
+  
 
   /**
    * Lấy session theo sessionId
@@ -346,7 +277,7 @@ export const useEnergySession = (userID = null) => {
             if (typeof window !== "undefined") {
               window.__sessionAutoRefetchHandled = true;
             }
-          } catch (err) {
+          } catch {
             /* ignore */
           }
 

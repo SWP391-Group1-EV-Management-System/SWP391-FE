@@ -40,14 +40,20 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
   const [dataLoading, setDataLoading] = useState(true);
   const [expectedEndTime, setExpectedEndTime] = useState(null);
 
+  // Use full ISO string (includes timezone) so backend parses the exact instant
   const formatLocalDateTime = useCallback((date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    try {
+      return date.toISOString();
+    } catch (e) {
+      // fallback to manual formatting if needed
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const seconds = String(date.getSeconds()).padStart(2, "0");
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    }
   }, []);
 
   const fetchPostData = useCallback(async () => {
@@ -56,10 +62,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
       const postInfo = await fetchPostById(qrResult);
       setPostData(postInfo);
 
-      const stationId =
-        postInfo.chargingStationId ||
-        postInfo.chargingStation ||
-        postInfo.stationId;
+      const stationId = postInfo.chargingStationId || postInfo.chargingStation || postInfo.stationId;
 
       if (stationId) {
         const stationDetails = await fetchStationById(stationId);
@@ -174,10 +177,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           return;
         }
 
-        console.log(
-          "✅ Preference updated with maxSecond:",
-          chargingTimeSeconds
-        );
+        console.log("✅ Preference updated with maxSecond:", chargingTimeSeconds);
       }
 
       // ✅ Bước 2: Tạo session
@@ -199,12 +199,8 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
       const checkOverpay = (obj) => {
         if (!obj) return false;
         try {
-          const s = (obj.status || obj.message || obj.msg || "")
-            .toString()
-            .toLowerCase();
-          const sid = (obj.sessionId || obj.chargingSessionId || "")
-            .toString()
-            .toLowerCase();
+          const s = (obj.status || obj.message || obj.msg || "").toString().toLowerCase();
+          const sid = (obj.sessionId || obj.chargingSessionId || "").toString().toLowerCase();
           if (s.includes("overpay") || sid === "overpaying") return true;
           if (obj.idAction && obj.idAction === "overpaying") return true;
         } catch (e) {
@@ -225,13 +221,8 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
       const isOverpay = candidates.some((c) => checkOverpay(c));
 
       if (isOverpay) {
-        console.warn(
-          "⚠️ [QRResultModal] User overpaying - blocking success message",
-          response
-        );
-        message.error(
-          "Tài khoản đang có khoản nợ trên 100.000 VND. Vui lòng thanh toán trước khi bắt đầu phiên sạc."
-        );
+        console.warn("⚠️ [QRResultModal] User overpaying - blocking success message", response);
+        message.error("Tài khoản đang có khoản nợ trên 100.000 VND. Vui lòng thanh toán trước khi bắt đầu phiên sạc.");
         onClose();
         return;
       }
@@ -240,10 +231,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         console.log("✅ Create session response:", response);
 
         const status =
-          response.data?.status ||
-          response.data?.message?.status ||
-          response.message?.status ||
-          response.status;
+          response.data?.status || response.data?.message?.status || response.message?.status || response.status;
 
         let sessionId =
           response.data?.sessionId ||
@@ -253,19 +241,14 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           response.sessionId ||
           null;
 
-        if (
-          status === "trụ đang bận" ||
-          status === "bạn đang có đặt chỗ khác hoặc trong hàng đợi"
-        ) {
+        if (status === "trụ đang bận" || status === "bạn đang có đặt chỗ khác hoặc trong hàng đợi") {
           console.warn("⚠️ [QRResultModal] Trụ đang bận:", status);
 
           const isStationBusy = status === "trụ đang bận";
 
           message.warning({
             content: (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "12px" }}
-              >
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <div>
                   <div
                     style={{
@@ -274,9 +257,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                       fontSize: "15px",
                     }}
                   >
-                    {isStationBusy
-                      ? "Trụ đang bận"
-                      : "Bạn đang có đặt chỗ khác"}
+                    {isStationBusy ? "Trụ đang bận" : "Bạn đang có đặt chỗ khác"}
                   </div>
                   <div
                     style={{
@@ -303,8 +284,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
 
         if (!sessionId && typeof response?.data?.message === "string") {
           const maybe = response.data.message.trim();
-          if (maybe && !maybe.includes(" ") && maybe.length > 3)
-            sessionId = maybe;
+          if (maybe && !maybe.includes(" ") && maybe.length > 3) sessionId = maybe;
         }
 
         if (status) {
@@ -316,16 +296,16 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           localStorage.setItem("currentSessionId", sessionId);
           console.log("✅ Saved sessionId to localStorage:", sessionId);
 
-          if (pinData?.pinNow && chargingTimeMinutes) {
+          if (pinData?.pinNow && chargingTimeSeconds) {
             localStorage.setItem(
               "batteryCountdown",
               JSON.stringify({
                 currentBattery: pinData.pinNow,
-                remainingMinutes: chargingTimeMinutes,
+                remainingSeconds: chargingTimeSeconds,
                 startTime: new Date().toISOString(),
               })
             );
-            console.log("✅ Saved battery countdown info");
+            console.log("✅ Saved battery countdown info (seconds)");
           }
 
           try {
@@ -350,9 +330,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           message.success("Bắt đầu phiên sạc thành công!");
 
           try {
-            window.dispatchEvent(
-              new CustomEvent("sessionCreated", { detail: { sessionId } })
-            );
+            window.dispatchEvent(new CustomEvent("sessionCreated", { detail: { sessionId } }));
           } catch (e) {
             console.warn("Failed to dispatch sessionCreated event:", e);
           }
@@ -363,9 +341,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
           const isVirtualStation = locPath.includes("/virtualstation/");
 
           if (isVirtualStation) {
-            console.log(
-              "🎯 [QRResultModal] On VirtualStationPage, not navigating."
-            );
+            console.log("🎯 [QRResultModal] On VirtualStationPage, not navigating.");
           } else if (locPath !== "/app/session") {
             navigate("/app/session");
           }
@@ -406,9 +382,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
     const remainingSeconds = seconds % 60;
 
     if (minutes < 60) {
-      return remainingSeconds > 0
-        ? `${minutes} phút ${remainingSeconds} giây`
-        : `${minutes} phút`;
+      return remainingSeconds > 0 ? `${minutes} phút ${remainingSeconds} giây` : `${minutes} phút`;
     }
 
     const hours = Math.floor(minutes / 60);
@@ -431,23 +405,14 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
         <div className="qr-result-modal" onClick={(e) => e.stopPropagation()}>
           <div className="qr-result-modal-header">
             <h3>Kết quả quét QR</h3>
-            <button
-              className="qr-result-close-btn"
-              onClick={onClose}
-              aria-label="Đóng"
-            >
+            <button className="qr-result-close-btn" onClick={onClose} aria-label="Đóng">
               <CloseOutlined />
             </button>
           </div>
 
           <div className="qr-result-modal-content">
             {dataLoading ? (
-              <LoadingSpinner
-                type="pulse"
-                size="medium"
-                color="primary"
-                text="Đang tải thông tin trụ sạc..."
-              />
+              <LoadingSpinner type="pulse" size="medium" color="primary" text="Đang tải thông tin trụ sạc..." />
             ) : (
               <>
                 <div className="qr-result-info">
@@ -456,13 +421,11 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                     <strong>Mã trụ:</strong> {qrResult}
                   </p>
                   <p>
-                    <strong>Tên trụ:</strong>{" "}
-                    {postData?.name || `Trụ ${qrResult}`}
+                    <strong>Tên trụ:</strong> {postData?.name || `Trụ ${qrResult}`}
                   </p>
                   <p>
                     <strong>Trạm:</strong> {stationInfo?.name || "Đang tải..."}
-                    {(postData?.chargingStation ||
-                      postData?.chargingStationId) && (
+                    {(postData?.chargingStation || postData?.chargingStationId) && (
                       <span
                         style={{
                           fontSize: "12px",
@@ -470,22 +433,15 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                           marginLeft: "8px",
                         }}
                       >
-                        (ID:{" "}
-                        {postData.chargingStation || postData.chargingStationId}
-                        )
+                        (ID: {postData.chargingStation || postData.chargingStationId})
                       </span>
                     )}
                   </p>
                   <p>
-                    <strong>Địa chỉ:</strong>{" "}
-                    {stationInfo?.address ||
-                      stationInfo?.location ||
-                      "Chưa có thông tin"}
+                    <strong>Địa chỉ:</strong> {stationInfo?.address || stationInfo?.location || "Chưa có thông tin"}
                   </p>
                   <p>
-                    <strong>Công suất:</strong>{" "}
-                    {postData?.powerDisplay ||
-                      `${postData?.maxPower || "N/A"} kW`}
+                    <strong>Công suất:</strong> {postData?.powerDisplay || `${postData?.maxPower || "N/A"} kW`}
                   </p>
                   <p>
                     <strong>Trạng thái:</strong>{" "}
@@ -518,8 +474,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                       <div
                         style={{
                           padding: "14px 16px",
-                          background:
-                            "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                          background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
                           border: "1px solid #fbbf24",
                           borderRadius: "10px",
                           fontSize: "14px",
@@ -553,8 +508,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                       <div
                         style={{
                           padding: "14px 16px",
-                          background:
-                            "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
+                          background: "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
                           border: "1px solid #3b82f6",
                           borderRadius: "10px",
                           fontSize: "14px",
@@ -589,8 +543,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                         <div
                           style={{
                             padding: "14px 16px",
-                            background:
-                              "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
+                            background: "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)",
                             border: "1px solid #0ea5e9",
                             borderRadius: "10px",
                             fontSize: "14px",
@@ -621,9 +574,7 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}{" "}
-                            <span
-                              style={{ fontSize: "14px", fontWeight: "500" }}
-                            >
+                            <span style={{ fontSize: "14px", fontWeight: "500" }}>
                               (
                               {expectedEndTime.toLocaleDateString("vi-VN", {
                                 day: "2-digit",
