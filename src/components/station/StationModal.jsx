@@ -46,7 +46,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
     post: null,
   });
   // Map charging type ids to display names (shared with service mapping)
-  const CHARGING_TYPE_NAMES = { 1: "CCS", 2: "CHAdeMO", 3: "AC" };
+  const CHARGING_TYPE_NAMES = { 1: "CCS", 2: "CHAdeMO", 3: "AC", 4: "NACS" };
   const navigate = useNavigate();
 
   // Chức năng: Merge trạng thái thực tế từ API vào danh sách trụ sạc
@@ -198,7 +198,7 @@ const StationModal = ({ isOpen, onClose, station }) => {
     // Nếu có post cụ thể, kiểm tra tính tương thích giữa loại sạc xe và trụ
     if (post) {
       // Map id -> tên (giống mapping trong service)
-      const CHARGING_TYPE_NAMES = { 1: "CCS", 2: "CHAdeMO", 3: "AC" };
+      const CHARGING_TYPE_NAMES = { 1: "CCS", 2: "CHAdeMO", 3: "AC", 4: "NACS" };
 
       const carTypeName =
         CHARGING_TYPE_NAMES[carObj.chargingType] ||
@@ -329,20 +329,6 @@ const StationModal = ({ isOpen, onClose, station }) => {
     } finally {
       setBookingProcessingId(null);
     }
-  };
-
-  // Chức năng: Lấy icon tiện ích theo tên
-  const getAmenityIcon = (amenity) => {
-    const amenityLower = amenity.toLowerCase();
-    if (amenityLower.includes("wifi")) return IoWifiOutline;
-    if (amenityLower.includes("cafe") || amenityLower.includes("coffee"))
-      return IoCafeOutline;
-    if (amenityLower.includes("shop") || amenityLower.includes("store"))
-      return IoStorefrontOutline;
-    if (amenityLower.includes("parking") || amenityLower.includes("car"))
-      return IoCarOutline;
-    if (amenityLower.includes("security")) return IoShieldCheckmarkOutline;
-    return IoStorefrontOutline;
   };
 
   // Hiển thị: Nội dung modal
