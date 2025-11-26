@@ -3,6 +3,7 @@ import { Modal, Typography } from 'antd';
 
 const { Text, Title } = Typography;
 
+// Modal xác nhận thanh toán
 const ConfirmPaymentModal = ({ 
   visible, 
   onConfirm, 
@@ -31,6 +32,7 @@ const ConfirmPaymentModal = ({
       <div style={{ textAlign: 'center', padding: '20px 0' }}>
         <Title level={4}>{messageText}</Title>
         
+        {/* Hiển thị tổng tiền */}
         <div style={{ marginTop: '16px' }}>
           <Text>Tổng tiền: </Text>
           <Text strong style={{ fontSize: '24px', color: '#ff4d4f' }}>

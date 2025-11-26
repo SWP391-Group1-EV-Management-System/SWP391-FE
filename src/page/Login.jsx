@@ -1,3 +1,4 @@
+// Trang đăng nhập - xác thực user và điều hướng vào hệ thống
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import "../assets/styles/Login.css";
@@ -17,20 +18,20 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ===== Lấy trang đích từ protected route redirect =====
+  // ===== Lấy đường dẫn đích sau khi đăng nhập thành công =====
   const from = location.state?.from || "/app/home";
 
-  // ===== FUNCTION: Toggle hiển thị/ẩn mật khẩu =====
+  // ===== FUNCTION: Chuyển đổi hiển thị mật khẩu =====
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  // ===== FUNCTION: Điều hướng về trang Welcome =====
+  // ===== FUNCTION: Quay về trang Welcome =====
   const handleBackToWelcome = () => {
     navigate("/welcome");
   };
 
-  // ===== FUNCTION: Xử lý submit form đăng nhập =====
+  // ===== FUNCTION: Xử lý đăng nhập =====
   const handleLogin = async (e) => {
     e.preventDefault();
     const email = e.target.username.value;
@@ -38,10 +39,10 @@ function Login() {
     try {
       const success = await login(email, password, from);
       if (!success) {
-        // Login hook sẽ hiển thị lỗi
+        // Hook sẽ hiển thị lỗi
       }
     } catch (err) {
-      // Xử lý lỗi đăng nhập
+      // Xử lý lỗi
     }
   };
 

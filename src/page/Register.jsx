@@ -1,3 +1,4 @@
+// Trang đăng ký - form đăng ký tài khoản mới và gửi OTP xác thực
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import "../assets/styles/Register.css";
@@ -10,7 +11,6 @@ import { FaUser, FaCalendarAlt, FaPhone } from "react-icons/fa";
 import { PiGenderIntersexBold } from "react-icons/pi";
 
 function Register() {
-  // ===== STATE MANAGEMENT =====
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
@@ -28,15 +28,14 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   
-  // ===== HOOKS =====
   const navigate = useNavigate();
 
-  // ===== FUNCTION: Điều hướng về trang Welcome =====
+  // Quay về trang Welcome
   const handleBackToWelcome = () => {
     navigate("/welcome");
   };
 
-  // ===== FUNCTION: Xử lý thay đổi input trong form =====
+  // Cập nhật giá trị input khi user nhập
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -45,12 +44,12 @@ function Register() {
     }));
   };
 
-  // ===== FUNCTION: Xử lý submit form đăng ký =====
+  // Xử lý đăng ký và gửi OTP
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Validate mật khẩu xác nhận
+    // Validate mật khẩu xác nhận khớp
     if (formData.password !== formData.confirmPassword) {
       setError("Mật khẩu xác nhận không khớp!");
       return;
@@ -83,7 +82,7 @@ function Register() {
       });
 
       if (response.ok) {
-        // Đăng ký thành công, chuyển đến trang xác thực OTP
+        // Chuyển đến trang xác thực OTP
         navigate("/otp-verification", {
           state: {
             email: formData.email,
@@ -108,17 +107,16 @@ function Register() {
     }
   };
 
-  // ===== FUNCTION: Toggle hiển thị/ẩn mật khẩu =====
+  // Toggle hiển thị mật khẩu
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  // ===== FUNCTION: Toggle hiển thị/ẩn mật khẩu xác nhận =====
+  // Toggle hiển thị mật khẩu xác nhận
   const toggleConfirmPasswordVisibility = () => {
     setShowConfirmPassword(!showConfirmPassword);
   };
 
-  // ===== RENDER UI =====
   return (
     <>
       <div className="register-page">

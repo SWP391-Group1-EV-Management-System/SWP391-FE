@@ -1,3 +1,4 @@
+// Trang chủ - hiển thị thống kê tổng quan và hoạt động gần đây của user
 /**
  * HOMEPAGE COMPONENT - FIXED VERSION
  * ✅ Sửa mapping đúng với API response structure
@@ -31,25 +32,22 @@ import { useHistory } from "../hooks/useHistory";
 import { useChargingStations } from "../hooks/useChargingStations";
 
 function HomePage() {
-  // ===== STATE: Giá trị animation cho các thống kê =====
+  // State cho animation đếm số liệu
   const [animatedValues, setAnimatedValues] = useState({
     totalPaid: 0,
     totalKwh: 0,
     sessions: 0,
   });
 
-  // ===== HOOK: Lấy thông tin người dùng =====
   const { user, loading, fetchUserProfile } = useAuth();
-
-  // ===== HOOK: Lấy dữ liệu dashboard =====
   const { dashboardData, loading: dashboardLoading } = useDashboard(user?.id);
 
-  // ===== EFFECT: Tải profile người dùng khi component mount =====
+  // Tải thông tin user khi component mount
   useEffect(() => {
     fetchUserProfile().catch(() => {});
   }, [fetchUserProfile]);
 
-  // Format lại tiền
+  // Format số tiền theo VND
   const formatCurrency = (amount) => {
     if (!amount && amount !== 0) return "0 VND";
     return new Intl.NumberFormat("vi-VN", {
@@ -57,17 +55,16 @@ function HomePage() {
       currency: "VND",
     }).format(amount);
   };
-  // ===== Xác định tên hiển thị người dùng =====
+
+  // Xác định tên hiển thị của user
   const userName = loading
     ? "Đang tải..."
     : user
-    ? `${(user.firstName || "").trim()} ${(
-        user.lastName || ""
-      ).trim()}`.trim() ||
+    ? `${(user.firstName || "").trim()} ${(user.lastName || "").trim()}`.trim() ||
       (user.email ? user.email.split("@")[0] : "Guest User")
     : "Guest User";
 
-  // ===== EFFECT: Animation đếm số liệu thống kê - ĐÃ SỬA =====
+  // Animation đếm số liệu thống kê
   useEffect(() => {
     if (!dashboardData || dashboardLoading) return;
 
@@ -113,7 +110,7 @@ function HomePage() {
     return () => clearInterval(timer);
   }, [dashboardData, dashboardLoading]);
 
-  // ===== DATA: Thống kê hệ thống - ĐÃ SỬA LABEL =====
+  // Dữ liệu thống kê hiển thị ở đầu trang
   const stats = [
     {
       label: "Tổng chi phí đã thanh toán",
@@ -138,7 +135,7 @@ function HomePage() {
     },
   ];
 
-  // ===== DATA: Hoạt động gần đây =====
+  // Lấy lịch sử hoạt động gần đây
   const {
     history,
     loading: historyLoading,
@@ -146,14 +143,14 @@ function HomePage() {
     fetchHistory,
   } = useHistory();
 
-  // Fetch history when user is available (reuse same pattern as HistoryPage)
+  // Tải lịch sử khi có user
   useEffect(() => {
     if (user?.id) {
       fetchHistory(user.id);
     }
   }, [user?.id, fetchHistory]);
 
-  // Map recent history sessions into activity items for the home dashboard
+  // Map lịch sử thành danh sách hoạt động gần đây
   const recentActivities = useMemo(() => {
     if (!history || history.length === 0) {
       return [
@@ -192,7 +189,7 @@ function HomePage() {
     return items;
   }, [history]);
 
-  // ===== DATA: Trạm sạc nổi bật (lấy từ API giống MapPage) =====
+  // Lấy danh sách trạm sạc nổi bật
   const {
     stations: chargingStations,
     statistics: stationsStats,
@@ -201,6 +198,7 @@ function HomePage() {
     refresh: refreshStations,
   } = useChargingStations({ autoFetch: true, useLocation: true });
 
+  // Lấy 3 trạm gần nhất
   const featuredStations = useMemo(() => {
     if (!Array.isArray(chargingStations) || chargingStations.length === 0) {
       return [];
@@ -217,7 +215,7 @@ function HomePage() {
     }));
   }, [chargingStations]);
 
-  // ===== DATA: Thành tích người dùng =====
+  // Dữ liệu thành tích người dùng
   const achievements = [
     {
       icon: BsTrophy,
@@ -242,7 +240,7 @@ function HomePage() {
     },
   ];
 
-  // ===== RENDER UI =====
+  // Hiển thị giao diện dashboard
   return (
     <div className="home-dashboard-container">
       <Container fluid className="px-4">

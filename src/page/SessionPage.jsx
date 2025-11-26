@@ -1,3 +1,4 @@
+// Trang phiên sạc - hiển thị thông tin realtime phiên sạc đang diễn ra
 import React, { useEffect, useState, useRef } from "react";
 import { Row, Col, Space, Spin, Alert, Button, notification } from "antd";
 import { useNavigate } from "react-router";
@@ -15,24 +16,23 @@ import { ThunderboltOutlined, LockOutlined, HomeOutlined } from "@ant-design/ico
 const EnergyPage = ({ userID }) => {
   const navigate = useNavigate();
 
-  // ==================== HOOKS ====================
   const { user, loading: authLoading } = useAuth();
   const { fetchUnpaidPaymentsByUserId } = usePaymentData();
   const { sessionData, currentTime, statusConfig, isLoading, isFinishing, error, errorCode, finishSession, refetch } =
     useEnergySession(userID);
 
-  // ==================== STATE MANAGEMENT ====================
   const [realtimeProgress, setRealtimeProgress] = useState(null);
   const [isPaid, setIsPaid] = useState(false);
   const [_batteryCountdownInfo, setBatteryCountdownInfo] = useState(null);
-  // Refs for SSE repeat-detection auto-finish
+  
+  // Refs cho việc phát hiện SSE lặp lại và auto-finish
   const lastSseStringRef = useRef(null);
   const repeatCountRef = useRef(0);
   const sseAutoFinishTriggeredRef = useRef(false);
   const eventSourceRef = useRef(null);
   const preventReconnectRef = useRef(false);
 
-  // ==================== LẤY THÔNG TIN BATTERY COUNTDOWN TỪ LOCALSTORAGE ====================
+  // Lấy thông tin battery countdown từ localStorage
   useEffect(() => {
     const countdownData = localStorage.getItem("batteryCountdown");
     if (countdownData) {
@@ -45,7 +45,7 @@ const EnergyPage = ({ userID }) => {
     }
   }, [sessionData?.chargingSessionId]);
 
-  // ==================== KIỂM TRA TRẠNG THÁI THANH TOÁN ====================
+  // Kiểm tra trạng thái đã thanh toán từ localStorage
   useEffect(() => {
     if (sessionData?.chargingSessionId) {
       const paidSessionsStr = localStorage.getItem("paidSessions");
@@ -59,7 +59,7 @@ const EnergyPage = ({ userID }) => {
     }
   }, [sessionData?.chargingSessionId]);
 
-  // ==================== KẾT NỐI SSE ĐỂ NHẬN DỮ LIỆU REALTIME ====================
+  // Kết nối SSE để nhận dữ liệu realtime từ server
   useEffect(() => {
     const sessionId = sessionData?.chargingSessionId || sessionData?.sessionId;
 
@@ -312,7 +312,7 @@ const EnergyPage = ({ userID }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionData?.chargingSessionId, sessionData?.sessionId, sessionData]);
 
-  // ==================== RESET GLOBAL AUTO-REFETCH FLAG WHEN ENTERING A NEW SESSION ====
+  // Reset cờ global khi có session mới
   useEffect(() => {
     try {
       // If we have a new active session that is not completed, reset the global flag
@@ -324,14 +324,14 @@ const EnergyPage = ({ userID }) => {
     }
   }, [sessionData?.chargingSessionId, sessionData?.isCompleted]);
 
-  // ==================== KIỂM TRA SESSION KẾT THÚC ====================
+  // Kiểm tra session đã kết thúc
   useEffect(() => {
     if (!isLoading && !sessionData && !error) {
       console.log("Session đã kết thúc");
     }
   }, [sessionData, isLoading, error]);
 
-  // ==================== LẮNG NGHE SỰ KIỆN SESSION CREATED ====================
+  // Lắng nghe sự kiện session created
   useEffect(() => {
     const handleSessionCreated = () => {
       try {
@@ -345,7 +345,7 @@ const EnergyPage = ({ userID }) => {
     return () => window.removeEventListener("sessionCreated", handleSessionCreated);
   }, [refetch]);
 
-  // ==================== LẮNG NGHE SỰ KIỆN THANH TOÁN THÀNH CÔNG ====================
+  // Lắng nghe sự kiện thanh toán thành công
   useEffect(() => {
     const handlePaymentSuccess = (e) => {
       const { sessionId } = e?.detail || {};
@@ -375,7 +375,7 @@ const EnergyPage = ({ userID }) => {
     };
   }, [sessionData?.chargingSessionId]);
 
-  // ==================== XỬ LÝ THANH TOÁN ====================
+  // Xử lý chuyển đến trang thanh toán
   const handlePayment = async () => {
     if (!user?.id) {
       notification.error({
@@ -428,7 +428,7 @@ const EnergyPage = ({ userID }) => {
     }
   };
 
-  // ==================== TRẠNG THÁI LOADING ====================
+  // Hiển thị các trạng thái: loading, forbidden, error, no session
   if (isLoading || authLoading) {
     return (
       <div
@@ -448,7 +448,6 @@ const EnergyPage = ({ userID }) => {
     );
   }
 
-  // ==================== TRẠNG THÁI KHÔNG CÓ QUYỀN ====================
   const isForbidden =
     !user ||
     (sessionData && user.id !== sessionData.userId && user.role !== "ADMIN" && user.role !== "MANAGER") ||
@@ -512,7 +511,6 @@ const EnergyPage = ({ userID }) => {
     );
   }
 
-  // ==================== TRẠNG THÁI LỖI ====================
   if (error) {
     return (
       <div
@@ -544,7 +542,6 @@ const EnergyPage = ({ userID }) => {
     );
   }
 
-  // ==================== TRẠNG THÁI KHÔNG CÓ SESSION ====================
   if (!sessionData) {
     return (
       <div
@@ -575,7 +572,7 @@ const EnergyPage = ({ userID }) => {
     );
   }
 
-  // ==================== GIAO DIỆN CHÍNH ====================
+  // Hiển thị giao diện phiên sạc với dữ liệu realtime
   return (
     <div
       style={{

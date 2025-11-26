@@ -1,3 +1,4 @@
+// Trang quản lý báo cáo xe (Admin) - tạo và xem báo cáo chuyển quyền sở hữu xe
 import React, { useEffect, useState, useMemo } from 'react';
 import { Table, Spin, Input, Row, Col, message } from 'antd';
 import { FileTextOutlined, PlusOutlined } from '@ant-design/icons';
@@ -6,17 +7,14 @@ import ReportForm from '../components/report/ReportForm';
 import useCar from '../hooks/useCar';
 
 const ReportPage = () => {
-  // ==================== STATE MANAGEMENT ====================
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // ==================== HOOKS ====================
-  // useCar already exposes a fetchAllReports helper; use it instead of duplicating logic here
   const { createReportCar, fetchAllReports } = useCar();
 
-  // ==================== LẤY TOÀN BỘ DANH SÁCH BÁO CÁO (sử dụng hàm từ hook)
+  // Tải toàn bộ danh sách báo cáo khi component mount
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -37,7 +35,7 @@ const ReportPage = () => {
     };
   }, [fetchAllReports]);
 
-  // ==================== TÌM KIẾM ====================
+  // Lọc danh sách báo cáo theo từ khóa tìm kiếm
   const filteredReports = useMemo(() => {
     if (!Array.isArray(reports)) return [];
     const search = (searchText || '').trim().toUpperCase();
@@ -52,7 +50,7 @@ const ReportPage = () => {
     });
   }, [reports, searchText]);
 
-  // ==================== CỘT BẢNG ====================
+  // Định nghĩa các cột của bảng báo cáo
   const columns = [
     {
       title: 'Tiêu đề',
@@ -103,7 +101,7 @@ const ReportPage = () => {
     },
   ];
 
-  // ==================== TRẠNG THÁI LOADING ====================
+  // Hiển thị loading khi đang tải
   if (loading && (!reports || reports.length === 0)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -112,7 +110,7 @@ const ReportPage = () => {
     );
   }
 
-  // ==================== GIAO DIỆN CHÍNH ====================
+  // Hiển thị giao diện chính
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">

@@ -4,7 +4,7 @@ import { useAuth } from "../../hooks/useAuth";
 
 const { Text, Title } = Typography;
 
-// Define package information (no discounts applied)
+// Thông tin các gói dịch vụ
 const packageInfo = {
   basic: {
     name: "Gói cơ bản",
@@ -21,15 +21,14 @@ const packageInfo = {
 };
 
 const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
-  const { user } = useAuth(); // Lấy user để biết gói đã đăng ký
-  // Chọn 1 trong 2 phương thức: 'momo' hoặc 'package'
-  // Now support 'momo', 'package', and 'cash'
+  const { user } = useAuth();
+  // Phương thức thanh toán: momo, package, hoặc cash
   const [paymentMethod, setPaymentMethod] = useState("momo");
 
-  // Lấy gói đăng ký của user (fallback 'basic' nếu không có)
+  // Lấy gói dịch vụ đã đăng ký của user
   const registeredPackage = user?.servicePackage || user?.package || user?.registeredPackage || "basic";
 
-  // Tính tổng tiền (luôn bằng giá gốc, không giảm)
+  // Tính tổng tiền thanh toán
   const calculateTotal = () => {
     return Math.round(sessionData.basePrice);
   };
@@ -40,7 +39,6 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
     const paymentData = {
       paymentMethod,
       usePackage,
-      // Không cho user chọn gói ở UI => hệ thống tự lấy gói đăng ký
       selectedPackage: usePackage ? registeredPackage : null,
       packageInfo: usePackage ? packageInfo[registeredPackage] : null,
       totalAmount: calculateTotal(),
@@ -64,8 +62,9 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
           </Descriptions.Item>
         </Descriptions>
 
-        {/* Phương thức thanh toán - CHỌN 1 TRONG 3 */}
+        {/* Chọn phương thức thanh toán */}
         <Space direction="vertical" style={{ width: "100%" }} size="large">
+          {/* Thanh toán qua MoMo */}
           <Button
             type={paymentMethod === "momo" ? "primary" : "default"}
             block
@@ -75,6 +74,7 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
             Thanh toán với MoMo
           </Button>
 
+          {/* Thanh toán bằng gói dịch vụ */}
           <Button
             type={paymentMethod === "package" ? "primary" : "default"}
             block
@@ -84,6 +84,7 @@ const PaymentCard = ({ visible, onClose, sessionData, onConfirm }) => {
             Gói dịch vụ
           </Button>
 
+          {/* Thanh toán tiền mặt */}
           <Button
             type={paymentMethod === "cash" ? "primary" : "default"}
             block

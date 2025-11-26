@@ -29,7 +29,7 @@ const ServicePackage = () => {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Tải danh sách gói dịch vụ và giao dịch đang hoạt động
+  // Tải danh sách gói và giao dịch đang hoạt động
   useEffect(() => {
     fetchAll();
     if (user?.id) {
@@ -37,7 +37,7 @@ const ServicePackage = () => {
     }
   }, [fetchAll, fetchUserTransactions, user?.id]);
 
-  // Xử lý callback từ MoMo sau khi thanh toán
+  // Xử lý callback sau khi thanh toán MoMo thành công
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const resultCode = urlParams.get("resultCode");
@@ -66,7 +66,7 @@ const ServicePackage = () => {
     }
   }, [user?.id, fetchUserTransactions]);
 
-  // Dọn dẹp thanh toán đã hết hạn
+  // Dọn dẹp thanh toán đã hết hạn (30 phút)
   useEffect(() => {
     const pendingPayment = localStorage.getItem("pendingPayment");
     if (pendingPayment) {
@@ -78,7 +78,7 @@ const ServicePackage = () => {
     }
   }, []);
 
-  // Xử lý khi người dùng nhấn đăng ký gói
+  // Xử lý khi user click đăng ký gói
   const handleSubscribeClick = (pkg) => {
     if (!user || !user.id) {
       message.error("Vui lòng đăng nhập để đăng ký gói dịch vụ!");
@@ -96,7 +96,7 @@ const ServicePackage = () => {
     setModalVisible(true);
   };
 
-  // Xử lý xác nhận thanh toán
+  // Xử lý xác nhận thanh toán và chuyển đến MoMo
   const handleConfirmPayment = async () => {
     if (!selectedPackage) return;
 
@@ -171,7 +171,7 @@ const ServicePackage = () => {
     return (packages || []).slice();
   }, [packages]);
 
-  // Kiểm tra người dùng có gói đang hoạt động
+  // Kiểm tra user có gói đang hoạt động
   const hasActivePackage = !!activeTransaction;
 
   // Xử lý hủy gói

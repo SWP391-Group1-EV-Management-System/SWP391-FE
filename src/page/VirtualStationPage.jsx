@@ -1,3 +1,4 @@
+// Trang trạm ảo (Public) - hiển thị QR và quản lý phiên sạc cho trụ công cộng
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router";
 import { Button, Alert } from "antd";
@@ -20,9 +21,9 @@ import "../assets/styles/virtualstation/PlugInButton.css";
 import logo from "../assets/images/logo.png";
 
 function VirtualStationPage() {
-  const { postId } = useParams(); // Lấy postId từ URL
-  const { status, isConnected } = useChargingPostStatus(postId); // WebSocket connection
-  const { postData, loading: postLoading } = useChargingPost(postId); // Charging post info
+  const { postId } = useParams(); // Lấy ID trụ sạc từ URL
+  const { status, isConnected } = useChargingPostStatus(postId); // Kết nối WebSocket
+  const { postData, loading: postLoading } = useChargingPost(postId); // Thông tin trụ sạc
 
   const [showQR, setShowQR] = useState(false);
   const [showSession, setShowSession] = useState(false);
@@ -30,65 +31,51 @@ function VirtualStationPage() {
   const allowUnloadRef = useRef(true);
   const storageKey = `virtualStationState_${postId}`;
 
-  // Callback passed to ShowSession so when user stops a session we can
-  // return to the initial plug-in screen without triggering beforeunload.
+  // Callback khi phiên sạc kết thúc
   const handleSessionFinishedFromChild = () => {
     try {
-      // Temporarily disable unload prompt
       allowUnloadRef.current = false;
-      // Clear persisted state for this post so we don't auto-restore a finished session
       sessionStorage.removeItem(storageKey);
     } catch (err) {
       // ignore
     }
 
-    // Reset UI to plug-in screen
+    // Reset UI về màn hình cắm sạc
     setShowSession(false);
     setShowQR(false);
     setCurrentSessionId(null);
 
-    // Re-enable unload protection shortly after (user has safely returned to plug screen)
+    // Bật lại cảnh báo reload sau 2s
     setTimeout(() => {
       allowUnloadRef.current = true;
     }, 2000);
   };
 
-  // Handler khi nhấn nút "CẮM SẠC"
+  // Xử lý khi nhấn nút "CẮM SẠC"
   const handlePlugIn = () => {
-    // ✅ Không check status nữa - Để backend xử lý và trả về lỗi nếu trụ bận
-    // User có thể bấm nút bất kỳ lúc nào, backend sẽ validate
     setShowQR(true);
   };
 
-  // Tự động chuyển sang ShowSession khi có session đang sạc từ WebSocket
+  // Tự động chuyển sang màn hình sạc khi có session đang hoạt động
   useEffect(() => {
     if (status?.status === "CHARGING" && status?.details?.sessionId) {
-      console.log(
-        "🎯 [VirtualStationPage] CHARGING detected, showing session:",
-        status.details.sessionId
-      );
+      console.log("🎯 CHARGING detected, showing session:", status.details.sessionId);
       setCurrentSessionId(status.details.sessionId);
       setShowSession(true);
       setShowQR(false);
     } else if (status?.status === "AVAILABLE" && showSession) {
-      // ✅ Khi trụ trở về AVAILABLE (session kết thúc) → back về nút CẮM SẠC
-      console.log(
-        "🏠 [VirtualStationPage] Status AVAILABLE, back to plug-in screen"
-      );
+      console.log("🏠 Status AVAILABLE, back to plug-in screen");
       setShowSession(false);
       setShowQR(false);
       setCurrentSessionId(null);
     }
   }, [status, showSession]);
 
-  // Lắng nghe sự kiện khi session được tạo từ QR scan
+  // Lắng nghe sự kiện session được tạo từ QR scan
   useEffect(() => {
     const handleSessionCreated = (event) => {
       const { sessionId } = event.detail;
-      console.log(
-        "🎯 [VirtualStationPage] Session created from QR:",
-        sessionId
-      );
+      console.log("🎯 Session created from QR:", sessionId);
       setCurrentSessionId(sessionId);
       setShowSession(true);
       setShowQR(false);
@@ -101,7 +88,7 @@ function VirtualStationPage() {
     };
   }, []);
 
-  // Restore persisted UI state (so reload won't drop the session view)
+  // Khôi phục trạng thái UI từ sessionStorage (chống mất dữ liệu khi reload)
   useEffect(() => {
     try {
       const key = `virtualStationState_${postId}`;
@@ -109,8 +96,7 @@ function VirtualStationPage() {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed) {
-          if (parsed.currentSessionId)
-            setCurrentSessionId(parsed.currentSessionId);
+          if (parsed.currentSessionId) setCurrentSessionId(parsed.currentSessionId);
           if (parsed.showSession) setShowSession(true);
           if (parsed.showQR) setShowQR(true);
         }
@@ -120,7 +106,7 @@ function VirtualStationPage() {
     }
   }, [postId]);
 
-  // Persist UI state whenever it changes (survive reload)
+  // Lưu trạng thái UI vào sessionStorage
   useEffect(() => {
     try {
       const key = `virtualStationState_${postId}`;
@@ -136,24 +122,19 @@ function VirtualStationPage() {
     }
   }, [postId, showQR, showSession, currentSessionId]);
 
-  // Stronger navigation protection: beforeunload prompt, block keyboard reloads,
-  // and disable right-click context menu while on this page.
+  // Bảo vệ trang khỏi reload: hiển thị cảnh báo và chặn F5/Ctrl+R
   useEffect(() => {
     const handleBeforeUnload = (e) => {
       if (!allowUnloadRef.current) return undefined;
       e.preventDefault();
-      e.returnValue =
-        "Bạn có chắc muốn rời trang? Phiên public này có thể bị gián đoạn.";
+      e.returnValue = "Bạn có chắc muốn rời trang? Phiên public này có thể bị gián đoạn.";
       return e.returnValue;
     };
 
     const handleKeyDownPreventRefresh = (e) => {
       if (!allowUnloadRef.current) return;
       const key = e.key;
-      if (
-        key === "F5" ||
-        ((e.ctrlKey || e.metaKey) && (key === "r" || key === "R"))
-      ) {
+      if (key === "F5" || ((e.ctrlKey || e.metaKey) && (key === "r" || key === "R"))) {
         e.preventDefault();
         e.stopPropagation();
         console.log("[VirtualStationPage] Refresh prevented (F5/Ctrl+R/Cmd+R)");
@@ -183,7 +164,7 @@ function VirtualStationPage() {
     const handleBeforeUnload = (e) => {
       if (!allowUnloadRef.current) return undefined;
       // Chuẩn: set returnValue để kích hoạt cảnh báo xác nhận reload
-      e.preventDefault();
+      e.preventPrevent();
       e.returnValue =
         "Bạn có chắc muốn rời trang? Phiên public này có thể bị gián đoạn.";
       return e.returnValue;
@@ -316,7 +297,7 @@ function VirtualStationPage() {
   return (
     <>
       {!showQR && !showSession ? (
-        // Bước 1: Hiển thị nút "CẮM SẠC" với trạng thái real-time
+        // Bước 1: Màn hình nút "CẮM SẠC"
         <div className="plugin-container">
           <div className="plugin-card">
             {/* Connection indicator */}
@@ -455,10 +436,10 @@ function VirtualStationPage() {
           </div>
         </div>
       ) : showQR ? (
-        // Bước 2: Sau khi nhấn nút, hiển thị QR code
+        // Bước 2: Màn hình hiển thị QR code
         <ShowQR />
       ) : (
-        // Bước 3: Sau khi scan QR và tạo session, hiển thị trạng thái sạc
+        // Bước 3: Màn hình theo dõi phiên sạc
         <ShowSession
           sessionId={currentSessionId}
           isPublic={true}

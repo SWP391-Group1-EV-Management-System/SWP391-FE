@@ -1,3 +1,4 @@
+// Trang 404 - hiển thị khi người dùng truy cập URL không tồn tại
 import React from "react";
 import { useNavigate } from "react-router";
 import "../assets/styles/NotFoundPage.css";
@@ -5,6 +6,7 @@ import "../assets/styles/NotFoundPage.css";
 function NotFoundPage() {
   const navigate = useNavigate();
 
+  // Điều hướng về trang chủ
   const handleGoHome = () => {
     navigate("/");
   };

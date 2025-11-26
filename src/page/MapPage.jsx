@@ -48,7 +48,7 @@ import "../assets/styles/utilities.css";
  * Render giao diện bản đồ trạm sạc với thống kê và danh sách trạm
  */
 function MapPage() {
-  // ===== HOOKS: Lấy dữ liệu trạm sạc và thống kê =====
+  // Lấy dữ liệu trạm sạc và thống kê
   const {
     stations: chargingStations,
     statistics: mapStats,
@@ -61,11 +61,10 @@ function MapPage() {
     useLocation: true, // Tự động lấy vị trí người dùng và tính khoảng cách
   });
 
-  // ===== STATE: Quản lý modal chi tiết trạm =====
   const [showModal, setShowModal] = useState(false);
   const [selectedStation, setSelectedStation] = useState(null);
 
-  // ===== FUNCTION: Chuyển đổi trạng thái sang tiếng Việt =====
+  // Chuyển đổi trạng thái sang tiếng Việt
   const getStatusText = (status) => {
     const statusMap = {
       available: "Còn trống",
@@ -75,12 +74,12 @@ function MapPage() {
     return statusMap[status] || "Không xác định";
   };
 
-  // ===== FUNCTION: Lấy CSS class cho styling trạng thái =====
+  // Lấy class CSS cho trạng thái
   const getStatusClass = (status) => {
     return `station-status ${status}`;
   };
 
-  // ===== FUNCTION: Xử lý click vào trạm - tải thông tin chi tiết và hiển thị modal =====
+  // Xử lý click vào trạm - tải chi tiết và hiển thị modal
   const handleStationClick = async (station) => {
     try {
       // Lấy thông tin chi tiết các charging posts của trạm
@@ -101,13 +100,13 @@ function MapPage() {
     }
   };
 
-  // ===== FUNCTION: Xử lý đóng modal - reset trạng thái trạm đã chọn =====
+  // Đóng modal chi tiết trạm
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedStation(null);
   };
 
-  // ===== Derived: Sắp xếp danh sách trạm - active trước, rồi theo khoảng cách gần nhất =====
+  // Sắp xếp danh sách trạm: active trước, rồi theo khoảng cách
   const sortedStations = useMemo(() => {
     if (!chargingStations || chargingStations.length === 0)
       return chargingStations;
@@ -152,7 +151,7 @@ function MapPage() {
     });
   }, [chargingStations]);
 
-  // ===== RENDER: Giao diện chính =====
+  // Hiển thị bản đồ và danh sách trạm
   return (
     <div className="map-page-container">
       {/* Header trang */}

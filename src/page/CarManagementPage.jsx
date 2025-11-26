@@ -1,10 +1,11 @@
+// Trang quản lý danh sách xe điện trong hệ thống (Admin)
 import React, { useEffect, useState, useMemo } from 'react';
 import { Table, Tag, Spin, Input, Row, Col, Button } from 'antd';
 import { CarOutlined } from '@ant-design/icons';
 import PageHeader from '../components/PageHeader';
 import useCar from '../hooks/useCar';
 
-// Map ID sang tên loại cổng sạc
+// Map ID loại cổng sạc sang tên hiển thị
 const CHARGING_TYPE_NAMES = {
   1: 'CCS',
   2: 'CHAdeMO',
@@ -13,29 +14,27 @@ const CHARGING_TYPE_NAMES = {
 };
 
 const CarManagementPage = () => {
-  // ==================== HOOKS ====================
   const { cars, loading, fetchAllCars } = useCar();
 
-  // search state - gộp thành một
+  // State cho chức năng tìm kiếm
   const [searchText, setSearchText] = useState('');
 
-  // ==================== LẤY TOÀN BỘ DANH SÁCH XE ====================
+  // Tải toàn bộ danh sách xe khi component mount
   useEffect(() => {
     fetchAllCars();
   }, [fetchAllCars]);
 
-  // tìm kiếm theo cả biển số và số khung
+  // Lọc và sắp xếp danh sách xe (active lên đầu)
   const filteredCars = useMemo(() => {
     if (!Array.isArray(cars)) return [];
     const search = (searchText || '').trim().toUpperCase();
 
-    // Hàm sắp xếp: xe active lên đầu
+    // Sắp xếp: xe active lên đầu
     const sortActiveFirst = (a, b) => {
       if (a.active === b.active) return 0;
       return a.active ? -1 : 1;
     };
 
-    // Hàm sắp xếp: xe active lên đầu
     if (!search) return [...cars].sort(sortActiveFirst);
 
     const filtered = cars.filter((c) => {
@@ -44,11 +43,10 @@ const CarManagementPage = () => {
       return lp.includes(search) || ch.includes(search);
     });
 
-    // Trả về kết quả đã lọc và sắp xếp với xe active lên đầu
     return filtered.sort(sortActiveFirst);
   }, [cars, searchText]);
 
-  // ==================== CỘT BẢNG ====================
+  // Định nghĩa các cột của bảng
   const columns = [
     {
       title: 'Biển số xe',
@@ -97,7 +95,7 @@ const CarManagementPage = () => {
     },
   ];
 
-  // ==================== TRẠNG THÁI LOADING ====================
+  // Hiển thị loading khi đang tải dữ liệu
   if (loading && (!cars || cars.length === 0)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -106,7 +104,7 @@ const CarManagementPage = () => {
     );
   }
 
-  // ==================== GIAO DIỆN CHÍNH ====================
+  // Hiển thị bảng danh sách xe với chức năng tìm kiếm
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-7xl mx-auto">

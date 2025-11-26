@@ -1,3 +1,4 @@
+// Trang chào mừng - giao diện landing page với các nút đăng nhập và đăng ký
 import React from "react";
 import { Link } from "react-router";
 import "../assets/styles/Welcome.css";
@@ -8,6 +9,7 @@ function WelcomePage() {
       <div className="welcomePage-content">
         <div id="welcome-header">
           <div className="welcomePage-header">
+            {/* Các nút điều hướng đến login và register */}
             <div className="welcome-header-btn">
               <Link to="/login" className="welcome-login-btn">
                 ĐĂNG NHẬP

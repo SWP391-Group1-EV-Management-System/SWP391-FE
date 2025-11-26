@@ -1,3 +1,4 @@
+// Trang dashboard quản trị hệ thống - thống kê tổng quan về doanh thu, trạm và phiên sạc
 import React, { useState } from "react";
 import { Card, Row, Col, Typography, Spin, Alert, Badge, Divider, Tabs } from "antd";
 import {
@@ -27,7 +28,7 @@ function DashboardContent() {
   });
   const [activeTab, setActiveTab] = useState("1");
 
-  // Format số tiền
+  // Format số tiền theo định dạng VND
   const formatCurrency = (amount) => {
     if (!amount && amount !== 0) return "0 VND";
     return new Intl.NumberFormat("vi-VN", {
@@ -36,6 +37,7 @@ function DashboardContent() {
     }).format(amount);
   };
 
+  // Hiển thị loading khi đang tải dữ liệu
   if (loading || stationsLoading) {
     return (
       <div
@@ -55,6 +57,7 @@ function DashboardContent() {
     );
   }
 
+  // Hiển thị lỗi nếu không tải được dữ liệu
   if (error) {
     return (
       <div
@@ -65,7 +68,7 @@ function DashboardContent() {
     );
   }
 
-  // Tab 1: Tổng quan doanh thu
+  // Tab 1: Thống kê doanh thu
   const RevenueTab = () => (
     <div>
       {/* Row 1: 3 cards trên */}
@@ -261,7 +264,7 @@ function DashboardContent() {
     </div>
   );
 
-  // Tab 2: Danh sách trạm và phiên sạc
+  // Tab 2: Thống kê trạm sạc và phiên sạc
   const StationsTab = () => (
     <div>
       {/* Row 1: 4 cards phiên sạc */}
@@ -563,7 +566,7 @@ function DashboardContent() {
   const SystemTab = () => {
     const [mapKey, setMapKey] = React.useState(Date.now());
 
-    // Remount map when tab becomes active
+    // Reload bản đồ khi chuyển tab
     React.useEffect(() => {
       setMapKey(Date.now());
     }, []);
@@ -661,6 +664,7 @@ function DashboardContent() {
     );
   };
 
+  // Định nghĩa các tab
   const tabItems = [
     {
       key: "1",
@@ -691,6 +695,7 @@ function DashboardContent() {
     },
   ];
 
+  // Hiển thị giao diện dashboard với tabs
   return (
     <div style={{ minHeight: "100vh", background: "white", padding: "24px" }}>
       <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
