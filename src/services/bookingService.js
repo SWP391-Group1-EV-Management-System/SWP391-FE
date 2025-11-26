@@ -3,7 +3,27 @@ import api from "../utils/axios";
 export const createBooking = async (bookingData) => {
   try {
     const response = await api.post("/api/booking/create", bookingData);
-    return response.data;
+    const data = response.data;
+
+    // Normalize backend response indicating post not available
+    try {
+      const statusStr = (data?.status || data?.message || "").toString().toLowerCase();
+      if (
+        statusStr.includes("post") &&
+        (statusStr.includes("not available") || statusStr.includes("are not available"))
+      ) {
+        return {
+          success: false,
+          errorCode: "POST_NOT_AVAILABLE",
+          message: data.message || data.status || "Post are not available",
+          data,
+        };
+      }
+    } catch (e) {
+      // ignore
+    }
+
+    return data;
   } catch (error) {
     console.error("Error creating booking:", error);
     throw error;

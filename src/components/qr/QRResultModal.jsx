@@ -195,6 +195,18 @@ function QRResultModal({ isOpen, onClose, qrResult, stationData }) {
 
       const response = await energySessionService.createSession(sessionData);
 
+      // If backend reported post unavailable, show user-friendly message
+      if (
+        response?.errorCode === "POST_NOT_AVAILABLE" ||
+        (response?.message || "").toString().toLowerCase().includes("post is not available") ||
+        (response?.message || "").toString().toLowerCase().includes("post are not available")
+      ) {
+        console.warn("⚠️ [QRResultModal] Backend reports post not available:", response);
+        message.error("Trụ sạc hiện không khả dụng. Vui lòng chọn trụ khác hoặc thử lại sau.");
+        setIsLoading(false);
+        return;
+      }
+
       // Robustly check for backend 'overpay' signals in many possible wrapper shapes
       const checkOverpay = (obj) => {
         if (!obj) return false;
