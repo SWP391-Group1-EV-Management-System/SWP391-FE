@@ -47,6 +47,7 @@ import {
 } from "./components/auth/AdminRoute.jsx";
 import RootRedirect from "./components/auth/RootRedirect.jsx";
 import ChatBox from "./components/chat/ChatBox.jsx";
+import { createPortal } from "react-dom";
 import { useRole } from "./hooks/useAuth";
 import UserProfile from "./components/layout/UserProfile.jsx";
 import CarManagementPage from "./page/CarManagementPage.jsx";
@@ -266,8 +267,14 @@ function ConditionalChat() {
   const isAppRoute = location?.pathname?.startsWith("/app");
 
   if (isDriver && isAppRoute) {
+    if (typeof document !== "undefined" && document.body) {
+      return createPortal(<ChatBox />, document.body);
+    }
+
+    // Fallback if document not available for some reason
     return <ChatBox />;
   }
+
   return null;
 }
 
